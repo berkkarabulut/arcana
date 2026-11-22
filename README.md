@@ -11,9 +11,12 @@ Sahibi: Mehmet Berk KARABULUT
 - Kaydırmalı çarkla doğum tarihi seçimi, burç ve yaş aralığı otomatik.
 - Kategorili itiraf akışı (Popüler / Yeni), öne çıkan itiraf, tepkiler, yorumlar.
 - Burç uyumlu profiller, Keşfet listesi.
-- Profil fotoğrafı ve kapak görseli: hazır görsellerden seçme veya yükleme. Profil değişiklikleri Kaydet ile işlenir.
+- Profil fotoğrafı ve kapak görseli: hazır kapaklar ve cinsiyete göre çizim avatarlar ücretsiz, kendi görselini yüklemek (kırpma/ayarlama ekranıyla) Premium. Profil değişiklikleri Kaydet ile işlenir.
+- Profil rengi profil sayfasındaki vurguları belirler.
 - Mesaj isteği ve sohbet. Ücretsiz planda sohbet başına mesaj sınırı, sınır dolunca bulanık mesaj ve Premium duvarı.
 - Premium'a özel fotoğraf, video, ses kaydı, sesli ve görüntülü arama (prototipte taklit).
+- Akışta sadece Premium üyelerin itirafları görünür; ücretsiz kullanıcı günde 3 farklı kişiye cevap yazabilir. Premium üyelerin adının yanında taç simgesi.
+- Bilgisayarda yatay şeritler fare tekerleği, sürükleme ve ok butonlarıyla kayar.
 - Numara, Instagram, WhatsApp gibi iletişim bilgilerini engelleyen filtre.
 - İtiraf ve yorumlarda şikâyet, profilde engelleme.
 

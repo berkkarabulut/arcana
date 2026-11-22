@@ -262,6 +262,51 @@ h1,h2,h3{font-family:var(--display);font-weight:400;text-wrap:balance}
 span.city-search{display:grid}
 
 /* ===== v6 rötuş katmanı ===== */
+.pro-wrap .pro2 .ring2,.pro-wrap .ring2.ring2{background:var(--acc);padding:4px;box-shadow:0 0 0 4px var(--murekkep),0 0 24px color-mix(in srgb,var(--acc) 45%,transparent)}
+.sheet .pro-wrap .pro2 .ring2{box-shadow:0 0 0 4px #17121C,0 0 24px color-mix(in srgb,var(--acc) 45%,transparent)}
+.pro-wrap .bd .glyph{color:var(--acc)}
+.pro-wrap .stats b{color:var(--acc)}
+.pro-wrap .tabs button[aria-pressed="true"]{border-color:var(--acc)}
+.pro-wrap .mini{border-left:2px solid color-mix(in srgb,var(--acc) 70%,transparent);padding-left:12px;border-bottom:0;margin:6px 0}
+.pro-wrap .pro-acts .btn:not(.line){background:var(--acc);color:#14101A;box-shadow:0 6px 18px color-mix(in srgb,var(--acc) 35%,transparent)}
+.pro-wrap .uyum{border-color:color-mix(in srgb,var(--acc) 35%,var(--cizgi))}
+.pro-wrap .btn.line#editPro{border-color:color-mix(in srgb,var(--acc) 55%,transparent)}
+
+.pb{width:15px;height:15px;display:inline-block;vertical-align:-2px;margin-left:5px;flex:0 0 auto;filter:drop-shadow(0 0 4px rgba(233,185,110,.35))}
+h2 .pb{width:22px;height:22px;vertical-align:-1px;margin-left:8px}
+
+.hs-wrap{position:relative}
+.hs-btn{display:none}
+@media (hover:hover) and (pointer:fine){
+ .hs-wrap .cats,.hs-wrap .picker{cursor:grab}
+ .hs-wrap .dragging{cursor:grabbing;scroll-behavior:auto}
+ .hs-wrap .dragging *{pointer-events:none}
+ .hs-btn{position:absolute;top:50%;transform:translateY(-58%);z-index:3;width:32px;height:32px;border-radius:50%;background:rgba(36,29,43,.95);border:1px solid rgba(244,236,228,.16);color:var(--kagit);display:grid;place-items:center;box-shadow:0 4px 14px rgba(0,0,0,.45);opacity:0;pointer-events:none;transition:opacity .15s}
+ .hs-btn.l{left:2px}.hs-btn.r{right:2px}
+ .hs-wrap.can-l .hs-btn.l,.hs-wrap.can-r .hs-btn.r{opacity:1;pointer-events:auto}
+ .hs-btn:hover{background:#2E2536}
+}
+.hs-wrap::before,.hs-wrap::after{content:"";position:absolute;top:0;bottom:8px;width:28px;z-index:2;pointer-events:none;opacity:0;transition:opacity .15s}
+.hs-wrap::before{left:-14px;background:linear-gradient(90deg,var(--edge,#14101A),transparent)}
+.hs-wrap::after{right:-14px;background:linear-gradient(270deg,var(--edge,#14101A),transparent)}
+.hs-wrap.can-l::before,.hs-wrap.can-r::after{opacity:1}
+.sheet .hs-wrap{--edge:#17121C}
+
+.pk-lock{position:absolute;right:5px;top:5px;width:18px;height:18px;border-radius:50%;background:var(--altin);color:#21170A;display:grid;place-items:center;font-style:normal}
+.pk.round .pk-lock{right:8px;top:4px}
+.pk-lock svg{width:10px;height:10px}
+.pnote{display:flex;gap:8px;align-items:flex-start;text-align:left;margin-top:12px;padding:10px 12px;border-radius:14px;background:rgba(233,185,110,.1);border:1px solid rgba(233,185,110,.3);color:#F3D9A8;font-size:12.5px;line-height:1.45;max-width:380px}
+.pnote svg{flex:0 0 auto;width:15px;height:15px;margin-top:1px}
+
+.cf.crop{max-width:440px}
+.crop-frame{position:relative;width:100%;aspect-ratio:3/1;border-radius:16px;overflow:hidden;background:#000;touch-action:none;cursor:grab;user-select:none}
+.crop-frame:active{cursor:grabbing}
+.crop-frame.round{aspect-ratio:1/1;max-width:280px;margin:0 auto;border-radius:50%}
+.crop-frame img{position:absolute;left:0;top:0;max-width:none;transform-origin:0 0;pointer-events:none}
+.crop-grid{position:absolute;inset:0;pointer-events:none;background:linear-gradient(90deg,transparent 33.2%,rgba(255,255,255,.22) 33.3%,transparent 33.5%,transparent 66.5%,rgba(255,255,255,.22) 66.6%,transparent 66.8%),linear-gradient(180deg,transparent 33.2%,rgba(255,255,255,.22) 33.3%,transparent 33.5%,transparent 66.5%,rgba(255,255,255,.22) 66.6%,transparent 66.8%);box-shadow:inset 0 0 0 1px rgba(255,255,255,.25);border-radius:inherit}
+.zoom-row{display:flex;align-items:center;gap:10px;margin-top:14px;color:var(--soluk)}
+.zoom-row input{flex:1;accent-color:var(--nar);height:28px}
+
 .cf-scrim{position:fixed;inset:0;z-index:80;background:rgba(8,6,12,.72);display:flex;align-items:center;justify-content:center;padding:20px;animation:fade .2s}
 @keyframes fade{from{opacity:0}to{opacity:1}}
 .cf{width:100%;max-width:400px;background:#1A1420;border:1px solid var(--cizgi);border-radius:24px;padding:22px 20px 18px;animation:up .25s cubic-bezier(.2,.8,.2,1)}
@@ -386,7 +431,9 @@ button:active:not(:disabled){transform:scale(.97)}
 .cover{height:118px;border-radius:22px;position:relative;overflow:hidden;margin-top:4px}
 .cover::after{content:"";position:absolute;inset:0;background:radial-gradient(120% 90% at 80% 0%,rgba(255,255,255,.18),transparent 55%),linear-gradient(180deg,transparent 40%,rgba(20,16,26,.55))}
 .pro2{display:flex;flex-direction:column;align-items:center;text-align:center;margin-top:-52px;position:relative;z-index:1}
-.pro2 .ring2{padding:4px;border-radius:50%;background:var(--murekkep)}
+.pro2 .ring2{padding:4px;border-radius:50%;background:var(--murekkep);line-height:0}
+.pro-wrap .ring2 .av{box-shadow:0 0 0 3px var(--murekkep)}
+.sheet .pro-wrap .ring2 .av{box-shadow:0 0 0 3px #17121C}
 .pro2 h2{font-family:var(--display);font-size:28px;margin-top:8px;line-height:1.1}
 .cam{position:absolute;right:2px;bottom:4px;width:32px;height:32px;border-radius:50%;background:var(--kagit);color:var(--murekkep);display:grid;place-items:center;box-shadow:0 4px 12px rgba(0,0,0,.4)}
 .cam svg{width:16px;height:16px}
@@ -456,16 +503,16 @@ const CATN=Object.fromEntries(CATS);
 const REACTS=[["bende","Ben de","meToo"],["saril","Sarıl","hug"],["yok","Yok artık","wow"]];
 
 const U={ // örnek kullanıcılar
- gecekusu:{banner:"preset:b1",photo:"preset:a1",n:"gecekuşu",s:"akrep",age:"25-29",g:"Kadın",c:"#C79AF2",bio:"Gece 3'ten sonra dürüst olurum.",since:"Eylül 2026",stat:[12,48,302]},
+ gecekusu:{prem:1,banner:"preset:b1",photo:"preset:k1",n:"gecekuşu",s:"akrep",age:"25-29",g:"Kadın",c:"#C79AF2",bio:"Gece 3'ten sonra dürüst olurum.",since:"Eylül 2026",stat:[12,48,302]},
  mavimerdiven:{banner:"preset:b4",n:"mavimerdiven",s:"basak",age:"25-29",g:"Erkek",c:"#86A8F0",bio:"Her şeyi planlarım, kalbim hariç.",since:"Ekim 2026",stat:[5,31,140]},
- sessizlimon:{banner:"preset:b5",photo:"preset:a5",n:"sessizlimon",s:"terazi",age:"20-24",g:"Kadın",c:"#E9B96E",bio:"Kararsızım ama bu konuda değil.",since:"Ağustos 2026",stat:[9,77,415]},
- yorgunkaptan:{banner:"preset:b3",photo:"preset:a6",n:"yorgunkaptan",s:"oglak",age:"30-34",g:"Erkek",c:"#7CC6A4",bio:"Plazada çalışıyorum, ruhum Kaş'ta.",since:"Haziran 2026",stat:[3,12,61]},
- kirmiziceket:{n:"kırmızıceket",s:"koc",age:"20-24",g:"Kadın",c:"#E8505B",bio:"Önce yaparım, sonra itiraf ederim.",since:"Kasım 2026",stat:[7,22,190]},
- eskiplak:{banner:"preset:b6",n:"eskiplak",s:"balik",age:"25-29",g:"Erkek",c:"#F29A7C",bio:"Hâlâ 2016'dayım bazı konularda.",since:"Temmuz 2026",stat:[14,60,388]},
- kumsaati:{n:"kumsaati",s:"yengec",age:"30-34",g:"Kadın",c:"#86A8F0",bio:"Annemle aramdaki her şey burada.",since:"Mayıs 2026",stat:[4,19,97]},
- ucuncukat:{n:"üçüncükat",s:"ikizler",age:"20-24",g:"Erkek",c:"#C79AF2",bio:"Komşular beni tanır, burada kimse tanımaz.",since:"Ekim 2026",stat:[6,40,155]},
- kedikahve:{banner:"preset:b2",photo:"preset:a9",n:"kedikahve",s:"yay",age:"25-29",g:"Kadın",c:"#7CC6A4",bio:"Plansız biletler, uzun mesajlar.",since:"Eylül 2026",stat:[8,35,222]},
- dumanli:{n:"dumanlı",s:"kova",age:"30-34",g:"Erkek",c:"#E9B96E",bio:"Kimseyi kırmadan dürüst olmayı deniyorum.",since:"Ağustos 2026",stat:[2,58,120]},
+ sessizlimon:{prem:1,banner:"preset:b5",photo:"preset:k4",n:"sessizlimon",s:"terazi",age:"20-24",g:"Kadın",c:"#E9B96E",bio:"Kararsızım ama bu konuda değil.",since:"Ağustos 2026",stat:[9,77,415]},
+ yorgunkaptan:{prem:1,banner:"preset:b3",photo:"preset:e2",n:"yorgunkaptan",s:"oglak",age:"30-34",g:"Erkek",c:"#7CC6A4",bio:"Plazada çalışıyorum, ruhum Kaş'ta.",since:"Haziran 2026",stat:[3,12,61]},
+ kirmiziceket:{prem:1,n:"kırmızıceket",s:"koc",age:"20-24",g:"Kadın",c:"#E8505B",bio:"Önce yaparım, sonra itiraf ederim.",since:"Kasım 2026",stat:[7,22,190]},
+ eskiplak:{prem:1,banner:"preset:b6",photo:"preset:e4",n:"eskiplak",s:"balik",age:"25-29",g:"Erkek",c:"#F29A7C",bio:"Hâlâ 2016'dayım bazı konularda.",since:"Temmuz 2026",stat:[14,60,388]},
+ kumsaati:{prem:1,photo:"preset:k5",n:"kumsaati",s:"yengec",age:"30-34",g:"Kadın",c:"#86A8F0",bio:"Annemle aramdaki her şey burada.",since:"Mayıs 2026",stat:[4,19,97]},
+ ucuncukat:{prem:1,n:"üçüncükat",s:"ikizler",age:"20-24",g:"Erkek",c:"#C79AF2",bio:"Komşular beni tanır, burada kimse tanımaz.",since:"Ekim 2026",stat:[6,40,155]},
+ kedikahve:{prem:1,banner:"preset:b2",photo:"preset:k3",n:"kedikahve",s:"yay",age:"25-29",g:"Kadın",c:"#7CC6A4",bio:"Plansız biletler, uzun mesajlar.",since:"Eylül 2026",stat:[8,35,222]},
+ dumanli:{photo:"preset:e5",n:"dumanlı",s:"kova",age:"30-34",g:"Erkek",c:"#E9B96E",bio:"Kimseyi kırmadan dürüst olmayı deniyorum.",since:"Ağustos 2026",stat:[2,58,120]},
 };
 const POSTS=[
  {id:"p1",u:"gecekusu",cat:"ask",t:"Üç yıldır en yakın arkadaşımın sevgilisine aşığım. İkisinin düğününde nedime olacağım. Kimse bilmiyor, o bile.",ago:"18 dk",r:{bende:214,saril:388,yok:96},cm:[
@@ -492,7 +539,7 @@ const POSTS=[
 // kullanıcıların başka yerlerdeki cevapları (profil için)
 const EXTRA_COMMENTS={gecekusu:[{on:"Kardeşimin harçlığını yıllardır ben veriyorum, annemler bilmiyor.",t:"Sen iyi bir ablasın, bunu bil."}],mavimerdiven:[{on:"Her sabah aynı kahveciye o kız için gidiyorum.",t:"Bir gün selam ver, en kötü kahve içmiş olursun."}]};
 
-const state={sort:"populer",hidden:new Set(),me:null,tab:"akis",cat:"hepsi",open:null,react:{},chats:[],requests:[],premium:false,myPosts:[],myComments:[],explore:"populer"};
+const state={replied:new Set(),sort:"populer",hidden:new Set(),me:null,tab:"akis",cat:"hepsi",open:null,react:{},chats:[],requests:[],premium:false,myPosts:[],myComments:[],explore:"populer"};
 const FREE_LIMIT=20, FREE_CHATS=3;
 
 
@@ -519,11 +566,58 @@ const AVATARS=[
  {id:"a9",svg:()=>`<rect width="200" height="200" fill="#E9B96E"/><path d="M50 90 h86 v34 a40 40 0 0 1 -40 40 h-6 a40 40 0 0 1 -40 -40z" fill="#4B2E22"/><path d="M136 100 h12 a14 14 0 0 1 0 28 h-12" fill="none" stroke="#4B2E22" stroke-width="9"/><path d="M75 55 q8 -10 0 -20 M95 55 q8 -10 0 -20 M115 55 q8 -10 0 -20" stroke="#fff" stroke-width="5" fill="none" stroke-linecap="round"/>`},
  {id:"a10",svg:()=>`<rect width="200" height="200" fill="#86A8F0"/><circle cx="70" cy="80" r="34" fill="#fff" opacity=".85"/><circle cx="110" cy="70" r="40" fill="#fff" opacity=".95"/><circle cx="140" cy="95" r="30" fill="#fff" opacity=".85"/><rect x="40" y="92" width="130" height="30" rx="15" fill="#fff"/>`},
 ];
+
+// çizim insan avatarları
+function personSVG(o){
+  const sk=o.skin, sd=o.skinD, hc=o.hair, sh=o.shirt, bg=o.bg;
+  let back="",front="",extra="",face="";
+  const head=`<ellipse cx="66" cy="98" rx="7" ry="9" fill="${sk}"/><ellipse cx="134" cy="98" rx="7" ry="9" fill="${sk}"/><ellipse cx="100" cy="94" rx="34" ry="40" fill="${sk}"/>`;
+  const eyes=o.f?`<ellipse cx="87" cy="96" rx="3.2" ry="3.8" fill="#2A1C18"/><ellipse cx="113" cy="96" rx="3.2" ry="3.8" fill="#2A1C18"/><path d="M82 92 l-3 -2 M118 92 l3 -2" stroke="#2A1C18" stroke-width="1.6" stroke-linecap="round"/>`:`<ellipse cx="87" cy="96" rx="3" ry="3.4" fill="#2A1C18"/><ellipse cx="113" cy="96" rx="3" ry="3.4" fill="#2A1C18"/>`;
+  const brows=`<path d="M80 ${o.f?86:85} q7 -${o.f?4:3} 14 0 M106 ${o.f?86:85} q7 -${o.f?4:3} 14 0" stroke="${o.brow||hc}" stroke-width="${o.f?2.4:3.2}" fill="none" stroke-linecap="round"/>`;
+  const nose=`<path d="M100 100 q-4 9 1 10" stroke="${sd}" stroke-width="2" fill="none" stroke-linecap="round"/>`;
+  const mouth=o.f?`<path d="M91 116 q9 7 18 0 q-9 3 -18 0z" fill="#C4535E"/>`:`<path d="M91 115 q9 6 18 0" stroke="#7A3A33" stroke-width="2.6" fill="none" stroke-linecap="round"/>`;
+  const blush=o.f?`<circle cx="80" cy="108" r="6" fill="#E8505B" opacity=".14"/><circle cx="120" cy="108" r="6" fill="#E8505B" opacity=".14"/>`:"";
+  const body=`<path d="M34 200 Q38 150 100 142 Q162 150 166 200Z" fill="${sh}"/><path d="M88 120 h24 v22 q-12 9 -24 0z" fill="${sd}"/>`;
+  switch(o.style){
+    case "long": back=`<path d="M60 96 Q54 42 100 40 Q146 42 140 96 L152 172 Q100 186 48 172Z" fill="${hc}"/>`;front=`<path d="M66 96 Q64 50 100 50 Q136 50 134 96 Q128 70 108 66 Q96 78 66 96Z" fill="${hc}"/>`;break;
+    case "bob": back=`<path d="M58 100 Q54 44 100 42 Q146 44 142 100 Q144 124 134 132 L66 132 Q56 124 58 100Z" fill="${hc}"/>`;front=`<path d="M64 98 Q62 50 100 48 Q138 50 136 98 Q132 72 100 68 Q72 70 64 98Z" fill="${hc}"/>`;break;
+    case "curlyF": back=`<g fill="${hc}">${[[62,70],[74,52],[94,44],[116,46],[134,58],[142,80],[60,96],[144,104],[58,120],[146,126],[64,142],[140,146]].map(([x,y])=>`<circle cx="${x}" cy="${y}" r="17"/>`).join("")}</g>`;front=`<g fill="${hc}">${[[76,62],[96,56],[118,60],[132,74],[68,78]].map(([x,y])=>`<circle cx="${x}" cy="${y}" r="12"/>`).join("")}</g>`;break;
+    case "bun": back=`<circle cx="100" cy="40" r="18" fill="${hc}"/>`;front=`<path d="M64 96 Q62 52 100 52 Q138 52 136 96 Q130 64 100 62 Q70 64 64 96Z" fill="${hc}"/>`;break;
+    case "hijab": back=`<path d="M50 130 Q44 40 100 38 Q156 40 150 130 L166 200 H34Z" fill="${hc}"/>`;extra=`<path d="M64 100 Q62 56 100 54 Q138 56 136 100 Q136 132 100 138 Q64 132 64 100Z" fill="none" stroke="${o.hijab2||"#00000022"}" stroke-width="5"/>`;break;
+    case "short": front=`<path d="M66 90 Q62 50 100 50 Q140 50 134 90 Q130 70 112 66 Q96 72 78 68 Q70 74 66 90Z" fill="${hc}"/>`;break;
+    case "side": front=`<path d="M66 92 Q60 48 102 48 Q142 50 134 90 Q128 66 96 64 Q76 66 66 92Z" fill="${hc}"/><path d="M96 50 q-6 10 -2 18" stroke="${sd}" stroke-width="1.5" fill="none" opacity=".4"/>`;break;
+    case "curlyM": front=`<g fill="${hc}">${[[70,72],[82,58],[98,52],[114,54],[128,62],[134,78],[66,86]].map(([x,y])=>`<circle cx="${x}" cy="${y}" r="13"/>`).join("")}</g>`;break;
+    case "buzz": front=`<path d="M67 86 Q66 54 100 54 Q134 54 133 86 Q118 74 100 74 Q82 74 67 86Z" fill="${hc}" opacity=".85"/>`;break;
+    case "mid": back=`<path d="M62 100 Q58 46 100 44 Q142 46 138 100 L140 130 L60 130Z" fill="${hc}"/>`;front=`<path d="M66 94 Q64 50 100 50 Q136 50 134 94 Q124 68 100 66 Q76 68 66 94Z" fill="${hc}"/>`;break;
+  }
+  if(o.beard)extra+=`<path d="M68 102 Q70 142 100 142 Q130 142 132 102 Q128 124 100 126 Q72 124 68 102Z" fill="${hc}"/><path d="M88 112 q12 -6 24 0" stroke="${hc}" stroke-width="5" fill="none" stroke-linecap="round"/>`;
+  if(o.mustache)extra+=`<path d="M87 111 q13 -7 26 0" stroke="${hc}" stroke-width="5" fill="none" stroke-linecap="round"/>`;
+  if(o.glasses)extra+=`<g fill="none" stroke="#1E1A22" stroke-width="2.6"><rect x="75" y="87" width="22" height="17" rx="7"/><rect x="103" y="87" width="22" height="17" rx="7"/><path d="M97 94 h6"/></g>`;
+  face=eyes+brows+nose+(o.beard?"":mouth)+(o.beard?`<path d="M93 120 q7 4 14 0" stroke="#7A3A33" stroke-width="2.4" fill="none" stroke-linecap="round"/>`:"")+blush;
+  return `<rect width="200" height="200" fill="${bg}"/><g transform="translate(-28 -8) scale(1.28)">${back}${body}${head}${front}${face}${extra}</g>`;
+}
+const PEOPLE=[
+ {id:"k1",g:"Kadın",o:{f:1,style:"long",skin:"#F3D2BC",skinD:"#D9AC92",hair:"#2B1D17",shirt:"#E8505B",bg:"#F7D6E0"}},
+ {id:"k2",g:"Kadın",o:{f:1,style:"bob",skin:"#E2B48F",skinD:"#C08E6B",hair:"#6B3E26",shirt:"#7CC6A4",bg:"#FCE9C8"}},
+ {id:"k3",g:"Kadın",o:{f:1,style:"curlyF",skin:"#9C6644",skinD:"#7A4C31",hair:"#21150F",shirt:"#E9B96E",bg:"#C9B6F2"}},
+ {id:"k4",g:"Kadın",o:{f:1,style:"bun",skin:"#F6DDCB",skinD:"#DDB59B",hair:"#D9A65B",brow:"#A9773C",shirt:"#86A8F0",bg:"#D9EEF2"}},
+ {id:"k5",g:"Kadın",o:{f:1,style:"hijab",skin:"#E8BE9C",skinD:"#C9967A",hair:"#B97A8E",hijab2:"#00000018",brow:"#3B2A22",shirt:"#B97A8E",bg:"#F3E3D3"}},
+ {id:"k6",g:"Kadın",o:{f:1,style:"long",skin:"#F4D5C2",skinD:"#DBAE97",hair:"#A3401F",shirt:"#2A2233",bg:"#F2C6B4",glasses:1}},
+ {id:"e1",g:"Erkek",o:{style:"short",skin:"#F0CDB4",skinD:"#D4A78C",hair:"#2B1D17",shirt:"#2F4A6B",bg:"#CFE3F7"}},
+ {id:"e2",g:"Erkek",o:{style:"side",skin:"#D7A57E",skinD:"#B5835F",hair:"#241812",shirt:"#7A4E7E",bg:"#F2D7B8",beard:1}},
+ {id:"e3",g:"Erkek",o:{style:"curlyM",skin:"#8A5A3C",skinD:"#6C442C",hair:"#18100B",shirt:"#E8505B",bg:"#BFE3CF"}},
+ {id:"e4",g:"Erkek",o:{style:"side",skin:"#F2D3BE",skinD:"#D7AC94",hair:"#6B3E26",shirt:"#E9B96E",bg:"#D8D2F2",glasses:1}},
+ {id:"e5",g:"Erkek",o:{style:"buzz",skin:"#E0B08C",skinD:"#BE8D6A",hair:"#3A2A22",shirt:"#1F4D3A",bg:"#F7E3B0",mustache:1}},
+ {id:"e6",g:"Erkek",o:{style:"mid",skin:"#F5D9C6",skinD:"#DCB39C",hair:"#C9954F",brow:"#9A6A33",shirt:"#86A8F0",bg:"#F7D6E0",beard:1}},
+];
+PEOPLE.forEach(p=>AVATARS.push({id:p.id,g:p.g,svg:()=>personSVG(p.o)}));
+
 const _pc={};
 function presetURI(ref){if(!ref||!ref.startsWith("preset:"))return ref;if(_pc[ref])return _pc[ref];const id=ref.slice(7);
   const b=BANNERS.find(x=>x.id===id),a=AVATARS.find(x=>x.id===id);
   const svg=b?`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 300" preserveAspectRatio="xMidYMid slice">${b.svg()}</svg>`:a?`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200">${a.svg()}</svg>`:"";
   return _pc[ref]="data:image/svg+xml;charset=utf-8,"+encodeURIComponent(svg)}
+const isUpload=v=>!!v&&!String(v).startsWith("preset:");
 function coverCSS(u){return u.banner?`background:#2A2233 url('${presetURI(u.banner)}') center/cover no-repeat`:`background:linear-gradient(135deg,${u.c},#3A2340 70%,#1F1926)`}
 
 /* ============ YARDIMCI ============ */
@@ -540,7 +634,10 @@ function grow(t){t.style.height="auto";t.style.height=Math.min(t.scrollHeight,15
 function save(){try{localStorage.setItem("itiraf_me",JSON.stringify(state.me))}catch(e){}}
 const userOf=k=>k==="me"?state.me:U[k];
 function av(k,size=36,noZ){const u=userOf(k);return `<span class="av" style="width:${size}px;height:${size}px;background:${u.photo?"var(--yuzey2)":u.c};font-size:${size*.42}px">${u.photo?`<img src="${presetURI(u.photo)}" alt="">`:esc(u.n.charAt(0).toLocaleUpperCase("tr"))}${noZ?"":`<span class="z glyph">${Z[u.s].g}</span>`}</span>`}
-function who(k,sub){const u=userOf(k);return `<button class="who" data-prof="${k}">${av(k)}<span><b>${esc(u.n)}</b><small>${Z[u.s].n}${sub?", "+sub:""}</small></span></button>`}
+const isPrem=k=>k==="me"?state.premium:!!(U[k]&&U[k].prem);
+const PB='<svg class="pb" viewBox="0 0 24 24" aria-label="Premium üye" role="img"><title>Premium üye</title><path fill="#E9B96E" d="M4 8l4.5 4L12 5l3.5 7L20 8l-1.6 10H5.6z"/><rect x="5.5" y="19" width="13" height="2" rx="1" fill="#E9B96E"/></svg>';
+const pb=k=>isPrem(k)?PB:"";
+function who(k,sub){const u=userOf(k);return `<button class="who" data-prof="${k}">${av(k)}<span><b>${esc(u.n)}${pb(k)}</b><small>${Z[u.s].n}${sub?", "+sub:""}</small></span></button>`}
 const IC={
  meToo:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M8 11V6.5a1.5 1.5 0 0 1 3 0V11m0-1.5V5a1.5 1.5 0 0 1 3 0v4.5m0 0V6.5a1.5 1.5 0 0 1 3 0V14a6 6 0 0 1-6 6h-.5a6 6 0 0 1-5-2.7L3.8 14a1.5 1.5 0 0 1 2.4-1.8L8 14"/></svg>',
  hug:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 20s-7-4.4-7-10a4 4 0 0 1 7-2.6A4 4 0 0 1 19 10c0 5.6-7 10-7 10z"/></svg>',
@@ -576,7 +673,7 @@ function uyumText(a,b,p){const ea=EL[Z[a].e],eb=EL[Z[b].e];
   if(a===b)return `İkiniz de ${Z[a].n}. Birbirinizi çok iyi anlarsınız ama aynı inatla da karşılaşırsınız.`;
   if(Z[a].e===Z[b].e)return `İkiniz de ${ea} grubundasınız. Aynı dili konuşursunuz, sohbet kendiliğinden akar.`;
   return p>=80?`${ea} ile ${eb} birbirini besler. Sohbetiniz hızlı ısınır.`:`${ea} ile ${eb} farklı tempolarda gider. İlk mesajlar biraz yoklama olur, sonra açılır.`}
-function ringSVG(p){const r=24,c=2*Math.PI*r;return `<svg class="ring" viewBox="0 0 58 58"><circle cx="29" cy="29" r="${r}" fill="none" stroke="var(--yuzey2)" stroke-width="5"/><circle cx="29" cy="29" r="${r}" fill="none" stroke="var(--nar)" stroke-width="5" stroke-linecap="round" stroke-dasharray="${c*p/100} ${c}" transform="rotate(-90 29 29)"/><text x="29" y="30" text-anchor="middle" dominant-baseline="middle" fill="var(--kagit)" font-size="14" font-weight="800" font-family="Figtree">%${p}</text></svg>`}
+function ringSVG(p){const r=24,c=2*Math.PI*r;return `<svg class="ring" viewBox="0 0 58 58"><circle cx="29" cy="29" r="${r}" fill="none" stroke="var(--yuzey2)" stroke-width="5"/><circle cx="29" cy="29" r="${r}" fill="none" stroke="var(--acc,var(--nar))" stroke-width="5" stroke-linecap="round" stroke-dasharray="${c*p/100} ${c}" transform="rotate(-90 29 29)"/><text x="29" y="30" text-anchor="middle" dominant-baseline="middle" fill="var(--kagit)" font-size="14" font-weight="800" font-family="Figtree">%${p}</text></svg>`}
 
 // iletişim bilgisi filtresi
 function contactBlock(t){
@@ -615,7 +712,7 @@ function postHTML(p,opts={}){
 }
 const reactTotal=p=>Object.values(p.r).reduce((a,b)=>a+b,0);
 function vAkis(){
-  let list=allPosts().filter(p=>(state.cat==="hepsi"||p.cat===state.cat)&&!state.hidden.has("p:"+p.id));
+  let list=allPosts().filter(p=>(p.u!=="me"||state.premium)&&(state.cat==="hepsi"||p.cat===state.cat)&&!state.hidden.has("p:"+p.id));
   let feat=null;
   if(state.sort==="populer"){list=[...list].sort((a,b)=>(b.u==="me")-(a.u==="me")||reactTotal(b)-reactTotal(a));
     if(state.cat==="hepsi"&&list.length>2){const i=list.findIndex(p=>p.u!=="me");feat=list.splice(i,1)[0]}}
@@ -630,49 +727,98 @@ function vKesfet(){
   const sameSign=Object.keys(U).filter(k=>U[k].s===me.s);
   view.innerHTML=`<h1 class="h2s">Keşfet</h1>
    <p class="muted" style="font-size:14px;margin-bottom:14px">Burcuna göre en uyumlu itirafçılar. Profiline girip itiraflarını okuyabilir, özelden yazabilirsin.</p>
-   ${people.map(({k,p})=>{const u=U[k];return `<button class="row" data-prof="${k}">${av(k,46)}<span class="t"><b>${esc(u.n)}</b><div>${Z[u.s].n}, ${u.age}, ${u.bio}</div></span><span class="meta"><b style="color:var(--kagit);font-size:15px">%${p}</b><br>uyum</span></button>`}).join("")}
+   ${people.map(({k,p})=>{const u=U[k];return `<button class="row" data-prof="${k}">${av(k,46)}<span class="t"><b>${esc(u.n)}${pb(k)}</b><div>${Z[u.s].n}, ${u.age}, ${u.bio}</div></span><span class="meta"><b style="color:var(--kagit);font-size:15px">%${p}</b><br>uyum</span></button>`}).join("")}
    <p class="hint" style="margin-top:14px">${sameSign.length?`${Z[me.s].n} burcundan ${sameSign.length} kişi aktif.`:`Şu an ${Z[me.s].n} burcundan aktif kimse yok.`}</p>`;
 }
 function vMesajlar(){
   const free=!state.premium;
   const active=state.chats.length;
   view.innerHTML=`<h1 class="h2s">Mesajlar</h1>
-   ${state.requests.length?`<h3 style="font-size:20px;margin:6px 0 8px">Mesaj istekleri</h3>${state.requests.map((r,i)=>`<div class="req">${av(r.u,42)}<div class="t"><b>${esc(U[r.u].n)}</b> <span class="muted" style="font-size:12.5px">${Z[U[r.u].s].n}</span><q>“${esc(r.first)}”</q></div><button class="sbtn no" data-rq="${i}:no">Sil</button><button class="sbtn ok" data-rq="${i}:ok">Kabul et</button></div>`).join("")}`:""}
+   ${state.requests.length?`<h3 style="font-size:20px;margin:6px 0 8px">Mesaj istekleri</h3>${state.requests.map((r,i)=>`<div class="req">${av(r.u,42)}<div class="t"><b>${esc(U[r.u].n)}${pb(r.u)}</b> <span class="muted" style="font-size:12.5px">${Z[U[r.u].s].n}</span><q>“${esc(r.first)}”</q></div><button class="sbtn no" data-rq="${i}:no">Sil</button><button class="sbtn ok" data-rq="${i}:ok">Kabul et</button></div>`).join("")}`:""}
    <h3 style="font-size:20px;margin:16px 0 4px">Sohbetler</h3>
    ${state.chats.length?state.chats.map((c,i)=>{const last=c.msgs[c.msgs.length-1];const locked=last&&!last.me&&isLockedIdx(c,c.msgs.length-1);
-     return `<button class="row" data-chat="${i}">${av(c.u,46)}<span class="t"><b>${esc(U[c.u].n)}</b><div class="${locked?"blur":""}">${last?(last.me?"Sen: ":"")+(last.kind==="img"?"Fotoğraf":last.kind==="vid"?"Video":last.kind==="voice"?"Ses kaydı":last.kind==="call"?(last.type==="video"?"Görüntülü arama":"Sesli arama"):esc(last.t)):"Sohbet başladı. İlk mesajı yaz."}</div></span><span class="meta">${c.unread?'<span class="dot"></span>':""}</span></button>`}).join(""):`<p class="empty">Henüz sohbet yok. Akışta seni etkileyen bir itirafın altındaki “Özelden yaz” ile başla.</p>`}`;
+     return `<button class="row" data-chat="${i}">${av(c.u,46)}<span class="t"><b>${esc(U[c.u].n)}${pb(c.u)}</b><div class="${locked?"blur":""}">${last?(last.me?"Sen: ":"")+(last.kind==="img"?"Fotoğraf":last.kind==="vid"?"Video":last.kind==="voice"?"Ses kaydı":last.kind==="call"?(last.type==="video"?"Görüntülü arama":"Sesli arama"):esc(last.t)):"Sohbet başladı. İlk mesajı yaz."}</div></span><span class="meta">${c.unread?'<span class="dot"></span>':""}</span></button>`}).join(""):`<p class="empty">Henüz sohbet yok. Akışta seni etkileyen bir itirafın altındaki “Özelden yaz” ile başla.</p>`}`;
 }
 function vBen(){
   const me=state.me;
   const mine=state.myPosts;
-  view.innerHTML=`<div class="cover" style="${coverCSS(me)}"><button class="cover-edit" id="covBtn">${IC.camera}Kapak</button></div>
+  view.innerHTML=`<div class="pro-wrap" style="--acc:${me.c}"><div class="cover" style="${coverCSS(me)}"><button class="cover-edit" id="covBtn">${IC.camera}Kapak</button></div>
    <div class="pro2"><div style="position:relative"><span class="ring2" style="display:inline-block">${av("me",96,true)}</span><button class="cam" id="camBtn" aria-label="Profil fotoğrafını değiştir">${IC.camera}</button></div>
-   <h2>${esc(me.n)}</h2>
-   <div class="badges"><span class="bd"><span class="glyph">${Z[me.s].g}</span>${Z[me.s].n}</span><span class="bd">${me.age}</span><span class="bd">${me.g}</span>${state.premium?'<span class="bd" style="color:var(--altin);border-color:rgba(233,185,110,.4)">Premium</span>':""}</div>
+   <h2>${esc(me.n)}${pb("me")}</h2>
+   <div class="badges"><span class="bd"><span class="glyph">${Z[me.s].g}</span>${Z[me.s].n}</span><span class="bd">${me.age}</span><span class="bd">${me.g}</span></div>
+   ${(isUpload(me.photo)||isUpload(me.banner))&&!state.premium?`<button class="pnote" id="pNote">${IC.lock}<span>Yüklediğin ${isUpload(me.photo)&&isUpload(me.banner)?"fotoğraf ve kapak":isUpload(me.photo)?"fotoğraf":"kapak"} şu an sadece sana görünüyor. Diğer kullanıcılar hazır görünümü görür. Göstermek için Premium'a geç.</span></button>`:""}
    <p class="bio">${me.bio?esc(me.bio):'<span class="muted" style="font-family:var(--body);font-size:13.5px">Profiline kendini anlatan tek bir cümle ekle.</span>'}</p></div>
    <div class="stats"><div><b>${mine.length}</b><span>itiraf</span></div><div><b>${state.myComments.length}</b><span>yorum</span></div><div><b>${mine.reduce((a,p)=>a+reactTotal(p),0)}</b><span>tepki</span></div></div>
    <div class="pro-btns"><button class="btn line sm" id="editPro">${IC.edit.replace('<svg','<svg width="16" height="16"')}Profili düzenle</button>${state.premium?"":`<button class="btn gold sm" id="goPrem">Premium'a geç</button>`}</div>
    ${me.ad?`<details class="private"><summary>${IC.lock} Gizli bilgilerin<span class="chev">${IC.chev}</span></summary><div class="val" style="margin-top:10px">${esc(me.ad)} ${esc(me.soyad)}<br>${esc(me.email||"")}</div><p>${{google:"Google ile giriş yaptın.",apple:"Apple ile giriş yaptın.",email:"E-posta ile giriş yaptın."}[me.provider]||""} Bunları sadece sen görüyorsun, diğer kullanıcılar seni ${esc(me.n)} olarak görür.</p></details>`:""}
    <div class="tabs"><button aria-pressed="true">İtiraflarım</button></div>
-   ${mine.length?mine.map(p=>`<div class="mini"><q data-open="${p.id}" style="cursor:pointer">“${esc(p.t)}”</q><div class="on">${CATN[p.cat]}, ${p.cm.length} yorum, ${reactTotal(p)} tepki</div></div>`).join(""):`<p class="empty">Henüz itirafın yok. Ortadaki “İtiraf et” ile ilkini yaz.</p>`}`;
+   ${mine.length&&!state.premium?`<button class="pnote" id="feedNote" style="max-width:none;margin:10px 0 2px">${IC.lock}<span>İtirafların şu an sadece profilinde görünüyor. Akışta herkese görünmesi için Premium'a geç.</span></button>`:""}
+   ${mine.length?mine.map(p=>`<div class="mini"><q data-open="${p.id}" style="cursor:pointer">“${esc(p.t)}”</q><div class="on">${CATN[p.cat]}, ${p.cm.length} yorum, ${reactTotal(p)} tepki${state.premium?", akışta":", sadece profilde"}</div></div>`).join(""):`<p class="empty">Henüz itirafın yok. Ortadaki “İtiraf et” ile ilkini yaz.</p>`}</div>`;
+  const fn=$("#feedNote");if(fn)fn.onclick=()=>premiumGate("İtirafın akışta görünsün","Akışta sadece Premium üyelerin itirafları görünür. Premium'a geçince itirafların herkesin akışına düşer.",()=>vBen());
+  const pn=$("#pNote");if(pn)pn.onclick=()=>premiumGate("Fotoğrafın görünsün","Yüklediğin fotoğraf ve kapak Premium üyelerde herkese görünür.",()=>vBen());
   $("#camBtn").onclick=()=>showEditProfile("photo");$("#covBtn").onclick=()=>showEditProfile("banner");
   $("#editPro").onclick=showEditProfile;
   const gp=$("#goPrem");if(gp)gp.onclick=()=>showPremium("profil");
 }
 
+/* ============ PREMIUM KAPISI ============ */
+function premiumGate(title,text,onUnlock){
+  const g=document.createElement("div");g.className="cf-scrim";g.setAttribute("role","dialog");g.setAttribute("aria-modal","true");
+  g.innerHTML=`<div class="cf"><div class="cf-ic">${IC.lock}</div><h2>${title}</h2><p class="muted" style="font-size:14px;margin:6px 0 12px">${text}</p>
+    <div class="perks" style="margin:0 0 14px"><div>${IC.chk}Kendi profil fotoğrafını ve kapak görselini yükle</div><div>${IC.chk}İtirafların akışta herkese görünsün</div><div>${IC.chk}Sınırsız cevap, mesaj ve sohbet</div><div>${IC.chk}Fotoğraf, ses, sesli ve görüntülü arama</div></div>
+    <div style="display:grid;gap:8px"><button class="btn gold wide" id="pgY">Premium'u başlat · 119,90 ₺/ay</button><button class="btn line wide" id="pgN">Şimdi değil</button></div>
+    <p class="hint" style="text-align:center">Prototip: ödeme alınmaz.</p></div>`;
+  document.body.appendChild(g);
+  g.querySelector("#pgY").onclick=()=>{g.remove();state.premium=true;toast("Premium açık");render();onUnlock&&onUnlock()};
+  g.querySelector("#pgN").onclick=()=>g.remove();
+}
+
 /* ============ FOTOĞRAF ============ */
+function openCropper(img,kind,onDone,onCancel){
+  const isB=kind==="banner",OW=isB?900:320,OH=isB?300:320;
+  const g=document.createElement("div");g.className="cf-scrim";g.setAttribute("role","dialog");g.setAttribute("aria-modal","true");
+  g.innerHTML=`<div class="cf crop"><h2>${isB?"Kapağı ayarla":"Fotoğrafı ayarla"}</h2>
+    <p class="muted" style="font-size:13.5px;margin:6px 0 14px">Sürükleyerek konumunu, alttaki çubukla yakınlığını ayarla.</p>
+    <div class="crop-frame ${isB?"":"round"}" id="cfr"><img alt="" draggable="false"><div class="crop-grid"></div></div>
+    <div class="zoom-row"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="6"/><path d="M8 11h6M20 20l-4-4"/></svg>
+      <input type="range" id="zm" min="1" max="3" step="0.01" value="1" aria-label="Yakınlaştır">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="6"/><path d="M8 11h6M11 8v6M20 20l-4-4"/></svg></div>
+    <div style="display:flex;gap:8px;margin-top:16px"><button class="btn line" style="flex:1" id="crN">Vazgeç</button><button class="btn" style="flex:2" id="crY">Uygula</button></div></div>`;
+  document.body.appendChild(g);
+  const fr=g.querySelector("#cfr"),im=fr.querySelector("img"),zm=g.querySelector("#zm");
+  im.src=img.src;
+  let FW,FH,s0,z=1,x=0,y=0;
+  const layout=()=>{FW=fr.clientWidth;FH=fr.clientHeight;s0=Math.max(FW/img.width,FH/img.height)};
+  const clamp=()=>{const dw=img.width*s0*z,dh=img.height*s0*z;x=Math.min(0,Math.max(FW-dw,x));y=Math.min(0,Math.max(FH-dh,y))};
+  const paint=()=>{clamp();im.style.width=img.width*s0*z+"px";im.style.height=img.height*s0*z+"px";im.style.transform=`translate(${x}px,${y}px)`};
+  layout();x=(FW-img.width*s0)/2;y=(FH-img.height*s0)/2;paint();
+  const setZoom=(nz,cx=FW/2,cy=FH/2)=>{nz=Math.min(3,Math.max(1,nz));const k=nz/z;x=cx-(cx-x)*k;y=cy-(cy-y)*k;z=nz;zm.value=z;paint()};
+  zm.oninput=()=>setZoom(+zm.value);
+  let drag=null;const pts=new Map();let pinch=null;
+  fr.addEventListener("pointerdown",e=>{fr.setPointerCapture(e.pointerId);pts.set(e.pointerId,{x:e.clientX,y:e.clientY});
+    if(pts.size===1)drag={sx:e.clientX,sy:e.clientY,ox:x,oy:y};
+    if(pts.size===2){const [a,b]=[...pts.values()];pinch={d:Math.hypot(a.x-b.x,a.y-b.y),z};drag=null}});
+  fr.addEventListener("pointermove",e=>{if(!pts.has(e.pointerId))return;pts.set(e.pointerId,{x:e.clientX,y:e.clientY});
+    if(pinch&&pts.size===2){const [a,b]=[...pts.values()];const r=fr.getBoundingClientRect();setZoom(pinch.z*Math.hypot(a.x-b.x,a.y-b.y)/pinch.d,(a.x+b.x)/2-r.left,(a.y+b.y)/2-r.top);return}
+    if(drag){x=drag.ox+(e.clientX-drag.sx);y=drag.oy+(e.clientY-drag.sy);paint()}});
+  const up=e=>{pts.delete(e.pointerId);if(pts.size<2)pinch=null;if(!pts.size)drag=null};
+  fr.addEventListener("pointerup",up);fr.addEventListener("pointercancel",up);
+  fr.addEventListener("wheel",e=>{e.preventDefault();const r=fr.getBoundingClientRect();setZoom(z*(e.deltaY<0?1.08:1/1.08),e.clientX-r.left,e.clientY-r.top)},{passive:false});
+  fr.tabIndex=0;fr.addEventListener("keydown",e=>{const st=10;if(e.key==="ArrowLeft")x+=st;else if(e.key==="ArrowRight")x-=st;else if(e.key==="ArrowUp")y+=st;else if(e.key==="ArrowDown")y-=st;else return;e.preventDefault();paint()});
+  const close=()=>{g.remove();removeEventListener("resize",onRs)};
+  const onRs=()=>{const cx=(FW/2-x)/(s0*z),cy=(FH/2-y)/(s0*z);layout();x=FW/2-cx*s0*z;y=FH/2-cy*s0*z;paint()};addEventListener("resize",onRs);
+  g.querySelector("#crN").onclick=()=>{close();onCancel&&onCancel()};
+  g.querySelector("#crY").onclick=()=>{const c=document.createElement("canvas");c.width=OW;c.height=OH;const r=OW/FW;
+    c.getContext("2d").drawImage(img,x*r,y*r,img.width*s0*z*r,img.height*s0*z*r);close();onDone(c.toDataURL("image/jpeg",.85))};
+}
 let photoInput=null;
 function pickPhoto(done,target,kind){
   if(!photoInput){photoInput=document.createElement("input");photoInput.type="file";photoInput.accept="image/*";photoInput.hidden=true;document.body.appendChild(photoInput)}
   photoInput.onchange=()=>{const f=photoInput.files[0];photoInput.value="";if(!f)return;
     if(!f.type.startsWith("image/")){toast("Lütfen bir fotoğraf seç");return}
     const url=URL.createObjectURL(f),img=new Image();
-    img.onload=()=>{const c=document.createElement("canvas"),x=c.getContext("2d");
-      if(kind==="banner"){const W=900,H=300;c.width=W;c.height=H;const r=W/H;let sw=img.width,sh=img.width/r;if(sh>img.height){sh=img.height;sw=img.height*r}
-        x.drawImage(img,(img.width-sw)/2,(img.height-sh)/2,sw,sh,0,0,W,H)}
-      else{const S=320;c.width=c.height=S;const m=Math.min(img.width,img.height);x.drawImage(img,(img.width-m)/2,(img.height-m)/2,m,m,0,0,S,S)}
-      const data=c.toDataURL("image/jpeg",.85);URL.revokeObjectURL(url);
-      (target||state.me)[kind==="banner"?"banner":"photo"]=data;if(!target)save();toast(target?"Fotoğraf seçildi. Kaydetmeyi unutma.":"Profil fotoğrafın güncellendi");done&&done()};
+    img.onload=()=>openCropper(img,kind==="banner"?"banner":"photo",data=>{URL.revokeObjectURL(url);
+      (target||state.me)[kind==="banner"?"banner":"photo"]=data;if(!target)save();toast(target?"Görsel hazır. Kaydetmeyi unutma.":"Profil fotoğrafın güncellendi");done&&done()},()=>URL.revokeObjectURL(url));
     img.onerror=()=>toast("Bu fotoğraf açılamadı, başka bir tane dene");
     img.src=url};
   photoInput.click();
@@ -680,6 +826,9 @@ function pickPhoto(done,target,kind){
 function showEditProfile(focus){
   const me=state.me;
   const draft={photo:me.photo,banner:me.banner,bio:me.bio||"",c:me.c,n:me.n};
+  const curAv=AVATARS.find(a=>"preset:"+a.id===me.photo);
+  const tabs=me.g==="Kadın"?["Kadın","Simge"]:me.g==="Erkek"?["Erkek","Simge"]:["Kadın","Erkek","Simge"];
+  let avTab=curAv&&tabs.includes(curAv.g||"Simge")?(curAv.g||"Simge"):tabs[0];
   const nickOk=()=>/^[a-zçğıöşü0-9._]{3,16}$/.test(draft.n);
   const dirty=()=>draft.photo!==me.photo||draft.banner!==me.banner||draft.bio.trim()!==(me.bio||"")||draft.c!==me.c||draft.n!==me.n;
   const commit=()=>{if(!nickOk()){toast("Takma ad en az 3 karakter olmalı, boşluk içeremez");return}me.n=draft.n;["photo","banner"].forEach(k=>{if(draft[k])me[k]=draft[k];else delete me[k]});me.bio=draft.bio.trim();me.c=draft.c;
@@ -689,20 +838,21 @@ function showEditProfile(focus){
       <div style="display:grid;gap:8px"><button class="btn wide" id="lv1">Kaydet ve çık</button><button class="btn line wide" id="lv2">Kaydetmeden çık</button><button class="btn line wide" id="lv3">Düzenlemeye dön</button></div>`,true);
     $("#lv1").onclick=commit;$("#lv2").onclick=()=>{closeSheet();toast("Değişiklikler kaydedilmedi")};$("#lv3").onclick=draw;};
   const draw=()=>{
-    const prevAv=`<span class="av" style="width:76px;height:76px;background:${draft.photo?"var(--yuzey2)":draft.c};font-size:30px;border:4px solid #17121C">${draft.photo?`<img src="${presetURI(draft.photo)}" alt="">`:esc(me.n.charAt(0).toLocaleUpperCase("tr"))}</span>`;
+    const prevAv=`<span class="av" style="width:76px;height:76px;background:${draft.photo?"var(--yuzey2)":draft.c};font-size:30px;box-shadow:0 0 0 3px #17121C,0 0 0 6px ${draft.c}">${draft.photo?`<img src="${presetURI(draft.photo)}" alt="">`:esc(me.n.charAt(0).toLocaleUpperCase("tr"))}</span>`;
     openSheet(`<div class="sheet-head"><h2>Profili düzenle</h2><button class="x" id="ex" aria-label="Kapat">${IC.close}</button></div>
-    <div class="ed-prev"><div class="ed-cover" style="${coverCSS(draft)}"></div><div class="ed-av">${prevAv}</div></div>
+    <div class="ed-prev pro-wrap" style="--acc:${draft.c}"><div class="ed-cover" style="${coverCSS(draft)}"></div><div class="ed-av">${prevAv}</div></div>
 
     <div class="ed-sec" id="secBanner"><div class="ed-h"><b>Kapak görseli</b>${draft.banner?`<button class="lnk" id="bnx" style="height:28px">Kaldır</button>`:""}</div>
     <div class="picker">
-      <button class="pk up" id="bnUp" aria-label="Kendi kapak görselini yükle">${IC.camera}<span>Yükle</span></button>
+      <button class="pk up" id="bnUp" aria-label="Kendi kapak görselini yükle">${IC.camera}<span>Yükle</span>${state.premium?"":`<i class="pk-lock">${IC.lock}</i>`}</button>
       ${BANNERS.map(b=>`<button class="pk wide-pk" data-bn="preset:${b.id}" aria-pressed="${draft.banner==="preset:"+b.id}" aria-label="${b.n}"><img src="${presetURI("preset:"+b.id)}" alt=""><span>${b.n}</span></button>`).join("")}
     </div></div>
 
     <div class="ed-sec" id="secPhoto"><div class="ed-h"><b>Profil fotoğrafı</b>${draft.photo?`<button class="lnk" id="phx" style="height:28px">Kaldır</button>`:""}</div>
+    <div class="seg2" role="group" aria-label="Avatar türü" style="margin-bottom:10px">${tabs.map(k=>`<button data-avt="${k}" aria-pressed="${avTab===k}">${k}</button>`).join("")}</div>
     <div class="picker">
-      <button class="pk up round" id="phUp" aria-label="Kendi fotoğrafını yükle">${IC.camera}<span>Yükle</span></button>
-      ${AVATARS.map(a=>`<button class="pk round" data-av="preset:${a.id}" aria-pressed="${draft.photo==="preset:"+a.id}" aria-label="Hazır görsel"><img src="${presetURI("preset:"+a.id)}" alt=""></button>`).join("")}
+      <button class="pk up round" id="phUp" aria-label="Kendi fotoğrafını yükle">${IC.camera}<span>Yükle</span>${state.premium?"":`<i class="pk-lock">${IC.lock}</i>`}</button>
+      ${AVATARS.filter(a=>(a.g||"Simge")===avTab).map(a=>`<button class="pk round" data-av="preset:${a.id}" aria-pressed="${draft.photo==="preset:"+a.id}" aria-label="Hazır görsel"><img src="${presetURI("preset:"+a.id)}" alt=""></button>`).join("")}
     </div></div>
 
     <div class="ed-sec"><div class="ed-h"><b>Takma ad</b><span class="muted" style="font-size:12px">3-16 karakter</span></div>
@@ -713,20 +863,21 @@ function showEditProfile(focus){
     <div class="box"><textarea id="bioIn" rows="2" maxlength="80" placeholder="Seni anlatan tek bir cümle" aria-label="Profil cümlen">${esc(draft.bio)}</textarea></div></div>
 
     <div class="ed-sec"><div class="ed-h"><b>Profil rengi</b></div><div class="swatches" style="margin-top:0">${COLORS.map(x=>`<button class="sw" style="background:${x}" data-sc="${x}" aria-pressed="${draft.c===x}" aria-label="Renk"></button>`).join("")}</div>
-    <p class="hint">Kapak görseli seçmezsen bu renk kullanılır.</p></div>
+    <p class="hint">Profilindeki vurgular bu renkte görünür: avatar halkası, sayılar, sekmeler ve butonlar. Kapak seçmezsen kapak da bu renkte olur.</p></div>
 
-    <p class="hint">Kapak ve profil fotoğrafın herkese görünür. Yüzünü göstermek zorunda değilsin.</p>
+    <p class="hint">${state.premium?"Kapak ve profil fotoğrafın herkese görünür. Yüzünü göstermek zorunda değilsin.":"Hazır avatar ve kapaklar ücretsiz. Kendi fotoğrafını ve kapağını yüklemek Premium'a özel."}</p>
     <p class="hint" id="dirtyNote" style="color:var(--altin);${dirty()?"":"visibility:hidden"}">Kaydedilmemiş değişiklikler var.</p>
     <div class="ed-foot"><button class="btn line" style="flex:1" id="cn">Vazgeç</button><button class="btn" style="flex:2" id="sv" ${dirty()&&nickOk()?"":"disabled"}>Kaydet</button></div>`,true);
     sheetGuard=()=>{if(dirty()){askLeave();return true}return false};
     const upd=()=>{$("#sv").disabled=!dirty()||!nickOk();$("#dirtyNote").style.visibility=dirty()?"visible":"hidden";$("#nkErr").style.display=nickOk()?"none":""};
     const nk=$("#nkIn");nk.oninput=()=>{const v=nk.value.replace(/\s/g,"").toLocaleLowerCase("tr");if(nk.value!==v)nk.value=v;draft.n=v;upd()};
     $("#ex").onclick=tryCloseSheet;$("#cn").onclick=tryCloseSheet;
-    $("#phUp").onclick=()=>pickPhoto(draw,draft,"photo");
-    $("#bnUp").onclick=()=>pickPhoto(draw,draft,"banner");
+    $("#phUp").onclick=()=>state.premium?pickPhoto(draw,draft,"photo"):premiumGate("Kendi fotoğrafın Premium'a özel","Hazır avatarlar herkese açık. Kendi fotoğrafını yüklemek ve diğer kullanıcılara göstermek için Premium'a geç.",()=>{draw();pickPhoto(draw,draft,"photo")});
+    $("#bnUp").onclick=()=>state.premium?pickPhoto(draw,draft,"banner"):premiumGate("Kendi kapağın Premium'a özel","Hazır kapaklar herkese açık. Kendi görselini kapak yapmak için Premium'a geç.",()=>{draw();pickPhoto(draw,draft,"banner")});
     const px=$("#phx");if(px)px.onclick=()=>{draft.photo=undefined;draw()};
     const bx=$("#bnx");if(bx)bx.onclick=()=>{draft.banner=undefined;draw()};
     $("#sheet").querySelectorAll("[data-av]").forEach(b=>b.onclick=()=>{draft.photo=b.dataset.av;draw()});
+    $("#sheet").querySelectorAll("[data-avt]").forEach(b=>b.onclick=()=>{avTab=b.dataset.avt;draw()});
     $("#sheet").querySelectorAll("[data-bn]").forEach(b=>b.onclick=()=>{draft.banner=b.dataset.bn;draw()});
     const t=$("#bioIn");t.oninput=()=>{draft.bio=t.value;$("#bioCnt").textContent=`${t.value.length} / 80`;upd()};
     $("#sheet").querySelectorAll("[data-sc]").forEach(b=>b.onclick=()=>{draft.c=b.dataset.sc;draw()});
@@ -749,6 +900,8 @@ function showPost(id){
   const t=$("#cmIn"),g=$("#cmGo");
   t.oninput=()=>{grow(t);g.disabled=t.value.trim().length<2};
   g.onclick=()=>{const v=t.value.trim();const bad=contactBlock(v);if(bad){$("#cmWarn").innerHTML=`<p class="warn">Yorumlarda ${bad} paylaşılamaz. Tanışmak istersen “Özelden yaz”ı kullan.</p>`;return}
+    if(!state.premium&&p.u!=="me"&&!state.replied.has(p.u)&&state.replied.size>=3){premiumGate("Bugün daha fazla kişiye cevap yazamazsın","Ücretsiz planda günde sınırlı sayıda kişinin itirafına cevap yazabilirsin. Herkese sınırsız cevap yazmak için Premium'a geç.",()=>g.click());return}
+    if(p.u!=="me")state.replied.add(p.u);
     p.cm.push({u:"me",t:v,ago:"Şimdi"});state.myComments.push({on:p.t,t:v});toast("Yorumun gönderildi");showPost(id);render()};
 }
 function showMore(id){
@@ -771,7 +924,7 @@ function showProfile(k){
   const comments=[...POSTS.flatMap(x=>x.cm.filter(c=>c.u===k).map(c=>({on:x.t,t:c.t}))),...(EXTRA_COMMENTS[k]||[])];
   let tab="itiraf";
   const chatIdx=state.chats.findIndex(c=>c.u===k);
-  const draw=()=>{openSheet(`<div class="cover" style="height:96px;${coverCSS(u)}"></div><div class="pro2" style="margin-top:-46px"><span class="ring2" style="display:inline-block">${av(k,84,true)}</span><h2>${esc(u.n)}</h2>
+  const draw=()=>{openSheet(`<div class="pro-wrap" style="--acc:${u.c}"><div class="cover" style="height:96px;${coverCSS(u)}"></div><div class="pro2" style="margin-top:-46px"><span class="ring2" style="display:inline-block">${av(k,84,true)}</span><h2>${esc(u.n)}${pb(k)}</h2>
     <div class="badges"><span class="bd"><span class="glyph">${Z[u.s].g}</span>${Z[u.s].n}</span><span class="bd">${u.age}</span><span class="bd">${u.g}</span><span class="bd">${u.since}'den beri</span></div>
     <p class="bio">${esc(u.bio)}</p></div>
     <div class="stats"><div><b>${u.stat[0]}</b><span>itiraf</span></div><div><b>${u.stat[1]}</b><span>yorum</span></div><div><b>${u.stat[2]}</b><span>tepki aldı</span></div></div>
@@ -779,7 +932,7 @@ function showProfile(k){
     <div class="tabs"><button data-pt="itiraf" aria-pressed="${tab==="itiraf"}">İtirafları</button><button data-pt="yorum" aria-pressed="${tab==="yorum"}">Yorumları</button></div>
     ${tab==="itiraf"?(posts.length?posts.map(x=>`<div class="mini"><q data-open="${x.id}" style="cursor:pointer">“${esc(x.t)}”</q><div class="on">${CATN[x.cat]}, ${x.ago}, ${x.cm.length} yorum</div></div>`).join(""):`<p class="empty">Herkese açık itirafı yok.</p>`)
      :(comments.length?comments.map(c=>`<div class="mini"><div class="on" style="margin:0 0 4px">Şu itirafa yorum yaptı: “${esc(c.on.slice(0,60))}…”</div><div style="font-size:15px">${esc(c.t)}</div></div>`).join(""):`<p class="empty">Henüz yorumu yok.</p>`)}
-    <div class="pro-acts">${chatIdx>=0?`<button class="btn wide" data-chat="${chatIdx}">Sohbete git</button>`:`<button class="btn wide" data-dm="${k}" data-from="">Özelden yaz</button>`}<button class="btn line" data-block="${k}" aria-label="Engelle veya şikâyet et">Engelle</button></div>`);
+    <div class="pro-acts">${chatIdx>=0?`<button class="btn wide" data-chat="${chatIdx}">Sohbete git</button>`:`<button class="btn wide" data-dm="${k}" data-from="">Özelden yaz</button>`}<button class="btn line" data-block="${k}" aria-label="Engelle veya şikâyet et">Engelle</button></div></div>`);
     $("#sheet").querySelectorAll("[data-pt]").forEach(b=>b.onclick=()=>{tab=b.dataset.pt;draw()});};
   draw();
 }
@@ -874,7 +1027,7 @@ function startCall(type,c){
   let sec=0,live=false,mute=false,camOff=false,iv;
   const draw=()=>{el.style.background=type==="video"?`radial-gradient(circle at 50% 35%,${u.c}55,#14101A 70%),#14101A`:`linear-gradient(180deg,#2A2233,#14101A)`;
     el.innerHTML=`${type==="video"?`<div class="self">${camOff?"Kamera kapalı":"Kameran"}</div>`:""}
-    <div style="display:flex;flex-direction:column;align-items:center">${av(c.u,120)}<h2>${esc(u.n)}</h2><div class="st">${live?fmt(sec):(type==="video"?"Görüntülü aranıyor…":"Aranıyor…")}</div></div>
+    <div style="display:flex;flex-direction:column;align-items:center">${av(c.u,120)}<h2>${esc(u.n)}${pb(c.u)}</h2><div class="st">${live?fmt(sec):(type==="video"?"Görüntülü aranıyor…":"Aranıyor…")}</div></div>
     <div><div class="cbtns"><button class="cb" id="cMute" aria-pressed="${mute}" aria-label="Sessize al">${IC.mic}</button>${type==="video"?`<button class="cb" id="cCam" aria-pressed="${camOff}" aria-label="Kamerayı kapat">${IC.video}</button>`:""}<button class="cb end" id="cEnd" aria-label="Aramayı bitir">${IC.end}</button></div>
     <p class="cnote">Prototip: gerçek sürümde kamera ve mikrofon açılır.</p></div>`;
     $("#cMute").onclick=()=>{mute=!mute;draw()};const cc=$("#cCam");if(cc)cc.onclick=()=>{camOff=!camOff;draw()};
@@ -887,7 +1040,7 @@ function startCall(type,c){
 function showPremium(src){
   let plan="aylik";
   const draw=()=>openSheet(`<h2>İtiraf Premium</h2><p class="muted" style="margin:6px 0 2px;font-size:14px">${src==="medya"?"Fotoğraf, ses kaydı, sesli ve görüntülü arama Premium'a özel.":src==="mesaj"?"Sohbetin yarıda kalmasın.":src==="sohbet"?"Yeni sohbet başlatmak için Premium'a geç.":"Sınırsız konuş."}</p>
-   <div class="perks"><div>${IC.chk}Sınırsız mesaj, sınırsız sohbet</div><div>${IC.chk}Fotoğraf, video ve ses kaydı gönder</div><div>${IC.chk}Sesli ve görüntülü arama</div><div>${IC.chk}Biriken mesajları hemen oku</div><div>${IC.chk}Mesajının okunduğunu gör</div><div>${IC.chk}Daha çok itiraf, itirafını öne çıkar</div></div>
+   <div class="perks"><div>${IC.chk}Sınırsız mesaj, sınırsız sohbet</div><div>${IC.chk}İtirafların akışta herkese görünsün</div><div>${IC.chk}İtiraflara sınırsız cevap yaz</div><div>${IC.chk}Kendi profil fotoğrafını ve kapağını yükle</div><div>${IC.chk}Fotoğraf, video ve ses kaydı gönder</div><div>${IC.chk}Sesli ve görüntülü arama</div><div>${IC.chk}Biriken mesajları hemen oku</div><div>${IC.chk}Mesajının okunduğunu gör</div><div>${IC.chk}Daha çok itiraf, itirafını öne çıkar</div></div>
    <div class="plans">${[["haftalik","Haftalık","İstediğin zaman iptal","49,90 ₺"],["aylik","Aylık","En çok seçilen, haftalığa göre %40 ucuz","119,90 ₺"],["yillik","Yıllık","Aylık 49,90 ₺'ye gelir","599 ₺"]].map(([k,n,s,pr])=>`<button class="plan" data-plan="${k}" aria-pressed="${plan===k}"><span><b>${n}</b><small>${s}</small></span><span class="p">${pr}</span></button>`).join("")}</div>
    <button class="btn gold wide" id="buy">Premium'u başlat</button>
    <p class="hint" style="text-align:center">Prototip: ödeme alınmaz, düğme sadece Premium görünümünü açar. Fiyatlar örnektir.</p>`);
@@ -907,14 +1060,19 @@ function showConfess(){
    <div class="box big"><textarea id="cfIn" maxlength="500" placeholder="Kimseye söyleyemediğin şey…"></textarea></div>
    <div class="row" style="border:0;padding:6px 2px 0"><span class="hint" style="margin:0" id="cnt">0 / 500</span></div>
    <div id="cfWarn"></div>
-   <button class="btn wide" id="cfGo" disabled style="margin-top:12px">İtirafı paylaş</button>`);
+   ${state.premium?"":`<button class="pnote" id="cfNote" style="max-width:none;margin-top:10px">${IC.lock}<span>Ücretsiz planda itirafın sadece profilinde görünür. Akışta herkese görünmesi için Premium gerekir.</span></button>`}
+   <button class="btn wide" id="cfGo" disabled style="margin-top:12px">${state.premium?"İtirafı akışta paylaş":"İtirafı profilimde paylaş"}</button>`);
+  const cn=$("#cfNote");if(cn)cn.onclick=()=>premiumGate("İtirafın akışta görünsün","Akışta sadece Premium üyelerin itirafları görünür. Premium'a geçince itirafın herkesin akışına düşer.",()=>{const v=$("#cfIn").value;showConfess();const t2=$("#cfIn");if(t2){t2.value=v;t2.oninput()}});
   const t=$("#cfIn"),g=$("#cfGo");
   $("#sheet").querySelectorAll("[data-pc]").forEach(b=>b.onclick=()=>{cat=b.dataset.pc;$("#sheet").querySelectorAll("[data-pc]").forEach(x=>x.setAttribute("aria-pressed",x===b))});
   t.oninput=()=>{$("#cnt").textContent=`${t.value.length} / 500`;g.disabled=t.value.trim().length<15;$("#cfWarn").innerHTML=""};
   setTimeout(()=>t.focus(),250);
   g.onclick=()=>{const v=t.value.trim(),bad=contactBlock(v);if(bad){$("#cfWarn").innerHTML=`<p class="warn">İtiraflarda ${bad} paylaşılamaz.</p>`;return}
     const p={id:"m"+Date.now(),u:"me",cat,t:v,ago:"Şimdi",r:{bende:0,saril:0,yok:0},cm:[],today:true};
-    state.myPosts.unshift(p);closeSheet();state.tab="akis";state.cat="hepsi";render();scrollTo(0,0);toast("İtirafın paylaşıldı");
+    state.myPosts.unshift(p);closeSheet();
+    if(state.premium){state.tab="akis";state.cat="hepsi";render();scrollTo(0,0);toast("İtirafın akışta paylaşıldı")}
+    else{state.tab="ben";render();scrollTo(0,0);toast("İtirafın profilinde paylaşıldı. Akışta görünmesi için Premium gerekli.")}
+    if(!state.premium)return;
     setTimeout(()=>{p.r.saril+=3;p.r.bende+=5;p.cm.push({u:"dumanli",t:"Bunu yazdığın için cesursun. Yalnız değilsin.",ago:"Şimdi"});if(state.tab==="akis")vAkis()},5000);
     setTimeout(()=>{const k=["dumanli","eskiplak","sessizlimon","mavimerdiven"].find(x=>!state.chats.some(c=>c.u===x)&&!state.requests.some(r=>r.u===x));if(!k)return;state.requests.push({u:k,first:"İtirafını okudum, çok tanıdık geldi. Biraz konuşmak ister misin?",from:p.t});toast("Yeni bir mesaj isteğin var");render()},9000);};
 }
@@ -998,7 +1156,7 @@ function drawOnb(){
   if(s===1){body=`<h1>Söyleyemediklerin burada.</h1><p class="lead">Takma adınla itiraf et, başkalarının itiraflarını oku, seni anlayanla özelden yazış. Gerçek adın hiçbir yerde görünmez.</p>
     <label class="lbl" for="nk">Takma adın</label><div class="nick"><input id="nk" maxlength="16" placeholder="gecekuşu" value="${esc(ob.n)}" autocomplete="off"><button class="dice" id="dice">${IC.dice}Rastgele</button></div>
     <label class="lbl">Profil rengin</label><div class="swatches">${COLORS.map(c=>`<button class="sw" style="background:${c}" data-c="${c}" aria-pressed="${ob.c===c}" aria-label="Renk"></button>`).join("")}</div>
-    <button class="onb-photo" id="obPh"><span class="av" style="width:52px;height:52px;background:${ob.photo?"var(--yuzey2)":ob.c};font-size:22px">${ob.photo?`<img src="${ob.photo}" alt="">`:esc((ob.n||"?").charAt(0).toLocaleUpperCase("tr"))}</span><span><b>${ob.photo?"Fotoğrafı değiştir":"Profil fotoğrafı ekle"}</b><span class="s">İsteğe bağlı. Sonra da ekleyebilirsin.</span></span></button>`;ok=ob.n.trim().length>=3;}
+    <p class="hint" style="margin-top:16px">Profil fotoğrafını ve kapak görselini kayıttan sonra Profilim'den seçebilirsin.</p>`;ok=ob.n.trim().length>=3;}
   if(s===2){const days=new Date(ob.y,ob.m,0).getDate();if(ob.d>days)ob.d=days;const sign=Z[signOf(ob.m,ob.d)];
     body=`<h1>Doğum tarihin</h1><p class="lead">Burcun profilinde görünür, doğum tarihin görünmez. Yaşın sadece aralık olarak görünür.</p>
     <div class="wheels" style="grid-template-columns:1fr 2fr 1.3fr">${wheel("gun",range(1,days),ob.d)}${wheel("ay",range(1,12,i=>AYLAR[i-1]),ob.m)}${wheel("yil",range(1950,new Date().getFullYear()-18),ob.y)}</div>
@@ -1027,7 +1185,7 @@ function drawOnb(){
       $("#chg").onclick=()=>{ob.provider=null;drawOnb()};
       if(!ob.ad)setTimeout(()=>{const a=$("#ad");a&&a.focus()},120)}}
   if(s===1){const n=$("#nk");n.oninput=()=>{ob.n=n.value.replace(/\s/g,"").toLocaleLowerCase("tr");if(n.value!==ob.n)n.value=ob.n;$("#obN").disabled=ob.n.length<3};
-    $("#dice").onclick=()=>{ob.n=rndNick();drawOnb()};$("#obPh").onclick=()=>pickPhoto(()=>drawOnb(),ob);document.querySelectorAll("[data-c]").forEach(b=>b.onclick=()=>{ob.c=b.dataset.c;drawOnb()});if(!ob.n)setTimeout(()=>n.focus(),120)}
+    $("#dice").onclick=()=>{ob.n=rndNick();drawOnb()};document.querySelectorAll("[data-c]").forEach(b=>b.onclick=()=>{ob.c=b.dataset.c;drawOnb()});if(!ob.n)setTimeout(()=>n.focus(),120)}
   if(s===2){const upd=()=>{if(!$("#sb"))return;const sign=Z[signOf(ob.m,ob.d)];$("#sb").innerHTML=`<div class="g glyph">${sign.g}</div><div><b style="font-size:17px">${sign.n}</b><div class="muted" style="font-size:13px">${EL[sign.e]} grubu, ${ageBand(ageOf(ob.y,ob.m,ob.d))} yaş aralığı</div></div>`};
     bindWheel("gun",v=>{ob.d=v;upd()});bindWheel("ay",v=>{ob.m=v;fixDays();upd()});bindWheel("yil",v=>{ob.y=v;fixDays();upd()})}
   if(s===3)document.querySelectorAll("[data-g]").forEach(b=>b.onclick=()=>{ob.g=b.dataset.g;drawOnb()});
@@ -1051,7 +1209,7 @@ function obNext(){
   if(ob.step===0&&ob.provider==="email"&&!ob.codeSent){ob.codeSent=true;drawOnb();toast("Doğrulama kodu e-postana gönderildi");setTimeout(()=>{const k=$("#kod");k&&k.focus()},150);return}
   if(ob.step<STEPS-1){ob.step++;drawOnb();$("#onb").scrollTop=0;return}
   const bio=state.me?state.me.bio:"";
-  state.me={n:ob.n,c:ob.c,s:signOf(ob.m,ob.d),g:ob.g,age:ageBand(ageOf(ob.y,ob.m,ob.d)),bio,b:{d:ob.d,m:ob.m,y:ob.y},ad:ob.ad.trim(),soyad:ob.soyad.trim(),email:ob.email.trim(),provider:ob.provider,photo:ob.photo||undefined,banner:state.me?state.me.banner:undefined};
+  state.me={n:ob.n,c:ob.c,s:signOf(ob.m,ob.d),g:ob.g,age:ageBand(ageOf(ob.y,ob.m,ob.d)),bio,b:{d:ob.d,m:ob.m,y:ob.y},ad:ob.ad.trim(),soyad:ob.soyad.trim(),email:ob.email.trim(),provider:ob.provider,photo:state.me?state.me.photo:undefined,banner:state.me?state.me.banner:undefined};
   save();$("#onb").hidden=true;render();toast(ob.editing?"Bilgilerin kaydedildi":`Hoş geldin ${ob.n}`);ob.editing=false;seedDemo();
 }
 let seeded=false;
@@ -1062,6 +1220,32 @@ function seedDemo(){ if(seeded)return;seeded=true;
   state.requests.push({u:"gecekusu",first:"Profilini gördüm, burçlarımız uyumlu çıktı. Selam :)",from:null});
   render();
 }
+
+
+/* ============ YATAY KAYDIRMA (bilgisayar) ============ */
+const HS_SEL=".cats,.picker";
+function enhanceScroller(el){
+  if(el.dataset.hs)return;el.dataset.hs="1";
+  const wrap=document.createElement("div");wrap.className="hs-wrap";el.parentNode.insertBefore(wrap,el);wrap.appendChild(el);
+  const mk=(dir)=>{const b=document.createElement("button");b.type="button";b.className="hs-btn "+dir;b.tabIndex=-1;b.setAttribute("aria-hidden","true");
+    b.innerHTML=dir==="l"?'<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M15 18l-6-6 6-6"/></svg>':'<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M9 6l6 6-6 6"/></svg>';
+    b.onclick=e=>{e.stopPropagation();el.scrollBy({left:(dir==="l"?-1:1)*Math.max(160,el.clientWidth*.7),behavior:"smooth"})};wrap.appendChild(b);return b};
+  mk("l");mk("r");
+  const upd=()=>{const max=el.scrollWidth-el.clientWidth-2;wrap.classList.toggle("can-l",el.scrollLeft>2);wrap.classList.toggle("can-r",el.scrollLeft<max)};
+  el.addEventListener("scroll",upd,{passive:true});requestAnimationFrame(upd);
+  if(window.ResizeObserver)new ResizeObserver(upd).observe(el);
+  el.addEventListener("wheel",e=>{if(Math.abs(e.deltaY)<=Math.abs(e.deltaX))return;const max=el.scrollWidth-el.clientWidth;if(max<=0)return;
+    if((e.deltaY>0&&el.scrollLeft<max-1)||(e.deltaY<0&&el.scrollLeft>1)){e.preventDefault();el.scrollLeft+=e.deltaY}},{passive:false});
+  let moved=false;
+  el.addEventListener("pointerdown",e=>{if(e.pointerType!=="mouse"||e.button!==0)return;const sx=e.clientX,sl=el.scrollLeft;moved=false;
+    const mv=ev=>{const dx=ev.clientX-sx;if(!moved&&Math.abs(dx)>5){moved=true;el.classList.add("dragging")}if(moved)el.scrollLeft=sl-dx};
+    const up=()=>{removeEventListener("pointermove",mv);removeEventListener("pointerup",up);setTimeout(()=>el.classList.remove("dragging"),0)};
+    addEventListener("pointermove",mv);addEventListener("pointerup",up)});
+  el.addEventListener("click",e=>{if(moved){e.preventDefault();e.stopPropagation();moved=false}},true);
+  el.addEventListener("dragstart",e=>e.preventDefault());
+}
+function enhanceAll(){document.querySelectorAll(HS_SEL).forEach(enhanceScroller)}
+new MutationObserver(()=>enhanceAll()).observe(document.body,{childList:true,subtree:true});
 
 /* ============ BAŞLAT ============ */
 try{const s=JSON.parse(localStorage.getItem("itiraf_me")||"null");if(s&&s.n&&s.s){state.me=s;render();seedDemo()}else startOnb()}catch(e){startOnb()}
