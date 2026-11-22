@@ -484,6 +484,57 @@ button:active:not(:disabled){transform:scale(.97)}
 .h2s{font-size:28px}
 
 @media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+/* ===== Eşleş ===== */
+.ks-head{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:10px}
+.ks-head .h2s{margin:6px 0}
+.likers{width:100%;display:flex;align-items:center;gap:12px;padding:10px 14px;border-radius:16px;background:linear-gradient(90deg,rgba(233,185,110,.12),rgba(233,185,110,.04));border:1px solid rgba(233,185,110,.22);text-align:left;margin-bottom:14px;color:var(--altin)}
+.lk-stack{display:flex}.lk-stack .lk-av+.lk-av{margin-left:-12px}
+.lk-av{display:inline-flex;border-radius:50%;border:2px solid var(--murekkep)}
+.lk-av.blurred .av{filter:blur(5px) saturate(.7)}
+.likers .lk-av[data-lk]+.lk-av[data-lk]{margin-left:-6px}
+.lk-t{flex:1;display:flex;flex-direction:column;line-height:1.3}
+.lk-t b{color:var(--kagit);font-size:14.5px}.lk-t small{color:var(--soluk);font-size:12.5px}
+.deck{position:relative;height:430px;margin:0 auto;max-width:420px}
+.swc{position:absolute;inset:0;display:flex;flex-direction:column;padding:22px 22px 18px;border-radius:28px;background:radial-gradient(130% 60% at 100% 0%,color-mix(in srgb,var(--acc) 22%,transparent),transparent 60%),#221B2A;border:1px solid rgba(244,236,228,.10);box-shadow:0 24px 50px rgba(0,0,0,.45);touch-action:none;user-select:none;cursor:grab;transition:transform .3s cubic-bezier(.2,.8,.2,1);--yes:0;--no:0}
+.swc.drag{transition:none;cursor:grabbing}
+.swc.fly{transition:transform .32s ease-in}
+.swc.under{transform:scale(.94) translateY(16px);opacity:.6;pointer-events:none;filter:saturate(.6)}
+.swc.under.rise{transform:none;opacity:1;filter:none}
+.swc:focus-visible{outline:2px solid var(--altin);outline-offset:3px}
+.swc-top{display:flex;align-items:center;gap:12px}
+.swz{width:46px;height:46px;border-radius:50%;display:grid;place-items:center;font-size:22px;color:#fff;flex:none}
+.swn{flex:1;min-width:0;display:flex;flex-direction:column;line-height:1.25}
+.swn b{font-size:16px;display:inline-flex;align-items:center;gap:4px}.swn small{color:var(--soluk);font-size:12.5px}
+.swq{flex:1;display:flex;align-items:center;font-family:var(--display);font-size:clamp(21px,5.6vw,25px);line-height:1.34;margin:16px 0;overflow:hidden}
+.swc-foot{display:flex;align-items:center;gap:12px;padding-top:14px;border-top:1px solid var(--cizgi)}
+.swc-foot .ring{width:50px;height:50px;flex:none}
+.swc-foot span{display:flex;flex-direction:column;line-height:1.3}.swc-foot b{font-size:14px}.swc-foot small{color:var(--soluk);font-size:12.5px}
+.stamp{position:absolute;top:92px;padding:6px 14px;border-radius:10px;border:3px solid;font-weight:800;font-size:20px;letter-spacing:.06em;text-transform:uppercase;pointer-events:none;z-index:2}
+.stamp.yes{left:22px;color:var(--nar);transform:rotate(-12deg);opacity:var(--yes)}
+.stamp.no{right:22px;color:var(--soluk);transform:rotate(12deg);opacity:var(--no)}
+.swc.end{align-items:center;justify-content:center;text-align:center;cursor:default;gap:8px;--acc:var(--altin)}
+.swc.end h2{font-family:var(--display);font-size:26px}.swc.end p{font-size:14px;max-width:300px;margin-bottom:10px}
+.sw-acts{display:flex;align-items:center;justify-content:center;gap:18px;margin-top:18px}
+.swb{position:relative;width:66px;height:66px;border-radius:50%;display:grid;place-items:center;background:var(--yuzey);border:1px solid rgba(244,236,228,.12);transition:transform .15s}
+.swb:active{transform:scale(.92)}
+.swb.sm{width:48px;height:48px;color:var(--soluk)}
+.swb.no{color:var(--kagit)}
+.swb.yes{color:#fff;background:linear-gradient(180deg,#EE5B66,#DE444F);border:0;box-shadow:0 8px 22px rgba(232,80,91,.35)}
+.swb .lk{position:absolute;right:-2px;top:-2px;width:20px;height:20px;border-radius:50%;background:var(--altin);color:#21170A;display:grid;place-items:center}
+.swb .lk svg{width:11px;height:11px}
+.match-scrim{background:radial-gradient(circle at 50% 38%,#3A1A26,#120E17 68%);backdrop-filter:blur(6px)}
+.match{width:100%;max-width:380px;text-align:center;animation:up .35s cubic-bezier(.2,.8,.2,1)}
+.m-avs{display:flex;align-items:center;justify-content:center;margin-bottom:18px}
+.m-a{display:inline-flex;border-radius:50%;padding:3px;background:var(--acc)}
+.m-a .av{border:3px solid var(--murekkep)}
+.m-a:first-child{transform:rotate(-8deg);margin-right:-14px}.m-a:last-child{transform:rotate(8deg);margin-left:-14px}
+.m-h{position:relative;z-index:2;width:48px;height:48px;border-radius:50%;background:var(--nar);color:#fff;display:grid;place-items:center;box-shadow:0 0 0 4px var(--murekkep)}
+.m-h svg{width:24px;height:24px}
+.match h2{font-family:var(--display);font-style:italic;font-size:44px;line-height:1;margin-bottom:10px}
+.match p{font-size:14.5px}
+.match q{quotes:none;display:block;margin-top:14px;font-family:var(--display);font-style:italic;font-size:17px;line-height:1.4;color:rgba(244,236,228,.85)}
+.mtag{margin-left:6px;font-size:11px;font-weight:800;padding:2px 7px;border-radius:999px;background:rgba(232,80,91,.16);color:#F08A92;vertical-align:2px}
+@media (prefers-reduced-motion:reduce){.swc,.swc.fly{transition:none}.match{animation:none}}
 </style>
 </head>
 <body>
@@ -739,15 +790,6 @@ function vAkis(){
    ${feat?`<div class="feat"><div class="it" style="padding-top:12px"><div class="feat-tag">${IC.spark}Bugün en çok sarılan</div>${postHTML(feat).replace('<article class="it">','<article class="it" style="background:none;border:0;padding:0;margin:0">')}</div></div>`:""}
    ${list.length?list.map(p=>postHTML(p)).join(""):(feat?"":`<p class="empty">Bu kategoride henüz itiraf yok. Ortadaki “İtiraf et” ile ilkini sen yaz.</p>`)}`;
 }
-function vKesfet(){
-  const me=state.me;
-  const people=Object.keys(U).map(k=>({k,p:uyum(me.s,U[k].s)})).sort((a,b)=>b.p-a.p);
-  const sameSign=Object.keys(U).filter(k=>U[k].s===me.s);
-  view.innerHTML=`<h1 class="h2s">Keşfet</h1>
-   <p class="muted" style="font-size:14px;margin-bottom:14px">Burcuna göre en uyumlu itirafçılar. Profiline girip itiraflarını okuyabilir, özelden yazabilirsin.</p>
-   ${people.map(({k,p})=>{const u=U[k];return `<button class="row" data-prof="${k}">${av(k,46)}<span class="t"><b>${esc(u.n)}${pb(k)}</b><div>${Z[u.s].n}, ${u.age}, ${u.bio}</div></span><span class="meta"><b style="color:var(--kagit);font-size:15px">%${p}</b><br>uyum</span></button>`}).join("")}
-   <p class="hint" style="margin-top:14px">${sameSign.length?`${Z[me.s].n} burcundan ${sameSign.length} kişi aktif.`:`Şu an ${Z[me.s].n} burcundan aktif kimse yok.`}</p>`;
-}
 function vMesajlar(){
   const free=!state.premium;
   const active=state.chats.length;
@@ -755,7 +797,7 @@ function vMesajlar(){
    ${state.requests.length?`<h3 style="font-size:20px;margin:6px 0 8px">Mesaj istekleri</h3>${state.requests.map((r,i)=>`<div class="req">${av(r.u,42)}<div class="t"><b>${esc(U[r.u].n)}${pb(r.u)}</b> <span class="muted" style="font-size:12.5px">${Z[U[r.u].s].n}</span><q>“${esc(r.first)}”</q></div><button class="sbtn no" data-rq="${i}:no">Sil</button><button class="sbtn ok" data-rq="${i}:ok">Kabul et</button></div>`).join("")}`:""}
    <h3 style="font-size:20px;margin:16px 0 4px">Sohbetler</h3>
    ${state.chats.length?state.chats.map((c,i)=>{const last=c.msgs[c.msgs.length-1];const locked=last&&!last.me&&isLockedIdx(c,c.msgs.length-1);
-     return `<button class="row" data-chat="${i}">${av(c.u,46)}<span class="t"><b>${esc(U[c.u].n)}${pb(c.u)}</b><div class="${locked?"blur":""}">${last?(last.me?"Sen: ":"")+(last.kind==="img"?"Fotoğraf":last.kind==="vid"?"Video":last.kind==="voice"?"Ses kaydı":last.kind==="call"?(last.type==="video"?"Görüntülü arama":"Sesli arama"):esc(last.t)):"Sohbet başladı. İlk mesajı yaz."}</div></span><span class="meta">${c.unread?'<span class="dot"></span>':""}</span></button>`}).join(""):`<p class="empty">Henüz sohbet yok. Akışta seni etkileyen bir itirafın altındaki “Özelden yaz” ile başla.</p>`}`;
+     return `<button class="row" data-chat="${i}">${av(c.u,46)}<span class="t"><b>${esc(U[c.u].n)}${pb(c.u)}${c.match?'<span class="mtag">Eşleşme</span>':""}</b><div class="${locked?"blur":""}">${last?(last.me?"Sen: ":"")+(last.kind==="img"?"Fotoğraf":last.kind==="vid"?"Video":last.kind==="voice"?"Ses kaydı":last.kind==="call"?(last.type==="video"?"Görüntülü arama":"Sesli arama"):esc(last.t)):"Sohbet başladı. İlk mesajı yaz."}</div></span><span class="meta">${c.unread?'<span class="dot"></span>':""}</span></button>`}).join(""):`<p class="empty">Henüz sohbet yok. Akışta seni etkileyen bir itirafın altındaki “Özelden yaz” ile başla.</p>`}`;
 }
 function vBen(){
   const me=state.me;
@@ -793,11 +835,151 @@ function confirmLogout(){
   g.querySelector("#loY").onclick=()=>{try{localStorage.removeItem("itiraf_me")}catch(e){}location.reload()};
 }
 
+/* ============ EŞLEŞ (itirafla kaydırmalı eşleşme) ============ */
+const SWIPE_EXTRA=[
+ {u:"mavimerdiven",cat:"ask",t:"Her sabah aynı kahveciye sırf kasadaki kız için gidiyorum. Aslında kahve bile sevmiyorum."},
+ {u:"dumanli",cat:"arkadas",t:"En yakın arkadaşımın düğününde konuşma yaptım, herkes ağladı. Konuşmayı yapay zekâya yazdırmıştım."},
+ {u:"kedikahve",cat:"ask",t:"İlk buluşmada otobüsü kaçırdım dedim. Aslında kapının önünde yirmi dakika cesaret topladım."},
+ {u:"gecekusu",cat:"aile",t:"Kardeşimin harçlığını yıllardır ben gönderiyorum. Annemler babamdan geldiğini sanıyor."},
+ {u:"eskiplak",cat:"kimse",t:"Gitar çalabildiğimi söylüyorum ama sadece tek bir şarkıyı ezbere biliyorum."},
+ {u:"kumsaati",cat:"is",t:"Toplantılarda kamerayı açmıyorum çünkü çoğu zaman yataktan katılıyorum."},
+ {u:"kirmiziceket",cat:"ask",t:"Eski sevgilime bilerek yanlışlıkla mesaj atıyorum, sonra özür dilemek için."},
+ {u:"ucuncukat",cat:"arkadas",t:"Arkadaşlarım beni sakin biri sanıyor. Aslında her konuşmayı kafamda yüz kere kuruyorum."},
+ {u:"sessizlimon",cat:"kimse",t:"Her yılbaşı gecesi tek başıma sinemaya gidiyorum ve bu benim yılın en sevdiğim gecesi."},
+ {u:"yorgunkaptan",cat:"ask",t:"Yeni biriyle tanışınca ilk iş burcunu soruyorum. Ama burca inanmadığımı söylüyorum."}
+];
+const LIKED_ME=new Set(["gecekusu","kedikahve","eskiplak","dumanli","sessizlimon","yorgunkaptan"]);
+const swTarget=()=>state.me.g==="Kadın"?"Erkek":state.me.g==="Erkek"?"Kadın":null;
+const FREE_SWIPES=12;
+const sw={done:new Set(),hist:[],used:0,mode:"eslesme",matched:new Set(),front:null,busy:false};
+function swipePool(){
+  const all=[];const a=POSTS.map(p=>({id:p.id,u:p.u,cat:p.cat,t:p.t})),b=SWIPE_EXTRA.map((p,i)=>({id:"s"+i,...p}));
+  for(let i=0;i<Math.max(a.length,b.length);i++){if(a[i])all.push(a[i]);if(b[i])all.push(b[i])}
+  const tg=swTarget();let l=all.filter(c=>!sw.done.has(c.id)&&U[c.u].g===tg);
+  if(sw.front){const i=l.findIndex(c=>c.u===sw.front);if(i>0)l.unshift(l.splice(i,1)[0]);else if(i<0)sw.front=null}
+  return l;
+}
+function vKesfet(){
+  view.innerHTML=`<div class="ks-head"><h1 class="h2s">Keşfet</h1><div class="seg2" role="group" aria-label="Keşfet görünümü"><button data-ks="eslesme" aria-pressed="${sw.mode==="eslesme"}">Eşleş</button><button data-ks="uyum" aria-pressed="${sw.mode==="uyum"}">Uyumlu kişiler</button></div></div><div id="ksBody"></div>`;
+  view.querySelectorAll("[data-ks]").forEach(b=>b.onclick=()=>{sw.mode=b.dataset.ks;vKesfet()});
+  sw.mode==="uyum"?vUyumlu():vEsles();
+}
+function vUyumlu(){
+  const me=state.me;
+  const people=Object.keys(U).map(k=>({k,p:uyum(me.s,U[k].s)})).sort((a,b)=>b.p-a.p);
+  const sameSign=Object.keys(U).filter(k=>U[k].s===me.s);
+  $("#ksBody").innerHTML=`<p class="muted" style="font-size:14px;margin-bottom:14px">Burcuna göre en uyumlu itirafçılar. Profiline girip itiraflarını okuyabilir, özelden yazabilirsin.</p>
+   ${people.map(({k,p})=>{const u=U[k];return `<button class="row" data-prof="${k}">${av(k,46)}<span class="t"><b>${esc(u.n)}${pb(k)}</b><div>${Z[u.s].n}, ${u.age}, ${u.bio}</div></span><span class="meta"><b style="color:var(--kagit);font-size:15px">%${p}</b><br>uyum</span></button>`}).join("")}
+   <p class="hint" style="margin-top:14px">${sameSign.length?`${Z[me.s].n} burcundan ${sameSign.length} kişi aktif.`:`Şu an ${Z[me.s].n} burcundan aktif kimse yok.`}</p>`;
+}
+function swCard(c,back){
+  const u=U[c.u],p=uyum(state.me.s,u.s);
+  return `<div class="swc${back?" under":""}" ${back?'aria-hidden="true"':`id="swTop" tabindex="0" aria-label="${esc(u.n)} adlı kişinin itirafı. Sağ ok: bana dokundu, sol ok: geç."`} style="--acc:${u.c}">
+    <span class="stamp yes">Dokundu</span><span class="stamp no">Geç</span>
+    <div class="swc-top"><span class="swz" style="background:${u.c}">${Z[u.s].g}</span><span class="swn"><b>${esc(u.n)}${pb(c.u)}</b><small>${Z[u.s].n}, ${u.age}, ${u.g}</small></span><span class="it-cat">${CATN[c.cat]}</span></div>
+    <blockquote class="swq">${esc(c.t)}</blockquote>
+    <div class="swc-foot">${ringSVG(p)}<span><b>Burç uyumunuz</b><small>${Z[state.me.s].n} ve ${Z[u.s].n}</small></span></div>
+  </div>`;
+}
+function vEsles(){
+  const body=$("#ksBody");if(!body)return;
+  const pool=swipePool(), out=!state.premium&&sw.used>=FREE_SWIPES;
+  const tg=swTarget();
+  if(!tg){body.innerHTML=`<div class="deck"><div class="swc end"><div class="cf-ic">${IC.spark}</div><h2>Önce cinsiyetini seç</h2><p class="muted">Eşleş'te kadınlar erkeklerin, erkekler kadınların itiraflarını görür. Kayıtta cinsiyetini belirtmediğin için seçmen gerekiyor. Bu seçim profilinde de görünür ve sonradan değiştirilemez.</p><div class="choice" style="width:100%;max-width:300px;display:grid;grid-template-columns:1fr 1fr;gap:8px"><button class="btn line" data-sg="Kadın">Kadın</button><button class="btn line" data-sg="Erkek">Erkek</button></div></div></div>`;
+    body.querySelectorAll("[data-sg]").forEach(b=>b.onclick=()=>{state.me.g=b.dataset.sg;save();toast("Cinsiyetin kaydedildi");vEsles()});return}
+  const likers=[...LIKED_ME].filter(k=>!sw.matched.has(k)&&U[k].g===tg);
+  const strip=likers.length?`<button class="likers" id="likers">${state.premium?likers.map(k=>`<span class="lk-av" data-lk="${k}">${av(k,34,true)}</span>`).join(""):`<span class="lk-stack">${likers.slice(0,4).map(k=>`<span class="lk-av blurred">${av(k,34,true)}</span>`).join("")}</span>`}
+     <span class="lk-t"><b>${likers.length} kişi seni beğendi</b><small>${state.premium?"Birine dokun, itirafı öne gelsin":"Kim olduklarını görmek için Premium"}</small></span>${state.premium?"":IC.lock}</button>`:"";
+  let deck;
+  if(out)deck=`<div class="swc end"><div class="cf-ic">${IC.lock}</div><h2>Bugünlük kartların bitti</h2><p class="muted">Yarın yeni itiraflar gelecek. Beklemek istemiyorsan Premium ile sınırsız kaydır, seni beğenenleri de gör.</p><button class="btn gold wide" id="swPrem">Premium ile devam et</button></div>`;
+  else if(!pool.length)deck=`<div class="swc end"><div class="cf-ic">${IC.spark}</div><h2>Hepsini gördün</h2><p class="muted">Yeni itiraflar geldikçe burada göreceksin. Geçtiğin itiraflara bir daha bakmak istersen başa dön.</p><button class="btn line wide" id="swReset">Geçtiklerimi tekrar göster</button></div>`;
+  else deck=(pool[1]?swCard(pool[1],true):"")+swCard(pool[0]);
+  body.innerHTML=`${strip}
+    <div class="deck" id="deck">${deck}</div>
+    ${out||!pool.length?"":`<div class="sw-acts">
+      <button class="swb sm" id="swUndo" aria-label="Son kartı geri al">${UNDO}${state.premium?"":`<span class="lk">${IC.lock}</span>`}</button>
+      <button class="swb no" id="swNo" aria-label="Geç">${IC.close.replace('width="18" height="18"','width="28" height="28"')}</button>
+      <button class="swb yes" id="swYes" aria-label="Bana dokundu">${HEART}</button>
+      <button class="swb sm" id="swProf" aria-label="Profiline bak">${IC.dm.replace('<svg','<svg width="20" height="20"').replace('M4 5h16v11H9l-5 4z','M12 12a4 4 0 1 0 0-8 4 4 0 0 0 0 8zM4.5 20c1.2-3.8 4-5.5 7.5-5.5s6.3 1.7 7.5 5.5')}</button>
+    </div>`}
+    <p class="hint" style="text-align:center;max-width:340px;margin:12px auto 0">Sağa kaydır: bana dokundu. Sola kaydır: geç. Sen ${tg==="Erkek"?"erkeklerin":"kadınların"} itiraflarını görürsün. Birbirinizi beğenirseniz eşleşirsiniz, sohbet açılır.</p>
+    ${state.myPosts.length?"":`<button class="pnote" id="swNudge" style="max-width:none;margin:14px 0 0">${IC.spark}<span>Kendi itirafını yazanlar daha çok eşleşiyor. İnsanlar seni yazdıklarınla tanır.</span></button>`}`;
+  const L=$("#likers");if(L)L.onclick=e=>{if(!state.premium){premiumGate("Seni kimler beğendi?","Seni beğenen kişileri görmek ve onların itirafını hemen önüne getirmek Premium ile açılır.",()=>vKesfet());return}
+    const a=e.target.closest("[data-lk]");if(a){sw.front=a.dataset.lk;vEsles()}};
+  const P=$("#swPrem");if(P)P.onclick=()=>showPremium("esles");
+  const R=$("#swReset");if(R)R.onclick=()=>{sw.hist.filter(h=>!h.like).forEach(h=>sw.done.delete(h.id));sw.hist=sw.hist.filter(h=>h.like);vEsles()};
+  const N=$("#swNudge");if(N)N.onclick=()=>showConfess();
+  if(out||!pool.length)return;
+  const top=$("#swTop"),c=pool[0];
+  $("#swNo").onclick=()=>fling(top,c,false);
+  $("#swYes").onclick=()=>fling(top,c,true);
+  $("#swProf").onclick=()=>showProfile(c.u);
+  $("#swUndo").onclick=undoSwipe;
+  dragCard(top,c);
+}
+function dragCard(el,c){
+  let x0=0,y0=0,dx=0,dy=0,on=false,id=null;
+  const set=()=>{el.style.transform=`translate(${dx}px,${dy*.35}px) rotate(${dx/16}deg)`;el.style.setProperty("--yes",Math.max(0,Math.min(1,dx/110)));el.style.setProperty("--no",Math.max(0,Math.min(1,-dx/110)))};
+  el.onpointerdown=e=>{if(sw.busy||e.button>0)return;on=true;id=e.pointerId;x0=e.clientX;y0=e.clientY;dx=dy=0;el.setPointerCapture(id);el.classList.add("drag")};
+  el.onpointermove=e=>{if(!on)return;dx=e.clientX-x0;dy=e.clientY-y0;set()};
+  const up=()=>{if(!on)return;on=false;el.classList.remove("drag");
+    if(Math.abs(dx)>100)fling(el,c,dx>0,dx,dy);
+    else{el.style.transform="";el.style.setProperty("--yes",0);el.style.setProperty("--no",0)}};
+  el.onpointerup=up;el.onpointercancel=up;
+}
+function fling(el,c,like,dx=0,dy=0){
+  if(sw.busy)return;sw.busy=true;
+  const d=like?1:-1;el.classList.remove("drag");el.classList.add("fly");
+  el.style.setProperty(like?"--yes":"--no",1);
+  el.style.transform=`translate(${d*(innerWidth*.9+200)}px,${dy*.35+40}px) rotate(${d*24}deg)`;
+  const b=document.querySelector(".swc.under");if(b)b.classList.add("rise");
+  setTimeout(()=>{sw.busy=false;decide(c,like)},300);
+}
+function decide(c,like){
+  sw.done.add(c.id);sw.used++;sw.hist.push({id:c.id,u:c.u,like});
+  if(sw.front===c.u)sw.front=null;
+  let m=false;
+  if(like&&LIKED_ME.has(c.u)&&!sw.matched.has(c.u)){sw.matched.add(c.u);sw.hist[sw.hist.length-1].match=true;m=true}
+  vEsles();
+  if(m)showMatch(c);else if(like)toast(`${U[c.u].n} itirafını beğendiğini görmeyecek, sadece o da seni beğenirse eşleşirsiniz`);
+}
+function undoSwipe(){
+  if(!state.premium){premiumGate("Son kartı geri al","Yanlışlıkla geçtiğin itirafı geri getirmek Premium ile açılır.",()=>vKesfet());return}
+  const h=sw.hist[sw.hist.length-1];if(!h){toast("Geri alınacak kart yok");return}
+  if(h.match){toast("Eşleşme geri alınamaz");return}
+  sw.hist.pop();sw.done.delete(h.id);sw.used=Math.max(0,sw.used-1);sw.front=h.u;vEsles();
+}
+function showMatch(c){
+  const u=U[c.u],p=uyum(state.me.s,u.s);
+  const g=document.createElement("div");g.className="cf-scrim match-scrim";g.setAttribute("role","dialog");g.setAttribute("aria-modal","true");g.setAttribute("aria-label","Eşleştiniz");
+  g.innerHTML=`<div class="match"><div class="m-avs"><span class="m-a" style="--acc:${state.me.c}">${av("me",92,true)}</span><span class="m-h">${HEART}</span><span class="m-a" style="--acc:${u.c}">${av(c.u,92,true)}</span></div>
+    <h2>Eşleştiniz</h2>
+    <p class="muted">Sen ${esc(u.n)} adlı kişinin itirafını beğendin, o da seni beğenmişti. Burç uyumunuz %${p}.</p>
+    <q>“${esc(c.t)}”</q>
+    <div style="display:grid;gap:8px;margin-top:18px"><button class="btn wide" id="mGo1">Mesaj yaz</button><button class="btn line wide" id="mGo2">Kaydırmaya devam et</button></div></div>`;
+  document.body.appendChild(g);
+  g.onclick=e=>{if(e.target===g)g.remove()};
+  g.querySelector("#mGo2").onclick=()=>g.remove();
+  g.querySelector("#mGo1").onclick=()=>{g.remove();
+    const ex=state.chats.findIndex(x=>x.u===c.u);if(ex>=0){openChat(ex);return}
+    if(!state.premium&&state.chats.length>=FREE_CHATS){showPremium("sohbet");return}
+    state.chats.unshift({u:c.u,from:c.t,match:true,msgs:[],status:"open",unread:false});openChat(0)};
+  setTimeout(()=>{const b=g.querySelector("#mGo1");b&&b.focus()},50);
+}
+const HEART='<svg width="30" height="30" viewBox="0 0 24 24" fill="currentColor"><path d="M12 20.5s-7.5-4.6-7.5-10.4A4.3 4.3 0 0 1 12 7.3a4.3 4.3 0 0 1 7.5 2.8c0 5.8-7.5 10.4-7.5 10.4z"/></svg>';
+const UNDO='<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 14L4 9l5-5"/><path d="M4 9h11a5 5 0 0 1 0 10h-4"/></svg>';
+document.addEventListener("keydown",e=>{
+  if(state.tab!=="kesfet"||sw.mode!=="eslesme"||$("#scrim").classList.contains("open")||$("#chat").classList.contains("open")||document.querySelector(".cf-scrim"))return;
+  if(e.target.matches("input,textarea"))return;
+  if(e.key==="ArrowRight"){const b=$("#swYes");if(b){e.preventDefault();b.click()}}
+  else if(e.key==="ArrowLeft"){const b=$("#swNo");if(b){e.preventDefault();b.click()}}
+});
+
 /* ============ PREMIUM KAPISI ============ */
 function premiumGate(title,text,onUnlock){
   const g=document.createElement("div");g.className="cf-scrim";g.setAttribute("role","dialog");g.setAttribute("aria-modal","true");
   g.innerHTML=`<div class="cf"><div class="cf-ic">${IC.lock}</div><h2>${title}</h2><p class="muted" style="font-size:14px;margin:6px 0 12px">${text}</p>
-    <div class="perks" style="margin:0 0 14px"><div>${IC.chk}Kendi profil fotoğrafını ve kapak görselini yükle</div><div>${IC.chk}İtirafların akışta herkese görünsün</div><div>${IC.chk}Sınırsız cevap, mesaj ve sohbet</div><div>${IC.chk}Fotoğraf, ses, sesli ve görüntülü arama</div></div>
+    <div class="perks" style="margin:0 0 14px"><div>${IC.chk}Kendi profil fotoğrafını ve kapak görselini yükle</div><div>${IC.chk}İtirafların akışta herkese görünsün</div><div>${IC.chk}Sınırsız cevap, mesaj ve sohbet</div><div>${IC.chk}Seni beğenenleri gör, sınırsız kaydır</div><div>${IC.chk}Fotoğraf, ses, sesli ve görüntülü arama</div></div>
     <div style="display:grid;gap:8px"><button class="btn gold wide" id="pgY">Premium'u başlat · 119,90 ₺/ay</button><button class="btn line wide" id="pgN">Şimdi değil</button></div>
     <p class="hint" style="text-align:center">Prototip: ödeme alınmaz.</p></div>`;
   document.body.appendChild(g);
@@ -1002,7 +1184,7 @@ function drawChat(){
   $("#chatIn").innerHTML=`<div class="chat-h"><button class="back" id="cBack" aria-label="Geri">${IC.back}</button>${who(c.u,c.status==="wait"?"istek bekliyor":"çevrimiçi")}
     <button class="hb" data-media="call" aria-label="Sesli ara">${IC.phone}${lockBadge()}</button><button class="hb" data-media="video" aria-label="Görüntülü ara">${IC.video}${lockBadge()}</button></div>
    <div class="msgs" id="msgs">
-     ${c.from?`<div class="origin"><small>Bu itiraf üzerinden tanıştınız</small><q>“${esc(c.from)}”</q></div>`:`<div class="origin"><small>Profil üzerinden tanıştınız</small></div>`}
+     ${c.from?`<div class="origin"><small>${c.match?"Eşleştiniz. Bu itirafını beğenmiştin":"Bu itiraf üzerinden tanıştınız"}</small><q>“${esc(c.from)}”</q></div>`:`<div class="origin"><small>Profil üzerinden tanıştınız</small></div>`}
      ${c.msgs.map((m,i)=>{const lk=!m.me&&isLockedIdx(c,i);return msgHTML(m,lk)}).join("")}
      ${c.status==="wait"?`<div class="sys">${esc(u.n)} isteğini henüz görmedi</div>`:""}
      ${c.typing?`<div class="typing"><i></i><i></i><i></i></div>`:""}
@@ -1071,8 +1253,8 @@ function startCall(type,c){
 /* ============ PREMIUM ============ */
 function showPremium(src){
   let plan="aylik";
-  const draw=()=>openSheet(`<h2>Arcana Premium</h2><p class="muted" style="margin:6px 0 2px;font-size:14px">${src==="medya"?"Fotoğraf, ses kaydı, sesli ve görüntülü arama Premium'a özel.":src==="mesaj"?"Sohbetin yarıda kalmasın.":src==="sohbet"?"Yeni sohbet başlatmak için Premium'a geç.":"Sınırsız konuş."}</p>
-   <div class="perks"><div>${IC.chk}Sınırsız mesaj, sınırsız sohbet</div><div>${IC.chk}İtirafların akışta herkese görünsün</div><div>${IC.chk}İtiraflara sınırsız cevap yaz</div><div>${IC.chk}Kendi profil fotoğrafını ve kapağını yükle</div><div>${IC.chk}Fotoğraf, video ve ses kaydı gönder</div><div>${IC.chk}Sesli ve görüntülü arama</div><div>${IC.chk}Biriken mesajları hemen oku</div><div>${IC.chk}Mesajının okunduğunu gör</div><div>${IC.chk}Daha çok itiraf, itirafını öne çıkar</div></div>
+  const draw=()=>openSheet(`<h2>Arcana Premium</h2><p class="muted" style="margin:6px 0 2px;font-size:14px">${src==="medya"?"Fotoğraf, ses kaydı, sesli ve görüntülü arama Premium'a özel.":src==="mesaj"?"Sohbetin yarıda kalmasın.":src==="esles"?"Sınırsız kaydır, seni beğenenleri gör.":src==="sohbet"?"Yeni sohbet başlatmak için Premium'a geç.":"Sınırsız konuş."}</p>
+   <div class="perks"><div>${IC.chk}Sınırsız mesaj, sınırsız sohbet</div><div>${IC.chk}Sınırsız kaydır, seni beğenenleri gör</div><div>${IC.chk}İtirafların akışta herkese görünsün</div><div>${IC.chk}İtiraflara sınırsız cevap yaz</div><div>${IC.chk}Kendi profil fotoğrafını ve kapağını yükle</div><div>${IC.chk}Fotoğraf, video ve ses kaydı gönder</div><div>${IC.chk}Sesli ve görüntülü arama</div><div>${IC.chk}Biriken mesajları hemen oku</div><div>${IC.chk}Mesajının okunduğunu gör</div><div>${IC.chk}Daha çok itiraf, itirafını öne çıkar</div></div>
    <div class="plans">${[["haftalik","Haftalık","İstediğin zaman iptal","49,90 ₺"],["aylik","Aylık","En çok seçilen, haftalığa göre %40 ucuz","119,90 ₺"],["yillik","Yıllık","Aylık 49,90 ₺'ye gelir","599 ₺"]].map(([k,n,s,pr])=>`<button class="plan" data-plan="${k}" aria-pressed="${plan===k}"><span><b>${n}</b><small>${s}</small></span><span class="p">${pr}</span></button>`).join("")}</div>
    <button class="btn gold wide" id="buy">Premium'u başlat</button>
    <p class="hint" style="text-align:center">Prototip: ödeme alınmaz, düğme sadece Premium görünümünü açar. Fiyatlar örnektir.</p>`);
