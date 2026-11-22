@@ -832,7 +832,7 @@ function confirmLogout(){
   document.body.appendChild(g);
   g.onclick=e=>{if(e.target===g)g.remove()};
   g.querySelector("#loN").onclick=()=>g.remove();
-  g.querySelector("#loY").onclick=()=>{try{localStorage.removeItem("itiraf_me")}catch(e){}location.reload()};
+  g.querySelector("#loY").onclick=()=>{try{localStorage.removeItem("itiraf_me");localStorage.removeItem("arcana_data")}catch(e){}location.reload()};
 }
 
 /* ============ EŞLEŞ (itirafla kaydırmalı eşleşme) ============ */
@@ -1116,7 +1116,7 @@ function showPost(id){
   g.onclick=()=>{const v=t.value.trim();const bad=contactBlock(v);if(bad){$("#cmWarn").innerHTML=`<p class="warn">Yorumlarda ${bad} paylaşılamaz. Tanışmak istersen “Özelden yaz”ı kullan.</p>`;return}
     if(!state.premium&&p.u!=="me"&&!state.replied.has(p.u)&&state.replied.size>=3){premiumGate("Bugün daha fazla kişiye cevap yazamazsın","Ücretsiz planda günde sınırlı sayıda kişinin itirafına cevap yazabilirsin. Herkese sınırsız cevap yazmak için Premium'a geç.",()=>g.click());return}
     if(p.u!=="me")state.replied.add(p.u);
-    p.cm.push({u:"me",t:v,ago:"Şimdi"});state.myComments.push({on:p.t,t:v});toast("Yorumun gönderildi");showPost(id);render()};
+    p.cm.push({u:"me",t:v,ago:"Şimdi",ts:Date.now()});state.myComments.push({on:p.t,t:v});toast("Yorumun gönderildi");showPost(id);render()};
 }
 function showMore(id){
   const p=allPosts().find(x=>x.id===id); if(!p)return; const mine=p.u==="me";
@@ -1214,6 +1214,7 @@ function waveHTML(seed){let h="";for(let i=0;i<26;i++){const v=6+((seed*31+i*17)
 const fmt=s=>`${Math.floor(s/60)}:${String(s%60).padStart(2,"0")}`;
 function msgHTML(m,lk){
   const cls=`m ${m.me?"me":"them"} ${lk?"locked":""}`;
+  if((m.kind==="img"||m.kind==="vid")&&!m.src)return `<div class="${cls}"><span style="opacity:.75">${m.kind==="vid"?"Video":"Fotoğraf"} gönderildi</span></div>`;
   if(m.kind==="img")return `<div class="${cls} media"><img src="${m.src}" alt="Gönderilen fotoğraf"></div>`;
   if(m.kind==="vid")return `<div class="${cls} media"><video src="${m.src}" controls playsinline></video></div>`;
   if(m.kind==="voice")return `<div class="${cls}"><div class="voice"><span class="pl">${IC.play}</span><span class="wave">${waveHTML(m.dur)}</span><span style="font-size:12.5px;font-variant-numeric:tabular-nums">${fmt(m.dur)}</span></div></div>`;
@@ -1282,7 +1283,7 @@ function showConfess(){
   t.oninput=()=>{$("#cnt").textContent=`${t.value.length} / 500`;g.disabled=t.value.trim().length<15;$("#cfWarn").innerHTML=""};
   setTimeout(()=>t.focus(),250);
   g.onclick=()=>{const v=t.value.trim(),bad=contactBlock(v);if(bad){$("#cfWarn").innerHTML=`<p class="warn">İtiraflarda ${bad} paylaşılamaz.</p>`;return}
-    const p={id:"m"+Date.now(),u:"me",cat,t:v,ago:"Şimdi",r:{bende:0,saril:0,yok:0},cm:[],today:true};
+    const p={id:"m"+Date.now(),u:"me",cat,t:v,ago:"Şimdi",r:{bende:0,saril:0,yok:0},cm:[],today:true,day:dayKey(),ts:Date.now()};
     state.myPosts.unshift(p);closeSheet();
     if(state.premium){state.tab="akis";state.cat="hepsi";render();scrollTo(0,0);toast("İtirafın akışta paylaşıldı")}
     else{state.tab="ben";render();scrollTo(0,0);toast("İtirafın profilinde paylaşıldı. Akışta görünmesi için Premium gerekli.")}
@@ -1464,7 +1465,35 @@ function enhanceAll(){document.querySelectorAll(HS_SEL).forEach(enhanceScroller)
 new MutationObserver(()=>enhanceAll()).observe(document.body,{childList:true,subtree:true});
 
 /* ============ BAŞLAT ============ */
-try{const s=JSON.parse(localStorage.getItem("itiraf_me")||"null");if(s&&s.n&&s.s){state.me=s;render();seedDemo()}else startOnb()}catch(e){startOnb()}
+
+/* ============ KALICI KAYIT (bu cihazda) ============ */
+const dayKey=()=>{const d=new Date();return d.getFullYear()+"-"+(d.getMonth()+1)+"-"+d.getDate()};
+function agoOf(ts){if(!ts)return "Şimdi";const m=Math.floor((Date.now()-ts)/60000);if(m<1)return "Şimdi";if(m<60)return m+" dk";const h=Math.floor(m/60);if(h<24)return h+" sa";const d=Math.floor(h/24);return d===1?"Dün":d+" gün"}
+function saveData(){
+  if(!state.me)return;try{if(!localStorage.getItem("itiraf_me"))return}catch(e){return}
+  try{localStorage.setItem("arcana_data",JSON.stringify({v:1,day:dayKey(),seeded,
+    myPosts:state.myPosts,myComments:state.myComments,requests:state.requests,premium:state.premium,react:state.react,
+    replied:[...state.replied],hidden:[...state.hidden],
+    chats:state.chats.map(c=>({...c,typing:false,msgs:c.msgs.map(m=>m.src&&String(m.src).startsWith("blob:")?{...m,src:null}:m)})),
+    posts:Object.fromEntries(POSTS.map(p=>[p.id,{r:p.r,cm:p.cm}])),
+    sw:{done:[...sw.done],hist:sw.hist,used:sw.used,matched:[...sw.matched]}}))}catch(e){}
+}
+function loadData(){
+  try{const d=JSON.parse(localStorage.getItem("arcana_data")||"null");if(!d||d.v!==1)return;
+    const today=d.day===dayKey();
+    Object.assign(state,{myPosts:d.myPosts||[],myComments:d.myComments||[],requests:d.requests||[],premium:!!d.premium,react:d.react||{},chats:d.chats||[],
+      replied:new Set(today?d.replied||[]:[]),hidden:new Set(d.hidden||[])});
+    state.myPosts.forEach(p=>{p.today=p.day===dayKey();if(p.ts)p.ago=agoOf(p.ts)});
+    POSTS.forEach(p=>{const o=d.posts&&d.posts[p.id];if(o){p.r=o.r;p.cm=o.cm}});
+    [...POSTS,...state.myPosts].forEach(p=>p.cm.forEach(c=>{if(c.ts)c.ago=agoOf(c.ts)}));
+    if(d.sw){sw.done=new Set(d.sw.done||[]);sw.hist=d.sw.hist||[];sw.used=today?d.sw.used||0:0;sw.matched=new Set(d.sw.matched||[])}
+    seeded=!!d.seeded;
+    state.chats.forEach(c=>{if(c.status==="wait")setTimeout(()=>{c.status="open";c.unread=true;c.msgs.push({me:false,t:replyFor(c)});toast(`${U[c.u].n} isteğini kabul etti`);render();if(openIdx===state.chats.indexOf(c))drawChat()},4000)});
+  }catch(e){}
+}
+{const r0=render,d0=drawChat,e0=vEsles;render=function(){r0();saveData()};drawChat=function(){d0();saveData()};vEsles=function(){e0();saveData()}}
+addEventListener("pagehide",saveData);document.addEventListener("visibilitychange",()=>{if(document.hidden)saveData()});
+try{const s=JSON.parse(localStorage.getItem("itiraf_me")||"null");if(s&&s.n&&s.s){state.me=s;loadData();render();seedDemo()}else startOnb()}catch(e){startOnb()}
 </script>
 </body>
 </html>
