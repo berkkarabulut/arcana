@@ -2002,7 +2002,7 @@ function drawOnb(){
        <div style="display:flex;align-items:center;gap:10px;color:var(--soluk);font-size:13px;margin:6px 0"><i style="flex:1;height:1px;background:var(--cizgi)"></i>veya<i style="flex:1;height:1px;background:var(--cizgi)"></i></div>
        <button class="btn line wide" data-prov="email" style="height:54px">E-posta ile üye ol</button></div>
       <p class="hint" style="margin-top:18px">Devam ederek <a href="kosullar.html" data-legal="kosullar">kullanım koşullarını</a> kabul etmiş olursun. Verilerinin nasıl işlendiğini <a href="gizlilik.html" data-legal="kvkk">KVKK aydınlatma metninde</a> bulabilirsin.</p>
-      <div style="display:flex;justify-content:flex-end;margin-top:14px"><button class="skip" id="skipBtn">ÜYE OLMADAN DEVAM ET<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M9 6l6 6-6 6"/></svg></button></div>`;
+      `;
       cta="";ok=false;
     } else {
       const pn={google:"Google",apple:"Apple",email:"E-posta"}[ob.provider];
@@ -2018,7 +2018,7 @@ function drawOnb(){
       else {cta="Devam";ok=nameOk&&emOk}
     }}
   if(s===1){body=`<h1>Söyleyemediklerin burada.</h1><p class="lead">Takma adınla itiraf et, başkalarının itiraflarını oku, seni anlayanla özelden yazış. Gerçek adın hiçbir yerde görünmez.</p>
-    <label class="lbl" for="nk">Takma adın</label><div class="nick"><input id="nk" maxlength="16" placeholder="gecekuşu" value="${esc(ob.n)}" autocomplete="off"><button class="dice" id="dice">${IC.dice}Rastgele</button></div>
+    <label class="lbl" for="nk">Takma adın</label><div class="nick"><input id="nk" maxlength="16" placeholder="Takma adını yaz" value="${esc(ob.n)}" autocomplete="off"></div><p class="hint" style="margin-top:6px">En az 3 karakter, boşluksuz. Herkes seni bu adla görür.</p>
     <label class="lbl">Profil rengin</label><div class="swatches">${COLORS.map(c=>`<button class="sw" style="background:${c}" data-c="${c}" aria-pressed="${ob.c===c}" aria-label="Renk"></button>`).join("")}</div>
     <p class="hint" style="margin-top:16px">Profil fotoğrafını ve kapak görselini kayıttan sonra Profilim'den seçebilirsin.</p>`;ok=ob.n.trim().length>=3;}
   if(s===2){const days=new Date(ob.y,ob.m,0).getDate();if(ob.d>days)ob.d=days;const sign=Z[signOf(ob.m,ob.d)];
@@ -2052,7 +2052,7 @@ function drawOnb(){
       $("#chg").onclick=()=>{ob.provider=null;drawOnb()};
       if(!ob.ad)setTimeout(()=>{const a=$("#ad");a&&a.focus()},120)}}
   if(s===1){const n=$("#nk");n.oninput=()=>{ob.n=n.value.replace(/\s/g,"").toLocaleLowerCase("tr");if(n.value!==ob.n)n.value=ob.n;$("#obN").disabled=ob.n.length<3};
-    $("#dice").onclick=()=>{ob.n=rndNick();drawOnb()};document.querySelectorAll("[data-c]").forEach(b=>b.onclick=()=>{ob.c=b.dataset.c;drawOnb()});if(!ob.n)setTimeout(()=>n.focus(),120)}
+    document.querySelectorAll("[data-c]").forEach(b=>b.onclick=()=>{ob.c=b.dataset.c;drawOnb()});if(!ob.n)setTimeout(()=>n.focus(),120)}
   if(s===2){const upd=()=>{if(!$("#sb"))return;const ad=ageOf(ob.y,ob.m,ob.d)>=18;const w=$("#ageWarn");if(w)w.hidden=ad;const nb=$("#obN");if(nb)nb.disabled=!ad;const sign=Z[signOf(ob.m,ob.d)];$("#sb").innerHTML=`<div class="g glyph">${sign.g}</div><div><b style="font-size:17px">${sign.n}</b><div class="muted" style="font-size:13px">${EL[sign.e]} grubu, ${ageBand(ageOf(ob.y,ob.m,ob.d))} yaş aralığı</div></div>`};
     bindWheel("gun",v=>{ob.d=v;upd()});bindWheel("ay",v=>{ob.m=v;fixDays();upd()});bindWheel("yil",v=>{ob.y=v;fixDays();upd()})}
   if(s===3)document.querySelectorAll("[data-g]").forEach(b=>b.onclick=()=>{ob.g=b.dataset.g;drawOnb()});
@@ -2222,6 +2222,8 @@ function remoteLoading(on){
   if(!on&&el)el.remove();
 }
 async function remoteAfterAuth(user,provider){
+  // sadece e-postası doğrulanmış hesaplar (Google veya e-posta bağlantısı) girebilir
+  if(user.isAnonymous||!user.emailVerified){await KDB.signOut().catch(()=>{});remoteLoading(false);ob.provider=null;ob.step=0;startOnb();toast("Devam etmek için Google ya da e-posta bağlantısıyla giriş yap");return}
   remoteLoading(true);
   try{
     const pub=await KDB.getProfile(user.uid);
@@ -2253,8 +2255,7 @@ function remoteInit(){
     if(pv&&pv.dataset.prov==="google"){e.stopImmediatePropagation();e.preventDefault();
       KDB.google().then(u=>remoteAfterAuth(u,"google")).catch(err=>{if(err&&err.code!=="auth/popup-closed-by-user"&&err.code!=="auth/cancelled-popup-request")toast("Google ile giriş olmadı: "+(err.code||err.message))});return}
     if(pv&&pv.dataset.prov==="apple"){e.stopImmediatePropagation();e.preventDefault();toast("Apple ile giriş yakında. Şimdilik Google ya da e-postayla devam et.");return}
-    if(e.target.closest("#skipBtn")){e.stopImmediatePropagation();e.preventDefault();
-      KDB.anon().then(u=>{ob.provider="guest";ob.ad="";ob.soyad="";ob.email="";remoteAfterAuth(u,"guest")}).catch(err=>toast("Giriş olmadı: "+(err.code||err.message)));return}
+
   },true);
   remoteLoading(true);
   const go=async()=>{
