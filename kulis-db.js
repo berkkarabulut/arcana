@@ -297,6 +297,12 @@ const KDB = {
   // ---------- Davet ----------
   async refInfo() { const s = await getDoc(doc(db, "users", KDB.uid, "private", "ref")).catch(() => null); return s && s.exists() ? s.data() : { count: 0 }; },
 
+  // ---------- Moderatörler ve öne çıkarma ----------
+  async isMod() { try { const s = await getDoc(doc(db, "config", "mods")); return s.exists() && (s.data().uids || []).includes(KDB.uid); } catch (e) { return false; } },
+  listenMods(cb) { stop("mods"); unsubs.mods = onSnapshot(doc(db, "config", "mods"), s => cb(s.exists() ? (s.data().uids || []) : []), e => cb([])); },
+  setMods(uids) { return setDoc(doc(db, "config", "mods"), { uids, updatedAt: serverTimestamp() }); },
+  setFeature(pid, until) { return updateDoc(doc(db, "posts", pid), { feat: until || null }); },
+
   // ---------- Yasaklı kelimeler (sunucu filtresi) ----------
   listenModeration(cb) { stop("mod"); unsubs.mod = onSnapshot(doc(db, "config", "moderation"), s => cb(s.exists() ? s.data() : null), e => cb(null)); },
   setModeration(words, re) { return setDoc(doc(db, "config", "moderation"), { words, re, updatedAt: serverTimestamp() }); },

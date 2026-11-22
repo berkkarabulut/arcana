@@ -1,8 +1,8 @@
 <!DOCTYPE html>
 <html lang="tr" data-v="12">
 <head>
-<meta charset="utf-8">
 <meta name="robots" content="noindex">
+<meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Kulis: İtiraf & Sohbet</title>
 <meta name="description" content="Aramızda. Takma adınla itiraf et, burcunla tanış, seni anlayanla sohbete başla.">
@@ -1075,8 +1075,8 @@ function render(){
   ({akis:vAkis,kesfet:vKesfet,mesajlar:vMesajlar,ben:vBen})[state.tab]();
 }
 function allPosts(){return DEMO?[...state.myPosts,...POSTS]:[...state.myPosts]}
-const isBoosted=p=>!!p.boost&&Date.now()-p.boost<864e5;
-function boostLeft(p){const h=Math.max(1,Math.ceil((864e5-(Date.now()-p.boost))/36e5));return h+" saat"}
+const isBoosted=p=>REMOTE?(!!p.feat&&Date.now()<p.feat):(!!p.boost&&Date.now()-p.boost<864e5);
+function boostLeft(p){const end=REMOTE?p.feat:p.boost+864e5;const h=Math.max(1,Math.ceil((end-Date.now())/36e5));return h+" saat"}
 function postHTML(p,opts={}){
   const mine=p.u==="me", my=state.react[p.id];
   const long=p.t.length>150;
@@ -1869,12 +1869,14 @@ function showMore(id){
   const p=allPosts().find(x=>x.id===id); if(!p)return; const mine=p.u==="me";state.lastMore=id;
   openSheet(`<div class="menu">
     <button id="m1">${IC.link}Bağlantıyı kopyala</button>
-    ${mine?`<button id="mB">${IC.spark}${isBoosted(p)?"Öne çıkarıldı, "+boostLeft(p)+" kaldı":"24 saat öne çıkar"}${state.premium?"":`<span class="lk-mini">${IC.lock}</span>`}</button><button id="mD" class="danger">${IC.close}İtirafı sil</button>`:""}
+    ${REMOTE&&(R.admin||R.mod)?`<button id="mF">${IC.spark}${isBoosted(p)?"Öne çıkarmayı kaldır ("+boostLeft(p)+" kaldı)":"Moderatör: 24 saat öne çıkar"}</button>`:""}
+    ${mine?`${REMOTE?"":`<button id="mB">${IC.spark}${isBoosted(p)?"Öne çıkarıldı, "+boostLeft(p)+" kaldı":"24 saat öne çıkar"}${state.premium?"":`<span class="lk-mini">${IC.lock}</span>`}</button>`}<button id="mD" class="danger">${IC.close}İtirafı sil</button>`:""}
     ${mine?"":`<button id="m2">${IC.flag}İtirafı şikâyet et</button>${p.anon?"":`<button id="m3" class="danger">${IC.block}${esc(U[p.u].n)} kullanıcısını engelle</button>`}`}
     <button id="m4">${IC.close}Vazgeç</button></div>`);
   $("#m1").onclick=async()=>{closeSheet();try{await navigator.clipboard.writeText(location.href.split("#")[0]+"#"+p.id);toast("Bağlantı kopyalandı")}catch(e){toast("Kopyalanamadı")}};
+  const mf=$("#mF");if(mf)mf.onclick=()=>{const on=isBoosted(p);closeSheet();KDB.setFeature(p.id,on?null:Date.now()+864e5).then(()=>toast(on?"Öne çıkarma kaldırıldı":"İtiraf 24 saat akışın en üstünde")).catch(e=>toast("Olmadı: "+(e.code||e.message)))};
   if(mine){
-    $("#mB").onclick=()=>{if(isBoosted(p)){closeSheet();return}
+    if($("#mB"))$("#mB").onclick=()=>{if(isBoosted(p)){closeSheet();return}
       if(!state.premium){premiumGate("İtirafını öne çıkar","Premium üyeler itiraflarını 24 saat boyunca akışın en üstüne taşıyabilir. Daha çok kişi okur, daha çok tepki ve mesaj gelir.",()=>showMore(id));return}
       p.boost=Date.now();closeSheet();state.tab="akis";render();scrollTo(0,0);toast("İtirafın 24 saat akışın en üstünde");track("one_cikar")};
     $("#mD").onclick=()=>openSheet(`<h2>İtiraf silinsin mi?</h2><p class="muted" style="margin:8px 0 16px">İtirafın, altındaki yorumlar ve tepkiler kalıcı olarak silinir. Bu işlem geri alınamaz.</p><div style="display:grid;gap:8px"><button class="btn wide" id="mDy" style="background:var(--nar)">Sil</button><button class="btn line wide" id="mDn">Vazgeç</button></div>`);
@@ -2012,7 +2014,7 @@ function showPremium(src){
   if(REMOTE)return showPremiumRemote(src);
   let plan="aylik";
   const draw=()=>openSheet(`<h2>Kulis Premium</h2><p class="muted" style="margin:6px 0 2px;font-size:14px">${src==="medya"?"Fotoğraf, ses kaydı, sesli ve görüntülü arama Premium'a özel.":src==="mesaj"?"Sohbetin yarıda kalmasın.":src==="esles"?"Sınırsız kaydır, seni beğenenleri gör.":src==="sohbet"?"Yeni sohbet başlatmak için Premium'a geç.":"Sınırsız konuş."}</p>
-   <div class="perks"><div>${IC.chk}Sınırsız mesaj, sınırsız sohbet</div><div>${IC.chk}Sınırsız kaydır, seni beğenenleri gör</div><div>${IC.chk}İtirafını 24 saat akışın en üstüne taşı</div><div>${IC.chk}İtiraflara sınırsız cevap yaz</div><div>${IC.chk}Kendi profil fotoğrafını ve kapağını yükle</div><div>${IC.chk}Fotoğraf, video ve ses kaydı gönder</div><div>${IC.chk}Sesli ve görüntülü arama</div><div>${IC.chk}Biriken mesajları hemen oku</div><div>${IC.chk}Mesajının okunduğunu gör</div><div>${IC.chk}Daha çok itiraf, itirafını öne çıkar</div></div>
+   <div class="perks"><div>${IC.chk}Sınırsız mesaj, sınırsız sohbet</div><div>${IC.chk}Sınırsız kaydır, seni beğenenleri gör</div><div>${IC.chk}İtirafını 24 saat akışın en üstüne taşı</div><div>${IC.chk}İtiraflara sınırsız cevap yaz</div><div>${IC.chk}Kendi profil fotoğrafını ve kapağını yükle</div><div>${IC.chk}Fotoğraf, video ve ses kaydı gönder</div><div>${IC.chk}Sesli ve görüntülü arama</div><div>${IC.chk}Biriken mesajları hemen oku</div><div>${IC.chk}Mesajının okunduğunu gör</div></div>
    <div class="plans">${[["haftalik","Haftalık","İstediğin zaman iptal","49,90 ₺"],["aylik","Aylık","En çok seçilen, haftalığa göre %40 ucuz","119,90 ₺"],["yillik","Yıllık","Aylık 49,90 ₺'ye gelir","599 ₺"]].map(([k,n,s,pr])=>`<button class="plan" data-plan="${k}" aria-pressed="${plan===k}"><span><b>${n}</b><small>${s}</small></span><span class="p">${pr}</span></button>`).join("")}</div>
    <button class="btn gold wide" id="buy">Premium'u başlat</button>
    <p class="hint" style="text-align:center">Prototip: ödeme alınmaz, düğme sadece Premium görünümünü açar. Fiyatlar örnektir.</p>`);
@@ -2293,9 +2295,9 @@ function authorSnap(){const m=state.me;return {n:m.n,c:m.c,s:m.s,g:m.g,age:m.age
 function monthTR(ts){const d=new Date(ts);return AYLAR[d.getMonth()]+" "+d.getFullYear()}
 function putUser(uid,d){if(!uid||uid===R.uid)return;const o=U[uid]||{};U[uid]=Object.assign(o,{n:d.n||o.n||"kullanıcı",s:d.s||o.s||"koc",age:d.age||o.age||"",g:d.g||o.g||"Belirtmeyeyim",c:d.c||o.c||"#7CC4FF",bio:d.bio!=null?d.bio:(o.bio||""),photo:d.av||o.photo,banner:d.banner||o.banner,since:d.createdAt?monthTR(d.createdAt.toMillis?d.createdAt.toMillis():d.createdAt):(o.since||""),stat:o.stat||[0,0,0]})}
 function mapPost(p){
-  if(p.anon){const m=!!(R.myAnon&&R.myAnon.has(p.id));return {id:p.id,anon:true,ag:p.a&&p.a.g||null,u:m?"me":"anon",uid:"anon",cat:p.cat,q:null,t:p.t,ts:p.ts,ago:agoOf(p.ts),r:p.r||{bende:0,saril:0,yok:0},cm:R.cm[p.id]||[],cmCount:p.cm||0,today:dayKeyOf(Date.now())===dayKeyOf(p.ts)}}
+  if(p.anon){const m=!!(R.myAnon&&R.myAnon.has(p.id));return {id:p.id,feat:p.feat||0,anon:true,ag:p.a&&p.a.g||null,u:m?"me":"anon",uid:"anon",cat:p.cat,q:null,t:p.t,ts:p.ts,ago:agoOf(p.ts),r:p.r||{bende:0,saril:0,yok:0},cm:R.cm[p.id]||[],cmCount:p.cm||0,today:dayKeyOf(Date.now())===dayKeyOf(p.ts)}}
   const mine=p.uid===R.uid;if(!mine&&p.a)putUser(p.uid,p.a);
-  return {id:p.id,u:mine?"me":p.uid,uid:p.uid,cat:p.cat,q:p.q||null,t:p.t,ts:p.ts,ago:agoOf(p.ts),r:p.r||{bende:0,saril:0,yok:0},cm:R.cm[p.id]||[],cmCount:p.cm||0,today:dayKeyOf(Date.now())===dayKeyOf(p.ts)}}
+  return {id:p.id,feat:p.feat||0,u:mine?"me":p.uid,uid:p.uid,cat:p.cat,q:p.q||null,t:p.t,ts:p.ts,ago:agoOf(p.ts),r:p.r||{bende:0,saril:0,yok:0},cm:R.cm[p.id]||[],cmCount:p.cm||0,today:dayKeyOf(Date.now())===dayKeyOf(p.ts)}}
 const dayKeyOf=ts=>{const d=new Date(ts);return d.getFullYear()+"-"+(d.getMonth()+1)+"-"+d.getDate()};
 function refreshStats(){const by={};R.posts.forEach(p=>{const k=p.uid;by[k]=by[k]||[0,0,0];by[k][0]++;by[k][2]+=reactTotal(p)});Object.keys(U).forEach(k=>{U[k].stat=by[k]||[0,0,0]})}
 function rerender(){if(!state.me)return;if($("#chat").classList.contains("open"))return void render();render()}
@@ -2327,7 +2329,8 @@ function remoteStartListeners(){
   });
   setPremiumFrom(null);KDB.listenPremium(setPremiumFrom);playRestore();
   if(KDB.listenModeration)KDB.listenModeration(d=>{R.mod=d;if($("#adm.open")&&ADM.tab==="kelime")openAdminRemote()});
-  KDB.isAdmin().then(a=>{R.admin=a;if(a){KDB.listenReports(r=>{R.reports=r});if(KDB.listenErrors)KDB.listenErrors(l=>{R.errors=l;if($("#adm.open")&&ADM.tab==="hata")openAdminRemote()})}});
+  if(KDB.isMod)KDB.isMod().then(m=>{R.mod=m;if(m&&!R.admin)KDB.listenReports(r=>{R.reports=r})});
+  KDB.isAdmin().then(a=>{R.admin=a;if(a&&KDB.listenMods)KDB.listenMods(l=>{R.mods=l;if($("#adm.open")&&ADM.tab==="mod")openAdminRemote()});if(a){KDB.listenReports(r=>{R.reports=r});if(KDB.listenErrors)KDB.listenErrors(l=>{R.errors=l;if($("#adm.open")&&ADM.tab==="hata")openAdminRemote()})}});
 }
 function askGender(){
   if(!state.me||state.me.g==="Kadın"||state.me.g==="Erkek"||$("#gAsk"))return;
@@ -2492,7 +2495,7 @@ const PLAY_BILLING="https://play.google.com/billing";
 const TIERS=[
   {k:"sohbet",n:"Sohbet",d:"Sınırsız konuşma",perks:["Sınırsız mesaj ve sohbet","İtiraflara sınırsız cevap"],pr:{haftalik:"29,90 ₺",aylik:"79,90 ₺",yillik:"549 ₺"}},
   {k:"ses",n:"Sohbet + Ses",d:"Konuşma ve sesli arama",perks:["Sınırsız mesaj ve sohbet","İtiraflara sınırsız cevap","Sesli arama"],pr:{haftalik:"49,90 ₺",aylik:"129,90 ₺",yillik:"899 ₺"}},
-  {k:"tam",n:"Kulis Tam",d:"Her şey sınırsız",perks:["Sınırsız mesaj ve sohbet","İtiraflara sınırsız cevap","Sesli ve görüntülü arama","Eşleş'te sınırsız kaydırma ve geri alma","Seni beğenenleri gör","İtirafını 24 saat öne çıkar"],pr:{haftalik:"69,90 ₺",aylik:"179,90 ₺",yillik:"1.249 ₺"}}];
+  {k:"tam",n:"Kulis Tam",d:"Her şey sınırsız",perks:["Sınırsız mesaj ve sohbet","İtiraflara sınırsız cevap","Sesli ve görüntülü arama","Eşleş'te sınırsız kaydırma ve geri alma","Seni beğenenleri gör"],pr:{haftalik:"69,90 ₺",aylik:"179,90 ₺",yillik:"1.249 ₺"}}];
 const PERIODS=[["haftalik","Haftalık","Her hafta yenilenir"],["aylik","Aylık","Haftalığa göre ~%40 avantajlı"],["yillik","Yıllık","Aylığa göre ~%40 avantajlı"]];
 const skuOf=(t,p)=>`kulis_${t}_${p}`;
 const ALL_SKUS=TIERS.flatMap(t=>PERIODS.map(([p])=>skuOf(t.k,p)));
@@ -2561,13 +2564,14 @@ function admUsers(){
   return (R.usersRaw||[]).map(u=>({uid:u.id,n:u.n,c:u.c,s:u.s,g:u.g,age:u.age,av:u.av,prem:!!u.prem,created:u.createdAt||0,seen:Math.max(u.lastSeen||0,u.createdAt||0),posts:posts[u.id]||0,me:u.id===R.uid}));
 }
 function openAdminRemote(){
-  if(!R.admin){toast("Bu panel sadece yöneticiler için");return}
+  if(!R.admin&&!R.mod){toast("Bu panel sadece yöneticiler için");return}
+  if(!R.admin)ADM.tab="sikayet";
   let el=$("#adm");if(!el){el=document.createElement("div");el.id="adm";el.setAttribute("role","dialog");el.setAttribute("aria-label","Yönetici paneli");document.body.appendChild(el)}
   const now=Date.now(),today=dayStart(),all=admUsers();
   const online=all.filter(u=>now-u.seen<ONLINE_MS),activeToday=all.filter(u=>u.seen>=today),newToday=all.filter(u=>u.created>=today),newWeek=all.filter(u=>now-u.created<7*864e5);
   const reps=(R.reports||[]).map(r=>Object.assign({},r,{status:r.status||"bekliyor"})),openReps=reps.filter(r=>r.status==="bekliyor");
   const errs=R.errors||[];
-  const tabs=[["uye","Kullanıcılar",all.length],["sikayet","Şikâyetler",openReps.length],["kelime","Kelimeler",null],["hata","Hatalar",errs.length]];
+  const tabs=R.admin?[["uye","Kullanıcılar",all.length],["sikayet","Şikâyetler",openReps.length],["mod","Moderatörler",(R.mods||[]).length||null],["kelime","Kelimeler",null],["hata","Hatalar",errs.length]]:[["sikayet","Şikâyetler",openReps.length]];
   let body="";
   if(ADM.tab==="uye"){
     const q=lowTR(ADM.q.trim());
@@ -2602,6 +2606,11 @@ function openAdminRemote(){
       <p>${esc(pv.text).slice(0,220)}</p>${r.status==="bekliyor"?`<div class="adm-acts"><button class="btn" data-adm="kaldir:${r.id}" style="background:var(--nar);color:var(--on-nar)">İçeriği kaldır</button><button class="btn line" data-adm="yoksay:${r.id}">Yoksay</button></div>`:`<small class="adm-st">${r.status==="kaldirildi"?"Kaldırıldı":"Yoksayıldı"}</small>`}</div>`};
     body=`${openReps.length?openReps.map(repRow).join(""):`<p class="muted" style="font-size:14px;padding:18px 4px">Bekleyen şikâyet yok.</p>`}
       ${done.length?`<details class="adm-done"><summary>Sonuçlananlar (${done.length})</summary>${done.map(repRow).join("")}</details>`:""}`;
+  } else if(ADM.tab==="mod"){
+    const mods=R.mods||[];const nm=id=>{const u=(R.usersRaw||[]).find(x=>x.id===id);return u?u.n:id.slice(0,8)+"…"};
+    body=`<p class="hint" style="margin:0 0 10px">Moderatörler itirafları 24 saat öne çıkarabilir, şikâyetleri görüp sonuçlandırabilir, itiraf ve yorum silebilir. Kullanıcıların gizli bilgilerini göremezler. Paneli açmak için onlar da logoya 5 kez dokunur.</p>
+    ${mods.length?mods.map(id=>`<div class="adm-rep" style="display:flex;align-items:center;gap:10px"><b style="flex:1">${esc(nm(id))}</b><button class="btn line" data-modx="${id}" style="height:36px;font-size:13.5px">Çıkar</button></div>`).join(""):`<p class="muted" style="font-size:14px;padding:8px 4px">Henüz moderatör yok.</p>`}
+    <div class="adm-add"><input class="city-search" id="modN" placeholder="Takma ad" maxlength="20" autocomplete="off"><button class="btn" id="modAdd">Moderatör yap</button></div>`;
   } else if(ADM.tab==="hata"){
     body=errs.length?`<div style="display:flex;justify-content:flex-end;margin-bottom:8px"><button class="dice" id="errClr">Hepsini temizle</button></div>${errs.map(e=>{const u=(R.usersRaw||[]).find(x=>x.id===e.uid);return `<div class="adm-rep"><div class="adm-rh"><span class="adm-k">${esc(e.where||"site")}</span><b>${esc(u?u.n:"?")}</b><small>${relTime(e.ts)}</small></div><p style="font-family:inherit;font-size:13.5px;overflow-wrap:anywhere">${esc(e.msg)}</p><small class="adm-st" style="overflow-wrap:anywhere">${esc(e.ua||"")}</small></div>`}).join("")}`
       :`<p class="muted" style="font-size:14px;padding:18px 4px">Hata kaydı yok. Kullanıcıların tarayıcısında bir şey bozulursa burada görünür.</p>`;
@@ -2636,6 +2645,9 @@ function openAdminRemote(){
     Promise.all(jobs).then(()=>{toast(a==="kaldir"?"İçerik kaldırıldı":"Şikâyet yoksayıldı");setTimeout(openAdminRemote,500)}).catch(e=>toast("Olmadı: "+(e.code||e.message)))});
   const w=$("#admW");if(w){const add=()=>{const v=w.value.trim();if(!v)return;const l=[...bannedList()];if(!l.map(lowTR).includes(lowTR(v)))l.push(v);saveBanned(l).then(openAdminRemote)};$("#admWAdd").onclick=add;w.onkeydown=e=>{if(e.key==="Enter")add()};$("#admReset").onclick=()=>saveBanned([...DEFAULT_BANNED]).then(openAdminRemote)}
   const ms=$("#modSeed");if(ms)ms.onclick=()=>saveBanned([...new Set([...DEFAULT_BANNED,...(()=>{try{return JSON.parse(localStorage.getItem("arcana_banned")||"[]")}catch(e){return []}})()])]);
+  const ma=$("#modAdd");if(ma)ma.onclick=()=>{const n=lowTR($("#modN").value.trim());const u=(R.usersRaw||[]).find(x=>lowTR(x.n||"")===n);if(!u){toast("Bu takma adla kullanıcı yok");return}
+    const l=[...new Set([...(R.mods||[]),u.id])];KDB.setMods(l).then(()=>toast(`${u.n} artık moderatör`)).catch(e=>toast("Olmadı: "+(e.code||e.message)))};
+  el.querySelectorAll("[data-modx]").forEach(b=>b.onclick=()=>{const l=(R.mods||[]).filter(x=>x!==b.dataset.modx);KDB.setMods(l).then(()=>toast("Moderatörlükten çıkarıldı")).catch(e=>toast("Olmadı: "+(e.code||e.message)))});
   const ec=$("#errClr");if(ec)ec.onclick=async()=>{ec.disabled=true;for(const e of errs)await KDB.deleteError(e.id).catch(()=>{});toast("Hata kayıtları temizlendi")};
 }
 
@@ -2680,6 +2692,6 @@ if(REMOTE){
 if(REMOTE)remoteInit();else
 try{const s=JSON.parse(localStorage.getItem("itiraf_me")||"null");if(s&&s.n&&s.s){state.me=s;loadData();render();seedDemo()}else startOnb()}catch(e){startOnb()}
 </script>
-<script type="module">if(REMOTE)import("./kulis-db.js?v=14")</script>
+<script type="module">if(REMOTE)import("./kulis-db.js?v=15")</script>
 </body>
 </html>

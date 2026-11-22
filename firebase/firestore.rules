@@ -12,6 +12,11 @@ service cloud.firestore {
       return signedIn() && exists(/databases/$(database)/documents/config/admins)
         && request.auth.uid in get(/databases/$(database)/documents/config/admins).data.uids;
     }
+    // moderatörler: config/mods.uids listesindekiler (yönetici de moderatör sayılır)
+    function isMod() {
+      return isAdmin() || (signedIn() && exists(/databases/$(database)/documents/config/mods)
+        && request.auth.uid in get(/databases/$(database)/documents/config/mods).data.uids);
+    }
     function changed() { return request.resource.data.diff(resource.data).affectedKeys(); }
     function str(v, lo, hi) { return v is string && v.size() >= lo && v.size() <= hi; }
 
@@ -31,9 +36,11 @@ service cloud.firestore {
     // Ayarlar: yönetici listesi sadece Firebase panelinden; yasaklı kelimeler yönetici panelinden
     match /config/{doc} {
       allow read: if signedIn();
-      allow write: if doc == 'moderation' && isAdmin()
+      allow write: if (doc == 'moderation' && isAdmin()
         && request.resource.data.keys().hasOnly(['re','words','updatedAt'])
-        && request.resource.data.re is string && request.resource.data.re.size() < 20000;
+        && request.resource.data.re is string && request.resource.data.re.size() < 20000)
+        || (doc == 'mods' && isAdmin() && request.resource.data.keys().hasOnly(['uids','updatedAt'])
+            && request.resource.data.uids is list && request.resource.data.uids.size() <= 50);
     }
 
     // Herkese açık profil (takma ad, burç, yaş aralığı, cinsiyet, renk, görseller)
@@ -127,13 +134,16 @@ service cloud.firestore {
         && request.resource.data.cm == 0
         && request.resource.data.ts == request.time
         && stamped('postAt');
+      // öne çıkarma sadece moderatör: feat = bitiş zamanı (ms) ya da null
+      allow update: if isMod() && changed().hasOnly(['feat'])
+        && (request.resource.data.feat == null || request.resource.data.feat is int);
       allow update: if signedIn() && changed().hasOnly(['r','cm'])
         && (!('r' in changed()) || (request.resource.data.r.keys().hasOnly(['bende','saril','yok'])
               && rOk('bende') && rOk('saril') && rOk('yok')))
         && (!('cm' in changed())
               || (request.resource.data.cm == resource.data.cm + 1 && stamped('cmAt'))
               || (request.resource.data.cm == resource.data.cm - 1 && request.resource.data.cm >= 0));
-      allow delete: if signedIn() && (resource.data.uid == request.auth.uid || isAdmin()
+      allow delete: if signedIn() && (resource.data.uid == request.auth.uid || isMod()
         || (resource.data.get('anon', false) == true
             && get(/databases/$(database)/documents/anonOwners/$(pid)).data.uid == request.auth.uid));
 
@@ -147,7 +157,7 @@ service cloud.firestore {
         allow create: if signedIn() && request.resource.data.uid == request.auth.uid
           && str(request.resource.data.t, 1, 300) && clean(request.resource.data.t)
           && request.resource.data.ts == request.time && stamped('cmAt');
-        allow delete: if signedIn() && (resource.data.uid == request.auth.uid || isAdmin());
+        allow delete: if signedIn() && (resource.data.uid == request.auth.uid || isMod());
         allow update: if false;
       }
     }
@@ -156,7 +166,8 @@ service cloud.firestore {
     match /reports/{rid} {
       allow create: if signedIn() && request.resource.data.by == request.auth.uid
         && str(request.resource.data.reason, 2, 60) && request.resource.data.ts == request.time;
-      allow read, update, delete: if isAdmin();
+      allow read, update: if isMod();
+      allow delete: if isAdmin();
     }
 
     // Sitedeki hatalar: kullanıcı tarayıcısı yazar (hız sınırıyla), sadece yönetici görür
