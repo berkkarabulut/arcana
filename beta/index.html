@@ -1540,7 +1540,7 @@ const lowTR=t=>t.toLocaleLowerCase("tr");
 function bannedRegex(words){const ks=[...new Set(words.map(w=>lowTR(w).trim()).filter(Boolean))].map(k=>k.replace(/[.*+?^${}()|[\]\\]/g,"\\$&"));return ks.length?"(^|[^a-zçğıöşü0-9])("+ks.join("|")+")":""}
 async function saveBanned(list){if(!REMOTE){LSset("arcana_banned",list);return}try{await KDB.setModeration(list,bannedRegex(list));toast("Kelime listesi herkese uygulandı")}catch(e){toast("Kaydedilemedi: "+(e.code||e.message))}}
 // sunucunun reddettiği yazmalar için anlaşılır mesaj
-function writeErr(e,kind){const c=e&&e.code||"";if(c==="permission-denied")return {itiraf:"Çok hızlı gidiyorsun. İki itiraf arasında en az 1 dakika olmalı.",yorum:"Biraz yavaş: iki yorum arasında birkaç saniye beklemelisin.",mesaj:"Mesajın gitmedi. Biraz yavaş yaz ya da karşı taraf seni engellemiş olabilir.",istek:"İstek gönderilemedi. Yeni bir istek için biraz bekle ya da bu kişi seni engellemiş olabilir."}[kind]||"Bu işlem şu an yapılamadı.";return "Olmadı: "+(c||e&&e.message||"bilinmeyen hata")}
+function writeErr(e,kind){const c=e&&e.code||"";if(c==="permission-denied")return {itiraf:"İki itiraf arasında en az 15 dakika olmalı. Biraz sonra tekrar dene.",yorum:"Biraz yavaş: iki yorum arasında birkaç saniye beklemelisin.",mesaj:"Mesajın gitmedi. Biraz yavaş yaz ya da karşı taraf seni engellemiş olabilir.",istek:"İstek gönderilemedi. Yeni bir istek için biraz bekle ya da bu kişi seni engellemiş olabilir."}[kind]||"Bu işlem şu an yapılamadı.";return "Olmadı: "+(c||e&&e.message||"bilinmeyen hata")}
 function bannedHit(t){
   const low=lowTR(t);
   for(const w of bannedList()){const k=lowTR(w).trim();if(!k)continue;
@@ -2004,10 +2004,15 @@ function showPremium(src){
 }
 
 /* ============ İTİRAF ET ============ */
+// İtiraf sınırı: günlük sınır şimdilik kapalı, iki itiraf arası 15 dk. POST_LIMIT_ON=true yapınca normal üye günde 1, Premium sınırsız.
+const POST_LIMIT_ON=false, POST_GAP_MS=15*60e3;
 function showConfess(opt={}){
   const QM=!!opt.q;
-  const today=state.myPosts.filter(p=>p.today&&p.cat!=="soru").length, limit=state.premium?5:1;
+  const today=state.myPosts.filter(p=>p.today&&p.cat!=="soru").length, limit=!POST_LIMIT_ON||state.premium?Infinity:1;
   if(QM&&state.myPosts.some(p=>p.cat==="soru"&&p.q===opt.q)){toast("Bugünün sorusunu zaten cevapladın");return}
+  // iki itiraf arasında 15 dakika (sunucu da aynı kuralı uygular)
+  const lastTs=Math.max(0,...state.myPosts.map(p=>p.ts||0)),wait=POST_GAP_MS-(Date.now()-lastTs);
+  if(REMOTE&&lastTs&&wait>0){toast(`15 dakikada bir itiraf atabilirsin. ${Math.ceil(wait/60000)} dakika sonra tekrar dene.`);return}
   if(!QM&&today>=limit){openSheet(`<h2>Bugünlük bu kadar</h2><p class="muted" style="margin:8px 0 16px">Yeni itiraf için yarını bekle ya da Premium ile hemen yaz.</p>${state.premium?"":`<button class="btn gold wide" id="gp">Premium ile hemen yaz</button>`}`);const g=$("#gp");if(g)g.onclick=()=>showPremium("itiraf");return}
   let cat=QM?"soru":"ask";const MIN=QM?3:15;
   openSheet(`<h2>${QM?"Günün sorusu":"İtiraf et"}</h2>${QM?`<p style="font-family:var(--display);font-style:italic;font-size:19px;margin:8px 0 6px">“${esc(opt.q)}”</p>`:""}<p class="muted" style="font-size:14px;margin:6px 0 12px">Takma adınla görünür: ${esc(state.me.n)}, ${Z[state.me.s].n}. Gerçek adın hiçbir yerde görünmez.</p>

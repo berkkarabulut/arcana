@@ -71,7 +71,7 @@ service cloud.firestore {
         allow read: if isMe(uid);
         allow create, update: if isMe(uid) && d == 'rl'
           && request.resource.data.keys().hasOnly(['postAt','cmAt','ntAt','chAt','msgAt','errAt'])
-          && tick('postAt', 60) && tick('cmAt', 8) && tick('ntAt', 2) && tick('chAt', 20) && tick('msgAt', 1) && tick('errAt', 20);
+          && tick('postAt', 900) && tick('cmAt', 8) && tick('ntAt', 2) && tick('chAt', 20) && tick('msgAt', 1) && tick('errAt', 20);
       }
       // Engellenenler: sadece sahibi
       match /blocks/{other} {
