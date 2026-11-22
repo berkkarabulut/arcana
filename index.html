@@ -262,7 +262,7 @@ h1,h2,h3{font-family:var(--display);font-weight:400;text-wrap:balance}
 span.city-search{display:grid}
 
 /* ===== v6 rötuş katmanı ===== */
-.skip{display:inline-flex;align-items:center;gap:6px;height:44px;padding:0 6px 0 14px;border-radius:12px;font-size:14px;font-weight:700;color:var(--soluk)}
+.skip{display:inline-flex;align-items:center;gap:6px;height:44px;padding:0 10px 0 16px;border-radius:12px;font-size:13.5px;font-weight:800;letter-spacing:.04em;color:var(--kagit);border:1px solid rgba(244,236,228,.16)}
 .skip:hover{color:var(--kagit);background:var(--yuzey)}
 
 .brand-wrap{display:flex;flex-direction:column;line-height:1}
@@ -1144,7 +1144,8 @@ function drawOnb(){
        <button class="btn line wide" data-prov="apple" style="height:54px;gap:12px"><svg width="18" height="20" viewBox="0 0 17 20" fill="currentColor"><path d="M14.1 10.6c0-2.6 2.1-3.8 2.2-3.9-1.2-1.8-3.1-2-3.7-2-1.6-.2-3.1.9-3.9.9-.8 0-2.1-.9-3.4-.9C3.6 4.8 2 5.8 1.1 7.3c-1.9 3.2-.5 8 1.3 10.6.9 1.3 1.9 2.7 3.3 2.6 1.3-.1 1.8-.8 3.4-.8 1.6 0 2 .8 3.4.8 1.4 0 2.3-1.3 3.2-2.6 1-1.5 1.4-2.9 1.4-3-.1 0-2.9-1.1-3-4.3zM11.5 3c.7-.9 1.2-2 1.1-3.2-1 0-2.3.7-3 1.6-.7.8-1.2 2-1.1 3.1 1.1.1 2.3-.6 3-1.5z"/></svg>Apple ile devam et</button>
        <div style="display:flex;align-items:center;gap:10px;color:var(--soluk);font-size:13px;margin:6px 0"><i style="flex:1;height:1px;background:var(--cizgi)"></i>veya<i style="flex:1;height:1px;background:var(--cizgi)"></i></div>
        <button class="btn line wide" data-prov="email" style="height:54px">E-posta ile üye ol</button></div>
-      <p class="hint" style="margin-top:18px">Devam ederek kullanım koşullarını ve KVKK aydınlatma metnini kabul edersin.</p>`;
+      <p class="hint" style="margin-top:18px">Devam ederek kullanım koşullarını ve KVKK aydınlatma metnini kabul edersin.</p>
+      <div style="display:flex;justify-content:flex-end;margin-top:14px"><button class="skip" id="skipBtn">ÜYE OLMADAN DEVAM ET<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M9 6l6 6-6 6"/></svg></button></div>`;
       cta="";ok=false;
     } else {
       const pn={google:"Google",apple:"Apple",email:"E-posta"}[ob.provider];
@@ -1178,7 +1179,7 @@ function drawOnb(){
     <button class="check" id="ck" role="checkbox" aria-checked="${ob.ok}"><span class="bx">${ob.ok?'<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3"><path d="M5 12.5l4.2 4.2L19 7"/></svg>':""}</span><span style="font-size:14.5px">18 yaşından büyüğüm, kuralları ve gizlilik metnini kabul ediyorum.</span></button>`;
     ok=ob.ok;cta=ob.editing?"Değişiklikleri kaydet":"İtiraflara gir";}
   $("#onbIn").innerHTML=`${ob.editing?`<button class="ob-back show" id="obX" style="float:right">Vazgeç</button>`:""}<button class="ob-back ${(s>0||ob.provider)&&!(ob.editing&&s===1)?"show":""}" id="obB">${IC.back}Geri</button><div class="steps">${Array.from({length:STEPS},(_,i)=>`<i class="${i<=s?"on":""}"></i>`).join("")}</div>
-   <div class="step">${body}</div><div class="ob-foot">${cta?`<button class="btn wide" id="obN" ${ok?"":"disabled"}>${cta}</button>`:`<button id="obN" hidden></button>`}${s===0&&!ob.provider?`<div style="display:flex;justify-content:flex-end"><button class="skip" id="skipBtn">Üye olmadan devam et<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M9 6l6 6-6 6"/></svg></button></div>`:""}</div>`;
+   <div class="step">${body}</div><div class="ob-foot">${cta?`<button class="btn wide" id="obN" ${ok?"":"disabled"}>${cta}</button>`:`<button id="obN" hidden></button>`}</div>`;
   $("#obB").onclick=()=>{if(ob.step===0){ob.provider=null}else{ob.step--;if(ob.step===0&&ob.provider==="guest")ob.provider=null}drawOnb()};
   const sk=$("#skipBtn");if(sk)sk.onclick=()=>{ob.provider="guest";ob.ad="";ob.soyad="";ob.email="";ob.step=1;drawOnb();$("#onb").scrollTop=0};
   const ox=$("#obX");if(ox)ox.onclick=()=>{const box=$("#onbIn");box.innerHTML=`<div class="step" style="padding-top:40px"><h1>Değişiklikler kaydedilmedi</h1><p class="lead">Hesap bilgilerinde yaptığın değişiklikleri kaydetmeden çıkarsan hepsi kaybolur.</p></div>
