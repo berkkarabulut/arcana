@@ -10,13 +10,13 @@
 <meta property="og:site_name" content="Kulis">
 <meta property="og:title" content="Kulis: İtiraf & Sohbet">
 <meta property="og:description" content="Aramızda. Takma adınla itiraf et, burcunla tanış, seni anlayanla sohbete başla.">
-<meta property="og:url" content="https://berkkarabulut.github.io/kulis/">
-<meta property="og:image" content="https://berkkarabulut.github.io/kulis/og.jpg">
+<meta property="og:url" content="https://kulistr.com/">
+<meta property="og:image" content="https://kulistr.com/og.jpg">
 <meta property="og:image:width" content="1200">
 <meta property="og:image:height" content="630">
 <meta property="og:locale" content="tr_TR">
 <meta name="twitter:card" content="summary_large_image">
-<meta name="twitter:image" content="https://berkkarabulut.github.io/kulis/og.jpg">
+<meta name="twitter:image" content="https://kulistr.com/og.jpg">
 <meta name="theme-color" content="#0B1220" id="themeColor">
 <script>
 (function(){try{var t=localStorage.getItem("kulis_tema")||"sistem";var l=t==="acik"||(t==="sistem"&&matchMedia("(prefers-color-scheme: light)").matches);if(l)document.documentElement.setAttribute("data-theme","light")}catch(e){}})();
@@ -1262,7 +1262,7 @@ if("serviceWorker" in navigator&&location.protocol==="https:"&&/github\.io$/.tes
 
 
 /* ============ HİKÂYEDE PAYLAŞ ============ */
-const SITE_URL="berkkarabulut.github.io/kulis";
+const SITE_URL="kulistr.com";
 function wrapLines(ctx,text,maxW){
   const words=text.split(/\s+/),lines=[];let line="";
   for(const w of words){const t=line?line+" "+w:w;if(ctx.measureText(t).width>maxW&&line){lines.push(line);line=w}else line=t}
@@ -1535,7 +1535,7 @@ function closeAdmin(){const el=$("#adm");if(el)el.classList.remove("open");docum
 
 
 function showInvite(){
-  const url="https://berkkarabulut.github.io/kulis/",text="Kulis'te takma adla itiraf ediliyor, burç uyumuna göre eşleşiliyor. Gel bak: "+url;
+  const url="https://kulistr.com/",text="Kulis'te takma adla itiraf ediliyor, burç uyumuna göre eşleşiliyor. Gel bak: "+url;
   track("davet");
   if(navigator.share){navigator.share({title:"Kulis",text,url}).catch(()=>{});return}
   try{navigator.clipboard.writeText(text);toast("Davet linki kopyalandı")}catch(e){toast(url)}
