@@ -1,6 +1,6 @@
-# İtiraf
+# Arcana: İtiraf & Sohbet
 
-Takma adla itiraf paylaşılan, burç rozetli profillerle özelden yazışılan sohbet uygulamasının tıklanabilir prototipi.
+Arcana; takma adla itiraf paylaşılan, burç rozetli profillerle özelden yazışılan sohbet uygulamasının tıklanabilir prototipi.
 
 Sahibi: Mehmet Berk KARABULUT
 
@@ -22,7 +22,9 @@ Sahibi: Mehmet Berk KARABULUT
 
 ## Çalıştırma
 
-`index.html` dosyasını tarayıcıda açman yeterli. Hiçbir kurulum gerekmez.
+Canlı: https://berkkarabulut.github.io/arcana/
+
+Yerelde denemek için `index.html` dosyasını tarayıcıda açman yeterli. Hiçbir kurulum gerekmez.
 
 ## Not
 
