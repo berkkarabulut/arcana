@@ -1,31 +1,24 @@
-# Arcana: İtiraf & Sohbet
+# Kulis: İtiraf & Sohbet
 
-Arcana; takma adla itiraf paylaşılan, burç rozetli profillerle özelden yazışılan sohbet uygulamasının tıklanabilir prototipi.
+**Aramızda.** Takma adla itiraf paylaşılan, burç rozetli profillerle eşleşilip sohbet edilen uygulamanın prototipi.
 
 Sahibi: Mehmet Berk KARABULUT
 
+Canlı: https://berkkarabulut.github.io/kulis/
+
 ## Neler var
 
-- Google, Apple veya e-posta ile üyelik. Ad, soyad ve e-posta gizli tutulur, herkes takma adı görür.
-- Kayıt sonunda kimlik onayı: ad, soyad, e-posta, doğum tarihi ve cinsiyet sonradan değiştirilemez.
-- Kaydırmalı çarkla doğum tarihi seçimi, burç ve yaş aralığı otomatik.
-- Kategorili itiraf akışı (Popüler / Yeni), öne çıkan itiraf, tepkiler, yorumlar.
-- Burç uyumlu profiller, Keşfet listesi.
-- Profil fotoğrafı ve kapak görseli: hazır kapaklar ve cinsiyete göre çizim avatarlar ücretsiz, kendi görselini yüklemek (kırpma/ayarlama ekranıyla) Premium. Profil değişiklikleri Kaydet ile işlenir.
-- Profil rengi profil sayfasındaki vurguları belirler.
-- Mesaj isteği ve sohbet. Ücretsiz planda sohbet başına mesaj sınırı, sınır dolunca bulanık mesaj ve Premium duvarı.
-- Premium'a özel fotoğraf, video, ses kaydı, sesli ve görüntülü arama (prototipte taklit).
-- Akışta sadece Premium üyelerin itirafları görünür; ücretsiz kullanıcı günde 3 farklı kişiye cevap yazabilir. Premium üyelerin adının yanında taç simgesi.
-- Bilgisayarda yatay şeritler fare tekerleği, sürükleme ve ok butonlarıyla kayar.
-- Numara, Instagram, WhatsApp gibi iletişim bilgilerini engelleyen filtre.
-- İtiraf ve yorumlarda şikâyet, profilde engelleme.
-
-## Çalıştırma
-
-Canlı: https://berkkarabulut.github.io/arcana/
-
-Yerelde denemek için `index.html` dosyasını tarayıcıda açman yeterli. Hiçbir kurulum gerekmez.
+- Google, Apple veya e-posta ile üyelik ya da üye olmadan deneme. Ad, soyad ve e-posta gizli, herkes takma adı görür.
+- 18 yaş kontrolü, kayıt sonunda kimlik onayı.
+- Kategorili itiraf akışı, tepkiler, yorumlar, günlük burç kartı, bildirimler.
+- Eşleş: itiraf kartlarını kaydırarak karşı cinsle eşleşme, eşleşince sohbet.
+- Premium: sınırsız kaydırma, seni beğenenleri görme, itirafı 24 saat öne çıkarma, sınırsız mesaj, fotoğraf, ses ve arama.
+- İtirafı hikâye görseli olarak paylaşma, ana ekrana eklenebilir uygulama (PWA).
+- İçerik filtresi: iletişim bilgisi, ad soyad, okul ve iş yeri adı, yasaklı kelimeler.
+- Şikâyet ve engelleme, yönetici paneli (logoya 5 kez dokun), demo modu anahtarı.
+- Yasal metinler: [Kullanım koşulları](kosullar.html), [KVKK ve gizlilik](gizlilik.html), [Topluluk kuralları](kurallar.html).
+- Google Analytics sadece çerez onayıyla çalışır.
 
 ## Not
 
-Bu bir prototip: diğer kullanıcılar, mesajlar ve ödeme akışı örnek veridir. Gerçek üyelik, veritabanı ve ödeme sistemi henüz bağlı değil.
+Bu bir prototip. Veriler sadece kullanıcının kendi cihazında saklanır; demo modunda örnek kullanıcılar ve otomatik cevaplar vardır. Gerçek üyelik, veritabanı ve ödeme sistemi henüz bağlı değil.
