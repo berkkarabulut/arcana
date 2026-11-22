@@ -598,13 +598,55 @@ a.btn{display:inline-flex;align-items:center;justify-content:center;text-decorat
 .wel-steps b{font-size:14px}.wel-steps small{font-size:11.5px;line-height:1.3;color:var(--soluk)}
 .wel-lead{text-align:center;font-size:13.5px;margin-top:14px;color:var(--soluk)}
 @media (prefers-reduced-motion:reduce){.wq-track{animation:none}}
+
+/* ===== Bildirimler ===== */
+.bell-pip{position:absolute;top:-5px;right:-5px;min-width:18px;height:18px;padding:0 5px;border-radius:99px;background:var(--nar);color:#fff;font-size:10.5px;font-weight:800;display:grid;place-items:center;box-shadow:0 0 0 2px var(--murekkep)}
+.bell-pip[hidden]{display:none}
+.nf-h{font-size:13px;font-family:Figtree,sans-serif;font-weight:800;color:var(--soluk);margin:14px 0 6px}
+.nf{width:100%;display:flex;align-items:center;gap:12px;padding:10px 10px;border-radius:14px;text-align:left}
+.nf.new{background:rgba(232,80,91,.08)}
+.nf+.nf{margin-top:2px}
+.nf-av{position:relative;flex:none;display:inline-flex}
+.nf-sys{width:42px;height:42px;border-radius:50%;display:grid;place-items:center;background:rgba(233,185,110,.14);color:var(--altin)}
+.nf-sys svg{width:20px;height:20px}
+.nf-ic{position:absolute;right:-3px;bottom:-3px;width:20px;height:20px;border-radius:50%;display:grid;place-items:center;color:#fff;background:var(--nar);box-shadow:0 0 0 2px var(--yuzey)}
+.nf-ic svg{width:11px;height:11px}
+.nf-ic.t-cm{background:#4E7BD8}.nf-ic.t-match{background:var(--altin);color:#21170A}
+.nf-t{flex:1;min-width:0;font-size:14px;line-height:1.38;color:rgba(244,236,228,.9)}
+.nf-t b{color:var(--kagit)}
+.nf-t small{display:block;color:var(--soluk);font-size:12px;margin-top:2px}
+
+/* ===== Günlük burç ===== */
+.dh{width:100%;display:flex;align-items:center;gap:12px;padding:12px 12px 12px 12px;margin-bottom:12px;border-radius:18px;text-align:left;background:radial-gradient(120% 140% at 0% 0%,color-mix(in srgb,var(--acc) 22%,transparent),transparent 60%),var(--yuzey);border:1px solid var(--cizgi)}
+.dh-z{width:44px;height:44px;flex:none;border-radius:14px;display:grid;place-items:center;font-size:22px;color:#fff;background:var(--acc)}
+.dh-t{flex:1;min-width:0;display:flex;flex-direction:column;gap:2px}
+.dh-t small{font-size:12px;font-weight:800;color:var(--altin)}
+.dh-t span{font-family:var(--display);font-size:15.5px;line-height:1.35;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.dh-go{color:var(--soluk);flex:none;transform:rotate(-90deg);display:grid}
+.dh-pick{display:grid;grid-template-columns:repeat(6,1fr);gap:6px;margin-bottom:16px}
+.dh-pick button{height:40px;border-radius:12px;font-size:19px;background:var(--yuzey);border:1px solid var(--cizgi);color:var(--soluk)}
+.dh-pick button[aria-pressed="true"]{background:rgba(233,185,110,.16);border-color:rgba(233,185,110,.5);color:var(--altin)}
+.dh-hero{display:flex;align-items:center;gap:14px;margin-bottom:10px}
+.dh-big{width:60px;height:60px;border-radius:18px;display:grid;place-items:center;font-size:30px;background:rgba(233,185,110,.14);color:var(--altin)}
+.dh-hero h3{font-size:26px;line-height:1}.dh-hero small{color:var(--soluk);font-size:13px}
+.dh-genel{font-family:var(--display);font-size:19px;line-height:1.4;margin:6px 0 14px}
+.dh-sec{padding:12px 0;border-top:1px solid var(--cizgi)}
+.dh-st{display:flex;align-items:center;justify-content:space-between;margin-bottom:4px}
+.dh-st b{font-size:14px}
+.dh-sec p{font-size:14.5px;line-height:1.45;color:rgba(244,236,228,.85)}
+.dh-dots{display:inline-flex;gap:4px}
+.dh-dots i{width:8px;height:8px;border-radius:50%;background:rgba(244,236,228,.14)}
+.dh-dots i.on{background:var(--nar)}
+.dh-chips{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:8px}
+.dh-chips div{padding:10px;border-radius:14px;background:var(--yuzey);display:flex;flex-direction:column;gap:2px}
+.dh-chips small{font-size:11.5px;color:var(--soluk)}.dh-chips b{font-size:14px}
 </style>
 </head>
 <body>
 <div class="shell">
   <header class="top">
     <div class="brand-wrap"><div class="logo">Arcana<b>.</b></div><div class="tagline">İtiraf &amp; Sohbet</div></div>
-    <div class="top-r"><button class="prem-pill" id="premPill"></button><button class="icon-btn" id="topMsg" aria-label="Mesajlar"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M4 5h16v11H9l-5 4z"/></svg></button></div>
+    <div class="top-r"><button class="prem-pill" id="premPill"></button><button class="icon-btn" id="topBell" aria-label="Bildirimler"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9a6 6 0 0 1 12 0c0 6 2.5 7.5 2.5 7.5h-17S6 15 6 9z"/><path d="M10 20a2 2 0 0 0 4 0"/></svg><span class="bell-pip" id="bellPip" hidden></span></button></div>
   </header>
   <main id="view"></main>
 </div>
@@ -671,7 +713,7 @@ const POSTS=[
 // kullanıcıların başka yerlerdeki cevapları (profil için)
 const EXTRA_COMMENTS={gecekusu:[{on:"Kardeşimin harçlığını yıllardır ben veriyorum, annemler bilmiyor.",t:"Sen iyi bir ablasın, bunu bil."}],mavimerdiven:[{on:"Her sabah aynı kahveciye o kız için gidiyorum.",t:"Bir gün selam ver, en kötü kahve içmiş olursun."}]};
 
-const state={replied:new Set(),sort:"populer",hidden:new Set(),me:null,tab:"akis",cat:"hepsi",open:null,react:{},chats:[],requests:[],premium:false,myPosts:[],myComments:[],explore:"populer"};
+const state={notifs:[],replied:new Set(),sort:"populer",hidden:new Set(),me:null,tab:"akis",cat:"hepsi",open:null,react:{},chats:[],requests:[],premium:false,myPosts:[],myComments:[],explore:"populer"};
 const FREE_LIMIT=20, FREE_CHATS=3;
 
 
@@ -750,7 +792,38 @@ function presetURI(ref){if(!ref||!ref.startsWith("preset:"))return ref;if(_pc[re
   const svg=b?`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 300" preserveAspectRatio="xMidYMid slice">${b.svg()}</svg>`:a?`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200">${a.svg()}</svg>`:"";
   return _pc[ref]="data:image/svg+xml;charset=utf-8,"+encodeURIComponent(svg)}
 const isUpload=v=>!!v&&!String(v).startsWith("preset:");
-function coverCSS(u){return u.banner?`background:#2A2233 url('${presetURI(u.banner)}') center/cover no-repeat`:`background:linear-gradient(135deg,${u.c},#3A2340 70%,#1F1926)`}
+const CONST={
+ koc:[[[10,30],[38,20],[60,18],[78,26]],[[0,1],[1,2],[2,3]]],
+ boga:[[[20,12],[40,28],[48,34],[56,28],[88,10],[30,42],[52,30]],[[0,1],[1,2],[2,3],[3,4],[2,5]]],
+ ikizler:[[[22,8],[26,22],[30,38],[46,6],[50,22],[56,40],[14,46],[66,46]],[[0,1],[1,2],[3,4],[4,5],[1,4],[2,6],[5,7]]],
+ yengec:[[[50,24],[46,6],[28,42],[72,40],[62,14]],[[0,1],[0,2],[0,3],[0,4]]],
+ aslan:[[[20,32],[24,16],[34,8],[46,12],[44,24],[34,30],[72,26],[90,38],[68,40]],[[4,3],[3,2],[2,1],[4,5],[5,0],[4,6],[6,7],[7,8],[8,5]]],
+ basak:[[[8,10],[26,16],[40,24],[56,22],[70,30],[62,44],[86,20],[40,42]],[[0,1],[1,2],[2,3],[3,4],[4,5],[3,6],[2,7]]],
+ terazi:[[[50,6],[32,22],[68,22],[28,42],[72,42]],[[0,1],[0,2],[1,2],[1,3],[2,4]]],
+ akrep:[[[16,8],[20,18],[30,24],[40,28],[48,36],[56,44],[68,46],[80,42],[88,34],[84,26],[8,24]],[[0,1],[1,2],[2,3],[3,4],[4,5],[5,6],[6,7],[7,8],[8,9],[1,10]]],
+ yay:[[[30,30],[46,22],[60,26],[54,40],[38,42],[70,12],[78,30],[18,22]],[[0,1],[1,2],[2,3],[3,4],[4,0],[1,5],[5,2],[2,6],[0,7]]],
+ oglak:[[[8,12],[30,32],[52,42],[74,36],[92,14],[60,22]],[[0,1],[1,2],[2,3],[3,4],[4,5],[5,0]]],
+ kova:[[[8,14],[22,22],[36,16],[50,26],[64,20],[76,34],[90,28],[48,42]],[[0,1],[1,2],[2,3],[3,4],[4,5],[5,6],[3,7]]],
+ balik:[[[10,40],[30,32],[50,24],[68,14],[86,6],[44,42],[66,44],[86,36],[92,26]],[[0,1],[1,2],[2,3],[3,4],[0,5],[5,6],[6,7],[7,8]]]
+};
+const constCache={};
+function constellationURI(sign){
+  if(constCache[sign])return constCache[sign];
+  const c=CONST[sign];if(!c)return "";
+  const [pts,ed]=c,X=x=>(62+x*.92).toFixed(1),Y=y=>(6+y).toFixed(1);
+  let seed=hsh(sign);const r=()=>{seed=(Math.imul(seed,1103515245)+12345)>>>0;return (seed%10000)/10000};
+  let bg="";for(let i=0;i<34;i++)bg+=`<circle cx="${(r()*160).toFixed(1)}" cy="${(r()*60).toFixed(1)}" r="${(.25+r()*.45).toFixed(2)}" fill="#F4ECE4" opacity="${(.2+r()*.4).toFixed(2)}"/>`;
+  const ln=ed.map(([a,b])=>`<line x1="${X(pts[a][0])}" y1="${Y(pts[a][1])}" x2="${X(pts[b][0])}" y2="${Y(pts[b][1])}"/>`).join("");
+  const st=pts.map(([x,y],i)=>{const big=i%3===0;return `<circle cx="${X(x)}" cy="${Y(y)}" r="${big?3.4:2.6}" fill="#F4ECE4" opacity=".14"/><circle cx="${X(x)}" cy="${Y(y)}" r="${big?1.5:1.1}" fill="#F4ECE4"/>`}).join("");
+  const svg=`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 160 60" preserveAspectRatio="xMaxYMid meet">${bg}<g stroke="#F4ECE4" stroke-opacity=".5" stroke-width=".5" stroke-linecap="round">${ln}</g>${st}</svg>`;
+  return constCache[sign]="data:image/svg+xml,"+encodeURIComponent(svg);
+}
+function coverCSS(u){
+  if(u.banner)return `background:#2A2233 url('${presetURI(u.banner)}') center/cover no-repeat`;
+  const g=`radial-gradient(120% 160% at 100% 0%,color-mix(in srgb,${u.c||"#E8505B"} 45%,transparent),transparent 65%),linear-gradient(160deg,#2B2036,#1A1520 70%)`;
+  const cu=u.s&&constellationURI(u.s);
+  return cu?`background:url('${cu}') right 4% center/auto 92% no-repeat,${g}`:`background:${g}`;
+}
 
 /* ============ YARDIMCI ============ */
 const $=s=>document.querySelector(s), view=$("#view");
@@ -829,6 +902,7 @@ function render(){
   $("#premPill").innerHTML=state.premium?"Premium":`${IC.lock} Premium`;
   const unread=state.chats.filter(c=>c.unread).length+state.requests.length;
   $("#pip").hidden=!unread;$("#pip").textContent=unread;
+  const nu=state.notifs.filter(n=>!n.read).length;$("#bellPip").hidden=!nu;$("#bellPip").textContent=nu>9?"9+":nu;$("#topBell").setAttribute("aria-label",nu?`Bildirimler, ${nu} yeni`:"Bildirimler");
   ({akis:vAkis,kesfet:vKesfet,mesajlar:vMesajlar,ben:vBen})[state.tab]();
 }
 function allPosts(){return [...state.myPosts,...POSTS]}
@@ -850,11 +924,12 @@ function vAkis(){
   let feat=null;
   if(state.sort==="populer"){list=[...list].sort((a,b)=>(b.u==="me")-(a.u==="me")||reactTotal(b)-reactTotal(a));
     if(state.cat==="hepsi"&&list.length>2){const i=list.findIndex(p=>p.u!=="me");feat=list.splice(i,1)[0]}}
-  view.innerHTML=`${instBanner()}<div class="cats" role="toolbar" aria-label="Kategori">${CATS.map(([k,l])=>`<button class="c" data-cat="${k}" aria-pressed="${state.cat===k}">${l}</button>`).join("")}</div>
+  view.innerHTML=`${instBanner()}${dailyCard()}<div class="cats" role="toolbar" aria-label="Kategori">${CATS.map(([k,l])=>`<button class="c" data-cat="${k}" aria-pressed="${state.cat===k}">${l}</button>`).join("")}</div>
    <div class="feed-head"><div class="seg2" role="group" aria-label="Sıralama"><button data-sort="populer" aria-pressed="${state.sort==="populer"}">Popüler</button><button data-sort="yeni" aria-pressed="${state.sort==="yeni"}">Yeni</button></div><span class="feed-count">${list.length+(feat?1:0)} itiraf</span></div>
    ${feat?`<div class="feat"><div class="it" style="padding-top:12px"><div class="feat-tag">${IC.spark}Bugün en çok sarılan</div>${postHTML(feat).replace('<article class="it">','<article class="it" style="background:none;border:0;padding:0;margin:0">')}</div></div>`:""}
    ${list.length?list.map(p=>postHTML(p)).join(""):(feat?"":`<p class="empty">Bu kategoride henüz itiraf yok. Ortadaki “İtiraf et” ile ilkini sen yaz.</p>`)}`;
   bindInst();
+  const dh=$("#dhCard");if(dh)dh.onclick=()=>showDaily();
 }
 function vMesajlar(){
   const free=!state.premium;
@@ -1007,7 +1082,7 @@ function decide(c,like){
   sw.done.add(c.id);sw.used++;sw.hist.push({id:c.id,u:c.u,like});
   if(sw.front===c.u)sw.front=null;
   let m=false;
-  if(like&&LIKED_ME.has(c.u)&&!sw.matched.has(c.u)){sw.matched.add(c.u);sw.hist[sw.hist.length-1].match=true;m=true}
+  if(like&&LIKED_ME.has(c.u)&&!sw.matched.has(c.u)){sw.matched.add(c.u);sw.hist[sw.hist.length-1].match=true;m=true;notify("match",c.u,"ile eşleştin",{chat:c.u,kesfet:1},Date.now(),true)}
   vEsles();
   if(m)showMatch(c);else if(like)toast(`${U[c.u].n} itirafını beğendiğini görmeyecek, sadece o da seni beğenirse eşleşirsiniz`);
 }
@@ -1162,6 +1237,76 @@ function welcomeHero(){
   </div>
   <div class="wq-wrap" aria-label="Örnek itiraflar">${row(a,"r1")}${row(b,"r2")}</div>
   <ol class="wel-steps">${ICS.map(([d,t,s])=>`<li><span class="wi"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round">${d}</svg></span><b>${t}</b><small>${s}</small></li>`).join("")}</ol>`;
+}
+
+
+/* ============ BİLDİRİMLER ============ */
+state.notifs=state.notifs||[];
+function notify(type,u,text,go,ts=Date.now(),read=false){
+  const dup=u&&!read&&state.notifs.find(n=>!n.read&&n.type===type&&n.u===u&&n.text===text);
+  if(dup){dup.ts=ts;return}
+  state.notifs.unshift({id:"n"+ts+Math.random().toString(36).slice(2,6),type,u,text,go:go||null,ts,read});
+  if(state.notifs.length>60)state.notifs.length=60;
+}
+const NIC={dm:"dm",req:"dm",cm:"cm",react:"meToo",like:"spark",match:"spark",sys:"spark"};
+function notifRow(n){
+  const ic=IC[NIC[n.type]]||IC.spark;
+  const who=n.u&&U[n.u]?`${av(n.u,42,true)}`:`<span class="nf-sys">${ic}</span>`;
+  const txt=n.u&&U[n.u]?`<b>${esc(U[n.u].n)}</b> ${esc(n.text)}`:esc(n.text);
+  return `<button class="nf ${n.read?"":"new"}" data-nf="${n.id}"><span class="nf-av">${who}${n.u&&U[n.u]?`<span class="nf-ic t-${n.type}">${ic}</span>`:""}</span><span class="nf-t">${txt}<small>${agoOf(n.ts)}</small></span></button>`;
+}
+function showNotifs(){
+  const list=state.notifs,fresh=list.filter(n=>!n.read),old=list.filter(n=>n.read);
+  openSheet(`<div class="sheet-head"><h2>Bildirimler</h2></div>
+    ${list.length?`${fresh.length?`<h3 class="nf-h">Yeni</h3>${fresh.map(notifRow).join("")}`:""}${old.length?`<h3 class="nf-h">Önceki</h3>${old.map(notifRow).join("")}`:""}`
+    :`<div class="empty" style="text-align:center;padding:30px 10px">${IC.spark}<p style="margin-top:8px">Henüz bildirimin yok. İtirafına tepki geldiğinde, biri sana yazdığında ya da eşleştiğinde burada görürsün.</p></div>`}`);
+  $("#sheet").querySelectorAll("[data-nf]").forEach(b=>b.onclick=()=>{
+    const n=state.notifs.find(x=>x.id===b.dataset.nf);if(!n)return;n.read=true;closeSheet();const g=n.go||{};
+    if(g.chat){const i=state.chats.findIndex(c=>c.u===g.chat);if(i>=0){render();openChat(i);return}}
+    if(g.post){render();showPost(g.post);return}
+    if(g.confess){render();showConfess();return}
+    if(g.kesfet){sw.mode="eslesme"}
+    if(g.tab){closeChat();state.tab=g.tab;if(g.tab==="kesfet")sw.mode="eslesme";render();scrollTo(0,0);return}
+    render();
+  });
+  if(fresh.length){state.notifs.forEach(n=>n.read=true);const nu=$("#bellPip");nu.hidden=true;saveData()}
+}
+
+
+/* ============ GÜNLÜK BURÇ ============ */
+const DH={
+ genel:["Bugün içinde tuttuğun bir şeyi söylemek için uygun bir gün. Lafı dolandırma, kısa ve net ol.","Enerjin sabah düşük, akşama doğru açılıyorsun. Önemli konuşmaları öğleden sonraya bırak.","Küçük bir tesadüf gününü değiştirebilir. Plansız gelen bir davete hayır deme.","Kafandaki senaryoları bir kenara bırak. Olanla ilgilen, olabilecekle değil.","Bugün biri sana beklemediğin bir yerden destek verecek. Yardımı kabul etmeyi bil.","Uzun süredir ertelediğin bir işi bitirmek sana tahmin ettiğinden fazla rahatlık verecek.","İçgüdülerin bugün mantığının önünde. İlk hissin genelde doğru çıkacak.","Bulunduğun ortamlarda dikkat çekiyorsun. Ama herkese her şeyi anlatma, biraz gizem iyidir.","Geçmişten biri aklına gelebilir. Mesaj atmadan önce iki kere düşün.","Bugün kendine ayırdığın bir saat, hafta boyunca seni taşıyacak.","Yorgunluğunu ciddiye al. Her şeye yetişmek zorunda değilsin.","Cesaret isteyen bir adım için yıldızlar senden yana. Küçük de olsa başla."],
+ ask:["Biriyle aranızdaki sessizlik, ikinizin de ilk adımı beklemesinden. O adımı sen at.","Bugün yeni biriyle tanışma ihtimalin yüksek. Yazdıklarına dikkat et, seni oradan bulacaklar.","İlişkindeysen küçük bir jest büyük etki yaratır. Bekârsan gözün bir itirafa takılabilir.","Kıskançlık duygusu yükselebilir. Sormadan önce bunu neden bu kadar önemsediğini kendine sor.","Eski bir hikâye kapanıyor, yenisine yer açılıyor. Geriye bakma.","Flörtte acele etme. Bugün dinlemek, konuşmaktan daha çekici.","Duygularını yazıya dökmek için iyi bir gün. Belki de bir itiraf zamanıdır.","Birinin ilgisi seni şaşırtacak. Hemen karar verme, merakın tadını çıkar."],
+ is:["Harcamalarına dikkat. Bugün aldığın bir şeyden yarın pişman olabilirsin.","İş yerinde fikrini söylemekten çekinme, beklediğinden iyi karşılanacak.","Küçük bir para girişi ya da beklenmedik bir indirim gününü güzelleştirebilir.","Toplantılarda sabırlı ol. Aceleyle verilen kararlar sonra iş çıkarır.","Birine verdiğin sözü tutmak bugün sana güven kazandıracak.","Yarım kalan işleri bitirmek için verimli bir gün. Telefonu bir kenara koy.","Yeni bir şey öğrenmeye başlamak için iyi zaman. Merak ettiğin konuya bir giriş yap.","Bugün hayır demeyi bil. Her işi üstlenmek zorunda değilsin."],
+ ruh:["İçin biraz huzursuz olabilir. Kısa bir yürüyüş iyi gelir.","Duygusal olarak dolu bir gün. Ağlamak da gülmek kadar iyi gelir.","Bugün kendine karşı nazik ol. İç sesin fazla sert konuşuyor.","Yalnız kalmak istemen normal. Bunu kimseye açıklamak zorunda değilsin.","Neşen bulaşıcı, çevrene iyi geliyorsun. Bunu bil.","Kafan dağınık olabilir. Bir liste yapmak düşüncelerini toparlar.","Uykuna dikkat et. Bu gece erken yatmak yarını değiştirir.","Eski bir şarkı ya da koku seni geçmişe götürebilir. Tadını çıkar ama orada kalma."],
+ renk:["Bordo","Lacivert","Altın sarısı","Zümrüt yeşili","Lila","Krem","Gece mavisi","Mercan","Gümüş gri","Turuncu","Bej","Vişne"]
+};
+const GUNLER=["Pazar","Pazartesi","Salı","Çarşamba","Perşembe","Cuma","Cumartesi"];
+function hsh(str){let h=2166136261;for(const c of str){h^=c.charCodeAt(0);h=Math.imul(h,16777619)}return h>>>0}
+function daily(sign){
+  const d=dayKey(),pick=(k,salt)=>DH[k][hsh(d+sign+salt)%DH[k].length];
+  const best=SIGNS.filter(x=>x.k!==sign).map(x=>({k:x.k,p:uyum(sign,x.k)})).sort((a,b)=>b.p-a.p).slice(0,5);
+  return {genel:pick("genel","g"),ask:pick("ask","a"),is:pick("is","i"),ruh:pick("ruh","r"),renk:pick("renk","c"),sayi:1+hsh(d+sign+"n")%49,uyum:best[hsh(d+sign+"u")%best.length].k,
+    puan:{ask:2+hsh(d+sign+"pa")%4,is:2+hsh(d+sign+"pi")%4,ruh:2+hsh(d+sign+"pr")%4}};
+}
+function dailyCard(){
+  const me=state.me;if(!me)return "";const r=daily(me.s);
+  return `<button class="dh" id="dhCard" style="--acc:${me.c||"#E8505B"}"><span class="dh-z">${Z[me.s].g}</span><span class="dh-t"><small>${Z[me.s].n} için bugün</small><span>${r.genel}</span></span><span class="dh-go">${IC.chev}</span></button>`;
+}
+function dots(n){return `<span class="dh-dots" aria-label="5 üzerinden ${n}">${[1,2,3,4,5].map(i=>`<i class="${i<=n?"on":""}"></i>`).join("")}</span>`}
+function showDaily(sign){
+  sign=sign||state.me.s;const r=daily(sign),z=Z[sign],d=new Date();
+  openSheet(`<div class="sheet-head"><h2>Günlük burç yorumu</h2></div>
+    <p class="muted" style="font-size:13px;margin:-6px 0 14px">${d.getDate()} ${AYLAR[d.getMonth()]} ${GUNLER[d.getDay()]}</p>
+    <div class="dh-pick" role="group" aria-label="Burç seç">${SIGNS.map(x=>`<button data-dhs="${x.k}" aria-pressed="${x.k===sign}" aria-label="${x.n}" title="${x.n}">${x.g}</button>`).join("")}</div>
+    <div class="dh-hero"><span class="dh-big">${z.g}</span><div><h3>${z.n}</h3><small>${EL[z.e]} grubu${sign===state.me.s?", senin burcun":""}</small></div></div>
+    <p class="dh-genel">${r.genel}</p>
+    <div class="dh-sec"><div class="dh-st"><b>Aşk</b>${dots(r.puan.ask)}</div><p>${r.ask}</p></div>
+    <div class="dh-sec"><div class="dh-st"><b>İş ve para</b>${dots(r.puan.is)}</div><p>${r.is}</p></div>
+    <div class="dh-sec"><div class="dh-st"><b>Ruh hali</b>${dots(r.puan.ruh)}</div><p>${r.ruh}</p></div>
+    <div class="dh-chips"><div><small>Şanslı renk</small><b>${r.renk}</b></div><div><small>Şanslı sayı</small><b>${r.sayi}</b></div><div><small>Günün uyumu</small><b>${Z[r.uyum].g} ${Z[r.uyum].n}</b></div></div>
+    <p class="hint" style="margin-top:14px;text-align:center">Yorumlar her gün yenilenir ve eğlence amaçlıdır.</p>`);
+  $("#sheet").querySelectorAll("[data-dhs]").forEach(b=>b.onclick=()=>showDaily(b.dataset.dhs));
 }
 
 /* ============ PREMIUM KAPISI ============ */
@@ -1356,7 +1501,7 @@ function startDM(k,fromId){
   g.onclick=()=>{const v=t.value.trim(),bad=contactBlock(v);if(bad){$("#dmWarn").innerHTML=`<p class="warn">Mesajında ${bad} var gibi görünüyor. Güvenliğin için iletişim bilgisi paylaşılamaz.</p>`;return}
     const c={u:k,from:p?p.t:null,msgs:[{me:true,t:v}],status:"wait",unread:false};state.chats.unshift(c);closeSheet();render();
     toast(`İstek gönderildi. ${U[k].n} kabul edince sohbet açılır.`);
-    setTimeout(()=>{c.status="open";c.unread=true;c.msgs.push({me:false,t:replyFor(c)});toast(`${U[k].n} isteğini kabul etti`);render();if(openIdx===state.chats.indexOf(c))drawChat()},4500);};
+    setTimeout(()=>{c.status="open";c.unread=true;c.msgs.push({me:false,t:replyFor(c)});notify("dm",k,"mesaj isteğini kabul etti",{chat:k});toast(`${U[k].n} isteğini kabul etti`);render();if(openIdx===state.chats.indexOf(c))drawChat()},4500);};
 }
 const SCRIPT=["Selam, mesajın beni şaşırttı açıkçası. İtirafımı okuyup yazan pek olmuyor.","Haha haklısın. Sen nerelisin bu arada, il söylemen yeter.","Ben de geceleri burada takılıyorum, gündüz yapamıyorum bunları.","Burcun ne? Profilde görmüştüm ama unuttum.","Bu arada senin itirafın var mı, okumak isterim.","Bazen yabancıya anlatmak daha kolay oluyor, değil mi?","Bugün işten çok yoruldum ama seninle konuşmak iyi geldi.","Ciddi soruyorum, sen olsan ne yapardın?","Tamam, buna gülmekten öldüm.","Yarın da burada mısın?"];
 function replyFor(c){const n=c.msgs.filter(m=>!m.me).length;return SCRIPT[n%SCRIPT.length]}
@@ -1392,7 +1537,7 @@ function drawChat(){
     if(bad){$("#mWarn").innerHTML=`<p class="warn">Bu mesaj gönderilmedi: ${bad} paylaşılamaz. Sohbetler sitede kalır, böylece iki taraf da güvende olur.</p>`;return}
     c.msgs.push({me:true,t:v});drawChat();
     const ci=c;setTimeout(()=>{ci.typing=true;if(state.chats[openIdx]===ci)drawChat()},700);
-    setTimeout(()=>{ci.typing=false;ci.msgs.push({me:false,t:replyFor(ci)});if(state.chats[openIdx]===ci)drawChat();else{ci.unread=true;render()}
+    setTimeout(()=>{ci.typing=false;ci.msgs.push({me:false,t:replyFor(ci)});if(state.chats[openIdx]===ci)drawChat();else{ci.unread=true;notify("dm",ci.u,"sana yeni mesaj gönderdi",{chat:ci.u});render()}
       if(!state.premium&&ci.msgs.length>=FREE_LIMIT&&!ci.extra){ci.extra=true;setTimeout(()=>{ci.msgs.push({me:false,t:"Tamam söylüyorum, Kızılay'daki yerin adı şu, gelince beraber gideriz belki."});if(state.chats[openIdx]===ci)drawChat();else{ci.unread=true;render()}},3500)}},2300);
     setTimeout(()=>{const x=$("#mIn");x&&x.focus()},30)};
 }
@@ -1476,9 +1621,9 @@ function showConfess(){
     state.myPosts.unshift(p);closeSheet();
     if(state.premium){state.tab="akis";state.cat="hepsi";render();scrollTo(0,0);toast("İtirafın akışta paylaşıldı")}
     else{state.tab="ben";render();scrollTo(0,0);toast("İtirafın profilinde paylaşıldı. Akışta görünmesi için Premium gerekli.")}
-    if(!state.premium)return;
-    setTimeout(()=>{p.r.saril+=3;p.r.bende+=5;p.cm.push({u:"dumanli",t:"Bunu yazdığın için cesursun. Yalnız değilsin.",ago:"Şimdi"});if(state.tab==="akis")vAkis()},5000);
-    setTimeout(()=>{const k=["dumanli","eskiplak","sessizlimon","mavimerdiven"].find(x=>!state.chats.some(c=>c.u===x)&&!state.requests.some(r=>r.u===x));if(!k)return;state.requests.push({u:k,first:"İtirafını okudum, çok tanıdık geldi. Biraz konuşmak ister misin?",from:p.t});toast("Yeni bir mesaj isteğin var");render()},9000);};
+    if(!state.premium){setTimeout(()=>{p.r.saril+=2;notify("react",null,"Profilini ziyaret eden 2 kişi itirafına sarıldı",{post:p.id});render()},7000);return}
+    setTimeout(()=>{p.r.saril+=3;p.r.bende+=5;p.cm.push({u:"dumanli",t:"Bunu yazdığın için cesursun. Yalnız değilsin.",ago:"Şimdi",ts:Date.now()});notify("cm","dumanli","itirafına yorum yaptı: “Bunu yazdığın için cesursun.”",{post:p.id});notify("react",null,"8 kişi itirafına tepki verdi",{post:p.id});render()},5000);
+    setTimeout(()=>{const k=["dumanli","eskiplak","sessizlimon","mavimerdiven"].find(x=>!state.chats.some(c=>c.u===x)&&!state.requests.some(r=>r.u===x));if(!k)return;state.requests.push({u:k,first:"İtirafını okudum, çok tanıdık geldi. Biraz konuşmak ister misin?",from:p.t});notify("req",k,"itirafını okudu ve sana mesaj isteği gönderdi",{tab:"mesajlar"});toast("Yeni bir mesaj isteğin var");render()},9000);};
 }
 
 /* ============ OLAYLAR ============ */
@@ -1504,7 +1649,7 @@ document.addEventListener("click",e=>{
   else if(d.block){openSheet(`<h2>${esc(U[d.block].n)}</h2><div style="display:grid;gap:8px;margin-top:14px"><button class="btn line wide" id="bl1">Engelle</button><button class="btn line wide" id="bl2">Şikâyet et</button></div><p class="hint">Engellediğin kişi seni göremez ve sana yazamaz. Şikâyetler 24 saat içinde incelenir.</p>`);
     $("#bl1").onclick=()=>{closeSheet();toast("Engellendi")};$("#bl2").onclick=()=>{closeSheet();toast("Şikâyetin alındı, inceleyeceğiz")}}
 });
-$("#topMsg").onclick=()=>{closeChat();state.tab="mesajlar";render();scrollTo(0,0)};
+$("#topBell").onclick=showNotifs;
 $("#confessBtn").onclick=()=>{closeChat();showConfess()};
 $("#premPill").onclick=()=>{if(!state.premium)showPremium("pill");else toast("Premium üyesin")};
 
@@ -1627,6 +1772,10 @@ function seedDemo(){ if(seeded)return;seeded=true;
   const t=["Selam, Mardin itirafını okudum. Ben de aynısını Kapadokya için yapmıştım.","Ciddi mi? Kime ne dedin?","Arkadaşımın düğünü var dedim, üç gün balon izledim.","Hahaha klasik. Yakalandın mı peki?","Annem fotoğrafları Instagram'da gördü. Tabii ki yakalandım.","Ben bu yüzden hiçbir şey paylaşmıyorum zaten.","Akıllıca. Sen nerede yaşıyorsun, il söyle yeter.","Ankara. Sen?","İzmir. Ama Ankara'ya çok geliyorum iş için.","Ankara'da gece gezilecek yer yok, uyarayım.","Kızılay'da bir yer biliyorum ama, gece 2'ye kadar açık.","Bak bu ilginç. Neresi?","Söylersem gelirsin diye korkuyorum şimdi.","Haha korkma, sadece merak ettim.","Peki. Bir dahaki gelişinde anlatırım.","Anlaştık. Bu arada burcun ne?","Yay. Belli değil mi?",`Çok belli. Ben ${Z[state.me.s].n}, bakalım anlaşabilecek miyiz.`];
   state.chats.push({u:"kedikahve",from:POSTS[7].t,msgs:t.map((x,i)=>({me:i%2===1,t:x})),status:"open",unread:false});
   state.requests.push({u:"gecekusu",first:"Profilini gördüm, burçlarımız uyumlu çıktı. Selam :)",from:null});
+  const now=Date.now();
+  notify("sys",null,"Arcana'ya hoş geldin. İlk itirafını yaz, insanlar seni yazdıklarınla tanısın.",{confess:1},now-60000);
+  const tg=swTarget();if(tg){const n=[...LIKED_ME].filter(k=>U[k].g===tg).length;notify("like",null,`${n} kişi seni beğendi. Eşleş'te kartlarını kaydır, eşleşirsen sohbet açılır.`,{tab:"kesfet"},now-40000)}
+  notify("req","gecekusu","sana mesaj isteği gönderdi",{tab:"mesajlar"},now-20000);
   render();
 }
 
@@ -1664,7 +1813,7 @@ function agoOf(ts){if(!ts)return "Şimdi";const m=Math.floor((Date.now()-ts)/600
 function saveData(){
   if(!state.me)return;try{if(!localStorage.getItem("itiraf_me"))return}catch(e){return}
   try{localStorage.setItem("arcana_data",JSON.stringify({v:1,day:dayKey(),seeded,
-    myPosts:state.myPosts,myComments:state.myComments,requests:state.requests,premium:state.premium,react:state.react,
+    myPosts:state.myPosts,myComments:state.myComments,requests:state.requests,notifs:state.notifs.slice(0,60),premium:state.premium,react:state.react,
     replied:[...state.replied],hidden:[...state.hidden],
     chats:state.chats.map(c=>({...c,typing:false,msgs:c.msgs.map(m=>m.src&&String(m.src).startsWith("blob:")?{...m,src:null}:m)})),
     posts:Object.fromEntries(POSTS.map(p=>[p.id,{r:p.r,cm:p.cm}])),
@@ -1673,7 +1822,7 @@ function saveData(){
 function loadData(){
   try{const d=JSON.parse(localStorage.getItem("arcana_data")||"null");if(!d||d.v!==1)return;
     const today=d.day===dayKey();
-    Object.assign(state,{myPosts:d.myPosts||[],myComments:d.myComments||[],requests:d.requests||[],premium:!!d.premium,react:d.react||{},chats:d.chats||[],
+    Object.assign(state,{notifs:d.notifs||[],myPosts:d.myPosts||[],myComments:d.myComments||[],requests:d.requests||[],premium:!!d.premium,react:d.react||{},chats:d.chats||[],
       replied:new Set(today?d.replied||[]:[]),hidden:new Set(d.hidden||[])});
     state.myPosts.forEach(p=>{p.today=p.day===dayKey();if(p.ts)p.ago=agoOf(p.ts)});
     POSTS.forEach(p=>{const o=d.posts&&d.posts[p.id];if(o){p.r=o.r;p.cm=o.cm}});
