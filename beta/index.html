@@ -763,7 +763,7 @@ a.btn{display:inline-flex;align-items:center;justify-content:center;text-decorat
 <div class="onb" id="onb" hidden><div class="onb-in" id="onbIn"></div></div>
 
 <script>
-const REMOTE=(()=>{try{return /\/beta\//.test(location.pathname)||localStorage.getItem("kulis_remote")==="1"}catch(e){return false}})();
+const REMOTE=(()=>{try{return localStorage.getItem("kulis_remote")!=="0"}catch(e){return true}})();
 /* ============ VERİ ============ */
 const SIGNS=[["koc","Koç","♈",0],["boga","Boğa","♉",1],["ikizler","İkizler","♊",2],["yengec","Yengeç","♋",3],["aslan","Aslan","♌",0],["basak","Başak","♍",1],["terazi","Terazi","♎",2],["akrep","Akrep","♏",3],["yay","Yay","♐",0],["oglak","Oğlak","♑",1],["kova","Kova","♒",2],["balik","Balık","♓",3]].map(([k,n,g,e],i)=>({k,n,g:g+"︎",e,i}));
 const Z=Object.fromEntries(SIGNS.map(s=>[s.k,s]));
