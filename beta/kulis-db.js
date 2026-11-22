@@ -23,8 +23,11 @@ const app = initializeApp({
 const auth = getAuth(app);
 auth.languageCode = "tr";
 let db;
-try { db = initializeFirestore(app, { localCache: persistentLocalCache({ tabManager: persistentMultipleTabManager() }) }); }
-catch (e) { db = initializeFirestore(app, {}); }
+// Reklam engelleyici, antivirüs ya da kurumsal ağ normal bağlantıyı bozarsa site "uzun sorgu" moduna geçer (kulis_lp)
+const LP = (() => { try { return localStorage.getItem("kulis_lp") === "1"; } catch (e) { return false; } })();
+const fsOpts = LP ? { experimentalForceLongPolling: true } : {};
+try { db = initializeFirestore(app, { ...fsOpts, localCache: persistentLocalCache({ tabManager: persistentMultipleTabManager() }) }); }
+catch (e) { db = initializeFirestore(app, fsOpts); }
 
 const ms = t => (t && t.toMillis) ? t.toMillis() : (typeof t === "number" ? t : Date.now());
 const chatId = (a, b) => a < b ? a + "_" + b : b + "_" + a;
@@ -64,7 +67,19 @@ const KDB = {
   async signOut() { stopAll(); await signOut(auth); },
 
   // ---------- Profil ----------
-  async getProfile(uid) { const s = await getDoc(doc(db, "users", uid)); return s.exists() ? { id: s.id, ...s.data() } : null; },
+  async getProfile(uid) {
+    const s = await Promise.race([getDoc(doc(db, "users", uid)), new Promise((_, rej) => setTimeout(() => rej(Object.assign(new Error("zaman aşımı"), { code: "timeout" })), 9000))]);
+    return s.exists() ? { id: s.id, ...s.data() } : null;
+  },
+  longPolling: LP,
+  // Yedek yol: profili Firestore'un düz REST adresinden oku (SDK bağlantısı engellendiğinde teşhis için)
+  async profileExistsREST(uid) {
+    const t = await auth.currentUser.getIdToken();
+    const r = await fetch(`https://firestore.googleapis.com/v1/projects/kulis-1647d/databases/(default)/documents/users/${uid}?mask.fieldPaths=n`, { headers: { Authorization: "Bearer " + t } });
+    if (r.status === 404) return false;
+    if (!r.ok) throw Object.assign(new Error("rest " + r.status), { code: "rest-" + r.status });
+    return true;
+  },
   async nickFree(n) { const s = await getDoc(doc(db, "nicks", n.toLocaleLowerCase("tr"))); return !s.exists() || s.data().uid === KDB.uid; },
   async createProfile(pub, priv) {
     const uid = KDB.uid, b = writeBatch(db);

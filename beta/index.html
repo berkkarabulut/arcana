@@ -2289,10 +2289,18 @@ async function remoteAfterAuth(user,provider){
   // sadece e-postası doğrulanmış hesaplar (Google veya e-posta bağlantısı) girebilir
   if(user.isAnonymous||!user.emailVerified){await KDB.signOut().catch(()=>{});remoteLoading(false);ob.provider=null;ob.step=0;startOnb();toast("Devam etmek için Google ya da e-posta bağlantısıyla giriş yap");return}
   remoteLoading(true);
-  try{
-    const pub=await KDB.getProfile(user.uid);
-    if(pub){const priv=await KDB.getPrivate().catch(()=>null);remoteEnterApp(pub,priv);return}
-  }catch(e){console.warn(e)}
+  // kayıtlı kullanıcıyı asla yeniden kayıt ekranına düşürme: profil okunamazsa birkaç kez dene
+  let pub=null,ok=false;
+  let lastErr=null;
+  for(let i=0;i<(KDB.longPolling?3:2)&&!ok;i++){try{pub=await KDB.getProfile(user.uid);ok=true}catch(e){lastErr=e;console.warn(e);await new Promise(r=>setTimeout(r,700*(i+1)))}}
+  // normal bağlantı engellendiyse bir kereliğine yedek bağlantı moduyla yeniden aç
+  if(!ok&&!KDB.longPolling){try{localStorage.setItem("kulis_lp","1")}catch(e){}location.reload();return}
+  if(!ok){
+    let exists=null;try{exists=await KDB.profileExistsREST(user.uid)}catch(e){}
+    remoteLoading(false);const g=document.createElement("div");g.className="cf-scrim";
+    g.innerHTML=`<div class="cf"><h2>Bağlanamadık</h2><p class="muted" style="font-size:14px;margin:6px 0 14px">${exists===true?"Hesabın duruyor ama tarayıcın Kulis'in sunucuyla konuşmasını engelliyor. Reklam ya da takip engelleyicinde kulistr.com'a izin verip tekrar dene.":"Hesabına ulaşırken bir sorun oldu. İnternetini kontrol edip tekrar dene."}</p><p class="hint" style="margin:0 0 12px">Hata: ${esc(String(lastErr&&(lastErr.code||lastErr.message)||"bilinmiyor"))}</p><button class="btn wide" id="rtY">Tekrar dene</button></div>`;
+    document.body.appendChild(g);g.querySelector("#rtY").onclick=()=>location.reload();return}
+  if(pub){const priv=await KDB.getPrivate().catch(()=>null);remoteEnterApp(pub,priv);return}
   remoteLoading(false);
   const pend=LS("kulis_ob",null);
   ob.provider=provider||(user.isAnonymous?"guest":(user.providerData[0]&&user.providerData[0].providerId==="google.com"?"google":"email"));
@@ -2300,7 +2308,8 @@ async function remoteAfterAuth(user,provider){
   if(!ob.email&&user.email)ob.email=user.email;
   if(!ob.ad&&user.displayName){const parts=user.displayName.trim().split(/\s+/);ob.soyad=parts.length>1?parts.pop():"";ob.ad=parts.join(" ")}
   ob.codeSent=true;ob.kod="000000";
-  ob.step=ob.provider==="guest"?1:0;$("#onb").hidden=false;drawOnb();$("#onb").scrollTop=0;
+  // Google bilgileri hazırsa bilgi ekranını atla, direkt takma ada geç
+  ob.step=(ob.provider==="guest"||(ob.provider==="google"&&ob.ad&&ob.email))?1:0;$("#onb").hidden=false;drawOnb();$("#onb").scrollTop=0;
 }
 async function remoteFinishOnb(){
   const n=ob.n.trim();
@@ -2311,13 +2320,26 @@ async function remoteFinishOnb(){
   try{await KDB.createProfile(pub,priv);track("kayit",{yontem:ob.provider});remoteEnterApp(pub,priv);toast(`Hoş geldin ${n}`)}
   catch(e){remoteLoading(false);toast("Kayıt tamamlanamadı: "+(e.code||e.message))}
 }
+const IN_WEBVIEW=/Instagram|FBAN|FBAV|FB_IAB|WhatsApp|TikTok|musical_ly|BytedanceWebview|Snapchat|Line\/|Twitter|; wv\)/i.test(navigator.userAgent);
+function showWebviewHelp(){
+  const g=document.createElement("div");g.className="cf-scrim";g.setAttribute("role","dialog");g.setAttribute("aria-modal","true");
+  g.innerHTML=`<div class="cf"><h2>Tarayıcıda aç</h2><p class="muted" style="font-size:14px;margin:6px 0 14px">Kulis'i bir uygulamanın içinden (WhatsApp, Instagram, TikTok gibi) açmışsın. Google bu pencerelerde girişe izin vermiyor. Sağ üstteki menüden <b>Chrome'da aç</b> ya da <b>Tarayıcıda aç</b>'a bas, veya linki kopyalayıp tarayıcına yapıştır.</p>
+    <div style="display:grid;gap:8px"><button class="btn wide" id="wvC">Linki kopyala</button><button class="btn line wide" id="wvX">Tamam</button></div></div>`;
+  document.body.appendChild(g);
+  g.querySelector("#wvX").onclick=()=>g.remove();
+  g.querySelector("#wvC").onclick=()=>{try{navigator.clipboard.writeText("https://kulistr.com/");toast("Link kopyalandı, tarayıcına yapıştır")}catch(e){toast("kulistr.com")}};
+}
 function remoteInit(){
   // giriş düğmeleri: Google, Apple, e-posta bağlantısı ve misafir girişi
   document.addEventListener("click",e=>{
     if($("#onb").hidden)return;
     const pv=e.target.closest("[data-prov]");
     if(pv&&pv.dataset.prov==="google"){e.stopImmediatePropagation();e.preventDefault();
-      KDB.google().then(u=>remoteAfterAuth(u,"google")).catch(err=>{if(err&&err.code!=="auth/popup-closed-by-user"&&err.code!=="auth/cancelled-popup-request")toast("Google ile giriş olmadı: "+(err.code||err.message))});return}
+      if(IN_WEBVIEW){showWebviewHelp();return}
+      KDB.google().then(u=>remoteAfterAuth(u,"google")).catch(err=>{const c=err&&err.code;if(c==="auth/popup-closed-by-user"||c==="auth/cancelled-popup-request")return;
+        if(c==="auth/popup-blocked"){toast("Giriş penceresi engellendi. Tarayıcıda açılır pencerelere izin verip tekrar dene.");return}
+        if(c==="auth/operation-not-supported-in-this-environment"||c==="auth/web-storage-unsupported"){showWebviewHelp();return}
+        toast("Google ile giriş olmadı: "+(c||err.message))});return}
     if(pv&&pv.dataset.prov==="apple"){e.stopImmediatePropagation();e.preventDefault();toast("Apple ile giriş yakında. Şimdilik Google ya da e-postayla devam et.");return}
 
   },true);
@@ -2516,6 +2538,6 @@ if(REMOTE){
 if(REMOTE)remoteInit();else
 try{const s=JSON.parse(localStorage.getItem("itiraf_me")||"null");if(s&&s.n&&s.s){state.me=s;loadData();render();seedDemo()}else startOnb()}catch(e){startOnb()}
 </script>
-<script type="module">if(REMOTE)import("./kulis-db.js")</script>
+<script type="module">if(REMOTE)import("./kulis-db.js?v=11")</script>
 </body>
 </html>
