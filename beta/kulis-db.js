@@ -3,7 +3,8 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/12.8.0/firebase-app.js";
 import {
   getAuth, onAuthStateChanged, signInAnonymously, GoogleAuthProvider, signInWithPopup,
-  sendSignInLinkToEmail, isSignInWithEmailLink, signInWithEmailLink, signOut, linkWithPopup
+  sendSignInLinkToEmail, isSignInWithEmailLink, signInWithEmailLink, signOut, linkWithPopup,
+  deleteUser, reauthenticateWithPopup
 } from "https://www.gstatic.com/firebasejs/12.8.0/firebase-auth.js";
 import {
   initializeFirestore, persistentLocalCache, persistentMultipleTabManager,
@@ -86,6 +87,31 @@ const KDB = {
     stop("users");
     unsubs.users = onSnapshot(query(collection(db, "users"), orderBy("createdAt", "desc"), limit(200)),
       s => cb(s.docs.map(d => ({ id: d.id, ...d.data() }))), e => console.warn("users", e));
+  },
+  // Hesabı ve kullanıcının bütün verisini sil (Google Play hesap silme zorunluluğu)
+  async deleteEverything() {
+    const uid = KDB.uid; if (!uid) return;
+    stopAll();
+    const wipe = async q => { const s = await getDocs(q).catch(() => null); if (s) for (const d of s.docs) await deleteDoc(d.ref).catch(() => {}); };
+    await wipe(query(collection(db, "posts"), where("uid", "==", uid)));
+    await wipe(query(collection(db, "likes"), where("from", "==", uid)));
+    await wipe(query(collection(db, "chats"), where("members", "array-contains", uid)));
+    await wipe(collection(db, "users", uid, "notifs"));
+    await wipe(collection(db, "users", uid, "blocks"));
+    await KDB.deleteAccount();
+    const u = auth.currentUser;
+    try { await deleteUser(u); }
+    catch (e) {
+      if (e.code === "auth/requires-recent-login" && u.providerData.some(p => p.providerId === "google.com")) {
+        await reauthenticateWithPopup(u, new GoogleAuthProvider()); await deleteUser(u);
+      } else { await signOut(auth); }
+    }
+  },
+  // Yönetici: bir kullanıcının profilini ve itiraflarını sil
+  async adminDeleteUser(uid) {
+    const s = await getDocs(query(collection(db, "posts"), where("uid", "==", uid)));
+    for (const d of s.docs) await deleteDoc(d.ref);
+    await deleteDoc(doc(db, "users", uid));
   },
   async deleteAccount() {
     const uid = KDB.uid; const me = await KDB.getProfile(uid);
@@ -189,6 +215,22 @@ const KDB = {
       s => cb(s.docs.map(d => ({ id: d.id, ...d.data(), ts: ms(d.data().ts) }))), e => console.warn("msgs", e));
   },
   stopMsgs() { stop("msgs"); },
+
+  // ---------- Premium (Google Play) ----------
+  listenPremium(cb) {
+    stop("prem");
+    unsubs.prem = onSnapshot(doc(db, "users", KDB.uid, "private", "premium"), s => cb(s.exists() ? s.data() : null), e => cb(null));
+  },
+  async verifyPurchase(productId, purchaseToken) {
+    const t = await auth.currentUser.getIdToken();
+    const r = await fetch("https://europe-west1-kulis-1647d.cloudfunctions.net/verifyPurchase", {
+      method: "POST", headers: { "Content-Type": "application/json", Authorization: "Bearer " + t },
+      body: JSON.stringify({ productId, purchaseToken })
+    });
+    const j = await r.json().catch(() => ({}));
+    if (!r.ok) throw Object.assign(new Error(j.error || "sunucu"), { code: j.error || r.status });
+    return j;
+  },
 
   // ---------- Eşleş ----------
   async like(toUid, pid) {

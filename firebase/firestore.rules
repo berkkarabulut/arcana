@@ -1,0 +1,151 @@
+rules_version = '2';
+// Kulis güvenlik kuralları
+// Temel ilke: herkes sadece kendi adına yazar; gizli bilgiler sadece sahibine, mesajlar sadece sohbetin iki tarafına görünür.
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // giriş yapmış VE e-postası doğrulanmış (Google ya da e-posta bağlantısı); misafir hesaplar hiçbir şey yapamaz
+    function signedIn() { return request.auth != null && request.auth.token.email_verified == true; }
+    function isMe(uid) { return signedIn() && request.auth.uid == uid; }
+    function isAdmin() {
+      return signedIn() && exists(/databases/$(database)/documents/config/admins)
+        && request.auth.uid in get(/databases/$(database)/documents/config/admins).data.uids;
+    }
+    function changed() { return request.resource.data.diff(resource.data).affectedKeys(); }
+    function str(v, lo, hi) { return v is string && v.size() >= lo && v.size() <= hi; }
+    function step(a, b) { return b is int && b >= 0 && (b - a == 1 || a - b == 1 || a == b); }
+
+    // Yönetici listesi: sadece Firebase panelinden değiştirilir
+    match /config/{doc} {
+      allow read: if signedIn();
+      allow write: if false;
+    }
+
+    // Herkese açık profil (takma ad, burç, yaş aralığı, cinsiyet, renk, görseller)
+    match /users/{uid} {
+      allow read: if signedIn();
+      allow create: if isMe(uid)
+        && request.resource.data.keys().hasOnly(['n','c','s','g','age','bio','av','banner','guest','createdAt','lastSeen'])
+        && str(request.resource.data.n, 3, 20)
+        && request.resource.data.createdAt == request.time;
+      // burç, cinsiyet ve yaş aralığı sonradan değiştirilemez (Eşleş'teki cinsiyet seçimi hariç: g sadece "Belirtmeyeyim"den değişebilir)
+      allow update: if isMe(uid)
+        && changed().hasOnly(['n','c','bio','av','banner','lastSeen','g'])
+        && (!('g' in changed()) || resource.data.g == 'Belirtmeyeyim')
+        && (!('n' in changed()) || str(request.resource.data.n, 3, 20))
+        && (!('bio' in changed()) || str(request.resource.data.bio, 0, 120));
+      allow delete: if isMe(uid) || isAdmin();
+
+      // Gizli bilgiler: gerçek ad, e-posta, doğum tarihi. Sadece sahibi görür, sonradan değiştirilemez.
+      // premium belgesini sadece ödeme doğrulama fonksiyonu yazar
+      match /private/{doc} {
+        allow read: if isMe(uid);
+        allow create: if isMe(uid) && doc != 'premium';
+        allow update: if false;
+        allow delete: if isMe(uid) && doc != 'premium';
+      }
+      // Engellenenler: sadece sahibi
+      match /blocks/{other} {
+        allow read, write: if isMe(uid);
+      }
+      // Bildirimler: sahibi okur ve siler; başkası sadece kendi adına bildirim bırakabilir
+      match /notifs/{nid} {
+        allow read, delete: if isMe(uid);
+        allow update: if isMe(uid) && changed().hasOnly(['read']);
+        allow create: if signedIn() && request.resource.data.from == request.auth.uid
+          && str(request.resource.data.text, 1, 200) && request.resource.data.ts == request.time;
+      }
+    }
+
+    // Takma adlar benzersiz olsun
+    match /nicks/{nick} {
+      allow read: if signedIn();
+      allow create: if signedIn() && request.resource.data.uid == request.auth.uid;
+      allow delete: if signedIn() && resource.data.uid == request.auth.uid;
+      allow update: if false;
+    }
+
+    // İtiraflar
+    match /posts/{pid} {
+      allow read: if signedIn();
+      allow create: if signedIn()
+        && request.resource.data.uid == request.auth.uid
+        && str(request.resource.data.t, 15, 500)
+        && request.resource.data.cat in ['ask','aile','arkadas','is','okul','kimse']
+        && request.resource.data.r == {'bende': 0, 'saril': 0, 'yok': 0}
+        && request.resource.data.cm == 0
+        && request.resource.data.ts == request.time;
+      // başkaları sadece tepki ve yorum sayısını birer birer değiştirebilir
+      allow update: if signedIn() && changed().hasOnly(['r','cm'])
+        && step(resource.data.cm, request.resource.data.cm)
+        && request.resource.data.r.keys().hasOnly(['bende','saril','yok'])
+        && step(resource.data.r.bende, request.resource.data.r.bende)
+        && step(resource.data.r.saril, request.resource.data.r.saril)
+        && step(resource.data.r.yok, request.resource.data.r.yok);
+      allow delete: if signedIn() && (resource.data.uid == request.auth.uid || isAdmin());
+
+      match /reactions/{uid} {
+        allow read: if signedIn();
+        allow create, update: if isMe(uid) && request.resource.data.k in ['bende','saril','yok'];
+        allow delete: if isMe(uid);
+      }
+      match /comments/{cid} {
+        allow read: if signedIn();
+        allow create: if signedIn() && request.resource.data.uid == request.auth.uid
+          && str(request.resource.data.t, 1, 300) && request.resource.data.ts == request.time;
+        allow delete: if signedIn() && (resource.data.uid == request.auth.uid || isAdmin());
+        allow update: if false;
+      }
+    }
+
+    // Şikâyetler: herkes gönderebilir, sadece yönetici görür
+    match /reports/{rid} {
+      allow create: if signedIn() && request.resource.data.by == request.auth.uid
+        && str(request.resource.data.reason, 2, 60) && request.resource.data.ts == request.time;
+      allow read, update, delete: if isAdmin();
+    }
+
+    // Eşleş beğenileri: belge adı "beğenen_beğenilen"
+    match /likes/{lid} {
+      allow read: if signedIn() && (resource.data.from == request.auth.uid || resource.data.to == request.auth.uid);
+      allow create: if signedIn() && request.resource.data.from == request.auth.uid
+        && lid == request.auth.uid + '_' + request.resource.data.to
+        && request.resource.data.ts == request.time;
+      allow delete: if signedIn() && resource.data.from == request.auth.uid;
+      allow update: if false;
+    }
+
+    // Sohbetler: belge adı iki kişinin kimliğinin sıralı birleşimi, sadece iki taraf görür
+    match /chats/{cid} {
+      function member() { return signedIn() && request.auth.uid in resource.data.members; }
+      function other(m) { return m[0] == request.auth.uid ? m[1] : m[0]; }
+      allow read: if member();
+      allow create: if signedIn()
+        && request.resource.data.members is list && request.resource.data.members.size() == 2
+        && request.auth.uid in request.resource.data.members
+        && cid == (request.resource.data.members[0] < request.resource.data.members[1]
+              ? request.resource.data.members[0] + '_' + request.resource.data.members[1]
+              : request.resource.data.members[1] + '_' + request.resource.data.members[0])
+        && request.resource.data.reqBy == request.auth.uid
+        && (request.resource.data.status == 'wait'
+            // eşleşme: iki taraf da birbirini beğendiyse sohbet direkt açık başlar
+            || (request.resource.data.status == 'open' && request.resource.data.match == true
+                && exists(/databases/$(database)/documents/likes/$(request.auth.uid + '_' + other(request.resource.data.members)))
+                && exists(/databases/$(database)/documents/likes/$(other(request.resource.data.members) + '_' + request.auth.uid))));
+      // isteği sadece karşı taraf kabul edebilir
+      allow update: if member()
+        && changed().hasOnly(['status','last','lastAt','lastBy','seen'])
+        && (!('status' in changed()) || (request.resource.data.status == 'open' && resource.data.reqBy != request.auth.uid));
+      allow delete: if member();
+
+      match /messages/{mid} {
+        function chat() { return get(/databases/$(database)/documents/chats/$(cid)).data; }
+        allow read: if signedIn() && request.auth.uid in chat().members;
+        allow create: if signedIn() && request.auth.uid in chat().members
+          && request.resource.data.uid == request.auth.uid
+          && str(request.resource.data.t, 1, 1000) && request.resource.data.ts == request.time;
+        allow update, delete: if false;
+      }
+    }
+  }
+}

@@ -1058,17 +1058,33 @@ function vBen(){
    ${isStandalone()?"":`<button class="btn line wide" id="instPro" style="margin-top:22px">${PHONE_DL}Ana ekrana ekle</button>`}
    ${themePicker()}
    <div class="lg-links"><a href="kurallar.html" data-legal="kurallar">Topluluk kuralları</a><a href="kosullar.html" data-legal="kosullar">Kullanım koşulları</a><a href="gizlilik.html" data-legal="kvkk">KVKK ve gizlilik</a>${GA_ID?'<a href="#" id="ckPref">Çerez tercihleri</a>':""}</div>
-   <button class="btn line wide" id="outBtn" style="margin-top:22px;color:var(--nar);border-color:rgba(var(--nar-rgb),.35)">${LOGOUT}Çıkış yap</button></div>`;
+   <button class="btn line wide" id="outBtn" style="margin-top:22px;color:var(--nar);border-color:rgba(var(--nar-rgb),.35)">${LOGOUT}Çıkış yap</button>${REMOTE?`<button class="dice" id="delAcc" style="margin:14px auto 0;display:flex">Hesabımı sil</button>`:""}</div>`;
   const pn=$("#pNote");if(pn)pn.onclick=()=>premiumGate("Fotoğrafın görünsün","Yüklediğin fotoğraf ve kapak Premium üyelerde herkese görünür.",()=>vBen());
   $("#camBtn").onclick=()=>showEditProfile("photo");$("#covBtn").onclick=()=>showEditProfile("banner");
   $("#editPro").onclick=showEditProfile;
   $("#outTop").onclick=$("#outBtn").onclick=confirmLogout;
+  if($("#delAcc"))$("#delAcc").onclick=confirmDeleteAccount;
   const ip=$("#instPro");if(ip)ip.onclick=installApp;
   const ck=$("#ckPref");if(ck)ck.onclick=e=>{e.preventDefault();showConsent(true)};
   const gp=$("#goPrem");if(gp)gp.onclick=()=>showPremium("profil");
 }
 
 const LOGOUT='<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><path d="M16 17l5-5-5-5"/><path d="M21 12H9"/></svg>';
+function confirmDeleteAccount(){
+  const g=document.createElement("div");g.className="cf-scrim";g.setAttribute("role","dialog");g.setAttribute("aria-modal","true");
+  g.innerHTML=`<div class="cf"><h2>Hesabın silinsin mi?</h2><p class="muted" style="font-size:14px;margin:6px 0 12px">Profilin, itirafların, sohbetlerin, beğenilerin ve bildirimlerin kalıcı olarak silinir. Bu işlem geri alınamaz.</p>
+    ${state.premUntil?`<p class="warn" style="margin:0 0 12px">Premium aboneliğin hesabı silince durmaz. Önce Google Play > Ödemeler ve abonelikler'den iptal et.</p>`:""}
+    <label class="lbl" for="delTx">Onaylamak için <b>SİL</b> yaz</label><input class="city-search" id="delTx" style="margin:6px 0 14px" autocomplete="off" maxlength="5">
+    <div style="display:grid;gap:8px"><button class="btn wide" id="delY" disabled style="background:var(--nar);color:var(--on-nar)">Hesabımı kalıcı olarak sil</button><button class="btn line wide" id="delN">Vazgeç</button></div></div>`;
+  document.body.appendChild(g);
+  const y=g.querySelector("#delY"),tx=g.querySelector("#delTx");
+  tx.oninput=()=>{y.disabled=tx.value.trim().toLocaleUpperCase("tr")!=="SİL"};
+  g.onclick=e=>{if(e.target===g)g.remove()};g.querySelector("#delN").onclick=()=>g.remove();
+  y.onclick=async()=>{y.disabled=true;y.textContent="Siliniyor…";
+    try{await KDB.deleteEverything();track("hesap_silindi");try{["kulis_beta_local","kulis_seen","kulis_ob"].forEach(k=>localStorage.removeItem(k))}catch(e){}g.remove();toast("Hesabın silindi");setTimeout(()=>location.reload(),1200)}
+    catch(e){y.disabled=false;y.textContent="Hesabımı kalıcı olarak sil";toast("Silinemedi: "+(e.code||e.message)+". Tekrar dene ya da bize yaz.")}};
+  setTimeout(()=>tx.focus(),50);
+}
 function confirmLogout(){
   const g=document.createElement("div");g.className="cf-scrim";g.setAttribute("role","dialog");g.setAttribute("aria-modal","true");
   const guest=state.me&&state.me.provider==="guest";
@@ -1510,6 +1526,8 @@ function openAdmin(){
     <h3 class="adm-h">Şikâyetler <span>${open.length} bekliyor</span></h3>
     ${open.length?open.map(repRow).join(""):`<p class="muted" style="font-size:14px">Bekleyen şikâyet yok.</p>`}
     ${done.length?`<details class="adm-done"><summary>Sonuçlananlar (${done.length})</summary>${done.map(repRow).join("")}</details>`:""}
+    ${REMOTE?`<h3 class="adm-h">Hesap sil</h3><p class="hint" style="margin:-4px 0 10px">Mailden silme talebi gelince takma adı yaz. Profil ve itirafları kalıcı olarak silinir.</p>
+    <div class="adm-add"><input class="city-search" id="admDel" placeholder="Takma ad" maxlength="20" autocomplete="off"><button class="btn" id="admDelGo" style="background:var(--nar);color:var(--on-nar)">Sil</button></div>`:""}
     <h3 class="adm-h">Yasaklı kelimeler</h3>
     <p class="hint" style="margin:-4px 0 10px">Bu kelimeler itiraf, yorum ve mesajlarda engellenir. Kelimenin başı eşleşir: “orospu” yazarsan “orospuluk” da engellenir.</p>
     <div class="adm-words">${banned.map((w,i)=>`<span>${esc(w)}<button data-adm="sil:${i}" aria-label="${esc(w)} kelimesini kaldır">${IC.close}</button></span>`).join("")}</div>
@@ -1530,7 +1548,11 @@ function openAdmin(){
     if(a==="kaldir"){const rm=LS("arcana_removed",[]);if(!rm.includes(r.key))rm.push(r.key);LSset("arcana_removed",rm);state.hidden.add(r.key)}
     toast(a==="kaldir"?"İçerik kaldırıldı":"Şikâyet yoksayıldı");openAdmin()});
   const add=()=>{const v=$("#admW").value.trim();if(!v)return;const l=[...bannedList()];if(!l.map(lowTR).includes(lowTR(v)))l.push(v);LSset("arcana_banned",l);openAdmin()};
-  $("#admWAdd").onclick=add;$("#admW").onkeydown=e=>{if(e.key==="Enter")add()};
+  $("#admWAdd").onclick=add;
+  if($("#admDelGo"))$("#admDelGo").onclick=async()=>{const n=lowTR($("#admDel").value.trim());const uid=Object.keys(U).find(k=>lowTR(U[k].n||"")===n);
+    if(!uid){toast("Bu takma adla kullanıcı bulunamadı");return}
+    if(!confirm(`${U[uid].n} hesabı ve itirafları kalıcı olarak silinsin mi?`))return;
+    try{await KDB.adminDeleteUser(uid);delete U[uid];toast("Hesap silindi");openAdmin()}catch(e){toast("Silinemedi: "+(e.code||e.message))}};$("#admW").onkeydown=e=>{if(e.key==="Enter")add()};
   $("#admReset").onclick=()=>{try{localStorage.removeItem("arcana_banned")}catch(e){}openAdmin()};
   if($("#admDemo"))$("#admDemo").onclick=()=>{try{localStorage.setItem("arcana_demo",DEMO?"0":"1")}catch(e){}location.reload()};
 }
@@ -1612,11 +1634,11 @@ document.addEventListener("click",e=>{const b=e.target.closest("[data-tema]");if
 function premiumGate(title,text,onUnlock){
   const g=document.createElement("div");g.className="cf-scrim";g.setAttribute("role","dialog");g.setAttribute("aria-modal","true");
   g.innerHTML=`<div class="cf"><div class="cf-ic">${IC.lock}</div><h2>${title}</h2><p class="muted" style="font-size:14px;margin:6px 0 12px">${text}</p>
-    <div class="perks" style="margin:0 0 14px"><div>${IC.chk}Kendi profil fotoğrafını ve kapak görselini yükle</div><div>${IC.chk}İtirafını 24 saat akışın en üstüne taşı</div><div>${IC.chk}Sınırsız cevap, mesaj ve sohbet</div><div>${IC.chk}Seni beğenenleri gör, sınırsız kaydır</div><div>${IC.chk}Fotoğraf, ses, sesli ve görüntülü arama</div></div>
-    <div style="display:grid;gap:8px"><button class="btn gold wide" id="pgY">Premium'u başlat · 119,90 ₺/ay</button><button class="btn line wide" id="pgN">Şimdi değil</button></div>
-    <p class="hint" style="text-align:center">Prototip: ödeme alınmaz.</p></div>`;
+    ${REMOTE?`<div class="perks" style="margin:0 0 14px">${PREM_PERKS.map(t=>`<div>${IC.chk}${t}</div>`).join("")}</div>`:`<div class="perks" style="margin:0 0 14px"><div>${IC.chk}Kendi profil fotoğrafını ve kapak görselini yükle</div><div>${IC.chk}İtirafını 24 saat akışın en üstüne taşı</div><div>${IC.chk}Sınırsız cevap, mesaj ve sohbet</div><div>${IC.chk}Seni beğenenleri gör, sınırsız kaydır</div><div>${IC.chk}Fotoğraf, ses, sesli ve görüntülü arama</div></div>`}
+    <div style="display:grid;gap:8px"><button class="btn gold wide" id="pgY">${REMOTE?"Premium'u gör":"Premium'u başlat · 119,90 ₺/ay"}</button><button class="btn line wide" id="pgN">Şimdi değil</button></div>
+    ${REMOTE?"":`<p class="hint" style="text-align:center">Prototip: ödeme alınmaz.</p>`}</div>`;
   document.body.appendChild(g);
-  g.querySelector("#pgY").onclick=()=>{g.remove();state.premium=true;toast("Premium açık");render();onUnlock&&onUnlock()};
+  g.querySelector("#pgY").onclick=()=>{g.remove();if(REMOTE){showPremium("gate");return}state.premium=true;toast("Premium açık");render();onUnlock&&onUnlock()};
   g.querySelector("#pgN").onclick=()=>g.remove();
 }
 
@@ -1896,6 +1918,7 @@ function startCall(type,c){
 
 /* ============ PREMIUM ============ */
 function showPremium(src){
+  if(REMOTE)return showPremiumRemote(src);
   let plan="aylik";
   const draw=()=>openSheet(`<h2>Kulis Premium</h2><p class="muted" style="margin:6px 0 2px;font-size:14px">${src==="medya"?"Fotoğraf, ses kaydı, sesli ve görüntülü arama Premium'a özel.":src==="mesaj"?"Sohbetin yarıda kalmasın.":src==="esles"?"Sınırsız kaydır, seni beğenenleri gör.":src==="sohbet"?"Yeni sohbet başlatmak için Premium'a geç.":"Sınırsız konuş."}</p>
    <div class="perks"><div>${IC.chk}Sınırsız mesaj, sınırsız sohbet</div><div>${IC.chk}Sınırsız kaydır, seni beğenenleri gör</div><div>${IC.chk}İtirafını 24 saat akışın en üstüne taşı</div><div>${IC.chk}İtiraflara sınırsız cevap yaz</div><div>${IC.chk}Kendi profil fotoğrafını ve kapağını yükle</div><div>${IC.chk}Fotoğraf, video ve ses kaydı gönder</div><div>${IC.chk}Sesli ve görüntülü arama</div><div>${IC.chk}Biriken mesajları hemen oku</div><div>${IC.chk}Mesajının okunduğunu gör</div><div>${IC.chk}Daha çok itiraf, itirafını öne çıkar</div></div>
@@ -2197,6 +2220,7 @@ function remoteStartListeners(){
     if(openId){openIdx=state.chats.findIndex(c=>c.id===openId)}
     render();
   });
+  setPremiumFrom(null);KDB.listenPremium(setPremiumFrom);playRestore();
   KDB.isAdmin().then(a=>{R.admin=a;if(a)KDB.listenReports(r=>{R.reports=r})});
 }
 function remoteEnterApp(pub,priv){
@@ -2272,6 +2296,65 @@ function remoteInit(){
       if(u)remoteAfterAuth(u);else{remoteLoading(false);startOnb()}});
   };
   if(window.KDB)go();else addEventListener("kdb-ready",go,{once:true});
+}
+
+/* ============ PREMIUM: GOOGLE PLAY ÖDEMESİ ============ */
+// Play'den indirilen uygulamada gerçek abonelik (Google Play Billing, Digital Goods API).
+// Tarayıcıdan girenlere uygulama yayınlanana kadar Premium ücretsiz.
+const WEB_FREE_PREMIUM=true;
+const PLAY_BILLING="https://play.google.com/billing";
+const PLAY_SKU={haftalik:"kulis_haftalik",aylik:"kulis_aylik",yillik:"kulis_yillik"};
+const PLAN_INFO=[["haftalik","Haftalık","İstediğin zaman iptal","49,90 ₺"],["aylik","Aylık","En çok seçilen","119,90 ₺"],["yillik","Yıllık","Aylık 49,90 ₺'ye gelir","599 ₺"]];
+const PREM_PERKS=["Sınırsız sohbet ve sınırsız mesaj","Eşleş'te sınırsız kaydırma, son kartı geri alma","İtiraflara sınırsız cevap"];
+const IN_APP=(()=>{try{if(document.referrer.startsWith("android-app://"))sessionStorage.setItem("kulis_app","1");return sessionStorage.getItem("kulis_app")==="1"||new URLSearchParams(location.search).get("src")==="twa"}catch(e){return false}})();
+let playSvc=null,playPrices={};
+async function playService(){
+  if(playSvc!==null)return playSvc;playSvc=false;
+  try{if("getDigitalGoodsService" in window){playSvc=await window.getDigitalGoodsService(PLAY_BILLING)||false}}catch(e){playSvc=false}
+  if(playSvc){try{(await playSvc.getDetails(Object.values(PLAY_SKU))).forEach(d=>{playPrices[d.itemId]=new Intl.NumberFormat("tr-TR",{style:"currency",currency:d.price.currency}).format(+d.price.value)})}catch(e){}}
+  return playSvc;
+}
+function setPremiumFrom(p){
+  const on=!!(p&&p.active&&(p.until||0)>Date.now());
+  const web=REMOTE&&WEB_FREE_PREMIUM&&!IN_APP;
+  const was=state.premium;state.premium=web||on;state.premUntil=on?p.until:0;
+  if(was!==state.premium&&state.me){render();if(openIdx>=0)drawChat()}
+}
+// uygulama açılınca mevcut abonelikleri yeniden doğrula (yenilenme / iptal güncellensin)
+async function playRestore(){
+  if(!IN_APP)return;const svc=await playService();if(!svc)return;
+  try{for(const p of await svc.listPurchases()){if(Object.values(PLAY_SKU).includes(p.itemId))await KDB.verifyPurchase(p.itemId,p.purchaseToken).catch(()=>{})}}catch(e){}
+}
+async function playBuy(plan,btn){
+  const svc=await playService();
+  if(!svc){toast("Google Play ödemesi açılamadı. Uygulamayı Play Store'dan güncelleyip tekrar dene.");return}
+  const sku=PLAY_SKU[plan];if(btn)btn.disabled=true;
+  try{
+    const req=new PaymentRequest([{supportedMethods:PLAY_BILLING,data:{sku}}],{total:{label:"Toplam",amount:{currency:"TRY",value:"0"}}});
+    const resp=await req.show();
+    const token=resp.details&&resp.details.purchaseToken;
+    let ok=false;try{const r=await KDB.verifyPurchase(sku,token);ok=!!r.active}catch(e){}
+    await resp.complete(ok?"success":"fail");
+    if(ok){track("premium",{plan});closeSheet();toast("Premium açık. İyi sohbetler!")}
+    else toast("Ödeme alındı ama doğrulanamadı. Birkaç dakika sonra uygulamayı yeniden aç, düzelmezse bize yaz.");
+  }catch(e){if(e&&e.name!=="AbortError")toast("Ödeme tamamlanamadı")}
+  finally{if(btn)btn.disabled=false}
+}
+function showPremiumRemote(src){
+  let plan="aylik";
+  const web=!IN_APP;
+  const draw=()=>{openSheet(`<h2>Kulis Premium</h2>
+   <div class="perks">${PREM_PERKS.map(t=>`<div>${IC.chk}${t}</div>`).join("")}</div>
+   ${web?`<p class="muted" style="font-size:14px;margin:10px 0 14px">Premium şu an web'de herkese ücretsiz. Android uygulaması yayınlanınca Premium uygulama içinden alınacak.</p><button class="btn wide" id="buyX">Tamam</button>`:
+   `${state.premUntil?`<p class="hint" style="margin:0 0 10px">Premium üyeliğin ${new Date(state.premUntil).toLocaleDateString("tr-TR")} tarihine kadar açık.</p>`:""}
+   <div class="plans">${PLAN_INFO.map(([k,n,s,pr])=>`<button class="plan" data-plan="${k}" aria-pressed="${plan===k}"><span><b>${n}</b><small>${s}</small></span><span class="p">${playPrices[PLAY_SKU[k]]||pr}</span></button>`).join("")}</div>
+   <button class="btn gold wide" id="buy">Google Play ile abone ol</button>
+   <p class="hint" style="text-align:center">Abonelik her dönem sonunda otomatik yenilenir. İstediğin zaman Google Play > Ödemeler ve abonelikler'den iptal edebilirsin.</p>`}`);
+   const x=$("#buyX");if(x)x.onclick=closeSheet;
+   $("#sheet").querySelectorAll("[data-plan]").forEach(b=>b.onclick=()=>{plan=b.dataset.plan;draw()});
+   const by=$("#buy");if(by)by.onclick=()=>playBuy(plan,by)};
+  draw();
+  if(!web)playService().then(()=>{if($("#buy"))draw()});
 }
 
 const WEL=REMOTE?{U:Object.assign({},U),P:POSTS.slice()}:null;
