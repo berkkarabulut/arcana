@@ -640,6 +640,41 @@ a.btn{display:inline-flex;align-items:center;justify-content:center;text-decorat
 .dh-chips{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:8px}
 .dh-chips div{padding:10px;border-radius:14px;background:var(--yuzey);display:flex;flex-direction:column;gap:2px}
 .dh-chips small{font-size:11.5px;color:var(--soluk)}.dh-chips b{font-size:14px}
+
+/* ===== Öne çıkar ===== */
+.boost-wrap{position:relative;margin-bottom:12px}
+.boost-wrap .it{border-color:rgba(233,185,110,.45);box-shadow:0 0 0 1px rgba(233,185,110,.15),0 10px 30px rgba(233,185,110,.08)}
+.boost-tag{display:inline-flex;align-items:center;gap:6px;font-size:12px;font-weight:800;color:var(--altin);margin:0 0 6px 4px}
+.boost-tag svg{width:14px;height:14px}
+.lk-mini{margin-left:auto;display:inline-grid;place-items:center;width:22px;height:22px;border-radius:50%;background:var(--altin);color:#21170A}
+.lk-mini svg{width:12px;height:12px}
+
+/* ===== Yönetici paneli ===== */
+#adm{position:fixed;inset:0;z-index:90;background:var(--murekkep);overflow-y:auto;display:none}
+#adm.open{display:block}
+.adm-in{max-width:640px;margin:0 auto;padding:18px 18px 60px}
+.adm-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:8px}
+.adm-top h2{font-size:28px}
+.adm-h{font-family:Figtree,sans-serif;font-size:15px;font-weight:800;margin:22px 0 10px;display:flex;align-items:center;gap:8px}
+.adm-h span{font-size:12px;font-weight:800;color:var(--nar);background:rgba(232,80,91,.12);padding:3px 8px;border-radius:99px}
+.adm-stats{display:grid;grid-template-columns:repeat(auto-fill,minmax(120px,1fr));gap:8px}
+.adm-stats div{padding:10px 12px;border-radius:14px;background:var(--yuzey);display:flex;flex-direction:column}
+.adm-stats b{font-size:22px;font-variant-numeric:tabular-nums}.adm-stats small{font-size:12.5px;color:rgba(244,236,228,.8)}.adm-stats i{font-style:normal;font-size:11.5px;color:var(--soluk)}
+.adm-rep{padding:12px 14px;border-radius:16px;background:var(--yuzey);border:1px solid var(--cizgi);margin-bottom:8px}
+.adm-rep.done{opacity:.6}
+.adm-rh{display:flex;align-items:center;gap:8px;flex-wrap:wrap;font-size:13.5px}
+.adm-k{font-size:11px;font-weight:800;padding:2px 7px;border-radius:99px;background:rgba(244,236,228,.08)}
+.adm-reason{color:#F08A92;font-weight:700}.adm-rh small{margin-left:auto;color:var(--soluk)}
+.adm-rep p{font-family:var(--display);font-size:16px;line-height:1.4;margin:8px 0}
+.adm-acts{display:flex;gap:8px}.adm-acts .btn{height:38px;font-size:13.5px}
+.adm-st{color:var(--soluk);font-size:12.5px}
+.adm-done summary{cursor:pointer;color:var(--soluk);font-size:13.5px;margin:6px 0}
+.adm-words{display:flex;flex-wrap:wrap;gap:6px}
+.adm-words span{display:inline-flex;align-items:center;gap:4px;padding:5px 6px 5px 11px;border-radius:99px;background:var(--yuzey);font-size:13px}
+.adm-words button{width:22px;height:22px;display:grid;place-items:center;color:var(--soluk)}.adm-words svg{width:12px;height:12px}
+.adm-add{display:flex;gap:8px;margin-top:10px}.adm-add .city-search{margin:0;flex:1}.adm-add .btn{height:auto}
+.adm-demo{display:flex;align-items:center;gap:12px;padding:12px 14px;border-radius:16px;background:var(--yuzey)}
+.adm-demo span{flex:1;display:flex;flex-direction:column;gap:2px}.adm-demo small{font-size:12.5px;color:var(--soluk);line-height:1.35}
 </style>
 </head>
 <body>
@@ -905,7 +940,9 @@ function render(){
   const nu=state.notifs.filter(n=>!n.read).length;$("#bellPip").hidden=!nu;$("#bellPip").textContent=nu>9?"9+":nu;$("#topBell").setAttribute("aria-label",nu?`Bildirimler, ${nu} yeni`:"Bildirimler");
   ({akis:vAkis,kesfet:vKesfet,mesajlar:vMesajlar,ben:vBen})[state.tab]();
 }
-function allPosts(){return [...state.myPosts,...POSTS]}
+function allPosts(){return DEMO?[...state.myPosts,...POSTS]:[...state.myPosts]}
+const isBoosted=p=>!!p.boost&&Date.now()-p.boost<864e5;
+function boostLeft(p){const h=Math.max(1,Math.ceil((864e5-(Date.now()-p.boost))/36e5));return h+" saat"}
 function postHTML(p,opts={}){
   const mine=p.u==="me", my=state.react[p.id];
   const long=p.t.length>150;
@@ -920,13 +957,14 @@ function postHTML(p,opts={}){
 }
 const reactTotal=p=>Object.values(p.r).reduce((a,b)=>a+b,0);
 function vAkis(){
-  let list=allPosts().filter(p=>(p.u!=="me"||state.premium)&&(state.cat==="hepsi"||p.cat===state.cat)&&!state.hidden.has("p:"+p.id));
+  let list=allPosts().filter(p=>(state.cat==="hepsi"||p.cat===state.cat)&&!state.hidden.has("p:"+p.id));
+  const boosted=list.filter(isBoosted);list=list.filter(p=>!isBoosted(p));
   let feat=null;
   if(state.sort==="populer"){list=[...list].sort((a,b)=>(b.u==="me")-(a.u==="me")||reactTotal(b)-reactTotal(a));
     if(state.cat==="hepsi"&&list.length>2){const i=list.findIndex(p=>p.u!=="me");feat=list.splice(i,1)[0]}}
   view.innerHTML=`${instBanner()}${dailyCard()}<div class="cats" role="toolbar" aria-label="Kategori">${CATS.map(([k,l])=>`<button class="c" data-cat="${k}" aria-pressed="${state.cat===k}">${l}</button>`).join("")}</div>
-   <div class="feed-head"><div class="seg2" role="group" aria-label="Sıralama"><button data-sort="populer" aria-pressed="${state.sort==="populer"}">Popüler</button><button data-sort="yeni" aria-pressed="${state.sort==="yeni"}">Yeni</button></div><span class="feed-count">${list.length+(feat?1:0)} itiraf</span></div>
-   ${feat?`<div class="feat"><div class="it" style="padding-top:12px"><div class="feat-tag">${IC.spark}Bugün en çok sarılan</div>${postHTML(feat).replace('<article class="it">','<article class="it" style="background:none;border:0;padding:0;margin:0">')}</div></div>`:""}
+   <div class="feed-head"><div class="seg2" role="group" aria-label="Sıralama"><button data-sort="populer" aria-pressed="${state.sort==="populer"}">Popüler</button><button data-sort="yeni" aria-pressed="${state.sort==="yeni"}">Yeni</button></div><span class="feed-count">${list.length+boosted.length+(feat?1:0)} itiraf</span></div>
+   ${boosted.map(p=>`<div class="boost-wrap"><div class="boost-tag">${IC.spark}Öne çıkarıldı</div>${postHTML(p)}</div>`).join("")}${feat?`<div class="feat"><div class="it" style="padding-top:12px"><div class="feat-tag">${IC.spark}Bugün en çok sarılan</div>${postHTML(feat).replace('<article class="it">','<article class="it" style="background:none;border:0;padding:0;margin:0">')}</div></div>`:""}
    ${list.length?list.map(p=>postHTML(p)).join(""):(feat?"":`<p class="empty">Bu kategoride henüz itiraf yok. Ortadaki “İtiraf et” ile ilkini sen yaz.</p>`)}`;
   bindInst();
   const dh=$("#dhCard");if(dh)dh.onclick=()=>showDaily();
@@ -953,11 +991,9 @@ function vBen(){
    <div class="pro-btns"><button class="btn line sm" id="editPro">${IC.edit.replace('<svg','<svg width="16" height="16"')}Profili düzenle</button>${state.premium?"":`<button class="btn gold sm" id="goPrem">Premium'a geç</button>`}</div>
    ${me.ad?`<details class="private"><summary>${IC.lock} Gizli bilgilerin<span class="chev">${IC.chev}</span></summary><div class="val" style="margin-top:10px">${esc(me.ad)} ${esc(me.soyad)}<br>${esc(me.email||"")}</div><p>${{google:"Google ile giriş yaptın.",apple:"Apple ile giriş yaptın.",email:"E-posta ile giriş yaptın."}[me.provider]||""} Bunları sadece sen görüyorsun, diğer kullanıcılar seni ${esc(me.n)} olarak görür.</p></details>`:""}
    <div class="tabs"><button aria-pressed="true">İtiraflarım</button></div>
-   ${mine.length&&!state.premium?`<button class="pnote" id="feedNote" style="max-width:none;margin:10px 0 2px">${IC.lock}<span>İtirafların şu an sadece profilinde görünüyor. Akışta herkese görünmesi için Premium'a geç.</span></button>`:""}
-   ${mine.length?mine.map(p=>`<div class="mini"><q data-open="${p.id}" style="cursor:pointer">“${esc(p.t)}”</q><div class="on">${CATN[p.cat]}, ${p.cm.length} yorum, ${reactTotal(p)} tepki${state.premium?", akışta":", sadece profilde"}<button class="mini-sh" data-share="${p.id}">${IC.share}Hikâyede paylaş</button></div></div>`).join(""):`<p class="empty">Henüz itirafın yok. Ortadaki “İtiraf et” ile ilkini yaz.</p>`}
+   ${mine.length?mine.map(p=>`<div class="mini"><q data-open="${p.id}" style="cursor:pointer">“${esc(p.t)}”</q><div class="on">${CATN[p.cat]}, ${p.cm.length} yorum, ${reactTotal(p)} tepki${isBoosted(p)?", öne çıkarıldı":""}<button class="mini-sh" data-share="${p.id}">${IC.share}Hikâyede paylaş</button></div></div>`).join(""):`<p class="empty">Henüz itirafın yok. Ortadaki “İtiraf et” ile ilkini yaz.</p>`}
    ${isStandalone()?"":`<button class="btn line wide" id="instPro" style="margin-top:22px">${PHONE_DL}Ana ekrana ekle</button>`}
    <button class="btn line wide" id="outBtn" style="margin-top:22px;color:var(--nar);border-color:rgba(232,80,91,.35)">${LOGOUT}Çıkış yap</button></div>`;
-  const fn=$("#feedNote");if(fn)fn.onclick=()=>premiumGate("İtirafın akışta görünsün","Akışta sadece Premium üyelerin itirafları görünür. Premium'a geçince itirafların herkesin akışına düşer.",()=>vBen());
   const pn=$("#pNote");if(pn)pn.onclick=()=>premiumGate("Fotoğrafın görünsün","Yüklediğin fotoğraf ve kapak Premium üyelerde herkese görünür.",()=>vBen());
   $("#camBtn").onclick=()=>showEditProfile("photo");$("#covBtn").onclick=()=>showEditProfile("banner");
   $("#editPro").onclick=showEditProfile;
@@ -991,11 +1027,12 @@ const SWIPE_EXTRA=[
  {u:"sessizlimon",cat:"kimse",t:"Her yılbaşı gecesi tek başıma sinemaya gidiyorum ve bu benim yılın en sevdiğim gecesi."},
  {u:"yorgunkaptan",cat:"ask",t:"Yeni biriyle tanışınca ilk iş burcunu soruyorum. Ama burca inanmadığımı söylüyorum."}
 ];
-const LIKED_ME=new Set(["gecekusu","kedikahve","eskiplak","dumanli","sessizlimon","yorgunkaptan"]);
+const LIKED_ME=new Set((()=>{try{return localStorage.getItem("arcana_demo")!=="0"}catch(e){return true}})()?["gecekusu","kedikahve","eskiplak","dumanli","sessizlimon","yorgunkaptan"]:[]);
 const swTarget=()=>state.me.g==="Kadın"?"Erkek":state.me.g==="Erkek"?"Kadın":null;
 const FREE_SWIPES=12;
 const sw={done:new Set(),hist:[],used:0,mode:"eslesme",matched:new Set(),front:null,busy:false};
 function swipePool(){
+  if(!DEMO)return [];
   const all=[];const a=POSTS.map(p=>({id:p.id,u:p.u,cat:p.cat,t:p.t})),b=SWIPE_EXTRA.map((p,i)=>({id:"s"+i,...p}));
   for(let i=0;i<Math.max(a.length,b.length);i++){if(a[i])all.push(a[i]);if(b[i])all.push(b[i])}
   const tg=swTarget();let l=all.filter(c=>!sw.done.has(c.id)&&U[c.u].g===tg);
@@ -1009,7 +1046,8 @@ function vKesfet(){
 }
 function vUyumlu(){
   const me=state.me;
-  const people=Object.keys(U).map(k=>({k,p:uyum(me.s,U[k].s)})).sort((a,b)=>b.p-a.p);
+  const people=DEMO?Object.keys(U).map(k=>({k,p:uyum(me.s,U[k].s)})).sort((a,b)=>b.p-a.p):[];
+  if(!people.length){$("#ksBody").innerHTML=`<p class="empty">Henüz başka üye yok. Arkadaşlarını davet et, burcuna en uyumlu kişiler burada sıralansın.</p><button class="btn wide" id="invK" style="margin-top:12px">${IC.share}Arkadaşını davet et</button>`;$("#invK").onclick=()=>showInvite();return}
   const sameSign=Object.keys(U).filter(k=>U[k].s===me.s);
   $("#ksBody").innerHTML=`<p class="muted" style="font-size:14px;margin-bottom:14px">Burcuna göre en uyumlu itirafçılar. Profiline girip itiraflarını okuyabilir, özelden yazabilirsin.</p>
    ${people.map(({k,p})=>{const u=U[k];return `<button class="row" data-prof="${k}">${av(k,46)}<span class="t"><b>${esc(u.n)}${pb(k)}</b><div>${Z[u.s].n}, ${u.age}, ${u.bio}</div></span><span class="meta"><b style="color:var(--kagit);font-size:15px">%${p}</b><br>uyum</span></button>`}).join("")}
@@ -1035,6 +1073,7 @@ function vEsles(){
      <span class="lk-t"><b>${likers.length} kişi seni beğendi</b><small>${state.premium?"Birine dokun, itirafı öne gelsin":"Kim olduklarını görmek için Premium"}</small></span>${state.premium?"":IC.lock}</button>`:"";
   let deck;
   if(out)deck=`<div class="swc end"><div class="cf-ic">${IC.lock}</div><h2>Bugünlük kartların bitti</h2><p class="muted">Yarın yeni itiraflar gelecek. Beklemek istemiyorsan Premium ile sınırsız kaydır, seni beğenenleri de gör.</p><button class="btn gold wide" id="swPrem">Premium ile devam et</button></div>`;
+  else if(!pool.length&&!DEMO)deck=`<div class="swc end"><div class="cf-ic">${IC.spark}</div><h2>Henüz kaydıracak itiraf yok</h2><p class="muted">Yeni üyeler itiraf yazdıkça kartlar burada görünecek. Arkadaşlarını davet et, eşleşme şansın artsın.</p><button class="btn wide" id="swInv">${IC.share}Arkadaşını davet et</button></div>`;
   else if(!pool.length)deck=`<div class="swc end"><div class="cf-ic">${IC.spark}</div><h2>Hepsini gördün</h2><p class="muted">Yeni itiraflar geldikçe burada göreceksin. Geçtiğin itiraflara bir daha bakmak istersen başa dön.</p><button class="btn line wide" id="swReset">Geçtiklerimi tekrar göster</button></div>`;
   else deck=(pool[1]?swCard(pool[1],true):"")+swCard(pool[0]);
   body.innerHTML=`${strip}
@@ -1050,6 +1089,7 @@ function vEsles(){
   const L=$("#likers");if(L)L.onclick=e=>{if(!state.premium){premiumGate("Seni kimler beğendi?","Seni beğenen kişileri görmek ve onların itirafını hemen önüne getirmek Premium ile açılır.",()=>vKesfet());return}
     const a=e.target.closest("[data-lk]");if(a){sw.front=a.dataset.lk;vEsles()}};
   const P=$("#swPrem");if(P)P.onclick=()=>showPremium("esles");
+  const SI=$("#swInv");if(SI)SI.onclick=()=>showInvite();
   const R=$("#swReset");if(R)R.onclick=()=>{sw.hist.filter(h=>!h.like).forEach(h=>sw.done.delete(h.id));sw.hist=sw.hist.filter(h=>h.like);vEsles()};
   const N=$("#swNudge");if(N)N.onclick=()=>showConfess();
   if(out||!pool.length)return;
@@ -1079,10 +1119,11 @@ function fling(el,c,like,dx=0,dy=0){
   setTimeout(()=>{sw.busy=false;decide(c,like)},300);
 }
 function decide(c,like){
+  if(like)track("begen");
   sw.done.add(c.id);sw.used++;sw.hist.push({id:c.id,u:c.u,like});
   if(sw.front===c.u)sw.front=null;
   let m=false;
-  if(like&&LIKED_ME.has(c.u)&&!sw.matched.has(c.u)){sw.matched.add(c.u);sw.hist[sw.hist.length-1].match=true;m=true;notify("match",c.u,"ile eşleştin",{chat:c.u,kesfet:1},Date.now(),true)}
+  if(like&&LIKED_ME.has(c.u)&&!sw.matched.has(c.u)){sw.matched.add(c.u);sw.hist[sw.hist.length-1].match=true;m=true;track("eslesme");notify("match",c.u,"ile eşleştin",{chat:c.u,kesfet:1},Date.now(),true)}
   vEsles();
   if(m)showMatch(c);else if(like)toast(`${U[c.u].n} itirafını beğendiğini görmeyecek, sadece o da seni beğenirse eşleşirsiniz`);
 }
@@ -1214,8 +1255,8 @@ async function showShare(id){
   box.innerHTML=`<img src="${url}" alt="Paylaşılacak hikâye görseli">`;
   box.insertAdjacentHTML("afterend",`<p class="hint" style="margin:12px 0">${p.u==="me"?"Takma adın görselde görünür, gerçek adın asla görünmez.":"Başkasının itirafında takma ad görünmez, sadece burcu yazar."}</p>
     <div style="display:grid;gap:8px">${canShare?`<button class="btn wide" id="shGo">${IC.share}Paylaş</button>`:""}<a class="btn ${canShare?"line":""} wide" id="shDl" href="${url}" download="arcana-itiraf.jpg">Görseli indir</a></div>`);
-  const go=$("#shGo");if(go)go.onclick=async()=>{try{await navigator.share({files:[file],text:"Arcana'da itiraf et: https://"+SITE_URL})}catch(e){}};
-  $("#shDl").onclick=()=>toast("Görsel indiriliyor");
+  const go=$("#shGo");if(go)go.onclick=async()=>{track("paylas");try{await navigator.share({files:[file],text:"Arcana'da itiraf et: https://"+SITE_URL})}catch(e){}};
+  $("#shDl").onclick=()=>{track("paylas");toast("Görsel indiriliyor")};
 }
 
 
@@ -1309,11 +1350,115 @@ function showDaily(sign){
   $("#sheet").querySelectorAll("[data-dhs]").forEach(b=>b.onclick=()=>showDaily(b.dataset.dhs));
 }
 
+
+/* ============ AYARLAR: DEMO ve İSTATİSTİK ============ */
+// DEMO=true iken sahte kullanıcılar cevap verir, beğenir, eşleşir. Sunucu bağlanıp gerçek kullanıcıya açılınca false yapılacak.
+const DEMO=(()=>{try{return localStorage.getItem("arcana_demo")!=="0"}catch(e){return true}})();
+// İstatistik: olaylar burada toplanır. Sayaç servisi (GoatCounter/Umami) hesabı açılınca STATS_URL doldurulacak.
+const STATS_URL="";
+function track(ev,data){
+  try{const k="arcana_stats",d=JSON.parse(localStorage.getItem(k)||"{}"),day=dayKey();d[day]=d[day]||{};d[day][ev]=(d[day][ev]||0)+1;localStorage.setItem(k,JSON.stringify(d))}catch(e){}
+  if(STATS_URL&&navigator.sendBeacon){try{navigator.sendBeacon(STATS_URL,JSON.stringify({ev,data:data||null,t:Date.now(),path:location.pathname}))}catch(e){}}
+}
+
+
+/* ============ İÇERİK FİLTRESİ ============ */
+const TR_NAMES=new Set("Mehmet Mustafa Ahmet Ali Hüseyin Hasan İbrahim İsmail Osman Yusuf Murat Ömer Ramazan Halil Süleyman Abdullah Mahmut Recep Emre Burak Kemal Fatih Serkan Hakan Kadir Orhan Can Cem Deniz Berk Arda Kerem Emir Eren Efe Mert Onur Tolga Volkan Uğur Okan Barış Batuhan Furkan Enes Yasin Oğuz Serdar Selim Tuncay Yiğit Kaan Alp Ege Baran Umut Sinan Erkan Gökhan Taner Cengiz Levent Erdem Engin Ercan Tarık Anıl Berkay Doğukan Görkem Halit Emirhan Metehan Alperen Ozan Tuna Koray Sercan Fatma Ayşe Emine Hatice Zeynep Elif Meryem Şerife Zehra Sultan Hanife Merve Esra Özlem Büşra Kübra Ebru Gizem Tuğba Ece Ceren Selin Cansu İrem Damla Buse Dilara Melis Ezgi Derya Seda Sibel Gamze Aslı Burcu Pınar Yasemin Gül Gülşen Nur Esma Beyza Sude Nisa Ecrin Defne Duru Eylül Azra Asya Ela Melike Sevgi Hande Tuba Nihan Nazlı Başak Didem Şeyma Rabia Hilal Aylin Berna Dilek Filiz Songül Yeliz Neslihan Gülay Hülya Serpil Sevda Şule Tuğçe Yağmur Begüm İpek Nehir Ada Lara".split(" "));
+const NAME_OK_NEXT=new Set(["Bey","Hanım","Abi","Abla","Hoca","Hocam","Teyze","Amca","Dayı","Enişte","Yenge"]);
+const DEFAULT_BANNED=["orospu","ibne","yarrak","yarak","amcık","sikiş","sikerim","sikeyim","pezevenk","kahpe","porno","nude","çıplak foto"];
+function bannedList(){try{const l=JSON.parse(localStorage.getItem("arcana_banned")||"null");if(Array.isArray(l))return l}catch(e){}return DEFAULT_BANNED}
+const lowTR=t=>t.toLocaleLowerCase("tr");
+function bannedHit(t){
+  const low=lowTR(t);
+  for(const w of bannedList()){const k=lowTR(w).trim();if(!k)continue;
+    const re=new RegExp("(^|[^a-zçğıöşü0-9])"+k.replace(/[.*+?^${}()|[\]\\]/g,"\\$&"));if(re.test(low))return w}
+  return null;
+}
+function nameHit(t){
+  const words=t.split(/[\s,.;:!?()"“”'’…-]+/).filter(Boolean);
+  for(let i=0;i<words.length-1;i++){const a=words[i],b=words[i+1];
+    if(TR_NAMES.has(a)&&/^[A-ZÇĞİÖŞÜ][a-zçğıöşü]{2,}$/.test(b)&&!NAME_OK_NEXT.has(b)&&!TR_NAMES.has(b))return a+" "+b;
+    if(TR_NAMES.has(a)&&TR_NAMES.has(b)&&i+2<words.length&&/^[A-ZÇĞİÖŞÜ][a-zçğıöşü]{2,}$/.test(words[i+2])&&!NAME_OK_NEXT.has(words[i+2]))return a+" "+b+" "+words[i+2];}
+  return null;
+}
+const INST_RE=/(?:[A-ZÇĞİÖŞÜ][A-Za-zÇĞİÖŞÜçğıöşü]+\s+){1,4}(?:Lisesi|Koleji|Üniversitesi|Ortaokulu|İlkokulu|Okulları|Okulu|Hastanesi|Holding|Bankası|Belediyesi|Fakültesi|Yurdu|Dershanesi|Kursu|Şirketi|Mağazası|Market|Kafe|Cafe)(?![a-zçğıöşü])|\bA\.?Ş\.?(?=\s|$)/;
+/* kind: "itiraf" | "yorum" | "mesaj". Uygunsa null, değilse kullanıcıya gösterilecek açıklama döner. */
+function modCheck(t,kind){
+  const w=bannedHit(t);
+  if(w){track("filtre_kelime");return `“${esc(w)}” Arcana'da kullanılamıyor. Cinsel içerik ve hakaret içeren kelimeler engelleniyor.`}
+  if(kind==="mesaj")return null;
+  if(/(^|\s)@[A-Za-z0-9_.]{3,}/.test(t)){track("filtre_kullaniciadi");return "Başka birinin kullanıcı adını yazamazsın. Kimseyi etiketleme, ifşa etme."}
+  const n=nameHit(t);
+  if(n){track("filtre_isim");return `“${esc(n)}” gerçek bir ad soyad gibi görünüyor. ${kind==="itiraf"?"İtiraflarda":"Yorumlarda"} kimsenin adını soyadını yazamazsın, kimseyi ifşa etmeden anlat.`}
+  const m=t.match(INST_RE);
+  if(m){track("filtre_kurum");return `“${esc(m[0].trim())}” bir okul ya da iş yeri adı gibi görünüyor. Kimsenin tanınmasına yol açacak yer adı yazma.`}
+  return null;
+}
+
+
+/* ============ YÖNETİCİ PANELİ ============ */
+// Şimdilik bu cihazdaki verileri gösterir. Sunucu bağlanınca tüm kullanıcıların şikâyetleri buraya düşecek ve panel şifreyle korunacak.
+const LS=(k,d)=>{try{const v=JSON.parse(localStorage.getItem(k)||"null");return v==null?d:v}catch(e){return d}};
+const LSset=(k,v)=>{try{localStorage.setItem(k,JSON.stringify(v))}catch(e){}};
+function logReport(key,reason){const l=LS("arcana_reports",[]);l.unshift({id:"r"+Date.now(),key,reason,ts:Date.now(),status:"bekliyor"});LSset("arcana_reports",l.slice(0,200));track("sikayet")}
+function reportPreview(key){
+  const [t,id]=key.split(":");
+  if(t==="p"){const p=allPosts().find(x=>x.id===id);return p?{who:userOf(p.u).n,text:p.t,kind:"İtiraf"}:{who:"?",text:"(silinmiş itiraf)",kind:"İtiraf"}}
+  if(t==="u"){const u=U[id];return {who:u?u.n:id,text:u?u.bio||"":"",kind:"Kullanıcı"}}
+  return {who:"?",text:key,kind:"İçerik"};
+}
+const STAT_NAMES=[["kayit","Yeni üye"],["itiraf_yazildi","İtiraf"],["yorum","Yorum"],["mesaj","Mesaj"],["begen","Sağa kaydırma"],["eslesme","Eşleşme"],["paylas","Hikâye paylaşımı"],["davet","Davet linki paylaşımı"],["sikayet","Şikâyet"],["filtre_kelime","Filtre: kelime"],["filtre_isim","Filtre: ad soyad"],["filtre_kurum","Filtre: okul/iş yeri"],["filtre_kullaniciadi","Filtre: kullanıcı adı"]];
+function openAdmin(){
+  let el=$("#adm");if(!el){el=document.createElement("div");el.id="adm";el.setAttribute("role","dialog");el.setAttribute("aria-label","Yönetici paneli");document.body.appendChild(el)}
+  const stats=LS("arcana_stats",{}),today=stats[dayKey()]||{},tot={};
+  Object.values(stats).forEach(d=>Object.entries(d).forEach(([k,v])=>tot[k]=(tot[k]||0)+v));
+  const reps=LS("arcana_reports",[]),open=reps.filter(r=>r.status==="bekliyor"),done=reps.filter(r=>r.status!=="bekliyor").slice(0,20);
+  const banned=bannedList();
+  const repRow=r=>{const pv=reportPreview(r.key);return `<div class="adm-rep ${r.status!=="bekliyor"?"done":""}"><div class="adm-rh"><span class="adm-k">${pv.kind}</span><b>${esc(pv.who)}</b><span class="adm-reason">${esc(r.reason)}</span><small>${agoOf(r.ts)}</small></div>
+    <p>${esc(pv.text).slice(0,220)}</p>${r.status==="bekliyor"?`<div class="adm-acts"><button class="btn" data-adm="kaldir:${r.id}" style="background:var(--nar)">İçeriği kaldır</button><button class="btn line" data-adm="yoksay:${r.id}">Yoksay</button></div>`:`<small class="adm-st">${r.status==="kaldirildi"?"Kaldırıldı":"Yoksayıldı"}</small>`}</div>`};
+  el.innerHTML=`<div class="adm-in">
+    <div class="adm-top"><h2>Yönetici paneli</h2><button class="icon-btn" id="admX" aria-label="Kapat">${IC.close}</button></div>
+    <p class="hint" style="margin:-4px 0 16px">Şu an sadece bu cihazdaki verileri görüyorsun. Sunucu bağlanınca tüm kullanıcıların şikâyetleri ve istatistikleri buraya gelecek.</p>
+    <h3 class="adm-h">Bugün</h3>
+    <div class="adm-stats">${STAT_NAMES.map(([k,n])=>`<div><b>${today[k]||0}</b><small>${n}</small><i>toplam ${tot[k]||0}</i></div>`).join("")}</div>
+    <h3 class="adm-h">Şikâyetler <span>${open.length} bekliyor</span></h3>
+    ${open.length?open.map(repRow).join(""):`<p class="muted" style="font-size:14px">Bekleyen şikâyet yok.</p>`}
+    ${done.length?`<details class="adm-done"><summary>Sonuçlananlar (${done.length})</summary>${done.map(repRow).join("")}</details>`:""}
+    <h3 class="adm-h">Yasaklı kelimeler</h3>
+    <p class="hint" style="margin:-4px 0 10px">Bu kelimeler itiraf, yorum ve mesajlarda engellenir. Kelimenin başı eşleşir: “orospu” yazarsan “orospuluk” da engellenir.</p>
+    <div class="adm-words">${banned.map((w,i)=>`<span>${esc(w)}<button data-adm="sil:${i}" aria-label="${esc(w)} kelimesini kaldır">${IC.close}</button></span>`).join("")}</div>
+    <div class="adm-add"><input class="city-search" id="admW" placeholder="Kelime ekle" maxlength="40"><button class="btn" id="admWAdd">Ekle</button></div>
+    <button class="dice" id="admReset" style="margin-top:8px">Varsayılan listeye dön</button>
+    <h3 class="adm-h">Demo modu</h3>
+    <div class="adm-demo"><span><b>${DEMO?"Açık":"Kapalı"}</b><small>${DEMO?"Örnek kullanıcılar, otomatik cevaplar ve sahte beğeniler görünüyor. Gerçek kullanıcıya açmadan önce kapatılmalı.":"Sadece gerçek içerik görünüyor. Örnek kullanıcılar ve otomatik cevaplar kapalı."}</small></span><button class="btn line" id="admDemo">${DEMO?"Kapat":"Aç"}</button></div>
+  </div>`;
+  el.classList.add("open");document.body.style.overflow="hidden";
+  $("#admX").onclick=closeAdmin;
+  el.querySelectorAll("[data-adm]").forEach(b=>b.onclick=()=>{const [a,id]=b.dataset.adm.split(":");
+    if(a==="sil"){const l=[...bannedList()];l.splice(+id,1);LSset("arcana_banned",l);openAdmin();return}
+    const l=LS("arcana_reports",[]),r=l.find(x=>x.id===id);if(!r)return;
+    r.status=a==="kaldir"?"kaldirildi":"yoksayildi";LSset("arcana_reports",l);
+    if(a==="kaldir"){const rm=LS("arcana_removed",[]);if(!rm.includes(r.key))rm.push(r.key);LSset("arcana_removed",rm);state.hidden.add(r.key)}
+    toast(a==="kaldir"?"İçerik kaldırıldı":"Şikâyet yoksayıldı");openAdmin()});
+  const add=()=>{const v=$("#admW").value.trim();if(!v)return;const l=[...bannedList()];if(!l.map(lowTR).includes(lowTR(v)))l.push(v);LSset("arcana_banned",l);openAdmin()};
+  $("#admWAdd").onclick=add;$("#admW").onkeydown=e=>{if(e.key==="Enter")add()};
+  $("#admReset").onclick=()=>{try{localStorage.removeItem("arcana_banned")}catch(e){}openAdmin()};
+  $("#admDemo").onclick=()=>{try{localStorage.setItem("arcana_demo",DEMO?"0":"1")}catch(e){}location.reload()};
+}
+function closeAdmin(){const el=$("#adm");if(el)el.classList.remove("open");document.body.style.overflow="";if(/[?&]yonetim/.test(location.search))history.replaceState(null,"",location.pathname);render()}
+
+
+function showInvite(){
+  const url="https://berkkarabulut.github.io/arcana/",text="Arcana'da takma adla itiraf ediliyor, burç uyumuna göre eşleşiliyor. Gel bak: "+url;
+  track("davet");
+  if(navigator.share){navigator.share({title:"Arcana",text,url}).catch(()=>{});return}
+  try{navigator.clipboard.writeText(text);toast("Davet linki kopyalandı")}catch(e){toast(url)}
+}
 /* ============ PREMIUM KAPISI ============ */
 function premiumGate(title,text,onUnlock){
   const g=document.createElement("div");g.className="cf-scrim";g.setAttribute("role","dialog");g.setAttribute("aria-modal","true");
   g.innerHTML=`<div class="cf"><div class="cf-ic">${IC.lock}</div><h2>${title}</h2><p class="muted" style="font-size:14px;margin:6px 0 12px">${text}</p>
-    <div class="perks" style="margin:0 0 14px"><div>${IC.chk}Kendi profil fotoğrafını ve kapak görselini yükle</div><div>${IC.chk}İtirafların akışta herkese görünsün</div><div>${IC.chk}Sınırsız cevap, mesaj ve sohbet</div><div>${IC.chk}Seni beğenenleri gör, sınırsız kaydır</div><div>${IC.chk}Fotoğraf, ses, sesli ve görüntülü arama</div></div>
+    <div class="perks" style="margin:0 0 14px"><div>${IC.chk}Kendi profil fotoğrafını ve kapak görselini yükle</div><div>${IC.chk}İtirafını 24 saat akışın en üstüne taşı</div><div>${IC.chk}Sınırsız cevap, mesaj ve sohbet</div><div>${IC.chk}Seni beğenenleri gör, sınırsız kaydır</div><div>${IC.chk}Fotoğraf, ses, sesli ve görüntülü arama</div></div>
     <div style="display:grid;gap:8px"><button class="btn gold wide" id="pgY">Premium'u başlat · 119,90 ₺/ay</button><button class="btn line wide" id="pgN">Şimdi değil</button></div>
     <p class="hint" style="text-align:center">Prototip: ödeme alınmaz.</p></div>`;
   document.body.appendChild(g);
@@ -1447,18 +1592,25 @@ function showPost(id){
   $("#ex").onclick=closeSheet;
   const t=$("#cmIn"),g=$("#cmGo");
   t.oninput=()=>{grow(t);g.disabled=t.value.trim().length<2};
-  g.onclick=()=>{const v=t.value.trim();const bad=contactBlock(v);if(bad){$("#cmWarn").innerHTML=`<p class="warn">Yorumlarda ${bad} paylaşılamaz. Tanışmak istersen “Özelden yaz”ı kullan.</p>`;return}
+  g.onclick=()=>{const v=t.value.trim();const mc=modCheck(v,"yorum");if(mc){$("#cmWarn").innerHTML=`<p class="warn">${mc}</p>`;return}const bad=contactBlock(v);if(bad){$("#cmWarn").innerHTML=`<p class="warn">Yorumlarda ${bad} paylaşılamaz. Tanışmak istersen “Özelden yaz”ı kullan.</p>`;return}
     if(!state.premium&&p.u!=="me"&&!state.replied.has(p.u)&&state.replied.size>=3){premiumGate("Bugün daha fazla kişiye cevap yazamazsın","Ücretsiz planda günde sınırlı sayıda kişinin itirafına cevap yazabilirsin. Herkese sınırsız cevap yazmak için Premium'a geç.",()=>g.click());return}
     if(p.u!=="me")state.replied.add(p.u);
-    p.cm.push({u:"me",t:v,ago:"Şimdi",ts:Date.now()});state.myComments.push({on:p.t,t:v});toast("Yorumun gönderildi");showPost(id);render()};
+    p.cm.push({u:"me",t:v,ago:"Şimdi",ts:Date.now()});track("yorum");state.myComments.push({on:p.t,t:v});toast("Yorumun gönderildi");showPost(id);render()};
 }
 function showMore(id){
-  const p=allPosts().find(x=>x.id===id); if(!p)return; const mine=p.u==="me";
+  const p=allPosts().find(x=>x.id===id); if(!p)return; const mine=p.u==="me";state.lastMore=id;
   openSheet(`<div class="menu">
     <button id="m1">${IC.link}Bağlantıyı kopyala</button>
+    ${mine?`<button id="mB">${IC.spark}${isBoosted(p)?"Öne çıkarıldı, "+boostLeft(p)+" kaldı":"24 saat öne çıkar"}${state.premium?"":`<span class="lk-mini">${IC.lock}</span>`}</button><button id="mD" class="danger">${IC.close}İtirafı sil</button>`:""}
     ${mine?"":`<button id="m2">${IC.flag}İtirafı şikâyet et</button><button id="m3" class="danger">${IC.block}${esc(U[p.u].n)} kullanıcısını engelle</button>`}
     <button id="m4">${IC.close}Vazgeç</button></div>`);
   $("#m1").onclick=async()=>{closeSheet();try{await navigator.clipboard.writeText(location.href.split("#")[0]+"#"+p.id);toast("Bağlantı kopyalandı")}catch(e){toast("Kopyalanamadı")}};
+  if(mine){
+    $("#mB").onclick=()=>{if(isBoosted(p)){closeSheet();return}
+      if(!state.premium){premiumGate("İtirafını öne çıkar","Premium üyeler itiraflarını 24 saat boyunca akışın en üstüne taşıyabilir. Daha çok kişi okur, daha çok tepki ve mesaj gelir.",()=>showMore(id));return}
+      p.boost=Date.now();closeSheet();state.tab="akis";render();scrollTo(0,0);toast("İtirafın 24 saat akışın en üstünde");track("one_cikar")};
+    $("#mD").onclick=()=>openSheet(`<h2>İtiraf silinsin mi?</h2><p class="muted" style="margin:8px 0 16px">İtirafın, altındaki yorumlar ve tepkiler kalıcı olarak silinir. Bu işlem geri alınamaz.</p><div style="display:grid;gap:8px"><button class="btn wide" id="mDy" style="background:var(--nar)">Sil</button><button class="btn line wide" id="mDn">Vazgeç</button></div>`);
+  }
   if(!mine){$("#m2").onclick=()=>showReport("p:"+p.id);
     $("#m3").onclick=()=>{allPosts().filter(x=>x.u===p.u).forEach(x=>state.hidden.add("p:"+x.id));closeSheet();toast(`${U[p.u].n} engellendi. İtirafları ve mesajları sana görünmeyecek.`);render()}}
   $("#m4").onclick=closeSheet;
@@ -1498,7 +1650,7 @@ function startDM(k,fromId){
    <p class="hint" style="text-align:center">Numara, Instagram ve benzeri iletişim bilgileri otomatik engellenir.</p>`);
   const t=$("#dmIn"),g=$("#dmGo");
   t.oninput=()=>{grow(t);g.disabled=t.value.trim().length<3;$("#dmWarn").innerHTML=""};
-  g.onclick=()=>{const v=t.value.trim(),bad=contactBlock(v);if(bad){$("#dmWarn").innerHTML=`<p class="warn">Mesajında ${bad} var gibi görünüyor. Güvenliğin için iletişim bilgisi paylaşılamaz.</p>`;return}
+  g.onclick=()=>{const v=t.value.trim(),bad=contactBlock(v),mc=modCheck(v,"mesaj");if(mc){$("#dmWarn").innerHTML=`<p class="warn">${mc}</p>`;return}if(bad){$("#dmWarn").innerHTML=`<p class="warn">Mesajında ${bad} var gibi görünüyor. Güvenliğin için iletişim bilgisi paylaşılamaz.</p>`;return}
     const c={u:k,from:p?p.t:null,msgs:[{me:true,t:v}],status:"wait",unread:false};state.chats.unshift(c);closeSheet();render();
     toast(`İstek gönderildi. ${U[k].n} kabul edince sohbet açılır.`);
     setTimeout(()=>{c.status="open";c.unread=true;c.msgs.push({me:false,t:replyFor(c)});notify("dm",k,"mesaj isteğini kabul etti",{chat:k});toast(`${U[k].n} isteğini kabul etti`);render();if(openIdx===state.chats.indexOf(c))drawChat()},4500);};
@@ -1533,7 +1685,7 @@ function drawChat(){
   const t=$("#mIn");if(!t)return;
   t.oninput=()=>{grow(t);$("#mGo").disabled=!t.value.trim();$("#mWarn").innerHTML=""};
   t.onkeydown=e=>{if(e.key==="Enter"&&!e.shiftKey){e.preventDefault();$("#mGo").click()}};
-  $("#mGo").onclick=()=>{const v=t.value.trim();if(!v)return;const bad=contactBlock(v);
+  $("#mGo").onclick=()=>{const v=t.value.trim();if(!v)return;track("mesaj");const mc=modCheck(v,"mesaj");if(mc){$("#mWarn").innerHTML=`<p class="warn">${mc}</p>`;return}const bad=contactBlock(v);
     if(bad){$("#mWarn").innerHTML=`<p class="warn">Bu mesaj gönderilmedi: ${bad} paylaşılamaz. Sohbetler sitede kalır, böylece iki taraf da güvende olur.</p>`;return}
     c.msgs.push({me:true,t:v});drawChat();
     const ci=c;setTimeout(()=>{ci.typing=true;if(state.chats[openIdx]===ci)drawChat()},700);
@@ -1589,7 +1741,7 @@ function startCall(type,c){
 function showPremium(src){
   let plan="aylik";
   const draw=()=>openSheet(`<h2>Arcana Premium</h2><p class="muted" style="margin:6px 0 2px;font-size:14px">${src==="medya"?"Fotoğraf, ses kaydı, sesli ve görüntülü arama Premium'a özel.":src==="mesaj"?"Sohbetin yarıda kalmasın.":src==="esles"?"Sınırsız kaydır, seni beğenenleri gör.":src==="sohbet"?"Yeni sohbet başlatmak için Premium'a geç.":"Sınırsız konuş."}</p>
-   <div class="perks"><div>${IC.chk}Sınırsız mesaj, sınırsız sohbet</div><div>${IC.chk}Sınırsız kaydır, seni beğenenleri gör</div><div>${IC.chk}İtirafların akışta herkese görünsün</div><div>${IC.chk}İtiraflara sınırsız cevap yaz</div><div>${IC.chk}Kendi profil fotoğrafını ve kapağını yükle</div><div>${IC.chk}Fotoğraf, video ve ses kaydı gönder</div><div>${IC.chk}Sesli ve görüntülü arama</div><div>${IC.chk}Biriken mesajları hemen oku</div><div>${IC.chk}Mesajının okunduğunu gör</div><div>${IC.chk}Daha çok itiraf, itirafını öne çıkar</div></div>
+   <div class="perks"><div>${IC.chk}Sınırsız mesaj, sınırsız sohbet</div><div>${IC.chk}Sınırsız kaydır, seni beğenenleri gör</div><div>${IC.chk}İtirafını 24 saat akışın en üstüne taşı</div><div>${IC.chk}İtiraflara sınırsız cevap yaz</div><div>${IC.chk}Kendi profil fotoğrafını ve kapağını yükle</div><div>${IC.chk}Fotoğraf, video ve ses kaydı gönder</div><div>${IC.chk}Sesli ve görüntülü arama</div><div>${IC.chk}Biriken mesajları hemen oku</div><div>${IC.chk}Mesajının okunduğunu gör</div><div>${IC.chk}Daha çok itiraf, itirafını öne çıkar</div></div>
    <div class="plans">${[["haftalik","Haftalık","İstediğin zaman iptal","49,90 ₺"],["aylik","Aylık","En çok seçilen, haftalığa göre %40 ucuz","119,90 ₺"],["yillik","Yıllık","Aylık 49,90 ₺'ye gelir","599 ₺"]].map(([k,n,s,pr])=>`<button class="plan" data-plan="${k}" aria-pressed="${plan===k}"><span><b>${n}</b><small>${s}</small></span><span class="p">${pr}</span></button>`).join("")}</div>
    <button class="btn gold wide" id="buy">Premium'u başlat</button>
    <p class="hint" style="text-align:center">Prototip: ödeme alınmaz, düğme sadece Premium görünümünü açar. Fiyatlar örnektir.</p>`);
@@ -1609,19 +1761,17 @@ function showConfess(){
    <div class="box big"><textarea id="cfIn" maxlength="500" placeholder="Kimseye söyleyemediğin şey…"></textarea></div>
    <div class="row" style="border:0;padding:6px 2px 0"><span class="hint" style="margin:0" id="cnt">0 / 500</span></div>
    <div id="cfWarn"></div>
-   ${state.premium?"":`<button class="pnote" id="cfNote" style="max-width:none;margin-top:10px">${IC.lock}<span>Ücretsiz planda itirafın sadece profilinde görünür. Akışta herkese görünmesi için Premium gerekir.</span></button>`}
-   <button class="btn wide" id="cfGo" disabled style="margin-top:12px">${state.premium?"İtirafı akışta paylaş":"İtirafı profilimde paylaş"}</button>`);
-  const cn=$("#cfNote");if(cn)cn.onclick=()=>premiumGate("İtirafın akışta görünsün","Akışta sadece Premium üyelerin itirafları görünür. Premium'a geçince itirafın herkesin akışına düşer.",()=>{const v=$("#cfIn").value;showConfess();const t2=$("#cfIn");if(t2){t2.value=v;t2.oninput()}});
+   <button class="btn wide" id="cfGo" disabled style="margin-top:12px">İtirafı paylaş</button>`);
   const t=$("#cfIn"),g=$("#cfGo");
   $("#sheet").querySelectorAll("[data-pc]").forEach(b=>b.onclick=()=>{cat=b.dataset.pc;$("#sheet").querySelectorAll("[data-pc]").forEach(x=>x.setAttribute("aria-pressed",x===b))});
   t.oninput=()=>{$("#cnt").textContent=`${t.value.length} / 500`;g.disabled=t.value.trim().length<15;$("#cfWarn").innerHTML=""};
   setTimeout(()=>t.focus(),250);
   g.onclick=()=>{const v=t.value.trim(),bad=contactBlock(v);if(bad){$("#cfWarn").innerHTML=`<p class="warn">İtiraflarda ${bad} paylaşılamaz.</p>`;return}
+    const mc=modCheck(v,"itiraf");if(mc){$("#cfWarn").innerHTML=`<p class="warn">${mc}</p>`;return}
     const p={id:"m"+Date.now(),u:"me",cat,t:v,ago:"Şimdi",r:{bende:0,saril:0,yok:0},cm:[],today:true,day:dayKey(),ts:Date.now()};
     state.myPosts.unshift(p);closeSheet();
-    if(state.premium){state.tab="akis";state.cat="hepsi";render();scrollTo(0,0);toast("İtirafın akışta paylaşıldı")}
-    else{state.tab="ben";render();scrollTo(0,0);toast("İtirafın profilinde paylaşıldı. Akışta görünmesi için Premium gerekli.")}
-    if(!state.premium){setTimeout(()=>{p.r.saril+=2;notify("react",null,"Profilini ziyaret eden 2 kişi itirafına sarıldı",{post:p.id});render()},7000);return}
+    state.tab="akis";state.cat="hepsi";state.sort="yeni";render();scrollTo(0,0);toast("İtirafın akışta paylaşıldı");track("itiraf_yazildi",{kategori:cat});
+    if(!DEMO)return;
     setTimeout(()=>{p.r.saril+=3;p.r.bende+=5;p.cm.push({u:"dumanli",t:"Bunu yazdığın için cesursun. Yalnız değilsin.",ago:"Şimdi",ts:Date.now()});notify("cm","dumanli","itirafına yorum yaptı: “Bunu yazdığın için cesursun.”",{post:p.id});notify("react",null,"8 kişi itirafına tepki verdi",{post:p.id});render()},5000);
     setTimeout(()=>{const k=["dumanli","eskiplak","sessizlimon","mavimerdiven"].find(x=>!state.chats.some(c=>c.u===x)&&!state.requests.some(r=>r.u===x));if(!k)return;state.requests.push({u:k,first:"İtirafını okudum, çok tanıdık geldi. Biraz konuşmak ister misin?",from:p.t});notify("req",k,"itirafını okudu ve sana mesaj isteği gönderdi",{tab:"mesajlar"});toast("Yeni bir mesaj isteğin var");render()},9000);};
 }
@@ -1631,6 +1781,8 @@ document.addEventListener("click",e=>{
   if(e.target.closest("#onb"))return;
   const so=e.target.closest("[data-sort]");if(so){state.sort=so.dataset.sort;vAkis();return}
   const mo=e.target.closest("[data-more]");if(mo){showMore(mo.dataset.more);return}
+  if(e.target.closest("#mDn")){closeSheet();return}
+  const del=e.target.closest("#mDy");if(del){const id=state.lastMore;state.myPosts=state.myPosts.filter(x=>x.id!==id);state.notifs=state.notifs.filter(n=>!(n.go&&n.go.post===id));closeSheet();render();toast("İtirafın silindi");return}
   const shb=e.target.closest("[data-share]");if(shb){showShare(shb.dataset.share);return}
   const rp=e.target.closest("[data-report]");if(rp&&!e.target.closest("#onb")){showReport(rp.dataset.report);return}
   const t=e.target.closest("[data-tab],[data-cat],[data-react],[data-open],[data-prof],[data-dm],[data-chat],[data-rq],[data-block]");if(!t)return;
@@ -1660,7 +1812,7 @@ function showReport(key){
     <div class="plans">${reasons.map(r=>`<button class="plan" data-rs="${r}" aria-pressed="${sel===r}"><b style="font-weight:600">${r}</b></button>`).join("")}</div>
     <button class="btn wide" id="rpGo" ${sel?"":"disabled"}>Şikâyeti gönder</button>`);
     $("#sheet").querySelectorAll("[data-rs]").forEach(b=>b.onclick=()=>{sel=b.dataset.rs;draw()});
-    $("#rpGo").onclick=()=>{state.hidden.add(key);closeSheet();toast("Şikâyetin alındı. Bu içerik artık sana gösterilmeyecek.");render()}};
+    $("#rpGo").onclick=()=>{state.hidden.add(key);logReport(key,sel);closeSheet();toast("Şikâyetin alındı. Bu içerik artık sana gösterilmeyecek.");render()}};
   draw();
 }
 
@@ -1713,7 +1865,8 @@ function drawOnb(){
     body=`<h1>Doğum tarihin</h1><p class="lead">Burcun profilinde görünür, doğum tarihin görünmez. Yaşın sadece aralık olarak görünür.</p>
     <div class="wheels" style="grid-template-columns:1fr 2fr 1.3fr">${wheel("gun",range(1,days),ob.d)}${wheel("ay",range(1,12,i=>AYLAR[i-1]),ob.m)}${wheel("yil",range(1950,new Date().getFullYear()-18),ob.y)}</div>
     <div class="wlab" style="grid-template-columns:1fr 2fr 1.3fr"><span>Gün</span><span>Ay</span><span>Yıl</span></div>
-    <div class="sign-big" id="sb"><div class="g glyph">${sign.g}</div><div><b style="font-size:17px">${sign.n}</b><div class="muted" style="font-size:13px">${EL[sign.e]} grubu, ${ageBand(ageOf(ob.y,ob.m,ob.d))} yaş aralığı</div></div></div>`;}
+    <div class="sign-big" id="sb"><div class="g glyph">${sign.g}</div><div><b style="font-size:17px">${sign.n}</b><div class="muted" style="font-size:13px">${EL[sign.e]} grubu, ${ageBand(ageOf(ob.y,ob.m,ob.d))} yaş aralığı</div></div></div>
+    <p class="warn" id="ageWarn" ${ageOf(ob.y,ob.m,ob.d)>=18?"hidden":""} style="margin-top:12px">Arcana'yı kullanmak için 18 yaşını doldurmuş olman gerekiyor.</p>`;ok=ageOf(ob.y,ob.m,ob.d)>=18;}
   if(s===3){body=`<h1>Biraz daha</h1><p class="lead">Profilinde görünür, sohbet önerilerinde kullanılır.</p>
     <label class="lbl">Cinsiyet</label><div class="choice">${["Kadın","Erkek","Belirtmeyeyim"].map(g=>`<button data-g="${g}" aria-pressed="${ob.g===g}">${g}</button>`).join("")}</div>`;ok=!!ob.g;}
   if(s===4){body=`<h1>Burada kurallar kısa</h1>
@@ -1740,7 +1893,7 @@ function drawOnb(){
       if(!ob.ad)setTimeout(()=>{const a=$("#ad");a&&a.focus()},120)}}
   if(s===1){const n=$("#nk");n.oninput=()=>{ob.n=n.value.replace(/\s/g,"").toLocaleLowerCase("tr");if(n.value!==ob.n)n.value=ob.n;$("#obN").disabled=ob.n.length<3};
     $("#dice").onclick=()=>{ob.n=rndNick();drawOnb()};document.querySelectorAll("[data-c]").forEach(b=>b.onclick=()=>{ob.c=b.dataset.c;drawOnb()});if(!ob.n)setTimeout(()=>n.focus(),120)}
-  if(s===2){const upd=()=>{if(!$("#sb"))return;const sign=Z[signOf(ob.m,ob.d)];$("#sb").innerHTML=`<div class="g glyph">${sign.g}</div><div><b style="font-size:17px">${sign.n}</b><div class="muted" style="font-size:13px">${EL[sign.e]} grubu, ${ageBand(ageOf(ob.y,ob.m,ob.d))} yaş aralığı</div></div>`};
+  if(s===2){const upd=()=>{if(!$("#sb"))return;const ad=ageOf(ob.y,ob.m,ob.d)>=18;const w=$("#ageWarn");if(w)w.hidden=ad;const nb=$("#obN");if(nb)nb.disabled=!ad;const sign=Z[signOf(ob.m,ob.d)];$("#sb").innerHTML=`<div class="g glyph">${sign.g}</div><div><b style="font-size:17px">${sign.n}</b><div class="muted" style="font-size:13px">${EL[sign.e]} grubu, ${ageBand(ageOf(ob.y,ob.m,ob.d))} yaş aralığı</div></div>`};
     bindWheel("gun",v=>{ob.d=v;upd()});bindWheel("ay",v=>{ob.m=v;fixDays();upd()});bindWheel("yil",v=>{ob.y=v;fixDays();upd()})}
   if(s===3)document.querySelectorAll("[data-g]").forEach(b=>b.onclick=()=>{ob.g=b.dataset.g;drawOnb()});
   if(s===4)$("#ck").onclick=()=>{ob.ok=!ob.ok;drawOnb()};
@@ -1763,11 +1916,14 @@ function obNext(){
   if(ob.step===0&&ob.provider==="email"&&!ob.codeSent){ob.codeSent=true;drawOnb();toast("Doğrulama kodu e-postana gönderildi");setTimeout(()=>{const k=$("#kod");k&&k.focus()},150);return}
   if(ob.step<STEPS-1){ob.step++;drawOnb();$("#onb").scrollTop=0;return}
   const bio=state.me?state.me.bio:"";
+  if(ageOf(ob.y,ob.m,ob.d)<18){ob.step=2;drawOnb();toast("18 yaşından küçükler kayıt olamaz");return}
+  if(!ob.editing)track("kayit",{yontem:ob.provider});
   state.me={n:ob.n,c:ob.c,s:signOf(ob.m,ob.d),g:ob.g,age:ageBand(ageOf(ob.y,ob.m,ob.d)),bio,b:{d:ob.d,m:ob.m,y:ob.y},ad:ob.ad.trim(),soyad:ob.soyad.trim(),email:ob.email.trim(),provider:ob.provider,photo:state.me?state.me.photo:undefined,banner:state.me?state.me.banner:undefined};
   save();$("#onb").hidden=true;render();toast(ob.editing?"Bilgilerin kaydedildi":`Hoş geldin ${ob.n}`);ob.editing=false;seedDemo();
 }
 let seeded=false;
 function seedDemo(){ if(seeded)return;seeded=true;
+  if(!DEMO){notify("sys",null,"Arcana'ya hoş geldin. İlk itirafını yaz, insanlar seni yazdıklarınla tanısın.",{confess:1});render();return}
   // 20 mesaj sınırını görmek için neredeyse dolmuş örnek sohbet
   const t=["Selam, Mardin itirafını okudum. Ben de aynısını Kapadokya için yapmıştım.","Ciddi mi? Kime ne dedin?","Arkadaşımın düğünü var dedim, üç gün balon izledim.","Hahaha klasik. Yakalandın mı peki?","Annem fotoğrafları Instagram'da gördü. Tabii ki yakalandım.","Ben bu yüzden hiçbir şey paylaşmıyorum zaten.","Akıllıca. Sen nerede yaşıyorsun, il söyle yeter.","Ankara. Sen?","İzmir. Ama Ankara'ya çok geliyorum iş için.","Ankara'da gece gezilecek yer yok, uyarayım.","Kızılay'da bir yer biliyorum ama, gece 2'ye kadar açık.","Bak bu ilginç. Neresi?","Söylersem gelirsin diye korkuyorum şimdi.","Haha korkma, sadece merak ettim.","Peki. Bir dahaki gelişinde anlatırım.","Anlaştık. Bu arada burcun ne?","Yay. Belli değil mi?",`Çok belli. Ben ${Z[state.me.s].n}, bakalım anlaşabilecek miyiz.`];
   state.chats.push({u:"kedikahve",from:POSTS[7].t,msgs:t.map((x,i)=>({me:i%2===1,t:x})),status:"open",unread:false});
@@ -1832,6 +1988,8 @@ function loadData(){
     state.chats.forEach(c=>{if(c.status==="wait")setTimeout(()=>{c.status="open";c.unread=true;c.msgs.push({me:false,t:replyFor(c)});toast(`${U[c.u].n} isteğini kabul etti`);render();if(openIdx===state.chats.indexOf(c))drawChat()},4000)});
   }catch(e){}
 }
+LS("arcana_removed",[]).forEach(k=>state.hidden.add(k));
+{let taps=0,tt=0;document.querySelector(".logo").addEventListener("click",()=>{const n=Date.now();taps=n-tt<700?taps+1:1;tt=n;if(taps>=5){taps=0;if(state.me)openAdmin()}})}
 {const r0=render,d0=drawChat,e0=vEsles;render=function(){r0();saveData()};drawChat=function(){d0();saveData()};vEsles=function(){e0();saveData()}}
 addEventListener("pagehide",saveData);document.addEventListener("visibilitychange",()=>{if(document.hidden)saveData()});
 try{const s=JSON.parse(localStorage.getItem("itiraf_me")||"null");if(s&&s.n&&s.s){state.me=s;loadData();render();seedDemo()}else startOnb()}catch(e){startOnb()}
