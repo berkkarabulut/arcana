@@ -16,6 +16,14 @@
 <meta property="og:locale" content="tr_TR">
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:image" content="https://berkkarabulut.github.io/arcana/og.jpg">
+<meta name="theme-color" content="#14101A">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" type="image/png" sizes="32x32" href="icons/favicon-32.png">
+<link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Arcana">
+<meta name="apple-mobile-web-app-status-bar-style" content="black">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,600;1,6..72,400;1,6..72,500&family=Figtree:wght@400;500;600;700;800&display=swap" rel="stylesheet">
@@ -535,6 +543,61 @@ button:active:not(:disabled){transform:scale(.97)}
 .match q{quotes:none;display:block;margin-top:14px;font-family:var(--display);font-style:italic;font-size:17px;line-height:1.4;color:rgba(244,236,228,.85)}
 .mtag{margin-left:6px;font-size:11px;font-weight:800;padding:2px 7px;border-radius:999px;background:rgba(232,80,91,.16);color:#F08A92;vertical-align:2px}
 @media (prefers-reduced-motion:reduce){.swc,.swc.fly{transition:none}.match{animation:none}}
+
+/* ===== Ana ekrana ekle ===== */
+.inst{display:flex;align-items:center;gap:12px;padding:12px 12px 12px 14px;margin-bottom:14px;border-radius:18px;background:linear-gradient(100deg,rgba(232,80,91,.14),rgba(233,185,110,.08));border:1px solid rgba(233,185,110,.22)}
+.inst img{border-radius:12px;flex:none}
+.inst span{flex:1;min-width:0;display:flex;flex-direction:column;line-height:1.3}
+.inst b{font-size:14.5px}.inst small{font-size:12.5px;color:var(--soluk)}
+.inst .btn{height:38px;padding:0 16px;flex:none}
+.inst-x{width:30px;height:30px;display:grid;place-items:center;color:var(--soluk);flex:none;margin-left:-4px}
+.inst-hero{display:flex;align-items:center;gap:14px;padding:14px;border-radius:18px;background:var(--yuzey);margin-bottom:16px}
+.inst-hero img{border-radius:16px}.inst-hero div{display:flex;flex-direction:column}.inst-hero b{font-size:17px}.inst-hero small{color:var(--soluk);font-size:13px}
+.inst-steps{list-style:none;display:grid;gap:12px;padding:0}
+.inst-steps li{display:flex;align-items:center;gap:12px;font-size:15px;line-height:1.4}
+.inst-steps .n{width:28px;height:28px;border-radius:50%;flex:none;display:grid;place-items:center;font-weight:800;font-size:13px;background:rgba(233,185,110,.14);color:var(--altin)}
+
+/* ===== Hikâyede paylaş ===== */
+.sh-prev{display:grid;place-items:center;background:var(--murekkep);border-radius:18px;padding:12px;min-height:200px}
+.sh-prev img{width:min(100%,250px);aspect-ratio:9/16;border-radius:14px;box-shadow:0 14px 30px rgba(0,0,0,.4)}
+.sh-load{color:var(--soluk);font-size:14px}
+a.btn{display:inline-flex;align-items:center;justify-content:center;text-decoration:none}
+.btn svg{width:18px;height:18px}
+.mini-sh{display:inline-flex;align-items:center;gap:6px;margin-left:10px;font-size:12.5px;font-weight:700;color:var(--altin)}
+.mini-sh svg{width:15px;height:15px}
+
+/* paylaş butonu eklenince alt satır sığsın */
+.it-foot .r{padding:0 8px 0 7px;gap:4px}
+.it-foot .reacts{gap:4px}
+.acts2 .ib{min-width:30px;padding:0 5px}
+@media (max-width:390px){.it-foot{gap:3px}.it-foot .reacts{gap:3px}.it-foot .r{padding:0 6px 0 5px;gap:3px;font-size:12px}.it-foot .r svg{width:15px;height:15px}.acts2{gap:0}.acts2 .ib{padding:0 3px;min-width:27px;gap:3px}.acts2 .ib svg{width:16px;height:16px}}
+@media (max-width:350px){.it-foot .r{padding:0 4px;gap:2px}.it-foot .r svg{width:14px;height:14px}.acts2 .ib{min-width:24px;padding:0 2px}}
+
+/* ===== Karşılama ===== */
+#onbIn.wel .steps,#onbIn.wel .ob-back{display:none}
+#onbIn.wel{padding-top:8px}
+.wel-hero{text-align:center;padding:12px 0 2px;position:relative}
+.wel-hero::before{content:"";position:absolute;left:50%;top:-30px;width:420px;height:300px;transform:translateX(-50%);background:radial-gradient(closest-side,rgba(232,80,91,.22),transparent);pointer-events:none;z-index:-1}
+.wel-logo{display:inline-flex;align-items:flex-end;gap:4px}
+.wl{font-family:var(--display);font-style:italic;font-size:56px;line-height:.9;letter-spacing:-.01em}
+.wd{width:12px;height:12px;border-radius:50%;background:var(--nar);margin-bottom:9px;box-shadow:0 0 16px rgba(232,80,91,.8)}
+.wel-sub{font-size:13.5px;font-weight:700;color:var(--altin);margin-top:8px}
+.step h1.wel-h{font-family:var(--display);font-weight:400;font-size:25px;line-height:1.2;margin:12px auto 0;max-width:330px;text-wrap:balance;letter-spacing:0}
+.wq-wrap{margin:18px -22px 0;display:grid;gap:10px;-webkit-mask-image:linear-gradient(90deg,transparent,#000 12%,#000 88%,transparent);mask-image:linear-gradient(90deg,transparent,#000 12%,#000 88%,transparent)}
+.wq-row{overflow:hidden}
+.wq-track{display:flex;gap:10px;width:max-content;animation:wq 70s linear infinite}
+.wq-row.r2 .wq-track{animation-duration:84s;animation-direction:reverse;padding-left:60px}
+@keyframes wq{to{transform:translateX(-50%)}}
+.wq{width:236px;flex:none;display:flex;gap:10px;align-items:flex-start;padding:12px 14px;border-radius:16px;background:var(--yuzey);border:1px solid var(--cizgi)}
+.wq-z{width:28px;height:28px;border-radius:50%;display:grid;place-items:center;color:#fff;font-size:14px;flex:none}
+.wq span:last-child{font-family:var(--display);font-size:14.5px;line-height:1.35;color:rgba(244,236,228,.9);display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden}
+.wq small{display:block;font-family:var(--sans,inherit);font-size:11.5px;font-weight:700;color:var(--soluk);margin-bottom:2px;font-family:Figtree,sans-serif}
+.wel-steps{list-style:none;padding:0;display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin:16px 0 0}
+.wel-steps li{display:flex;flex-direction:column;align-items:center;text-align:center;gap:2px;padding:10px 6px;border-radius:16px;background:rgba(244,236,228,.03)}
+.wel-steps .wi{width:34px;height:34px;border-radius:12px;display:grid;place-items:center;color:var(--altin);background:rgba(233,185,110,.12);margin-bottom:4px}
+.wel-steps b{font-size:14px}.wel-steps small{font-size:11.5px;line-height:1.3;color:var(--soluk)}
+.wel-lead{text-align:center;font-size:13.5px;margin-top:14px;color:var(--soluk)}
+@media (prefers-reduced-motion:reduce){.wq-track{animation:none}}
 </style>
 </head>
 <body>
@@ -708,6 +771,7 @@ const PB='<svg class="pb" viewBox="0 0 24 24" aria-label="Premium üye" role="im
 const pb=k=>isPrem(k)?PB:"";
 function who(k,sub){const u=userOf(k);return `<button class="who" data-prof="${k}">${av(k)}<span><b>${esc(u.n)}${pb(k)}</b><small>${Z[u.s].n}${sub?", "+sub:""}</small></span></button>`}
 const IC={
+ share:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 15V3"/><path d="M8 7l4-4 4 4"/><path d="M5 12v7a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-7"/></svg>',
  meToo:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M8 11V6.5a1.5 1.5 0 0 1 3 0V11m0-1.5V5a1.5 1.5 0 0 1 3 0v4.5m0 0V6.5a1.5 1.5 0 0 1 3 0V14a6 6 0 0 1-6 6h-.5a6 6 0 0 1-5-2.7L3.8 14a1.5 1.5 0 0 1 2.4-1.8L8 14"/></svg>',
  hug:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 20s-7-4.4-7-10a4 4 0 0 1 7-2.6A4 4 0 0 1 19 10c0 5.6-7 10-7 10z"/></svg>',
  wow:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="8.5"/><circle cx="9" cy="10" r=".9" fill="currentColor"/><circle cx="15" cy="10" r=".9" fill="currentColor"/><ellipse cx="12" cy="15.5" rx="2" ry="2.4"/></svg>',
@@ -777,6 +841,7 @@ function postHTML(p,opts={}){
    <div class="it-foot"><div class="reacts">${REACTS.map(([k,l,ic])=>`<button class="r" data-react="${p.id}:${k}" aria-pressed="${my===k}" title="${l}" aria-label="${l}">${IC[ic]}<span class="n">${(p.r[k]||0)+(my===k?1:0)}</span></button>`).join("")}</div>
    <div class="acts2">${opts.full?"":`<button class="ib" data-open="${p.id}" aria-label="Yorumlar">${IC.cm}${p.cm.length}</button>`}
    ${mine?"":`<button class="ib dm" data-dm="${p.u}" data-from="${p.id}" aria-label="Özelden yaz">${IC.dm}</button>`}
+   <button class="ib" data-share="${p.id}" aria-label="Hikâyede paylaş">${IC.share}</button>
    <button class="ib" data-more="${p.id}" aria-label="Diğer seçenekler">${IC.more}</button></div></div></article>`;
 }
 const reactTotal=p=>Object.values(p.r).reduce((a,b)=>a+b,0);
@@ -785,10 +850,11 @@ function vAkis(){
   let feat=null;
   if(state.sort==="populer"){list=[...list].sort((a,b)=>(b.u==="me")-(a.u==="me")||reactTotal(b)-reactTotal(a));
     if(state.cat==="hepsi"&&list.length>2){const i=list.findIndex(p=>p.u!=="me");feat=list.splice(i,1)[0]}}
-  view.innerHTML=`<div class="cats" role="toolbar" aria-label="Kategori">${CATS.map(([k,l])=>`<button class="c" data-cat="${k}" aria-pressed="${state.cat===k}">${l}</button>`).join("")}</div>
+  view.innerHTML=`${instBanner()}<div class="cats" role="toolbar" aria-label="Kategori">${CATS.map(([k,l])=>`<button class="c" data-cat="${k}" aria-pressed="${state.cat===k}">${l}</button>`).join("")}</div>
    <div class="feed-head"><div class="seg2" role="group" aria-label="Sıralama"><button data-sort="populer" aria-pressed="${state.sort==="populer"}">Popüler</button><button data-sort="yeni" aria-pressed="${state.sort==="yeni"}">Yeni</button></div><span class="feed-count">${list.length+(feat?1:0)} itiraf</span></div>
    ${feat?`<div class="feat"><div class="it" style="padding-top:12px"><div class="feat-tag">${IC.spark}Bugün en çok sarılan</div>${postHTML(feat).replace('<article class="it">','<article class="it" style="background:none;border:0;padding:0;margin:0">')}</div></div>`:""}
    ${list.length?list.map(p=>postHTML(p)).join(""):(feat?"":`<p class="empty">Bu kategoride henüz itiraf yok. Ortadaki “İtiraf et” ile ilkini sen yaz.</p>`)}`;
+  bindInst();
 }
 function vMesajlar(){
   const free=!state.premium;
@@ -813,13 +879,15 @@ function vBen(){
    ${me.ad?`<details class="private"><summary>${IC.lock} Gizli bilgilerin<span class="chev">${IC.chev}</span></summary><div class="val" style="margin-top:10px">${esc(me.ad)} ${esc(me.soyad)}<br>${esc(me.email||"")}</div><p>${{google:"Google ile giriş yaptın.",apple:"Apple ile giriş yaptın.",email:"E-posta ile giriş yaptın."}[me.provider]||""} Bunları sadece sen görüyorsun, diğer kullanıcılar seni ${esc(me.n)} olarak görür.</p></details>`:""}
    <div class="tabs"><button aria-pressed="true">İtiraflarım</button></div>
    ${mine.length&&!state.premium?`<button class="pnote" id="feedNote" style="max-width:none;margin:10px 0 2px">${IC.lock}<span>İtirafların şu an sadece profilinde görünüyor. Akışta herkese görünmesi için Premium'a geç.</span></button>`:""}
-   ${mine.length?mine.map(p=>`<div class="mini"><q data-open="${p.id}" style="cursor:pointer">“${esc(p.t)}”</q><div class="on">${CATN[p.cat]}, ${p.cm.length} yorum, ${reactTotal(p)} tepki${state.premium?", akışta":", sadece profilde"}</div></div>`).join(""):`<p class="empty">Henüz itirafın yok. Ortadaki “İtiraf et” ile ilkini yaz.</p>`}
+   ${mine.length?mine.map(p=>`<div class="mini"><q data-open="${p.id}" style="cursor:pointer">“${esc(p.t)}”</q><div class="on">${CATN[p.cat]}, ${p.cm.length} yorum, ${reactTotal(p)} tepki${state.premium?", akışta":", sadece profilde"}<button class="mini-sh" data-share="${p.id}">${IC.share}Hikâyede paylaş</button></div></div>`).join(""):`<p class="empty">Henüz itirafın yok. Ortadaki “İtiraf et” ile ilkini yaz.</p>`}
+   ${isStandalone()?"":`<button class="btn line wide" id="instPro" style="margin-top:22px">${PHONE_DL}Ana ekrana ekle</button>`}
    <button class="btn line wide" id="outBtn" style="margin-top:22px;color:var(--nar);border-color:rgba(232,80,91,.35)">${LOGOUT}Çıkış yap</button></div>`;
   const fn=$("#feedNote");if(fn)fn.onclick=()=>premiumGate("İtirafın akışta görünsün","Akışta sadece Premium üyelerin itirafları görünür. Premium'a geçince itirafların herkesin akışına düşer.",()=>vBen());
   const pn=$("#pNote");if(pn)pn.onclick=()=>premiumGate("Fotoğrafın görünsün","Yüklediğin fotoğraf ve kapak Premium üyelerde herkese görünür.",()=>vBen());
   $("#camBtn").onclick=()=>showEditProfile("photo");$("#covBtn").onclick=()=>showEditProfile("banner");
   $("#editPro").onclick=showEditProfile;
   $("#outTop").onclick=$("#outBtn").onclick=confirmLogout;
+  const ip=$("#instPro");if(ip)ip.onclick=installApp;
   const gp=$("#goPrem");if(gp)gp.onclick=()=>showPremium("profil");
 }
 
@@ -974,6 +1042,127 @@ document.addEventListener("keydown",e=>{
   if(e.key==="ArrowRight"){const b=$("#swYes");if(b){e.preventDefault();b.click()}}
   else if(e.key==="ArrowLeft"){const b=$("#swNo");if(b){e.preventDefault();b.click()}}
 });
+
+
+/* ============ ANA EKRANA EKLE (PWA) ============ */
+let instEvt=null;
+addEventListener("beforeinstallprompt",e=>{e.preventDefault();instEvt=e;if(state.tab==="akis"&&state.me)render()});
+addEventListener("appinstalled",()=>{instEvt=null;toast("Arcana ana ekranına eklendi");render()});
+const isStandalone=()=>matchMedia("(display-mode: standalone)").matches||navigator.standalone===true;
+const isIOS=()=>/iphone|ipad|ipod/i.test(navigator.userAgent)||(navigator.platform==="MacIntel"&&navigator.maxTouchPoints>1);
+const isMobile=()=>isIOS()||/android/i.test(navigator.userAgent);
+const inAppBrowser=()=>/Instagram|FBAN|FBAV|TikTok|musical_ly|Snapchat|Line\//i.test(navigator.userAgent);
+const PHONE_DL='<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="6" y="2" width="12" height="20" rx="3"/><path d="M12 7v7"/><path d="M9 11l3 3 3-3"/></svg>';
+function instBanner(){
+  let off=false;try{off=localStorage.getItem("arcana_inst_off")==="1"}catch(e){}
+  if(isStandalone()||off||!(instEvt||isMobile()))return "";
+  return `<div class="inst" id="inst"><img src="icons/icon-192.png" alt="" width="44" height="44"><span><b>Arcana'yı ana ekranına ekle</b><small>Uygulama gibi tam ekran açılır.</small></span><button class="btn" id="instGo">Ekle</button><button class="inst-x" id="instX" aria-label="Kapat">${IC.close}</button></div>`;
+}
+function bindInst(){
+  const g=$("#instGo");if(g)g.onclick=installApp;
+  const x=$("#instX");if(x)x.onclick=()=>{try{localStorage.setItem("arcana_inst_off","1")}catch(e){}$("#inst").remove();toast("Profilim'den istediğin zaman ekleyebilirsin")};
+}
+async function installApp(){
+  if(instEvt){instEvt.prompt();const r=await instEvt.userChoice.catch(()=>null);instEvt=null;if(r&&r.outcome==="accepted")toast("Ekleniyor…");return}
+  const step=(n,t)=>`<li><span class="n">${n}</span><span>${t}</span></li>`;
+  const SHARE='<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-3px"><path d="M12 3v12"/><path d="M8 7l4-4 4 4"/><path d="M5 12v7a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-7"/></svg>';
+  let body;
+  if(inAppBrowser())body=`<p class="muted" style="margin-bottom:12px">Şu an Instagram ya da TikTok'un kendi tarayıcısındasın, buradan ana ekrana eklenmiyor.</p><ol class="inst-steps">${step(1,"Sağ üstteki <b>⋯</b> menüsüne dokun")}${step(2,isIOS()?"<b>Safari'de aç</b>'ı seç":"<b>Tarayıcıda aç</b>'ı seç")}${step(3,"Açılan sayfada bu adımları tekrar et")}</ol>`;
+  else if(isIOS())body=`<ol class="inst-steps">${step(1,`Safari'de alttaki <b>Paylaş</b> ${SHARE} simgesine dokun`)}${step(2,"Listeyi aşağı kaydır, <b>Ana Ekrana Ekle</b>'yi seç")}${step(3,"Sağ üstteki <b>Ekle</b>'ye dokun")}</ol><p class="hint" style="margin-top:12px">iPhone'da bu sadece Safari'de çalışır. Chrome'daysan linki Safari'de aç.</p>`;
+  else body=`<ol class="inst-steps">${step(1,"Tarayıcının sağ üstündeki <b>⋮</b> menüsüne dokun")}${step(2,"<b>Ana ekrana ekle</b> ya da <b>Uygulamayı yükle</b>'yi seç")}${step(3,"<b>Ekle</b>'ye dokun")}</ol>`;
+  openSheet(`<div class="sheet-head"><h2>Ana ekrana ekle</h2></div>
+    <div class="inst-hero"><img src="icons/icon-192.png" alt="" width="64" height="64"><div><b>Arcana</b><small>Telefonunda uygulama gibi dursun</small></div></div>${body}
+    <button class="btn wide" style="margin-top:16px" onclick="closeSheet()">Tamam</button>`);
+}
+if("serviceWorker" in navigator&&location.protocol==="https:"&&/github\.io$/.test(location.hostname))addEventListener("load",()=>navigator.serviceWorker.register("sw.js").catch(()=>{}));
+
+
+/* ============ HİKÂYEDE PAYLAŞ ============ */
+const SITE_URL="berkkarabulut.github.io/arcana";
+function wrapLines(ctx,text,maxW){
+  const words=text.split(/\s+/),lines=[];let line="";
+  for(const w of words){const t=line?line+" "+w:w;if(ctx.measureText(t).width>maxW&&line){lines.push(line);line=w}else line=t}
+  if(line)lines.push(line);return lines;
+}
+function rr(ctx,x,y,w,h,r){ctx.beginPath();ctx.moveTo(x+r,y);ctx.arcTo(x+w,y,x+w,y+h,r);ctx.arcTo(x+w,y+h,x,y+h,r);ctx.arcTo(x,y+h,x,y,r);ctx.arcTo(x,y,x+w,y,r);ctx.closePath()}
+async function storyCanvas(p){
+  try{await Promise.all(['italic 400 100px Newsreader','400 64px Newsreader','700 34px Figtree','800 30px Figtree'].map(f=>document.fonts.load(f)))}catch(e){}
+  const W=1080,H=1920,cv=document.createElement("canvas");cv.width=W;cv.height=H;const x=cv.getContext("2d");
+  const u=userOf(p.u),mine=p.u==="me",acc=u.c||"#E8505B",SERIF='Newsreader, "Crimson Text", Georgia, serif',SANS='Figtree, "DM Sans", system-ui, sans-serif';
+  x.fillStyle="#14101A";x.fillRect(0,0,W,H);
+  const glow=(cx,cy,r,c)=>{const g=x.createRadialGradient(cx,cy,0,cx,cy,r);g.addColorStop(0,c);g.addColorStop(1,"rgba(20,16,26,0)");x.fillStyle=g;x.fillRect(0,0,W,H)};
+  glow(930,260,760,"rgba(232,80,91,.30)");glow(120,1760,760,"rgba(233,185,110,.18)");glow(160,300,520,"rgba(120,70,140,.18)");
+  let seed=p.id.split("").reduce((a,c)=>a+c.charCodeAt(0),7);const rnd=()=>{seed=(seed*9301+49297)%233280;return seed/233280};
+  for(let i=0;i<70;i++){x.globalAlpha=.15+rnd()*.45;x.fillStyle="#F4ECE4";x.beginPath();x.arc(rnd()*W,rnd()*H,1+rnd()*2.2,0,7);x.fill()}x.globalAlpha=1;
+  // logo
+  x.textAlign="center";x.textBaseline="alphabetic";x.fillStyle="#F4ECE4";x.font=`italic 400 112px ${SERIF}`;
+  const lw=x.measureText("Arcana").width;x.fillText("Arcana",W/2-12,250);
+  x.fillStyle="#E8505B";x.beginPath();x.arc(W/2+lw/2+4,236,13,0,7);x.fill();
+  x.fillStyle="#E9B96E";x.font=`700 34px ${SANS}`;x.fillText("İtiraf & Sohbet",W/2,315);
+  // kart
+  const cx=84,cw=W-168,pad=64;let fs=66,lines;
+  x.font=`400 ${fs}px ${SERIF}`;
+  for(;fs>=40;fs-=2){x.font=`400 ${fs}px ${SERIF}`;lines=wrapLines(x,"“"+p.t+"”",cw-pad*2);if(lines.length*fs*1.32<=900)break}
+  const lh=fs*1.32,qh=lines.length*lh,ch=170+qh+150,cy=Math.max(420,(H-ch)/2+40);
+  x.save();x.shadowColor="rgba(0,0,0,.5)";x.shadowBlur=60;x.shadowOffsetY=30;rr(x,cx,cy,cw,ch,56);x.fillStyle="#221B2A";x.fill();x.restore();
+  x.save();rr(x,cx,cy,cw,ch,56);x.clip();const g=x.createRadialGradient(cx+cw,cy,0,cx+cw,cy,cw*.9);g.addColorStop(0,acc+"55");g.addColorStop(1,"rgba(34,27,42,0)");x.fillStyle=g;x.fillRect(cx,cy,cw,ch);x.restore();
+  rr(x,cx,cy,cw,ch,56);x.strokeStyle="rgba(244,236,228,.12)";x.lineWidth=2;x.stroke();
+  // kart başı
+  const hy=cy+pad+38;x.fillStyle=acc;x.beginPath();x.arc(cx+pad+38,hy,38,0,7);x.fill();
+  x.fillStyle="#fff";x.font=`400 40px ${SANS}`;x.textAlign="center";x.textBaseline="middle";x.fillText(Z[u.s].g+"︎",cx+pad+38,hy+2);
+  x.textAlign="left";x.textBaseline="alphabetic";x.fillStyle="#F4ECE4";x.font=`800 36px ${SANS}`;
+  x.fillText(mine?u.n:`Bir ${Z[u.s].n} itiraf etti`,cx+pad+96,hy-4);
+  x.fillStyle="rgba(244,236,228,.6)";x.font=`600 28px ${SANS}`;x.fillText(mine?`${Z[u.s].n}${u.age?", "+u.age:""}`:"Takma adı gizli",cx+pad+96,hy+36);
+  const cat=CATN[p.cat]||"";x.font=`800 26px ${SANS}`;const tw=x.measureText(cat).width+40;rr(x,cx+cw-pad-tw,hy-26,tw,52,26);x.fillStyle="rgba(244,236,228,.08)";x.fill();
+  x.fillStyle="rgba(244,236,228,.8)";x.textAlign="center";x.fillText(cat,cx+cw-pad-tw/2,hy+9);
+  // itiraf
+  x.textAlign="left";x.fillStyle="#F4ECE4";x.font=`400 ${fs}px ${SERIF}`;
+  lines.forEach((l,i)=>x.fillText(l,cx+pad,cy+170+fs+i*lh));
+  // alt satır
+  const fy=cy+ch-pad-6;x.strokeStyle="rgba(244,236,228,.10)";x.beginPath();x.moveTo(cx+pad,fy-58);x.lineTo(cx+cw-pad,fy-58);x.stroke();
+  x.fillStyle="#F08A92";x.font=`800 30px ${SANS}`;const tot=reactTotal(p)+(state.react[p.id]?1:0);
+  x.fillText(`♥ ${tot} tepki`,cx+pad,fy);x.fillStyle="#E9B96E";x.fillText(`${p.cm.length} yorum`,cx+pad+x.measureText(`♥ ${tot} tepki`).width+40,fy);
+  // çağrı
+  x.textAlign="center";x.fillStyle="#F4ECE4";x.font=`italic 400 60px ${SERIF}`;x.fillText("Senin itirafın ne?",W/2,H-250);
+  x.font=`700 32px ${SANS}`;const uw=x.measureText(SITE_URL).width+80;rr(x,W/2-uw/2,H-200,uw,76,38);x.fillStyle="rgba(232,80,91,.18)";x.fill();x.strokeStyle="rgba(232,80,91,.5)";x.stroke();
+  x.fillStyle="#F4ECE4";x.fillText(SITE_URL,W/2,H-150);
+  return cv;
+}
+async function showShare(id){
+  const p=allPosts().find(x=>x.id===id);if(!p)return;
+  openSheet(`<div class="sheet-head"><h2>Hikâyede paylaş</h2></div><div class="sh-prev"><div class="sh-load">Görsel hazırlanıyor…</div></div>`);
+  const cv=await storyCanvas(p);
+  const blob=await new Promise(r=>cv.toBlob(r,"image/jpeg",.9));
+  const file=new File([blob],"arcana-itiraf.jpg",{type:"image/jpeg"}),url=URL.createObjectURL(blob);
+  const canShare=!!(navigator.canShare&&navigator.canShare({files:[file]}));
+  const box=$("#sheet .sh-prev");if(!box)return;
+  box.innerHTML=`<img src="${url}" alt="Paylaşılacak hikâye görseli">`;
+  box.insertAdjacentHTML("afterend",`<p class="hint" style="margin:12px 0">${p.u==="me"?"Takma adın görselde görünür, gerçek adın asla görünmez.":"Başkasının itirafında takma ad görünmez, sadece burcu yazar."}</p>
+    <div style="display:grid;gap:8px">${canShare?`<button class="btn wide" id="shGo">${IC.share}Paylaş</button>`:""}<a class="btn ${canShare?"line":""} wide" id="shDl" href="${url}" download="arcana-itiraf.jpg">Görseli indir</a></div>`);
+  const go=$("#shGo");if(go)go.onclick=async()=>{try{await navigator.share({files:[file],text:"Arcana'da itiraf et: https://"+SITE_URL})}catch(e){}};
+  $("#shDl").onclick=()=>toast("Görsel indiriliyor");
+}
+
+
+/* ============ KARŞILAMA EKRANI ============ */
+function welcomeHero(){
+  const pool=[...POSTS.map(p=>({u:p.u,t:p.t})),...SWIPE_EXTRA];
+  const cut=t=>t.length>78?t.slice(0,t.lastIndexOf(" ",76))+"…":t;
+  const card=c=>{const u=U[c.u];return `<div class="wq"><span class="wq-z" style="background:${u.c}">${Z[u.s].g}</span><span><small>Bir ${Z[u.s].n}</small>${esc(cut(c.t))}</span></div>`};
+  const a=pool.filter((_,i)=>i%2===0),b=pool.filter((_,i)=>i%2===1);
+  const row=(l,cls)=>`<div class="wq-row ${cls}"><div class="wq-track">${l.map(card).join("")}${l.map(card).join("").replace(/class="wq"/g,'class="wq" aria-hidden="true"')}</div></div>`;
+  const ICS=[
+    ['<path d="M4 20h4L19 9a2.8 2.8 0 0 0-4-4L4 16z"/><path d="M13.5 6.5l4 4"/>',"İtiraf et","Takma adınla, içinden geçeni yaz"],
+    ['<path d="M12 20s-7-4.4-7-10a4 4 0 0 1 7-2.6A4 4 0 0 1 19 10c0 5.6-7 10-7 10z"/>',"Eşleş","İtirafına dokunanla karşılaş"],
+    ['<path d="M4 5h16v11H9l-5 4z"/>',"Sohbet et","Burcuna uyan biriyle konuş"]];
+  return `<div class="wel-hero">
+    <div class="wel-logo"><span class="wl">Arcana</span><span class="wd" aria-hidden="true"></span></div>
+    <p class="wel-sub">İtiraf &amp; Sohbet</p>
+    <h1 class="wel-h">Kimseye söyleyemediğini burada söyle.</h1>
+  </div>
+  <div class="wq-wrap" aria-label="Örnek itiraflar">${row(a,"r1")}${row(b,"r2")}</div>
+  <ol class="wel-steps">${ICS.map(([d,t,s])=>`<li><span class="wi"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round">${d}</svg></span><b>${t}</b><small>${s}</small></li>`).join("")}</ol>`;
+}
 
 /* ============ PREMIUM KAPISI ============ */
 function premiumGate(title,text,onUnlock){
@@ -1297,6 +1486,7 @@ document.addEventListener("click",e=>{
   if(e.target.closest("#onb"))return;
   const so=e.target.closest("[data-sort]");if(so){state.sort=so.dataset.sort;vAkis();return}
   const mo=e.target.closest("[data-more]");if(mo){showMore(mo.dataset.more);return}
+  const shb=e.target.closest("[data-share]");if(shb){showShare(shb.dataset.share);return}
   const rp=e.target.closest("[data-report]");if(rp&&!e.target.closest("#onb")){showReport(rp.dataset.report);return}
   const t=e.target.closest("[data-tab],[data-cat],[data-react],[data-open],[data-prof],[data-dm],[data-chat],[data-rq],[data-block]");if(!t)return;
   const d=t.dataset;
@@ -1347,8 +1537,9 @@ function drawOnb(){
   const s=ob.step;let body="",cta="Devam",ok=true;
   if(s===0){const emOk=/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(ob.email.trim()),nameOk=ob.ad.trim().length>=2&&ob.soyad.trim().length>=2;
     if(!ob.provider){
-      body=`<h1>Arcana'ya hoş geldin</h1><p class="tagline" style="font-size:12.5px;margin:-4px 0 10px;color:var(--altin)">İtiraf &amp; Sohbet</p><p class="lead">Google veya Apple hesabınla saniyeler içinde üye ol. Adın ve e-postan kimseye gösterilmez, sitede herkes seni takma adınla görür.</p>
-      <div style="display:grid;gap:10px;margin-top:28px">
+      body=`${welcomeHero()}
+      <p class="lead wel-lead">Adın ve e-postan gizli kalır, herkes seni takma adınla görür.</p>
+      <div style="display:grid;gap:10px;margin-top:12px">
        <button class="btn line wide" data-prov="google" style="height:54px;gap:12px"><svg width="20" height="20" viewBox="0 0 48 48"><path fill="#FFC107" d="M43.6 20.5H42V20H24v8h11.3C33.7 32.7 29.2 36 24 36c-6.6 0-12-5.4-12-12s5.4-12 12-12c3.1 0 5.8 1.2 7.9 3.1l5.7-5.7C34 6.1 29.3 4 24 4 12.9 4 4 12.9 4 24s8.9 20 20 20 20-8.9 20-20c0-1.3-.1-2.4-.4-3.5z"/><path fill="#FF3D00" d="M6.3 14.7l6.6 4.8C14.7 15.1 19 12 24 12c3.1 0 5.8 1.2 7.9 3.1l5.7-5.7C34 6.1 29.3 4 24 4 16.3 4 9.7 8.3 6.3 14.7z"/><path fill="#4CAF50" d="M24 44c5.2 0 9.9-2 13.4-5.2l-6.2-5.2C29.2 35.1 26.7 36 24 36c-5.2 0-9.6-3.3-11.3-8l-6.5 5C9.5 39.6 16.2 44 24 44z"/><path fill="#1976D2" d="M43.6 20.5H42V20H24v8h11.3c-.8 2.2-2.2 4.2-4.1 5.6l6.2 5.2C37 39.2 44 34 44 24c0-1.3-.1-2.4-.4-3.5z"/></svg>Google ile devam et</button>
        <button class="btn line wide" data-prov="apple" style="height:54px;gap:12px"><svg width="18" height="20" viewBox="0 0 17 20" fill="currentColor"><path d="M14.1 10.6c0-2.6 2.1-3.8 2.2-3.9-1.2-1.8-3.1-2-3.7-2-1.6-.2-3.1.9-3.9.9-.8 0-2.1-.9-3.4-.9C3.6 4.8 2 5.8 1.1 7.3c-1.9 3.2-.5 8 1.3 10.6.9 1.3 1.9 2.7 3.3 2.6 1.3-.1 1.8-.8 3.4-.8 1.6 0 2 .8 3.4.8 1.4 0 2.3-1.3 3.2-2.6 1-1.5 1.4-2.9 1.4-3-.1 0-2.9-1.1-3-4.3zM11.5 3c.7-.9 1.2-2 1.1-3.2-1 0-2.3.7-3 1.6-.7.8-1.2 2-1.1 3.1 1.1.1 2.3-.6 3-1.5z"/></svg>Apple ile devam et</button>
        <div style="display:flex;align-items:center;gap:10px;color:var(--soluk);font-size:13px;margin:6px 0"><i style="flex:1;height:1px;background:var(--cizgi)"></i>veya<i style="flex:1;height:1px;background:var(--cizgi)"></i></div>
@@ -1387,6 +1578,7 @@ function drawOnb(){
     <div>${IC.chk}<span>Rahatsız olursan tek dokunuşla engelle ve şikâyet et.</span></div></div>
     <button class="check" id="ck" role="checkbox" aria-checked="${ob.ok}"><span class="bx">${ob.ok?'<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3"><path d="M5 12.5l4.2 4.2L19 7"/></svg>':""}</span><span style="font-size:14.5px">18 yaşından büyüğüm, kuralları ve gizlilik metnini kabul ediyorum.</span></button>`;
     ok=ob.ok;cta=ob.editing?"Değişiklikleri kaydet":"İtiraflara gir";}
+  $("#onbIn").classList.toggle("wel",s===0&&!ob.provider);
   $("#onbIn").innerHTML=`${ob.editing?`<button class="ob-back show" id="obX" style="float:right">Vazgeç</button>`:""}<button class="ob-back ${(s>0||ob.provider)&&!(ob.editing&&s===1)?"show":""}" id="obB">${IC.back}Geri</button><div class="steps">${Array.from({length:STEPS},(_,i)=>`<i class="${i<=s?"on":""}"></i>`).join("")}</div>
    <div class="step">${body}</div><div class="ob-foot">${cta?`<button class="btn wide" id="obN" ${ok?"":"disabled"}>${cta}</button>`:`<button id="obN" hidden></button>`}</div>`;
   $("#obB").onclick=()=>{if(ob.step===0){ob.provider=null}else{ob.step--;if(ob.step===0&&ob.provider==="guest")ob.provider=null}drawOnb()};
