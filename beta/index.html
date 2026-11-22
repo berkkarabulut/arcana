@@ -244,7 +244,7 @@ h1,h2,h3{font-family:var(--display);font-weight:400;text-wrap:balance}
 .nb .pip{position:absolute;top:7px;left:calc(50% + 6px);min-width:17px;height:17px;padding:0 4px;border-radius:99px;background:var(--nar);color:var(--on-nar);font-size:10.5px;display:grid;place-items:center}
 .confess{height:50px;margin:0 4px;border-radius:16px;background:var(--nar);color:var(--on-nar);font-weight:800;font-size:14px;line-height:1.1;box-shadow:0 8px 22px rgba(var(--nar-rgb),.35)}
 
-.toast{position:fixed;left:50%;bottom:96px;z-index:70;pointer-events:none;transform:translate(-50%,12px);opacity:0;transition:.25s;background:var(--kagit);color:var(--murekkep);padding:11px 16px;border-radius:14px;font-size:13.5px;font-weight:700;max-width:88%;text-align:center;box-shadow:0 12px 30px rgba(0,0,0,.45)}
+.toast{position:fixed;left:50%;bottom:96px;z-index:100;pointer-events:none;transform:translate(-50%,12px);opacity:0;transition:.25s;background:var(--kagit);color:var(--murekkep);padding:11px 16px;border-radius:14px;font-size:13.5px;font-weight:700;max-width:88%;text-align:center;box-shadow:0 12px 30px rgba(0,0,0,.45)}
 .toast.show{opacity:1;transform:translate(-50%,0)}
 .empty{color:var(--soluk);padding:20px 4px;font-size:14px;line-height:1.55}
 
@@ -738,6 +738,41 @@ a.btn{display:inline-flex;align-items:center;justify-content:center;text-decorat
 .theme-pick svg{width:16px;height:16px}
 .set-h{font-size:13px;font-weight:800;color:var(--soluk);margin-top:22px}
 #remLoad{position:fixed;inset:0;z-index:9999;display:grid;place-items:center;background:var(--murekkep)}#remLoad .rl-in{text-align:center;color:var(--soluk);font-size:14px}#remLoad img{border-radius:18px;animation:rlp 1.4s ease-in-out infinite}@media (prefers-reduced-motion:reduce){#remLoad img{animation:none}}@keyframes rlp{50%{opacity:.55;transform:scale(.96)}}
+.adm-tabs{display:flex;gap:4px;padding:4px;border-radius:14px;background:var(--yuzey);margin:6px 0 16px;position:sticky;top:0;z-index:2}
+.adm-tabs button{flex:1;height:40px;border-radius:10px;font-weight:700;font-size:14px;color:var(--soluk)}
+.adm-tabs button[aria-selected=true]{background:var(--kagit);color:var(--murekkep)}
+.adm-tabs span{font-size:11.5px;font-weight:800;padding:1px 6px;border-radius:99px;background:rgba(var(--nar-rgb),.16);color:var(--nar);margin-left:2px}
+.adm-tabs button[aria-selected=true] span{background:rgba(var(--zemin-rgb),.12);color:inherit}
+.au-stats{grid-template-columns:repeat(2,1fr)}
+@media (min-width:520px){.au-stats{grid-template-columns:repeat(4,1fr)}}
+.au-stats b.g{color:#3DDC97}
+.au-chips{display:flex;gap:6px;overflow-x:auto;padding-bottom:4px;margin-bottom:10px;scrollbar-width:none}
+.au-chips .c span{opacity:.6;font-weight:700;margin-left:2px}
+.au{border-radius:16px;background:var(--yuzey);border:1px solid transparent;margin-bottom:6px;overflow:hidden}
+.au.op{border-color:var(--cizgi)}
+.au-row{display:flex;align-items:center;gap:12px;width:100%;padding:10px 12px;text-align:left}
+.au-av{position:relative;flex:0 0 40px;height:40px;border-radius:50%;display:grid;place-items:center;font-weight:800;font-size:17px;color:#0B1220}
+.au-av i{position:absolute;right:-1px;bottom:-1px;width:12px;height:12px;border-radius:50%;background:var(--soluk);border:2px solid var(--yuzey);opacity:.5}
+.au-av i.on{background:#3DDC97;opacity:1}
+.au-main{flex:1;min-width:0;display:flex;flex-direction:column}
+.au-main b{font-size:15px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.au-main em{font-style:normal;font-size:10.5px;font-weight:800;padding:1px 6px;border-radius:99px;background:rgba(var(--kagit-rgb),.1);vertical-align:2px}
+.au-main em.pr{background:rgba(var(--altin-rgb),.2);color:var(--altin)}
+.au-main small,.au-side small{font-size:12.5px;color:var(--soluk)}
+.au-side{display:flex;flex-direction:column;align-items:flex-end;font-size:12.5px;white-space:nowrap}
+.au-on{color:#3DDC97;font-weight:700}
+.au-det{padding:2px 14px 14px 64px}
+.au-det dl{margin:0;display:grid;gap:6px}
+.au-det dl div{display:flex;gap:10px;font-size:13.5px}
+.au-det dt{flex:0 0 108px;color:var(--soluk)}
+.au-det dd{margin:0;min-width:0;overflow-wrap:anywhere}
+.au-id{font-size:11.5px;color:var(--soluk)}
+.au-del{margin-top:12px;padding:12px;border-radius:12px;background:rgba(229,72,77,.1)}
+.au-danger{color:#E5484D;border-color:rgba(229,72,77,.45)}
+.au-danger-fill{background:#E5484D;color:#fff}
+:root[data-theme="light"] .au-on,:root[data-theme="light"] .au-stats b.g{color:#12865A}
+.au-del p{font-size:13.5px;margin:0 0 8px}
+@media (max-width:420px){.au-det{padding-left:14px}.au-det dt{flex-basis:92px}}
 </style>
 </head>
 <body>
@@ -1511,7 +1546,7 @@ function reportPreview(key){
 }
 const STAT_NAMES=[["kayit","Yeni üye"],["itiraf_yazildi","İtiraf"],["yorum","Yorum"],["mesaj","Mesaj"],["begen","Sağa kaydırma"],["eslesme","Eşleşme"],["paylas","Hikâye paylaşımı"],["davet","Davet linki paylaşımı"],["sikayet","Şikâyet"],["filtre_kelime","Filtre: kelime"],["filtre_isim","Filtre: ad soyad"],["filtre_kurum","Filtre: okul/iş yeri"],["filtre_kullaniciadi","Filtre: kullanıcı adı"]];
 function openAdmin(){
-  if(REMOTE&&!R.admin){toast("Bu panel sadece yöneticiler için");return}
+  if(REMOTE)return openAdminRemote();
   let el=$("#adm");if(!el){el=document.createElement("div");el.id="adm";el.setAttribute("role","dialog");el.setAttribute("aria-label","Yönetici paneli");document.body.appendChild(el)}
   const stats=LS("arcana_stats",{}),today=stats[dayKey()]||{},tot={};
   Object.values(stats).forEach(d=>Object.entries(d).forEach(([k,v])=>tot[k]=(tot[k]||0)+v));
@@ -2199,7 +2234,7 @@ function rerender(){if(!state.me)return;if($("#chat").classList.contains("open")
 
 function remoteStartListeners(){
   if(R.started)return;R.started=true;
-  KDB.listenUsers(list=>{list.forEach(u=>putUser(u.id,u));refreshStats();if(state.tab==="kesfet")rerender()});
+  KDB.listenUsers(list=>{R.usersRaw=list;list.forEach(u=>putUser(u.id,u));if($("#adm.open")&&ADM.tab==="uye"&&!document.activeElement.closest("#adm input"))openAdminRemote();refreshStats();if(state.tab==="kesfet")rerender()});
   KDB.listenPosts(list=>{R.posts=list;const mapped=list.map(mapPost);state.myPosts=mapped.filter(p=>p.u==="me");R.mapped=mapped;refreshStats();
     if(!$("#scrim").classList.contains("open")||!R.cmPid)rerender()});
   KDB.listenNotifs(list=>{state.notifs=list.map(n=>({id:n.id,type:n.type,u:n.from,text:n.text,go:n.go,ts:n.ts,read:!!n.read}));render()});
@@ -2231,6 +2266,7 @@ function remoteEnterApp(pub,priv){
   R.syncedMe=JSON.stringify({n:state.me.n,c:state.me.c,bio:state.me.bio,photo:state.me.photo,banner:state.me.banner,g:state.me.g});
   $("#onb").hidden=true;$("#remLoad")&&$("#remLoad").remove();
   remoteStartListeners();render();
+  KDB.touch();if(!R.hb){R.hb=setInterval(()=>{if(!document.hidden)KDB.touch()},120e3);document.addEventListener("visibilitychange",()=>{if(!document.hidden)KDB.touch()})}
 }
 // profil değişikliklerini sunucuya yaz (takma ad, renk, profil cümlesi, hazır görseller, cinsiyet seçimi)
 function remoteSyncMe(){
@@ -2356,6 +2392,88 @@ function showPremiumRemote(src){
    const by=$("#buy");if(by)by.onclick=()=>playBuy(plan,by)};
   draw();
   if(!web)playService().then(()=>{if($("#buy"))draw()});
+}
+
+/* ============ YÖNETİCİ PANELİ (sunucu) ============ */
+const ADM={tab:"uye",q:"",f:"hepsi",open:null,priv:{},confirm:null};
+const ONLINE_MS=5*60e3;
+const dayStart=()=>{const d=new Date();d.setHours(0,0,0,0);return d.getTime()};
+function relTime(ts){if(!ts)return "bilinmiyor";const m=Math.floor((Date.now()-ts)/60000);if(m<1)return "az önce";if(m<60)return m+" dk önce";const h=Math.floor(m/60);if(h<24)return h+" sa önce";const d=Math.floor(h/24);return d===1?"dün":d<30?d+" gün önce":new Date(ts).toLocaleDateString("tr-TR",{day:"numeric",month:"short",year:"numeric"})}
+const fmtDate=ts=>ts?new Date(ts).toLocaleDateString("tr-TR",{day:"numeric",month:"long",year:"numeric"})+" "+new Date(ts).toLocaleTimeString("tr-TR",{hour:"2-digit",minute:"2-digit"}):"—";
+function admUsers(){
+  const posts={};(R.posts||[]).forEach(p=>{posts[p.uid]=(posts[p.uid]||0)+1});
+  return (R.usersRaw||[]).map(u=>({uid:u.id,n:u.n,c:u.c,s:u.s,g:u.g,age:u.age,av:u.av,prem:!!u.prem,created:u.createdAt||0,seen:Math.max(u.lastSeen||0,u.createdAt||0),posts:posts[u.id]||0,me:u.id===R.uid}));
+}
+function openAdminRemote(){
+  if(!R.admin){toast("Bu panel sadece yöneticiler için");return}
+  let el=$("#adm");if(!el){el=document.createElement("div");el.id="adm";el.setAttribute("role","dialog");el.setAttribute("aria-label","Yönetici paneli");document.body.appendChild(el)}
+  const now=Date.now(),today=dayStart(),all=admUsers();
+  const online=all.filter(u=>now-u.seen<ONLINE_MS),activeToday=all.filter(u=>u.seen>=today),newToday=all.filter(u=>u.created>=today),newWeek=all.filter(u=>now-u.created<7*864e5);
+  const reps=(R.reports||[]).map(r=>Object.assign({},r,{status:r.status||"bekliyor"})),openReps=reps.filter(r=>r.status==="bekliyor");
+  const tabs=[["uye","Kullanıcılar",all.length],["sikayet","Şikâyetler",openReps.length],["kelime","Kelimeler",null]];
+  let body="";
+  if(ADM.tab==="uye"){
+    const q=lowTR(ADM.q.trim());
+    let list=ADM.f==="online"?online:ADM.f==="bugun"?activeToday:ADM.f==="yeni"?newWeek:ADM.f==="prem"?all.filter(u=>u.prem):all;
+    if(q)list=list.filter(u=>lowTR(u.n||"").includes(q));
+    list=[...list].sort((a,b)=>b.seen-a.seen);
+    const row=u=>{const on=now-u.seen<ONLINE_MS,z=Z[u.s]||{g:"",n:""},op=ADM.open===u.uid,pv=ADM.priv[u.uid];
+      return `<div class="au ${op?"op":""}"><button class="au-row" data-au="${u.uid}" aria-expanded="${op}">
+        <span class="au-av" style="background:${esc(u.c||"#7CC4FF")}">${esc((u.n||"?").charAt(0).toLocaleUpperCase("tr"))}<i class="${on?"on":""}"></i></span>
+        <span class="au-main"><b>${esc(u.n||"?")}${u.me?" <em>sen</em>":""}${u.prem?` <em class="pr">Premium</em>`:""}</b><small>${z.g} ${z.n} · ${esc(u.g||"—")} · ${esc(u.age||"—")}</small></span>
+        <span class="au-side"><span class="${on?"au-on":""}">${on?"Şu an sitede":relTime(u.seen)}</span><small>${u.posts} itiraf</small></span></button>
+        ${op?`<div class="au-det">
+          <dl><div><dt>Kayıt</dt><dd>${fmtDate(u.created)}</dd></div><div><dt>Son görülme</dt><dd>${on?"Şu an sitede":fmtDate(u.seen)}</dd></div>
+          ${pv===undefined?`<div><dt>Gizli bilgiler</dt><dd class="muted">Yükleniyor…</dd></div>`:pv===null?`<div><dt>Gizli bilgiler</dt><dd class="muted">Görülemedi</dd></div>`:
+          `<div><dt>Ad soyad</dt><dd>${esc((pv.ad||"")+" "+(pv.soyad||""))||"—"}</dd></div><div><dt>E-posta</dt><dd>${esc(pv.email||"—")}</dd></div><div><dt>Doğum tarihi</dt><dd>${pv.b?`${pv.b.d} ${AYLAR[pv.b.m-1]} ${pv.b.y}`:"—"}</dd></div><div><dt>Giriş</dt><dd>${{google:"Google",email:"E-posta bağlantısı",apple:"Apple"}[pv.provider]||esc(pv.provider||"—")}</dd></div>`}
+          <div><dt>Kullanıcı kimliği</dt><dd class="au-id">${u.uid}</dd></div></dl>
+          ${u.me?"":ADM.confirm===u.uid?`<div class="au-del"><p>Silmek için takma adı yaz: <b>${esc(u.n)}</b></p><div class="adm-add"><input class="city-search" id="auDelIn" autocomplete="off" maxlength="20"><button class="btn au-danger-fill" id="auDelGo" disabled>Kalıcı sil</button></div><button class="dice" id="auDelX" style="margin-top:8px">Vazgeç</button></div>`
+            :`<button class="btn line au-danger" data-audel="${u.uid}" style="height:40px;margin-top:12px">Hesabı sil</button>`}
+        </div>`:""}</div>`};
+    body=`<div class="adm-stats au-stats">
+      <div><b>${all.length}</b><small>Toplam üye</small><i>son 200 kayıt</i></div>
+      <div><b class="g">${online.length}</b><small>Şu an sitede</small><i>son 5 dakika</i></div>
+      <div><b>${activeToday.length}</b><small>Bugün giren</small><i>gece yarısından beri</i></div>
+      <div><b>${newToday.length}</b><small>Bugün kayıt</small><i>bu hafta ${newWeek.length}</i></div></div>
+      <input class="city-search" id="auQ" placeholder="Takma adla ara" value="${esc(ADM.q)}" autocomplete="off" style="margin:14px 0 8px">
+      <div class="au-chips">${[["hepsi","Hepsi",all.length],["online","Şu an sitede",online.length],["bugun","Bugün giren",activeToday.length],["yeni","Son 7 gün kayıt",newWeek.length],["prem","Premium",all.filter(u=>u.prem).length]].map(([k,n,c])=>`<button class="c" data-auf="${k}" aria-pressed="${ADM.f===k}">${n} <span>${c}</span></button>`).join("")}</div>
+      <div class="au-list">${list.length?list.map(row).join(""):`<p class="muted" style="font-size:14px;padding:18px 4px">Bu filtrede kullanıcı yok.</p>`}</div>`;
+  } else if(ADM.tab==="sikayet"){
+    const done=reps.filter(r=>r.status!=="bekliyor").slice(0,30);
+    const repRow=r=>{let pv=reportPreview(r.key);if(r.preview&&(pv.who==="?"||pv.text==="(silinmiş itiraf)")){const m=String(r.preview).match(/^([^:]*): ([^|]*) \| ([\s\S]*)$/);pv=m?{kind:m[1],who:m[2]+" (artık yok)",text:m[3]}:{kind:"İçerik",who:"",text:r.preview}}
+      return `<div class="adm-rep ${r.status!=="bekliyor"?"done":""}"><div class="adm-rh"><span class="adm-k">${pv.kind}</span><b>${esc(pv.who)}</b><span class="adm-reason">${esc(r.reason)}</span><small>${relTime(r.ts)}</small></div>
+      <p>${esc(pv.text).slice(0,220)}</p>${r.status==="bekliyor"?`<div class="adm-acts"><button class="btn" data-adm="kaldir:${r.id}" style="background:var(--nar);color:var(--on-nar)">İçeriği kaldır</button><button class="btn line" data-adm="yoksay:${r.id}">Yoksay</button></div>`:`<small class="adm-st">${r.status==="kaldirildi"?"Kaldırıldı":"Yoksayıldı"}</small>`}</div>`};
+    body=`${openReps.length?openReps.map(repRow).join(""):`<p class="muted" style="font-size:14px;padding:18px 4px">Bekleyen şikâyet yok.</p>`}
+      ${done.length?`<details class="adm-done"><summary>Sonuçlananlar (${done.length})</summary>${done.map(repRow).join("")}</details>`:""}`;
+  } else {
+    const banned=bannedList();
+    body=`<p class="hint" style="margin:0 0 10px">Bu kelimeler itiraf, yorum ve mesajlarda engellenir. Kelimenin başı eşleşir. Şimdilik sadece bu cihazda kayıtlı; diğer kullanıcılar sitedeki hazır listeyle filtrelenir.</p>
+    <div class="adm-words">${banned.map((w,i)=>`<span>${esc(w)}<button data-adm="sil:${i}" aria-label="${esc(w)} kelimesini kaldır">${IC.close}</button></span>`).join("")}</div>
+    <div class="adm-add"><input class="city-search" id="admW" placeholder="Kelime ekle" maxlength="40"><button class="btn" id="admWAdd">Ekle</button></div>
+    <button class="dice" id="admReset" style="margin-top:8px">Varsayılan listeye dön</button>`;
+  }
+  el.innerHTML=`<div class="adm-in"><div class="adm-top"><h2>Yönetici paneli</h2><button class="icon-btn" id="admX" aria-label="Kapat">${IC.close}</button></div>
+    <div class="adm-tabs" role="tablist">${tabs.map(([k,n,c])=>`<button role="tab" data-admt="${k}" aria-selected="${ADM.tab===k}">${n}${c?` <span>${c}</span>`:""}</button>`).join("")}</div>${body}</div>`;
+  el.classList.add("open");document.body.style.overflow="hidden";
+  $("#admX").onclick=closeAdmin;
+  el.querySelectorAll("[data-admt]").forEach(b=>b.onclick=()=>{ADM.tab=b.dataset.admt;ADM.open=null;ADM.confirm=null;openAdminRemote();el.scrollTop=0});
+  const q=$("#auQ");if(q)q.oninput=()=>{ADM.q=q.value;const p=q.selectionStart;openAdminRemote();const n=$("#auQ");n.focus();n.setSelectionRange(p,p)};
+  el.querySelectorAll("[data-auf]").forEach(b=>b.onclick=()=>{ADM.f=b.dataset.auf;openAdminRemote()});
+  el.querySelectorAll("[data-au]").forEach(b=>b.onclick=()=>{const id=b.dataset.au;ADM.confirm=null;ADM.open=ADM.open===id?null:id;
+    if(ADM.open&&!(id in ADM.priv))KDB.adminPrivate(id).then(p=>{ADM.priv[id]=p;if(ADM.open===id)openAdminRemote()}).catch(()=>{ADM.priv[id]=null;if(ADM.open===id)openAdminRemote()});
+    openAdminRemote()});
+  el.querySelectorAll("[data-audel]").forEach(b=>b.onclick=()=>{ADM.confirm=b.dataset.audel;openAdminRemote();setTimeout(()=>{const i=$("#auDelIn");i&&i.focus()},30)});
+  const dx=$("#auDelX");if(dx)dx.onclick=()=>{ADM.confirm=null;openAdminRemote()};
+  const di=$("#auDelIn"),dg=$("#auDelGo");
+  if(di){const u=all.find(x=>x.uid===ADM.confirm);di.oninput=()=>{dg.disabled=lowTR(di.value.trim())!==lowTR(u.n||"")};
+    dg.onclick=async()=>{dg.disabled=true;dg.textContent="Siliniyor…";try{await KDB.adminDeleteUser(u.uid,u.n);R.usersRaw=(R.usersRaw||[]).filter(x=>x.id!==u.uid);delete U[u.uid];ADM.open=null;ADM.confirm=null;toast(`${u.n} silindi`);openAdminRemote()}
+      catch(e){dg.disabled=false;dg.textContent="Kalıcı sil";toast("Silinemedi: "+(e.code||e.message))}}}
+  el.querySelectorAll("[data-adm]").forEach(b=>b.onclick=()=>{const[a,id]=b.dataset.adm.split(":");
+    if(a==="sil"){const l=[...bannedList()];l.splice(+id,1);LSset("arcana_banned",l);openAdminRemote();return}
+    const r=reps.find(x=>x.id===id);if(!r)return;const st=a==="kaldir"?"kaldirildi":"yoksayildi";const jobs=[KDB.setReport(id,st)];
+    if(a==="kaldir"){const[t,pid,ci]=r.key.split(":");if(t==="p")jobs.push(KDB.deletePost(pid).catch(()=>{}));else if(t==="c"){const c=(R.cm[pid]||[])[+ci];if(c)jobs.push(KDB.deleteComment(pid,c.id))}}
+    Promise.all(jobs).then(()=>{toast(a==="kaldir"?"İçerik kaldırıldı":"Şikâyet yoksayıldı");setTimeout(openAdminRemote,500)}).catch(e=>toast("Olmadı: "+(e.code||e.message)))});
+  const w=$("#admW");if(w){const add=()=>{const v=w.value.trim();if(!v)return;const l=[...bannedList()];if(!l.map(lowTR).includes(lowTR(v)))l.push(v);LSset("arcana_banned",l);openAdminRemote()};$("#admWAdd").onclick=add;w.onkeydown=e=>{if(e.key==="Enter")add()};$("#admReset").onclick=()=>{try{localStorage.removeItem("arcana_banned")}catch(e){}openAdminRemote()}}
 }
 
 const WEL=REMOTE?{U:Object.assign({},U),P:POSTS.slice()}:null;

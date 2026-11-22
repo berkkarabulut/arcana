@@ -86,7 +86,7 @@ const KDB = {
   listenUsers(cb) {
     stop("users");
     unsubs.users = onSnapshot(query(collection(db, "users"), orderBy("createdAt", "desc"), limit(200)),
-      s => cb(s.docs.map(d => ({ id: d.id, ...d.data() }))), e => console.warn("users", e));
+      s => cb(s.docs.map(d => { const x = d.data(); return { id: d.id, ...x, createdAt: x.createdAt ? ms(x.createdAt) : 0, lastSeen: x.lastSeen ? ms(x.lastSeen) : 0 }; })), e => console.warn("users", e));
   },
   // Hesabı ve kullanıcının bütün verisini sil (Google Play hesap silme zorunluluğu)
   async deleteEverything() {
@@ -108,11 +108,16 @@ const KDB = {
     }
   },
   // Yönetici: bir kullanıcının profilini ve itiraflarını sil
-  async adminDeleteUser(uid) {
+  async adminDeleteUser(uid, nick) {
     const s = await getDocs(query(collection(db, "posts"), where("uid", "==", uid)));
     for (const d of s.docs) await deleteDoc(d.ref);
+    await deleteDoc(doc(db, "users", uid, "private", "info")).catch(() => {});
+    if (nick) await deleteDoc(doc(db, "nicks", nick.toLocaleLowerCase("tr"))).catch(() => {});
     await deleteDoc(doc(db, "users", uid));
   },
+  async adminPrivate(uid) { const s = await getDoc(doc(db, "users", uid, "private", "info")); return s.exists() ? s.data() : null; },
+  // "son görülme" zamanını güncelle
+  touch() { if (KDB.uid) return updateDoc(doc(db, "users", KDB.uid), { lastSeen: serverTimestamp() }).catch(() => {}); },
   async deleteAccount() {
     const uid = KDB.uid; const me = await KDB.getProfile(uid);
     const b = writeBatch(db);

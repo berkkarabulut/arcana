@@ -39,10 +39,10 @@ service cloud.firestore {
       // Gizli bilgiler: gerçek ad, e-posta, doğum tarihi. Sadece sahibi görür, sonradan değiştirilemez.
       // premium belgesini sadece ödeme doğrulama fonksiyonu yazar
       match /private/{doc} {
-        allow read: if isMe(uid);
+        allow read: if isMe(uid) || isAdmin();
         allow create: if isMe(uid) && doc != 'premium';
         allow update: if false;
-        allow delete: if isMe(uid) && doc != 'premium';
+        allow delete: if (isMe(uid) && doc != 'premium') || isAdmin();
       }
       // Engellenenler: sadece sahibi
       match /blocks/{other} {
@@ -61,7 +61,7 @@ service cloud.firestore {
     match /nicks/{nick} {
       allow read: if signedIn();
       allow create: if signedIn() && request.resource.data.uid == request.auth.uid;
-      allow delete: if signedIn() && resource.data.uid == request.auth.uid;
+      allow delete: if (signedIn() && resource.data.uid == request.auth.uid) || isAdmin();
       allow update: if false;
     }
 
