@@ -56,9 +56,9 @@ service cloud.firestore {
       // premium belgesini sadece ödeme doğrulama fonksiyonu yazar
       match /private/{doc} {
         allow read: if isMe(uid) || isAdmin();
-        allow create: if isMe(uid) && doc != 'premium';
+        allow create: if isMe(uid) && doc == 'info';
         allow update: if false;
-        allow delete: if (isMe(uid) && doc != 'premium') || isAdmin();
+        allow delete: if (isMe(uid) && doc == 'info') || isAdmin();
       }
       // Hız sınırı belgesi: her alan sadece "şimdi" yapılabilir ve bir öncekinden belli süre sonra
       match /meta/{d} {
@@ -72,6 +72,15 @@ service cloud.firestore {
         allow create, update: if isMe(uid) && d == 'rl'
           && request.resource.data.keys().hasOnly(['postAt','cmAt','ntAt','chAt','msgAt','errAt'])
           && tick('postAt', 900) && tick('cmAt', 8) && tick('ntAt', 2) && tick('chAt', 20) && tick('msgAt', 1) && tick('errAt', 20);
+      }
+      // Bildirim anahtarları (telefon/tarayıcı): sadece sahibi
+      match /push/{token} {
+        allow read, write: if isMe(uid);
+      }
+      // Kendi anonim itiraflarının listesi: sunucu yazar, sahibi okur
+      match /anon/{pid} {
+        allow read: if isMe(uid);
+        allow delete: if isMe(uid);
       }
       // Engellenenler: sadece sahibi
       match /blocks/{other} {
@@ -124,7 +133,9 @@ service cloud.firestore {
         && (!('cm' in changed())
               || (request.resource.data.cm == resource.data.cm + 1 && stamped('cmAt'))
               || (request.resource.data.cm == resource.data.cm - 1 && request.resource.data.cm >= 0));
-      allow delete: if signedIn() && (resource.data.uid == request.auth.uid || isAdmin());
+      allow delete: if signedIn() && (resource.data.uid == request.auth.uid || isAdmin()
+        || (resource.data.get('anon', false) == true
+            && get(/databases/$(database)/documents/anonOwners/$(pid)).data.uid == request.auth.uid));
 
       match /reactions/{uid} {
         allow read: if signedIn();

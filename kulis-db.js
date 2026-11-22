@@ -11,6 +11,8 @@ import {
   doc, getDoc, setDoc, addDoc, updateDoc, deleteDoc, collection, query, where, orderBy, limit,
   onSnapshot, serverTimestamp, increment, writeBatch, getDocs
 } from "https://www.gstatic.com/firebasejs/12.8.0/firebase-firestore.js";
+import { getMessaging, getToken, deleteToken, isSupported as msgSupported } from "https://www.gstatic.com/firebasejs/12.8.0/firebase-messaging.js";
+import { getFunctions, httpsCallable } from "https://www.gstatic.com/firebasejs/12.8.0/firebase-functions.js";
 
 // /beta/ adresi ayrı test veritabanını kullanır; canlı kullanıcıların verisine dokunmaz
 const IS_TEST = /\/beta\//.test(location.pathname);
@@ -38,6 +40,8 @@ const fsOpts = LP ? { experimentalForceLongPolling: true } : {};
 try { db = initializeFirestore(app, { ...fsOpts, localCache: persistentLocalCache({ tabManager: persistentMultipleTabManager() }) }); }
 catch (e) { db = initializeFirestore(app, fsOpts); }
 
+const fns = getFunctions(app, "europe-west1");
+const VAPID = "BPuLRxoQfvz2-ml5JWzJFQd9qrKd-q7bXD-gtYbJOeg0gqxuoVL7MyQbZrEaXHOnaN9N_kK7d10PE4NDakgDcdo";
 const ms = t => (t && t.toMillis) ? t.toMillis() : (typeof t === "number" ? t : Date.now());
 const chatId = (a, b) => a < b ? a + "_" + b : b + "_" + a;
 const unsubs = {};
@@ -122,6 +126,9 @@ const KDB = {
     stopAll();
     const wipe = async q => { const s = await getDocs(q).catch(() => null); if (s) for (const d of s.docs) await deleteDoc(d.ref).catch(() => {}); };
     await wipe(query(collection(db, "posts"), where("uid", "==", uid)));
+    const an = await getDocs(collection(db, "users", uid, "anon")).catch(() => null);
+    if (an) for (const d of an.docs) { await deleteDoc(doc(db, "posts", d.id)).catch(() => {}); await deleteDoc(d.ref).catch(() => {}); }
+    await wipe(collection(db, "users", uid, "push"));
     await wipe(query(collection(db, "likes"), where("from", "==", uid)));
     await wipe(query(collection(db, "chats"), where("members", "array-contains", uid)));
     await wipe(collection(db, "users", uid, "notifs"));
@@ -261,6 +268,34 @@ const KDB = {
       s => cb(s.docs.map(d => ({ id: d.id, ...d.data(), ts: ms(d.data().ts) }))), e => console.warn("msgs", e));
   },
   stopMsgs() { stop("msgs"); },
+
+  // ---------- Telefona bildirim ----------
+  async pushSupported() { try { return !IS_TEST && "Notification" in window && "serviceWorker" in navigator && await msgSupported(); } catch (e) { return false; } },
+  async enablePush() {
+    const reg = await navigator.serviceWorker.register("sw.js");
+    await navigator.serviceWorker.ready;
+    const token = await getToken(getMessaging(app), { vapidKey: VAPID, serviceWorkerRegistration: reg });
+    if (!token) throw new Error("anahtar alınamadı");
+    await setDoc(doc(db, "users", KDB.uid, "push", token), { ts: serverTimestamp(), ua: navigator.userAgent.slice(0, 160) });
+    try { localStorage.setItem("kulis_push", token); } catch (e) {}
+    return token;
+  },
+  async disablePush() {
+    let t = null; try { t = localStorage.getItem("kulis_push"); localStorage.removeItem("kulis_push"); } catch (e) {}
+    if (t) await deleteDoc(doc(db, "users", KDB.uid, "push", t)).catch(() => {});
+    await deleteToken(getMessaging(app)).catch(() => {});
+  },
+  // her açılışta anahtarı tazele (Google zamanla yeniler)
+  async refreshPush() {
+    try { if (Notification.permission !== "granted" || !localStorage.getItem("kulis_push")) return; const old = localStorage.getItem("kulis_push"); const t = await KDB.enablePush(); if (old && old !== t) await deleteDoc(doc(db, "users", KDB.uid, "push", old)).catch(() => {}); } catch (e) {}
+  },
+
+  // ---------- Anonim itiraf (sunucu yazar) ----------
+  async anonPost(t, cat) { const r = await httpsCallable(fns, "anonimItiraf")({ t, cat }); return r.data.id; },
+  listenMyAnon(cb) { stop("anon"); unsubs.anon = onSnapshot(collection(db, "users", KDB.uid, "anon"), s => cb(s.docs.map(d => d.id)), e => cb([])); },
+
+  // ---------- Davet ----------
+  async refInfo() { const s = await getDoc(doc(db, "users", KDB.uid, "private", "ref")).catch(() => null); return s && s.exists() ? s.data() : { count: 0 }; },
 
   // ---------- Yasaklı kelimeler (sunucu filtresi) ----------
   listenModeration(cb) { stop("mod"); unsubs.mod = onSnapshot(doc(db, "config", "moderation"), s => cb(s.exists() ? s.data() : null), e => cb(null)); },

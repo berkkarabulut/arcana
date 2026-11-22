@@ -1,0 +1,36 @@
+name: Sunucuyu yükle (kurallar + fonksiyonlar)
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "firebase/firestore.rules"
+      - "functions/**"
+      - "firebase.json"
+      - ".github/workflows/sunucu.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  id-token: write
+
+concurrency:
+  group: sunucu
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - uses: google-github-actions/auth@v2
+        with:
+          workload_identity_provider: projects/165708007413/locations/global/workloadIdentityPools/github/providers/github
+          service_account: github-deploy@kulis-1647d.iam.gserviceaccount.com
+      - name: Fonksiyon paketlerini kur
+        run: npm install --prefix functions --no-audit --no-fund
+      - name: Firebase'e yükle
+        run: npx -y firebase-tools@latest deploy --only firestore:rules,functions --project kulis-1647d --non-interactive --force

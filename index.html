@@ -782,6 +782,15 @@ a.btn{display:inline-flex;align-items:center;justify-content:center;text-decorat
 .it-q{font-size:13px;font-weight:700;color:var(--altin);margin:2px 0 -2px}
 .wk{position:relative}
 .wk-n{position:absolute;left:-6px;top:-6px;z-index:2;width:28px;height:28px;border-radius:50%;display:grid;place-items:center;font-weight:800;font-size:14px;background:var(--nar);color:var(--on-nar);box-shadow:0 2px 8px rgba(0,0,0,.25)}
+.anon-sw{display:flex;gap:10px;align-items:flex-start;margin:12px 2px 0;padding:10px 12px;border-radius:14px;background:var(--yuzey);cursor:pointer}
+.anon-sw input{margin-top:3px;width:18px;height:18px;accent-color:var(--nar)}
+.anon-sw span{display:flex;flex-direction:column;gap:2px}.anon-sw b{font-size:14px}.anon-sw small{font-size:12.5px;color:var(--soluk);line-height:1.35}
+.anon-av{background:var(--yuzey2)!important;color:var(--soluk);font-weight:800;display:inline-grid;place-items:center;border-radius:50%}
+.anon-who{cursor:default}
+.me-tag{font-style:normal;font-size:10.5px;font-weight:800;padding:1px 6px;border-radius:99px;background:rgba(var(--kagit-rgb),.1);vertical-align:2px}
+.push-card{display:flex;gap:12px;align-items:center;padding:12px 14px;border-radius:16px;background:var(--yuzey);margin:0 0 12px}
+.push-card span{flex:1;font-size:13.5px;line-height:1.35}.push-card b{display:block;font-size:14.5px}
+.push-card .btn{height:38px;padding:0 14px;font-size:14px;flex:0 0 auto}
 </style>
 </head>
 <body>
@@ -807,6 +816,8 @@ a.btn{display:inline-flex;align-items:center;justify-content:center;text-decorat
 <div class="onb" id="onb" hidden><div class="onb-in" id="onbIn"></div></div>
 
 <script>
+// davet linkiyle gelindiyse davet edeni hatırla (kayıtta sunucuya iletilir)
+try{const rf=new URLSearchParams(location.search).get("ref");if(rf&&/^[A-Za-z0-9]{10,40}$/.test(rf)&&!localStorage.getItem("kulis_ref"))localStorage.setItem("kulis_ref",rf)}catch(e){}
 const REMOTE=(()=>{try{return localStorage.getItem("kulis_remote")!=="0"}catch(e){return true}})();
 /* ============ VERİ ============ */
 const SIGNS=[["koc","Koç","♈",0],["boga","Boğa","♉",1],["ikizler","İkizler","♊",2],["yengec","Yengeç","♋",3],["aslan","Aslan","♌",0],["basak","Başak","♍",1],["terazi","Terazi","♎",2],["akrep","Akrep","♏",3],["yay","Yay","♐",0],["oglak","Oğlak","♑",1],["kova","Kova","♒",2],["balik","Balık","♓",3]].map(([k,n,g,e],i)=>({k,n,g:g+"︎",e,i}));
@@ -1062,11 +1073,11 @@ function postHTML(p,opts={}){
   const mine=p.u==="me", my=state.react[p.id];
   const long=p.t.length>150;
   return `<article class="it">
-   <div class="it-top">${who(p.u,p.ago)}<span class="it-cat">${CATN[p.cat]||""}</span></div>
+   <div class="it-top">${p.anon?`<span class="who anon-who"><span class="av anon-av" style="width:36px;height:36px">?</span><span><b>Anonim${p.u==="me"?" <em class=\"me-tag\">sen</em>":""}</b><small>${p.ago}</small></span></span>`:who(p.u,p.ago)}<span class="it-cat">${CATN[p.cat]||""}</span></div>
    ${p.q?`<p class="it-q">${esc(p.q)}</p>`:""}<blockquote class="${long?"long":""}" ${opts.full?"":`data-open="${p.id}"`}>${esc(p.t)}</blockquote>
    <div class="it-foot"><div class="reacts">${REACTS.map(([k,l,ic])=>`<button class="r" data-react="${p.id}:${k}" aria-pressed="${my===k}" title="${l}" aria-label="${l}">${IC[ic]}<span class="n">${(p.r[k]||0)+(!REMOTE&&my===k?1:0)}</span></button>`).join("")}</div>
    <div class="acts2">${opts.full?"":`<button class="ib" data-open="${p.id}" aria-label="Yorumlar">${IC.cm}${cmN(p)}</button>`}
-   ${mine?"":`<button class="ib dm" data-dm="${p.u}" data-from="${p.id}" aria-label="Özelden yaz">${IC.dm}</button>`}
+   ${mine||p.anon?"":`<button class="ib dm" data-dm="${p.u}" data-from="${p.id}" aria-label="Özelden yaz">${IC.dm}</button>`}
    <button class="ib" data-share="${p.id}" aria-label="Hikâyede paylaş">${IC.share}</button>
    <button class="ib" data-more="${p.id}" aria-label="Diğer seçenekler">${IC.more}</button></div></div></article>`;
 }
@@ -1114,7 +1125,7 @@ function vBen(){
    ${isStandalone()?"":`<button class="btn line wide" id="instPro" style="margin-top:22px">${PHONE_DL}Ana ekrana ekle</button>`}
    ${themePicker()}
    <div class="lg-links"><a href="kurallar.html" data-legal="kurallar">Topluluk kuralları</a><a href="kosullar.html" data-legal="kosullar">Kullanım koşulları</a><a href="gizlilik.html" data-legal="kvkk">KVKK ve gizlilik</a>${GA_ID?'<a href="#" id="ckPref">Çerez tercihleri</a>':""}</div>
-   <button class="btn line wide" id="outBtn" style="margin-top:22px;color:var(--nar);border-color:rgba(var(--nar-rgb),.35)">${LOGOUT}Çıkış yap</button>${REMOTE?`<button class="dice" id="delAcc" style="margin:14px auto 0;display:flex">Hesabımı sil</button>`:""}</div>`;
+   <button class="btn line wide" id="outBtn" style="margin-top:22px;color:var(--nar);border-color:rgba(var(--nar-rgb),.35)">${LOGOUT}Çıkış yap</button>${REMOTE?`${pushState()==="acik"?`<button class="dice" data-push="off" style="margin:14px auto 0;display:flex">Telefon bildirimlerini kapat</button>`:`<div style="margin-top:14px">${pushCard("pro")}</div>`}<button class="dice" id="delAcc" style="margin:14px auto 0;display:flex">Hesabımı sil</button>`:""}</div>`;
   const pn=$("#pNote");if(pn)pn.onclick=()=>premiumGate("Fotoğrafın görünsün","Yüklediğin fotoğraf ve kapak Premium üyelerde herkese görünür.",()=>vBen());
   $("#camBtn").onclick=()=>showEditProfile("photo");$("#covBtn").onclick=()=>showEditProfile("banner");
   $("#editPro").onclick=showEditProfile;
@@ -1331,7 +1342,7 @@ async function installApp(){
     <div class="inst-hero"><img src="icons/icon-192.png" alt="" width="64" height="64"><div><b>Kulis</b><small>Telefonunda uygulama gibi dursun</small></div></div>${body}
     <button class="btn wide" style="margin-top:16px" onclick="closeSheet()">Tamam</button>`);
 }
-if("serviceWorker" in navigator&&location.protocol==="https:"&&/github\.io$/.test(location.hostname))addEventListener("load",()=>navigator.serviceWorker.register("sw.js").catch(()=>{}));
+if("serviceWorker" in navigator&&location.protocol==="https:")addEventListener("load",()=>navigator.serviceWorker.register("sw.js").catch(()=>{}));
 
 
 /* ============ HİKÂYEDE PAYLAŞ ============ */
@@ -1359,7 +1370,7 @@ function drawLogo(x,px,py,size){
 async function storyCanvas(p){
   try{await Promise.all(['italic 400 100px Newsreader','400 64px Newsreader','700 34px Figtree','800 30px Figtree'].map(f=>document.fonts.load(f)))}catch(e){}
   const W=1080,H=1920,cv=document.createElement("canvas");cv.width=W;cv.height=H;const x=cv.getContext("2d");
-  const u=userOf(p.u),mine=p.u==="me",acc=u.c||"#FF8A65",SERIF='Newsreader, "Crimson Text", Georgia, serif',SANS='Figtree, "DM Sans", system-ui, sans-serif';
+  const u=p.anon?U.anon:userOf(p.u),mine=p.u==="me"&&!p.anon,acc=u.c||"#FF8A65",SERIF='Newsreader, "Crimson Text", Georgia, serif',SANS='Figtree, "DM Sans", system-ui, sans-serif';
   x.fillStyle="#0B1220";x.fillRect(0,0,W,H);
   const glow=(cx,cy,r,c)=>{const g=x.createRadialGradient(cx,cy,0,cx,cy,r);g.addColorStop(0,c);g.addColorStop(1,"rgba(11,18,32,0)");x.fillStyle=g;x.fillRect(0,0,W,H)};
   glow(930,260,760,"rgba(255,138,101,.30)");glow(120,1760,760,"rgba(124,196,255,.18)");glow(160,300,520,"rgba(70,100,190,.20)");
@@ -1456,7 +1467,7 @@ function notifRow(n){
 }
 function showNotifs(){
   const list=state.notifs,fresh=list.filter(n=>!n.read),old=list.filter(n=>n.read);
-  openSheet(`<div class="sheet-head"><h2>Bildirimler</h2></div>
+  openSheet(`<div class="sheet-head"><h2>Bildirimler</h2></div>${typeof pushCard==="function"?pushCard("nf"):""}
     ${list.length?`${fresh.length?`<h3 class="nf-h">Yeni</h3>${fresh.map(notifRow).join("")}`:""}${old.length?`<h3 class="nf-h">Önceki</h3>${old.map(notifRow).join("")}`:""}`
     :`<div class="empty" style="text-align:center;padding:30px 10px">${IC.spark}<p style="margin-top:8px">Henüz bildirimin yok. İtirafına tepki geldiğinde, biri sana yazdığında ya da eşleştiğinde burada görürsün.</p></div>`}`);
   $("#sheet").querySelectorAll("[data-nf]").forEach(b=>b.onclick=()=>{
@@ -1575,7 +1586,7 @@ const LSset=(k,v)=>{try{localStorage.setItem(k,JSON.stringify(v))}catch(e){}};
 function logReport(key,reason){if(REMOTE){let pv=null;try{const o=reportPreview(key);pv=`${o.kind}: ${o.who} | ${o.text}`.slice(0,200)}catch(e){}KDB.report(key,reason,pv).catch(()=>{});track("sikayet");return}const l=LS("arcana_reports",[]);l.unshift({id:"r"+Date.now(),key,reason,ts:Date.now(),status:"bekliyor"});LSset("arcana_reports",l.slice(0,200));track("sikayet")}
 function reportPreview(key){
   const [t,id]=key.split(":");
-  if(t==="p"){const p=allPosts().find(x=>x.id===id);return p?{who:userOf(p.u).n,text:p.t,kind:"İtiraf"}:{who:"?",text:"(silinmiş itiraf)",kind:"İtiraf"}}
+  if(t==="p"){const p=allPosts().find(x=>x.id===id);return p?{who:p.anon?"Anonim":userOf(p.u).n,text:p.t,kind:"İtiraf"}:{who:"?",text:"(silinmiş itiraf)",kind:"İtiraf"}}
   if(t==="u"){const u=U[id];return {who:u?u.n:id,text:u?u.bio||"":"",kind:"Kullanıcı"}}
   return {who:"?",text:key,kind:"İçerik"};
 }
@@ -1631,6 +1642,7 @@ function closeAdmin(){const el=$("#adm");if(el)el.classList.remove("open");docum
 
 
 function showInvite(){
+  if(REMOTE&&window.KDB&&KDB.uid)return showInviteRemote();
   const url="https://kulistr.com/",text="Kulis'te takma adla itiraf ediliyor, burç uyumuna göre eşleşiliyor. Gel bak: "+url;
   track("davet");
   if(navigator.share){navigator.share({title:"Kulis",text,url}).catch(()=>{});return}
@@ -1842,7 +1854,7 @@ function showPost(id){
   g.onclick=()=>{const v=t.value.trim();const mc=modCheck(v,"yorum");if(mc){$("#cmWarn").innerHTML=`<p class="warn">${mc}</p>`;return}const bad=contactBlock(v);if(bad){$("#cmWarn").innerHTML=`<p class="warn">Yorumlarda ${bad} paylaşılamaz. Tanışmak istersen “Özelden yaz”ı kullan.</p>`;return}
     if(!state.premium&&p.u!=="me"&&!state.replied.has(p.u)&&state.replied.size>=3){premiumGate("Bugün daha fazla kişiye cevap yazamazsın","Ücretsiz planda günde sınırlı sayıda kişinin itirafına cevap yazabilirsin. Herkese sınırsız cevap yazmak için Premium'a geç.",()=>g.click());return}
     if(p.u!=="me")state.replied.add(p.u);
-    if(REMOTE){g.disabled=true;KDB.addComment(p.id,v,authorSnap()).then(()=>{track("yorum");state.myComments.push({on:p.t,t:v});t.value="";toast("Yorumun gönderildi");if(p.uid&&p.u!=="me")KDB.notify(p.uid,"cm",`itirafına yorum yaptı: “${v.slice(0,60)}”`,{post:p.id});showPost(id)}).catch(e=>{g.disabled=false;toast(writeErr(e,"yorum"))});return}
+    if(REMOTE){g.disabled=true;KDB.addComment(p.id,v,authorSnap()).then(()=>{track("yorum");state.myComments.push({on:p.t,t:v});t.value="";toast("Yorumun gönderildi");if(p.uid&&p.u!=="me"&&!p.anon)KDB.notify(p.uid,"cm",`itirafına yorum yaptı: “${v.slice(0,60)}”`,{post:p.id});showPost(id)}).catch(e=>{g.disabled=false;toast(writeErr(e,"yorum"))});return}
     p.cm.push({u:"me",t:v,ago:"Şimdi",ts:Date.now()});track("yorum");state.myComments.push({on:p.t,t:v});toast("Yorumun gönderildi");showPost(id);render()};
 }
 function showMore(id){
@@ -1850,7 +1862,7 @@ function showMore(id){
   openSheet(`<div class="menu">
     <button id="m1">${IC.link}Bağlantıyı kopyala</button>
     ${mine?`<button id="mB">${IC.spark}${isBoosted(p)?"Öne çıkarıldı, "+boostLeft(p)+" kaldı":"24 saat öne çıkar"}${state.premium?"":`<span class="lk-mini">${IC.lock}</span>`}</button><button id="mD" class="danger">${IC.close}İtirafı sil</button>`:""}
-    ${mine?"":`<button id="m2">${IC.flag}İtirafı şikâyet et</button><button id="m3" class="danger">${IC.block}${esc(U[p.u].n)} kullanıcısını engelle</button>`}
+    ${mine?"":`<button id="m2">${IC.flag}İtirafı şikâyet et</button>${p.anon?"":`<button id="m3" class="danger">${IC.block}${esc(U[p.u].n)} kullanıcısını engelle</button>`}`}
     <button id="m4">${IC.close}Vazgeç</button></div>`);
   $("#m1").onclick=async()=>{closeSheet();try{await navigator.clipboard.writeText(location.href.split("#")[0]+"#"+p.id);toast("Bağlantı kopyalandı")}catch(e){toast("Kopyalanamadı")}};
   if(mine){
@@ -1860,7 +1872,7 @@ function showMore(id){
     $("#mD").onclick=()=>openSheet(`<h2>İtiraf silinsin mi?</h2><p class="muted" style="margin:8px 0 16px">İtirafın, altındaki yorumlar ve tepkiler kalıcı olarak silinir. Bu işlem geri alınamaz.</p><div style="display:grid;gap:8px"><button class="btn wide" id="mDy" style="background:var(--nar)">Sil</button><button class="btn line wide" id="mDn">Vazgeç</button></div>`);
   }
   if(!mine){$("#m2").onclick=()=>showReport("p:"+p.id);
-    $("#m3").onclick=()=>{allPosts().filter(x=>x.u===p.u).forEach(x=>state.hidden.add("p:"+x.id));closeSheet();toast(`${U[p.u].n} engellendi. İtirafları ve mesajları sana görünmeyecek.`);render()}}
+    if($("#m3"))$("#m3").onclick=()=>{if(REMOTE)KDB.block(p.uid).catch(()=>{});allPosts().filter(x=>x.u===p.u).forEach(x=>state.hidden.add("p:"+x.id));closeSheet();toast(`${U[p.u].n} engellendi. İtirafları ve mesajları sana görünmeyecek.`);render()}}
   $("#m4").onclick=closeSheet;
 }
 
@@ -2018,6 +2030,7 @@ function showConfess(opt={}){
    ${QM?"":`<div class="cats" style="margin:0 -18px;padding:0 18px 12px">${CATS.filter(c=>c[0]!=="hepsi"&&c[0]!=="soru").map(([k,l])=>`<button class="c" data-pc="${k}" aria-pressed="${cat===k}">${l}</button>`).join("")}</div>`}
    <div class="box big"><textarea id="cfIn" maxlength="500" placeholder="${QM?"Cevabın…":"Kimseye söyleyemediğin şey…"}"></textarea></div>
    <div class="row" style="border:0;padding:6px 2px 0"><span class="hint" style="margin:0" id="cnt">0 / 500</span></div>
+   ${REMOTE&&!QM?`<label class="anon-sw"><input type="checkbox" id="cfAnon"><span><b>Anonim paylaş</b><small>Takma adın bile görünmez, kimse sana yazamaz. Silmek istersen sadece sen silebilirsin.</small></span></label>`:""}
    <div id="cfWarn"></div>
    <button class="btn wide" id="cfGo" disabled style="margin-top:12px">${QM?"Cevabı paylaş":"İtirafı paylaş"}</button>`);
   const t=$("#cfIn"),g=$("#cfGo");
@@ -2026,6 +2039,8 @@ function showConfess(opt={}){
   setTimeout(()=>t.focus(),250);
   g.onclick=()=>{const v=t.value.trim(),bad=contactBlock(v);if(bad){$("#cfWarn").innerHTML=`<p class="warn">İtiraflarda ${bad} paylaşılamaz.</p>`;return}
     const mc=modCheck(v,"itiraf");if(mc){$("#cfWarn").innerHTML=`<p class="warn">${mc}</p>`;return}
+    const anonOn=!!($("#cfAnon")&&$("#cfAnon").checked);
+    if(REMOTE&&anonOn){g.disabled=true;KDB.anonPost(v,cat).then(()=>{closeSheet();state.tab="akis";state.cat="hepsi";state.sort="yeni";render();scrollTo(0,0);toast("Anonim itirafın akışta");track("itiraf_yazildi",{kategori:cat,anonim:1})}).catch(e=>{g.disabled=false;const m=String(e&&e.message||"");toast(/hiz/.test(m)?"İki itiraf arasında en az 15 dakika olmalı.":/kelime/.test(m)?"İtirafında yasaklı bir kelime var.":"Anonim itiraf gönderilemedi: "+(e.code||m))});return}
     if(REMOTE){g.disabled=true;KDB.addPost(QM?{t:v,cat,q:opt.q}:{t:v,cat},authorSnap()).then(()=>{closeSheet();state.tab="akis";state.cat=QM?"soru":"hepsi";state.sort="yeni";render();scrollTo(0,0);toast("İtirafın akışta paylaşıldı");track("itiraf_yazildi",{kategori:cat})}).catch(e=>{g.disabled=false;toast(writeErr(e,"itiraf"))});return}
     const p={id:"m"+Date.now(),u:"me",cat,t:v,ago:"Şimdi",r:{bende:0,saril:0,yok:0},cm:[],today:true,day:dayKey(),ts:Date.now()};
     state.myPosts.unshift(p);closeSheet();
@@ -2050,7 +2065,7 @@ document.addEventListener("click",e=>{
   if(d.tab){closeChat();state.tab=d.tab;render();scrollTo(0,0)}
   else if(d.cat){state.cat=d.cat;vAkis()}
   else if(d.react){const[id,k]=d.react.split(":");const oldK=state.react[id]||null;state.react[id]=state.react[id]===k?null:k;
-    if(REMOTE){const nk=state.react[id]||null;KDB.react(id,nk,oldK).catch(e=>toast("Tepki kaydedilemedi: "+(e.code||e.message)));const pp=(R.mapped||[]).find(x=>x.id===id);if(nk&&!oldK&&pp&&pp.u!=="me")KDB.notify(pp.uid,"react",{bende:"itirafına “Ben de” dedi",saril:"itirafına sarıldı",yok:"itirafına “Yok artık” dedi"}[nk],{post:id})}if(state.react[id])toast({bende:"“Ben de” dedin",saril:"Sarıldın",yok:"“Yok artık” dedin"}[k]);
+    if(REMOTE){const nk=state.react[id]||null;KDB.react(id,nk,oldK).catch(e=>toast("Tepki kaydedilemedi: "+(e.code||e.message)));const pp=(R.mapped||[]).find(x=>x.id===id);if(nk&&!oldK&&pp&&pp.u!=="me"&&!pp.anon)KDB.notify(pp.uid,"react",{bende:"itirafına “Ben de” dedi",saril:"itirafına sarıldı",yok:"itirafına “Yok artık” dedi"}[nk],{post:id})}if(state.react[id])toast({bende:"“Ben de” dedin",saril:"Sarıldın",yok:"“Yok artık” dedin"}[k]);
     if($("#scrim").classList.contains("open"))showPost(id);render()}
   else if(d.open){showPost(d.open)}
   else if(d.prof){showProfile(d.prof)}
@@ -2269,7 +2284,9 @@ const cmN=p=>p.cmCount!=null?p.cmCount:p.cm.length;
 function authorSnap(){const m=state.me;return {n:m.n,c:m.c,s:m.s,g:m.g,age:m.age,av:(m.photo&&String(m.photo).startsWith("preset:"))?m.photo:null}}
 function monthTR(ts){const d=new Date(ts);return AYLAR[d.getMonth()]+" "+d.getFullYear()}
 function putUser(uid,d){if(!uid||uid===R.uid)return;const o=U[uid]||{};U[uid]=Object.assign(o,{n:d.n||o.n||"kullanıcı",s:d.s||o.s||"koc",age:d.age||o.age||"",g:d.g||o.g||"Belirtmeyeyim",c:d.c||o.c||"#7CC4FF",bio:d.bio!=null?d.bio:(o.bio||""),photo:d.av||o.photo,banner:d.banner||o.banner,since:d.createdAt?monthTR(d.createdAt.toMillis?d.createdAt.toMillis():d.createdAt):(o.since||""),stat:o.stat||[0,0,0]})}
-function mapPost(p){const mine=p.uid===R.uid;if(!mine&&p.a)putUser(p.uid,p.a);
+function mapPost(p){
+  if(p.anon){const m=!!(R.myAnon&&R.myAnon.has(p.id));return {id:p.id,anon:true,ag:p.a&&p.a.g||null,u:m?"me":"anon",uid:"anon",cat:p.cat,q:null,t:p.t,ts:p.ts,ago:agoOf(p.ts),r:p.r||{bende:0,saril:0,yok:0},cm:R.cm[p.id]||[],cmCount:p.cm||0,today:dayKeyOf(Date.now())===dayKeyOf(p.ts)}}
+  const mine=p.uid===R.uid;if(!mine&&p.a)putUser(p.uid,p.a);
   return {id:p.id,u:mine?"me":p.uid,uid:p.uid,cat:p.cat,q:p.q||null,t:p.t,ts:p.ts,ago:agoOf(p.ts),r:p.r||{bende:0,saril:0,yok:0},cm:R.cm[p.id]||[],cmCount:p.cm||0,today:dayKeyOf(Date.now())===dayKeyOf(p.ts)}}
 const dayKeyOf=ts=>{const d=new Date(ts);return d.getFullYear()+"-"+(d.getMonth()+1)+"-"+d.getDate()};
 function refreshStats(){const by={};R.posts.forEach(p=>{const k=p.uid;by[k]=by[k]||[0,0,0];by[k][0]++;by[k][2]+=reactTotal(p)});Object.keys(U).forEach(k=>{U[k].stat=by[k]||[0,0,0]})}
@@ -2278,6 +2295,7 @@ function rerender(){if(!state.me)return;if($("#chat").classList.contains("open")
 function remoteStartListeners(){
   if(R.started)return;R.started=true;
   KDB.listenUsers(list=>{R.usersRaw=list;list.forEach(u=>putUser(u.id,u));if($("#adm.open")&&ADM.tab==="uye"&&!document.activeElement.closest("#adm input"))openAdminRemote();refreshStats();if(state.tab==="kesfet")rerender()});
+  if(KDB.listenMyAnon)KDB.listenMyAnon(ids=>{R.myAnon=new Set(ids);if(R.posts&&R.posts.length){R.mapped=R.posts.map(mapPost);state.myPosts=R.mapped.filter(p=>p.u==="me");rerender()}});
   KDB.listenPosts(list=>{R.posts=list;const mapped=list.map(mapPost);state.myPosts=mapped.filter(p=>p.u==="me");R.mapped=mapped;refreshStats();
     if(!$("#scrim").classList.contains("open")||!R.cmPid)rerender()});
   KDB.listenNotifs(list=>{state.notifs=list.map(n=>({id:n.id,type:n.type,u:n.from,text:n.text,go:n.go,ts:n.ts,read:!!n.read}));render()});
@@ -2318,6 +2336,7 @@ function remoteEnterApp(pub,priv){
   R.syncedMe=JSON.stringify({n:state.me.n,c:state.me.c,bio:state.me.bio,photo:state.me.photo,banner:state.me.banner,g:state.me.g});
   $("#onb").hidden=true;$("#remLoad")&&$("#remLoad").remove();
   remoteStartListeners();render();askGender();
+  if(KDB.pushSupported)KDB.pushSupported().then(ok=>{R.pushOk=ok;if(ok&&LS("kulis_push_on",false))KDB.refreshPush();if(state.tab==="ben")render()});
   const tch=()=>{if(KDB.touch)KDB.touch()};tch();if(!R.hb){R.hb=setInterval(()=>{if(!document.hidden)tch()},120e3);document.addEventListener("visibilitychange",()=>{if(!document.hidden)tch()})}
 }
 // profil değişikliklerini sunucuya yaz (takma ad, renk, profil cümlesi, hazır görseller, cinsiyet seçimi)
@@ -2368,6 +2387,7 @@ async function remoteFinishOnb(){
   try{if(!(await KDB.nickFree(n))){toast("Bu takma ad alınmış, başka bir tane seç");ob.step=1;drawOnb();return}}catch(e){}
   const pub={n,c:ob.c,s:signOf(ob.m,ob.d),g:ob.g,age:ageBand(ageOf(ob.y,ob.m,ob.d)),bio:"",av:null,banner:null,guest:ob.provider==="guest"};
   const priv={ad:ob.ad.trim(),soyad:ob.soyad.trim(),email:ob.email.trim(),b:{d:ob.d,m:ob.m,y:ob.y},provider:ob.provider};
+  try{const rf=localStorage.getItem("kulis_ref");if(rf&&rf!==KDB.uid)priv.ref=rf}catch(e){}
   remoteLoading(true);
   try{await KDB.createProfile(pub,priv);track("kayit",{yontem:ob.provider});remoteEnterApp(pub,priv);toast(`Hoş geldin ${n}`)}
   catch(e){remoteLoading(false);toast("Kayıt tamamlanamadı: "+(e.code||e.message))}
@@ -2392,6 +2412,40 @@ function testLoginButton(){
   b.style.cssText="position:fixed;left:50%;transform:translateX(-50%);bottom:14px;z-index:95;height:42px;background:var(--yuzey)";
   b.onclick=()=>KDB.anon().then(u=>{b.remove();ob.provider="google";ob.ad="Test";ob.soyad="Kullanıcı";ob.email="test@kulistr.com";remoteAfterAuth(u,"google")}).catch(e=>toast("Test girişi olmadı: "+(e.code||e.message)));
   document.body.appendChild(b);
+}
+/* ---- telefona bildirim ---- */
+const IS_IOS=/iPhone|iPad|iPod/.test(navigator.userAgent),IS_STANDALONE=matchMedia("(display-mode: standalone)").matches||navigator.standalone===true;
+function pushState(){
+  if(!REMOTE||!R.pushOk){if(IS_IOS&&!IS_STANDALONE)return "ios";return "yok"}
+  return Notification.permission==="granted"&&LS("kulis_push_on",false)?"acik":Notification.permission==="denied"?"engelli":"kapali";
+}
+function pushCard(where){
+  const st=pushState();if(st==="acik"||st==="yok")return "";
+  if(where==="nf"&&LS("kulis_push_x",0)>Date.now())return "";
+  if(st==="ios")return `<div class="push-card">${IC.spark}<span><b>Bildirim almak ister misin?</b>iPhone'da önce Paylaş → Ana Ekrana Ekle ile Kulis'i ana ekrana ekle, oradan aç.</span></div>`;
+  if(st==="engelli")return where==="nf"?"":`<div class="push-card">${IC.spark}<span><b>Bildirimler engelli</b>Tarayıcı ayarlarından kulistr.com için bildirimlere izin ver.</span></div>`;
+  return `<div class="push-card">${IC.spark}<span><b>Telefonuna bildirim gelsin</b>Mesaj, yorum ya da eşleşme olunca site kapalıyken bile haberin olsun.</span><button class="btn" data-push="on">Aç</button>${where==="nf"?`<button class="ib" data-push="x" aria-label="Kapat">${IC.close}</button>`:""}</div>`;
+}
+async function turnPushOn(btn){
+  if(btn)btn.disabled=true;
+  try{const p=await Notification.requestPermission();if(p!=="granted"){toast("Bildirim izni verilmedi");if(btn)btn.disabled=false;return}
+    await KDB.enablePush();LSset("kulis_push_on",true);toast("Bildirimler açık");track("bildirim_acik");render();if($("#scrim").classList.contains("open"))showNotifs()}
+  catch(e){if(btn)btn.disabled=false;toast("Bildirim açılamadı: "+(e.code||e.message))}
+}
+async function turnPushOff(){await KDB.disablePush().catch(()=>{});LSset("kulis_push_on",false);toast("Telefon bildirimleri kapalı");render()}
+document.addEventListener("click",e=>{const b=e.target.closest("[data-push]");if(!b)return;const a=b.dataset.push;
+  if(a==="on")turnPushOn(b);else if(a==="off")turnPushOff();else if(a==="x"){LSset("kulis_push_x",Date.now()+7*864e5);b.closest(".push-card").remove()}});
+async function showInviteRemote(){
+  const url="https://kulistr.com/?ref="+KDB.uid,text="Kulis'te takma adla itiraf ediliyor, burç uyumuna göre eşleşiliyor. Bu linkle gel: "+url;
+  track("davet");
+  const draw=c=>{const n=c.count||0,left=3-(n%3);openSheet(`<h2>Arkadaşını davet et</h2>
+    <p class="muted" style="font-size:14px;margin:6px 0 14px">Senin linkinle katılan her <b>3 kişi</b> için <b>1 hafta Premium</b> kazanırsın. Katılan kişinin e-postasını doğrulaması gerekir.</p>
+    <div class="adm-stats" style="grid-template-columns:1fr 1fr;margin-bottom:14px"><div><b>${n}</b><small>Seninle katılan</small></div><div><b>${left}</b><small>Sonraki ödüle kalan</small></div></div>
+    <div class="box" style="padding:10px 12px;font-size:13.5px;overflow-wrap:anywhere">${esc(url)}</div>
+    <div style="display:grid;gap:8px;margin-top:12px"><button class="btn wide" id="invS">Paylaş</button><button class="btn line wide" id="invC">Linki kopyala</button></div>`);
+    $("#invC").onclick=async()=>{try{await navigator.clipboard.writeText(text);toast("Davet linki kopyalandı")}catch(e){toast(url)}};
+    $("#invS").onclick=()=>{if(navigator.share)navigator.share({title:"Kulis",text,url}).catch(()=>{});else $("#invC").click()}};
+  draw({count:0});KDB.refInfo().then(c=>{if($("#invS"))draw(c)}).catch(()=>{});
 }
 function remoteInit(){
   // giriş düğmeleri: Google, Apple, e-posta bağlantısı ve misafir girişi
@@ -2573,8 +2627,9 @@ const WEL=REMOTE?{U:Object.assign({},U),P:POSTS.slice()}:null;
 if(REMOTE){
   // örnek kullanıcıları kaldır
   Object.keys(U).forEach(k=>delete U[k]);
+  U.anon={n:"Anonim",s:"koc",c:"#8A93A6",g:null,age:"",bio:"",stat:[0,0,0],since:""};
   POSTS.length=0;
-  allPosts=function(){return (R.mapped||[]).filter(p=>p.u==="me"||genderOk(p.uid))};
+  allPosts=function(){return (R.mapped||[]).filter(p=>p.u==="me"||(p.anon?(()=>{const t=swTarget();return !t||p.ag===t})():genderOk(p.uid)))};
   seedDemo=function(){seeded=true};
   // yerel kayıt: sadece bu cihaza ait küçük tercihler (tepkilerim, kaydırdıklarım)
   const LKEY="kulis_beta_local";
@@ -2609,6 +2664,6 @@ if(REMOTE){
 if(REMOTE)remoteInit();else
 try{const s=JSON.parse(localStorage.getItem("itiraf_me")||"null");if(s&&s.n&&s.s){state.me=s;loadData();render();seedDemo()}else startOnb()}catch(e){startOnb()}
 </script>
-<script type="module">if(REMOTE)import("./kulis-db.js?v=12")</script>
+<script type="module">if(REMOTE)import("./kulis-db.js?v=14")</script>
 </body>
 </html>
