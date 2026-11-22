@@ -10,6 +10,7 @@ self.addEventListener("activate", e => {
 self.addEventListener("fetch", e => {
   const r = e.request;
   if (r.method !== "GET") return;
+  if (/\/beta\//.test(r.url)) return; // test sürümüne karışma
   const url = new URL(r.url);
   if (r.mode === "navigate") {
     e.respondWith(fetch(r).then(res => { const cp = res.clone(); caches.open(CACHE).then(c => c.put("./index.html", cp)); return res; })
