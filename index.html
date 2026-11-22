@@ -1485,7 +1485,7 @@ function modCheck(t,kind){
 // Şimdilik bu cihazdaki verileri gösterir. Sunucu bağlanınca tüm kullanıcıların şikâyetleri buraya düşecek ve panel şifreyle korunacak.
 const LS=(k,d)=>{try{const v=JSON.parse(localStorage.getItem(k)||"null");return v==null?d:v}catch(e){return d}};
 const LSset=(k,v)=>{try{localStorage.setItem(k,JSON.stringify(v))}catch(e){}};
-function logReport(key,reason){if(REMOTE){let pv=null;try{pv=String(reportPreview(key)||"").slice(0,200)}catch(e){}KDB.report(key,reason,pv).catch(()=>{});track("sikayet");return}const l=LS("arcana_reports",[]);l.unshift({id:"r"+Date.now(),key,reason,ts:Date.now(),status:"bekliyor"});LSset("arcana_reports",l.slice(0,200));track("sikayet")}
+function logReport(key,reason){if(REMOTE){let pv=null;try{const o=reportPreview(key);pv=`${o.kind}: ${o.who} | ${o.text}`.slice(0,200)}catch(e){}KDB.report(key,reason,pv).catch(()=>{});track("sikayet");return}const l=LS("arcana_reports",[]);l.unshift({id:"r"+Date.now(),key,reason,ts:Date.now(),status:"bekliyor"});LSset("arcana_reports",l.slice(0,200));track("sikayet")}
 function reportPreview(key){
   const [t,id]=key.split(":");
   if(t==="p"){const p=allPosts().find(x=>x.id===id);return p?{who:userOf(p.u).n,text:p.t,kind:"İtiraf"}:{who:"?",text:"(silinmiş itiraf)",kind:"İtiraf"}}
@@ -1494,16 +1494,17 @@ function reportPreview(key){
 }
 const STAT_NAMES=[["kayit","Yeni üye"],["itiraf_yazildi","İtiraf"],["yorum","Yorum"],["mesaj","Mesaj"],["begen","Sağa kaydırma"],["eslesme","Eşleşme"],["paylas","Hikâye paylaşımı"],["davet","Davet linki paylaşımı"],["sikayet","Şikâyet"],["filtre_kelime","Filtre: kelime"],["filtre_isim","Filtre: ad soyad"],["filtre_kurum","Filtre: okul/iş yeri"],["filtre_kullaniciadi","Filtre: kullanıcı adı"]];
 function openAdmin(){
+  if(REMOTE&&!R.admin){toast("Bu panel sadece yöneticiler için");return}
   let el=$("#adm");if(!el){el=document.createElement("div");el.id="adm";el.setAttribute("role","dialog");el.setAttribute("aria-label","Yönetici paneli");document.body.appendChild(el)}
   const stats=LS("arcana_stats",{}),today=stats[dayKey()]||{},tot={};
   Object.values(stats).forEach(d=>Object.entries(d).forEach(([k,v])=>tot[k]=(tot[k]||0)+v));
-  const reps=LS("arcana_reports",[]),open=reps.filter(r=>r.status==="bekliyor"),done=reps.filter(r=>r.status!=="bekliyor").slice(0,20);
+  const reps=REMOTE?(R.reports||[]).map(r=>Object.assign({},r,{status:r.status||"bekliyor"})):LS("arcana_reports",[]),open=reps.filter(r=>r.status==="bekliyor"),done=reps.filter(r=>r.status!=="bekliyor").slice(0,20);
   const banned=bannedList();
-  const repRow=r=>{const pv=reportPreview(r.key);return `<div class="adm-rep ${r.status!=="bekliyor"?"done":""}"><div class="adm-rh"><span class="adm-k">${pv.kind}</span><b>${esc(pv.who)}</b><span class="adm-reason">${esc(r.reason)}</span><small>${agoOf(r.ts)}</small></div>
+  const repRow=r=>{let pv=reportPreview(r.key);if(REMOTE&&r.preview&&(pv.who==="?"||pv.text==="(silinmiş itiraf)")){const m=String(r.preview).match(/^([^:]*): ([^|]*) \| ([\s\S]*)$/);pv=m?{kind:m[1],who:m[2]+" (artık yok)",text:m[3]}:{kind:"İçerik",who:"",text:r.preview}}return `<div class="adm-rep ${r.status!=="bekliyor"?"done":""}"><div class="adm-rh"><span class="adm-k">${pv.kind}</span><b>${esc(pv.who)}</b><span class="adm-reason">${esc(r.reason)}</span><small>${agoOf(r.ts)}</small></div>
     <p>${esc(pv.text).slice(0,220)}</p>${r.status==="bekliyor"?`<div class="adm-acts"><button class="btn" data-adm="kaldir:${r.id}" style="background:var(--nar)">İçeriği kaldır</button><button class="btn line" data-adm="yoksay:${r.id}">Yoksay</button></div>`:`<small class="adm-st">${r.status==="kaldirildi"?"Kaldırıldı":"Yoksayıldı"}</small>`}</div>`};
   el.innerHTML=`<div class="adm-in">
     <div class="adm-top"><h2>Yönetici paneli</h2><button class="icon-btn" id="admX" aria-label="Kapat">${IC.close}</button></div>
-    <p class="hint" style="margin:-4px 0 16px">Şu an sadece bu cihazdaki verileri görüyorsun. Sunucu bağlanınca tüm kullanıcıların şikâyetleri ve istatistikleri buraya gelecek.</p>
+    <p class="hint" style="margin:-4px 0 16px">${REMOTE?"Şikâyetler tüm kullanıcılardan canlı geliyor. Aşağıdaki sayılar sadece bu cihazdaki hareketler; sitenin genel istatistikleri Google Analytics'te.":"Şu an sadece bu cihazdaki verileri görüyorsun."}</p>
     <h3 class="adm-h">Bugün</h3>
     <div class="adm-stats">${STAT_NAMES.map(([k,n])=>`<div><b>${today[k]||0}</b><small>${n}</small><i>toplam ${tot[k]||0}</i></div>`).join("")}</div>
     <h3 class="adm-h">Şikâyetler <span>${open.length} bekliyor</span></h3>
@@ -1514,13 +1515,16 @@ function openAdmin(){
     <div class="adm-words">${banned.map((w,i)=>`<span>${esc(w)}<button data-adm="sil:${i}" aria-label="${esc(w)} kelimesini kaldır">${IC.close}</button></span>`).join("")}</div>
     <div class="adm-add"><input class="city-search" id="admW" placeholder="Kelime ekle" maxlength="40"><button class="btn" id="admWAdd">Ekle</button></div>
     <button class="dice" id="admReset" style="margin-top:8px">Varsayılan listeye dön</button>
-    <h3 class="adm-h">Demo modu</h3>
-    <div class="adm-demo"><span><b>${DEMO?"Açık":"Kapalı"}</b><small>${DEMO?"Örnek kullanıcılar, otomatik cevaplar ve sahte beğeniler görünüyor. Gerçek kullanıcıya açmadan önce kapatılmalı.":"Sadece gerçek içerik görünüyor. Örnek kullanıcılar ve otomatik cevaplar kapalı."}</small></span><button class="btn line" id="admDemo">${DEMO?"Kapat":"Aç"}</button></div>
+    ${REMOTE?"":`<h3 class="adm-h">Demo modu</h3>
+    <div class="adm-demo"><span><b>${DEMO?"Açık":"Kapalı"}</b><small>${DEMO?"Örnek kullanıcılar, otomatik cevaplar ve sahte beğeniler görünüyor. Gerçek kullanıcıya açmadan önce kapatılmalı.":"Sadece gerçek içerik görünüyor. Örnek kullanıcılar ve otomatik cevaplar kapalı."}</small></span><button class="btn line" id="admDemo">${DEMO?"Kapat":"Aç"}</button></div>`}
   </div>`;
   el.classList.add("open");document.body.style.overflow="hidden";
   $("#admX").onclick=closeAdmin;
   el.querySelectorAll("[data-adm]").forEach(b=>b.onclick=()=>{const [a,id]=b.dataset.adm.split(":");
     if(a==="sil"){const l=[...bannedList()];l.splice(+id,1);LSset("arcana_banned",l);openAdmin();return}
+    if(REMOTE){const r=reps.find(x=>x.id===id);if(!r)return;const st=a==="kaldir"?"kaldirildi":"yoksayildi";const jobs=[KDB.setReport(id,st)];
+      if(a==="kaldir"){const[t,pid,ci]=r.key.split(":");if(t==="p")jobs.push(KDB.deletePost(pid).catch(()=>{}));else if(t==="c"){const c=(R.cm[pid]||[])[+ci];if(c)jobs.push(KDB.deleteComment(pid,c.id))}}
+      Promise.all(jobs).then(()=>{toast(a==="kaldir"?"İçerik kaldırıldı":"Şikâyet yoksayıldı");setTimeout(openAdmin,500)}).catch(e=>toast("Olmadı: "+(e.code||e.message)));return}
     const l=LS("arcana_reports",[]),r=l.find(x=>x.id===id);if(!r)return;
     r.status=a==="kaldir"?"kaldirildi":"yoksayildi";LSset("arcana_reports",l);
     if(a==="kaldir"){const rm=LS("arcana_removed",[]);if(!rm.includes(r.key))rm.push(r.key);LSset("arcana_removed",rm);state.hidden.add(r.key)}
@@ -1528,7 +1532,7 @@ function openAdmin(){
   const add=()=>{const v=$("#admW").value.trim();if(!v)return;const l=[...bannedList()];if(!l.map(lowTR).includes(lowTR(v)))l.push(v);LSset("arcana_banned",l);openAdmin()};
   $("#admWAdd").onclick=add;$("#admW").onkeydown=e=>{if(e.key==="Enter")add()};
   $("#admReset").onclick=()=>{try{localStorage.removeItem("arcana_banned")}catch(e){}openAdmin()};
-  $("#admDemo").onclick=()=>{try{localStorage.setItem("arcana_demo",DEMO?"0":"1")}catch(e){}location.reload()};
+  if($("#admDemo"))$("#admDemo").onclick=()=>{try{localStorage.setItem("arcana_demo",DEMO?"0":"1")}catch(e){}location.reload()};
 }
 function closeAdmin(){const el=$("#adm");if(el)el.classList.remove("open");document.body.style.overflow="";if(/[?&]yonetim/.test(location.search))history.replaceState(null,"",location.pathname);render()}
 
