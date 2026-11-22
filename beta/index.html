@@ -1133,7 +1133,7 @@ function vBen(){
    ${isStandalone()?"":`<button class="btn line wide" id="instPro" style="margin-top:22px">${PHONE_DL}Ana ekrana ekle</button>`}
    ${themePicker()}
    <div class="lg-links"><a href="kurallar.html" data-legal="kurallar">Topluluk kuralları</a><a href="kosullar.html" data-legal="kosullar">Kullanım koşulları</a><a href="gizlilik.html" data-legal="kvkk">KVKK ve gizlilik</a>${GA_ID?'<a href="#" id="ckPref">Çerez tercihleri</a>':""}</div>
-   <button class="btn line wide" id="outBtn" style="margin-top:22px;color:var(--nar);border-color:rgba(var(--nar-rgb),.35)">${LOGOUT}Çıkış yap</button>${REMOTE?`${pushState()==="acik"?`<button class="dice" data-push="off" style="margin:14px auto 0;display:flex">Telefon bildirimlerini kapat</button>`:`<div style="margin-top:14px">${pushCard("pro")}</div>`}<button class="dice" id="delAcc" style="margin:14px auto 0;display:flex">Hesabımı sil</button>`:""}</div>`;
+   <button class="btn line wide" id="outBtn" style="margin-top:22px;color:var(--nar);border-color:rgba(var(--nar-rgb),.35)">${LOGOUT}Çıkış yap</button>${REMOTE?`${pushState()==="acik"?`<button class="dice" data-push="off" style="margin:14px auto 0;display:flex">Telefon bildirimlerini kapat</button>`:""}<button class="dice" id="delAcc" style="margin:14px auto 0;display:flex">Hesabımı sil</button>`:""}</div>`;
   const pn=$("#pNote");if(pn)pn.onclick=()=>premiumGate("Fotoğrafın görünsün","Yüklediğin fotoğraf ve kapak Premium üyelerde herkese görünür.",()=>vBen());
   $("#camBtn").onclick=()=>showEditProfile("photo");$("#covBtn").onclick=()=>showEditProfile("banner");
   $("#editPro").onclick=showEditProfile;
