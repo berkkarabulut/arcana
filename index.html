@@ -1265,6 +1265,20 @@ function wrapLines(ctx,text,maxW){
   if(line)lines.push(line);return lines;
 }
 function rr(ctx,x,y,w,h,r){ctx.beginPath();ctx.moveTo(x+r,y);ctx.arcTo(x+w,y,x+w,y+h,r);ctx.arcTo(x+w,y+h,x,y+h,r);ctx.arcTo(x,y+h,x,y,r);ctx.arcTo(x,y,x+w,y,r);ctx.closePath()}
+
+/* Kulis logosu: K'nin bacağı fısıltı noktalarıyla kalpli kulağa uzanıyor (icons/logo.svg ile aynı) */
+function drawLogo(x,px,py,size){
+  x.save();x.translate(px,py);x.scale(size/512,size/512);
+  rr(x,0,0,512,512,112);x.clip();x.fillStyle="#0B1220";x.fillRect(0,0,512,512);
+  const g=x.createRadialGradient(400,92,0,400,92,435);g.addColorStop(0,"#3B2B3D");g.addColorStop(1,"rgba(11,18,32,0)");x.fillStyle=g;x.fillRect(0,0,512,512);
+  x.lineCap="round";x.lineJoin="round";
+  const line=(d,c,w)=>{x.strokeStyle=c;x.lineWidth=w;x.stroke(new Path2D(d))};
+  line("M140 112V396","#EEF3FF",38);line("M152 292L272 132","#EEF3FF",38);line("M200 244C232 300 262 350 300 380C332 404 372 400 392 372","#EEF3FF",38);
+  [[404,334,13,1],[410,300,10,.8],[412,270,8,.6]].forEach(([cx,cy,r,o])=>{x.globalAlpha=o;x.fillStyle="#FF8A65";x.beginPath();x.arc(cx,cy,r,0,7);x.fill()});x.globalAlpha=1;
+  line("M372 238C368 196 392 164 426 166C462 168 478 206 466 236C456 258 440 266 436 286","#FF8A65",22);
+  x.translate(430,214);x.scale(.55,.55);x.fillStyle="#E25C8F";x.fill(new Path2D("M0 22s-22-13-22-29a12 12 0 0 1 22-6 12 12 0 0 1 22 6c0 16-22 29-22 29z"));
+  x.restore();
+}
 async function storyCanvas(p){
   try{await Promise.all(['italic 400 100px Newsreader','400 64px Newsreader','700 34px Figtree','800 30px Figtree'].map(f=>document.fonts.load(f)))}catch(e){}
   const W=1080,H=1920,cv=document.createElement("canvas");cv.width=W;cv.height=H;const x=cv.getContext("2d");
@@ -1275,15 +1289,17 @@ async function storyCanvas(p){
   let seed=p.id.split("").reduce((a,c)=>a+c.charCodeAt(0),7);const rnd=()=>{seed=(seed*9301+49297)%233280;return seed/233280};
   for(let i=0;i<70;i++){x.globalAlpha=.15+rnd()*.45;x.fillStyle="#EEF3FF";x.beginPath();x.arc(rnd()*W,rnd()*H,1+rnd()*2.2,0,7);x.fill()}x.globalAlpha=1;
   // logo
+  drawLogo(x,W/2-60,80,120);
+  x.translate(0,110);
   x.textAlign="center";x.textBaseline="alphabetic";x.fillStyle="#EEF3FF";x.font=`italic 400 112px ${SERIF}`;
   const lw=x.measureText("Kulis").width;x.fillText("Kulis",W/2-12,250);
   x.fillStyle="#FF8A65";x.beginPath();x.arc(W/2+lw/2+4,236,13,0,7);x.fill();
-  x.fillStyle="#7CC4FF";x.font=`700 34px ${SANS}`;x.fillText("İtiraf & Sohbet",W/2,315);
+  x.fillStyle="#7CC4FF";x.font=`700 34px ${SANS}`;x.fillText("İtiraf & Sohbet",W/2,315);x.translate(0,-110);
   // kart
   const cx=84,cw=W-168,pad=64;let fs=66,lines;
   x.font=`400 ${fs}px ${SERIF}`;
-  for(;fs>=40;fs-=2){x.font=`400 ${fs}px ${SERIF}`;lines=wrapLines(x,"“"+p.t+"”",cw-pad*2);if(lines.length*fs*1.32<=900)break}
-  const lh=fs*1.32,qh=lines.length*lh,ch=170+qh+150,cy=Math.max(420,(H-ch)/2+40);
+  for(;fs>=40;fs-=2){x.font=`400 ${fs}px ${SERIF}`;lines=wrapLines(x,"“"+p.t+"”",cw-pad*2);if(lines.length*fs*1.32<=760)break}
+  const lh=fs*1.32,qh=lines.length*lh,ch=170+qh+150,cy=Math.max(490,(H-ch)/2+70);
   x.save();x.shadowColor="rgba(0,0,0,.5)";x.shadowBlur=60;x.shadowOffsetY=30;rr(x,cx,cy,cw,ch,56);x.fillStyle="#131D33";x.fill();x.restore();
   x.save();rr(x,cx,cy,cw,ch,56);x.clip();const g=x.createRadialGradient(cx+cw,cy,0,cx+cw,cy,cw*.9);g.addColorStop(0,acc+"55");g.addColorStop(1,"rgba(19,29,51,0)");x.fillStyle=g;x.fillRect(cx,cy,cw,ch);x.restore();
   rr(x,cx,cy,cw,ch,56);x.strokeStyle="rgba(238,243,255,.12)";x.lineWidth=2;x.stroke();
