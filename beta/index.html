@@ -1007,12 +1007,19 @@ const IC={
  dice:'<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="4" y="4" width="16" height="16" rx="4"/><circle cx="9" cy="9" r="1" fill="currentColor"/><circle cx="15" cy="15" r="1" fill="currentColor"/><circle cx="15" cy="9" r="1" fill="currentColor"/><circle cx="9" cy="15" r="1" fill="currentColor"/></svg>'};
 
 // burç uyumu: element bazlı
-function uyum(a,b){const ea=Z[a].e,eb=Z[b].e;let base=a===b?78:ea===eb?88:((ea===0&&eb===2)||(ea===2&&eb===0)||(ea===1&&eb===3)||(ea===3&&eb===1))?82:((ea+eb)%2===1&&Math.abs(ea-eb)!==2)?58:64;
-  return Math.min(97,base+((a.length*7+b.length*3)%9))}
+// Burç uyumu: iki burç arasındaki açıya göre taban puan + her ikiliye özel sabit sapma (aynı ikili hep aynı puanı alır)
+const SIGN_IDX=Object.fromEntries(SIGNS.map((x,i)=>[x.k,i]));
+const ASPECT_BASE=[71,38,77,27,86,21,62];
+function uyum(a,b){
+  const ia=SIGN_IDX[a],ib=SIGN_IDX[b];if(ia==null||ib==null)return 50;
+  let d=Math.abs(ia-ib);if(d>6)d=12-d;
+  const key=ia<ib?a+b:b+a;let h=7;for(const ch of key)h=(h*31+ch.charCodeAt(0))%1009;
+  return Math.max(11,Math.min(97,ASPECT_BASE[d]+(h%19)-9));
+}
 function uyumText(a,b,p){const ea=EL[Z[a].e],eb=EL[Z[b].e];
   if(a===b)return `İkiniz de ${Z[a].n}. Birbirinizi çok iyi anlarsınız ama aynı inatla da karşılaşırsınız.`;
   if(Z[a].e===Z[b].e)return `İkiniz de ${ea} grubundasınız. Aynı dili konuşursunuz, sohbet kendiliğinden akar.`;
-  return p>=80?`${ea} ile ${eb} birbirini besler. Sohbetiniz hızlı ısınır.`:`${ea} ile ${eb} farklı tempolarda gider. İlk mesajlar biraz yoklama olur, sonra açılır.`}
+  return p>=75?`${ea} ile ${eb} birbirini besler. Sohbetiniz hızlı ısınır.`:p>=50?`${ea} ile ${eb} farklı tempolarda gider. İlk mesajlar biraz yoklama olur, sonra açılır.`:`${ea} ile ${eb} pek aynı telden çalmaz. Zorlu ama sürprizli bir ikili, belki zıtlar birbirini çeker.`}
 function ringSVG(p){const r=24,c=2*Math.PI*r;return `<svg class="ring" viewBox="0 0 58 58"><circle cx="29" cy="29" r="${r}" fill="none" stroke="var(--yuzey2)" stroke-width="5"/><circle cx="29" cy="29" r="${r}" fill="none" stroke="var(--acc,var(--nar))" stroke-width="5" stroke-linecap="round" stroke-dasharray="${c*p/100} ${c}" transform="rotate(-90 29 29)"/><text x="29" y="30" text-anchor="middle" dominant-baseline="middle" fill="var(--kagit)" font-size="14" font-weight="800" font-family="Figtree">%${p}</text></svg>`}
 
 // iletişim bilgisi filtresi
@@ -1146,6 +1153,8 @@ const SWIPE_EXTRA=[
  {u:"yorgunkaptan",cat:"ask",t:"Yeni biriyle tanışınca ilk iş burcunu soruyorum. Ama burca inanmadığımı söylüyorum."}
 ];
 const LIKED_ME=new Set(!REMOTE&&(()=>{try{return localStorage.getItem("arcana_demo")!=="0"}catch(e){return true}})()?["gecekusu","kedikahve","eskiplak","dumanli","sessizlimon","yorgunkaptan"]:[]);
+// karşı cins kuralı: erkeklere kadınlar, kadınlara erkekler görünür (cinsiyet belirtmeyen herkesi görür)
+const genderOk=uid=>{const t=state.me?swTarget():null;if(!t)return true;const u=U[uid];return !!u&&u.g===t};
 const swTarget=()=>state.me.g==="Kadın"?"Erkek":state.me.g==="Erkek"?"Kadın":null;
 const FREE_SWIPES=12;
 const sw={done:new Set(),hist:[],used:0,mode:"eslesme",matched:new Set(),front:null,busy:false};
@@ -1164,9 +1173,9 @@ function vKesfet(){
 }
 function vUyumlu(){
   const me=state.me;
-  const people=DEMO?Object.keys(U).map(k=>({k,p:uyum(me.s,U[k].s)})).sort((a,b)=>b.p-a.p):[];
+  const people=(DEMO||REMOTE)?Object.keys(U).filter(k=>DEMO||genderOk(k)).map(k=>({k,p:uyum(me.s,U[k].s)})).sort((a,b)=>b.p-a.p):[];
   if(!people.length){$("#ksBody").innerHTML=`<p class="empty">Henüz başka üye yok. Arkadaşlarını davet et, burcuna en uyumlu kişiler burada sıralansın.</p><button class="btn wide" id="invK" style="margin-top:12px">${IC.share}Arkadaşını davet et</button>`;$("#invK").onclick=()=>showInvite();return}
-  const sameSign=Object.keys(U).filter(k=>U[k].s===me.s);
+  const sameSign=Object.keys(U).filter(k=>U[k].s===me.s&&(DEMO||genderOk(k)));
   $("#ksBody").innerHTML=`<p class="muted" style="font-size:14px;margin-bottom:14px">Burcuna göre en uyumlu itirafçılar. Profiline girip itiraflarını okuyabilir, özelden yazabilirsin.</p>
    ${people.map(({k,p})=>{const u=U[k];return `<button class="row" data-prof="${k}">${av(k,46)}<span class="t"><b>${esc(u.n)}${pb(k)}</b><div>${Z[u.s].n}, ${u.age}, ${u.bio}</div></span><span class="meta"><b style="color:var(--kagit);font-size:15px">%${p}</b><br>uyum</span></button>`}).join("")}
    <p class="hint" style="margin-top:14px">${sameSign.length?`${Z[me.s].n} burcundan ${sameSign.length} kişi aktif.`:`Şu an ${Z[me.s].n} burcundan aktif kimse yok.`}</p>`;
@@ -2053,6 +2062,7 @@ function ageOf(y,m,d){const n=new Date();let a=n.getFullYear()-y;if(n.getMonth()
 const ageBand=a=>a<20?"18-19":a<25?"20-24":a<30?"25-29":a<35?"30-34":a<40?"35-39":"40+";
 function startOnb(edit){ob.editing=!!(edit&&state.me);if(edit&&state.me)Object.assign(ob,{step:1,n:state.me.n,c:state.me.c,g:state.me.g,ok:true,ad:state.me.ad||"",soyad:state.me.soyad||"",email:state.me.email||"",provider:state.me.provider||"email",codeSent:true,kod:"000000",photo:state.me.photo},state.me.b);$("#onb").hidden=false;drawOnb()}
 function drawOnb(){
+  if(ob.g&&ob.g!=="Kadın"&&ob.g!=="Erkek")ob.g=null;
   const s=ob.step;let body="",cta="Devam",ok=true;
   if(s===0){const emOk=/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(ob.email.trim()),nameOk=ob.ad.trim().length>=2&&ob.soyad.trim().length>=2;
     if(!ob.provider){
@@ -2090,7 +2100,7 @@ function drawOnb(){
     <div class="sign-big" id="sb"><div class="g glyph">${sign.g}</div><div><b style="font-size:17px">${sign.n}</b><div class="muted" style="font-size:13px">${EL[sign.e]} grubu, ${ageBand(ageOf(ob.y,ob.m,ob.d))} yaş aralığı</div></div></div>
     <p class="warn" id="ageWarn" ${ageOf(ob.y,ob.m,ob.d)>=18?"hidden":""} style="margin-top:12px">Kulis'i kullanmak için 18 yaşını doldurmuş olman gerekiyor.</p>`;ok=ageOf(ob.y,ob.m,ob.d)>=18;}
   if(s===3){body=`<h1>Biraz daha</h1><p class="lead">Profilinde görünür, sohbet önerilerinde kullanılır.</p>
-    <label class="lbl">Cinsiyet</label><div class="choice">${["Kadın","Erkek","Belirtmeyeyim"].map(g=>`<button data-g="${g}" aria-pressed="${ob.g===g}">${g}</button>`).join("")}</div>`;ok=!!ob.g;}
+    <label class="lbl">Cinsiyet</label><div class="choice">${["Kadın","Erkek"].map(g=>`<button data-g="${g}" aria-pressed="${ob.g===g}">${g}</button>`).join("")}</div>`;ok=!!ob.g;}
   if(s===4){body=`<h1>Burada kurallar kısa</h1>
     <div class="rules"><div>${IC.chk}<span>Numara, Instagram ve benzeri iletişim bilgileri otomatik engellenir.</span></div>
     <div>${IC.chk}<span>Kimsenin gerçek adını, okulunu, iş yerini yazma. Başkasını ifşa eden itiraf silinir.</span></div>
@@ -2259,14 +2269,22 @@ function remoteStartListeners(){
   setPremiumFrom(null);KDB.listenPremium(setPremiumFrom);playRestore();
   KDB.isAdmin().then(a=>{R.admin=a;if(a)KDB.listenReports(r=>{R.reports=r})});
 }
+function askGender(){
+  if(!state.me||state.me.g==="Kadın"||state.me.g==="Erkek"||$("#gAsk"))return;
+  const g=document.createElement("div");g.className="cf-scrim";g.id="gAsk";g.setAttribute("role","dialog");g.setAttribute("aria-modal","true");
+  g.innerHTML=`<div class="cf"><h2>Cinsiyetini seç</h2><p class="muted" style="font-size:14px;margin:6px 0 14px">Kulis'te erkekler kadınların, kadınlar erkeklerin itiraflarını görür ve eşleşir. Devam etmek için cinsiyetini seç. Sonradan değiştirilemez.</p>
+    <div class="choice">${["Kadın","Erkek"].map(x=>`<button data-gq="${x}">${x}</button>`).join("")}</div></div>`;
+  document.body.appendChild(g);
+  g.querySelectorAll("[data-gq]").forEach(b=>b.onclick=()=>{state.me.g=b.dataset.gq;save();g.remove();toast("Cinsiyetin kaydedildi");render()});
+}
 function remoteEnterApp(pub,priv){
   R.uid=KDB.uid;
   state.me={n:pub.n,c:pub.c,s:pub.s,g:pub.g,age:pub.age,bio:pub.bio||"",photo:pub.av||undefined,banner:pub.banner||undefined,
     ad:priv?priv.ad||"":"",soyad:priv?priv.soyad||"":"",email:priv?priv.email||"":"",b:priv?priv.b:undefined,provider:priv?priv.provider:(pub.guest?"guest":"")};
   R.syncedMe=JSON.stringify({n:state.me.n,c:state.me.c,bio:state.me.bio,photo:state.me.photo,banner:state.me.banner,g:state.me.g});
   $("#onb").hidden=true;$("#remLoad")&&$("#remLoad").remove();
-  remoteStartListeners();render();
-  KDB.touch();if(!R.hb){R.hb=setInterval(()=>{if(!document.hidden)KDB.touch()},120e3);document.addEventListener("visibilitychange",()=>{if(!document.hidden)KDB.touch()})}
+  remoteStartListeners();render();askGender();
+  const tch=()=>{if(KDB.touch)KDB.touch()};tch();if(!R.hb){R.hb=setInterval(()=>{if(!document.hidden)tch()},120e3);document.addEventListener("visibilitychange",()=>{if(!document.hidden)tch()})}
 }
 // profil değişikliklerini sunucuya yaz (takma ad, renk, profil cümlesi, hazır görseller, cinsiyet seçimi)
 function remoteSyncMe(){
@@ -2503,7 +2521,7 @@ if(REMOTE){
   // örnek kullanıcıları kaldır
   Object.keys(U).forEach(k=>delete U[k]);
   POSTS.length=0;
-  allPosts=function(){return R.mapped||[]};
+  allPosts=function(){return (R.mapped||[]).filter(p=>p.u==="me"||genderOk(p.uid))};
   seedDemo=function(){seeded=true};
   // yerel kayıt: sadece bu cihaza ait küçük tercihler (tepkilerim, kaydırdıklarım)
   const LKEY="kulis_beta_local";

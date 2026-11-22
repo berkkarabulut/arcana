@@ -27,11 +27,12 @@ service cloud.firestore {
       allow create: if isMe(uid)
         && request.resource.data.keys().hasOnly(['n','c','s','g','age','bio','av','banner','guest','createdAt','lastSeen'])
         && str(request.resource.data.n, 3, 20)
+        && request.resource.data.g in ['Kadın','Erkek']
         && request.resource.data.createdAt == request.time;
       // burç, cinsiyet ve yaş aralığı sonradan değiştirilemez (Eşleş'teki cinsiyet seçimi hariç: g sadece "Belirtmeyeyim"den değişebilir)
       allow update: if isMe(uid)
         && changed().hasOnly(['n','c','bio','av','banner','lastSeen','g'])
-        && (!('g' in changed()) || resource.data.g == 'Belirtmeyeyim')
+        && (!('g' in changed()) || (resource.data.g == 'Belirtmeyeyim' && request.resource.data.g in ['Kadın','Erkek']))
         && (!('n' in changed()) || str(request.resource.data.n, 3, 20))
         && (!('bio' in changed()) || str(request.resource.data.bio, 0, 120));
       allow delete: if isMe(uid) || isAdmin();
