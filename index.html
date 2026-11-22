@@ -262,6 +262,9 @@ h1,h2,h3{font-family:var(--display);font-weight:400;text-wrap:balance}
 span.city-search{display:grid}
 
 /* ===== v6 rötuş katmanı ===== */
+.skip{display:inline-flex;align-items:center;gap:6px;height:44px;padding:0 6px 0 14px;border-radius:12px;font-size:14px;font-weight:700;color:var(--soluk)}
+.skip:hover{color:var(--kagit);background:var(--yuzey)}
+
 .brand-wrap{display:flex;flex-direction:column;line-height:1}
 .tagline{font-size:10.5px;font-weight:700;letter-spacing:.06em;color:var(--soluk);margin-top:3px;padding-left:2px}
 
@@ -1175,8 +1178,9 @@ function drawOnb(){
     <button class="check" id="ck" role="checkbox" aria-checked="${ob.ok}"><span class="bx">${ob.ok?'<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3"><path d="M5 12.5l4.2 4.2L19 7"/></svg>':""}</span><span style="font-size:14.5px">18 yaşından büyüğüm, kuralları ve gizlilik metnini kabul ediyorum.</span></button>`;
     ok=ob.ok;cta=ob.editing?"Değişiklikleri kaydet":"İtiraflara gir";}
   $("#onbIn").innerHTML=`${ob.editing?`<button class="ob-back show" id="obX" style="float:right">Vazgeç</button>`:""}<button class="ob-back ${(s>0||ob.provider)&&!(ob.editing&&s===1)?"show":""}" id="obB">${IC.back}Geri</button><div class="steps">${Array.from({length:STEPS},(_,i)=>`<i class="${i<=s?"on":""}"></i>`).join("")}</div>
-   <div class="step">${body}</div><div class="ob-foot">${cta?`<button class="btn wide" id="obN" ${ok?"":"disabled"}>${cta}</button>`:`<button id="obN" hidden></button>`}</div>`;
-  $("#obB").onclick=()=>{if(ob.step===0){ob.provider=null}else ob.step--;drawOnb()};
+   <div class="step">${body}</div><div class="ob-foot">${cta?`<button class="btn wide" id="obN" ${ok?"":"disabled"}>${cta}</button>`:`<button id="obN" hidden></button>`}${s===0&&!ob.provider?`<div style="display:flex;justify-content:flex-end"><button class="skip" id="skipBtn">Üye olmadan devam et<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M9 6l6 6-6 6"/></svg></button></div>`:""}</div>`;
+  $("#obB").onclick=()=>{if(ob.step===0){ob.provider=null}else{ob.step--;if(ob.step===0&&ob.provider==="guest")ob.provider=null}drawOnb()};
+  const sk=$("#skipBtn");if(sk)sk.onclick=()=>{ob.provider="guest";ob.ad="";ob.soyad="";ob.email="";ob.step=1;drawOnb();$("#onb").scrollTop=0};
   const ox=$("#obX");if(ox)ox.onclick=()=>{const box=$("#onbIn");box.innerHTML=`<div class="step" style="padding-top:40px"><h1>Değişiklikler kaydedilmedi</h1><p class="lead">Hesap bilgilerinde yaptığın değişiklikleri kaydetmeden çıkarsan hepsi kaybolur.</p></div>
       <div class="ob-foot" style="display:grid;gap:8px"><button class="btn wide" id="oq1">Düzenlemeye dön</button><button class="btn line wide" id="oq2">Kaydetmeden çık</button></div>`;
     $("#oq1").onclick=drawOnb;$("#oq2").onclick=()=>{ob.editing=false;$("#onb").hidden=true;toast("Değişiklikler kaydedilmedi")}};$("#obN").onclick=obNext;
@@ -1199,7 +1203,7 @@ function confirmIdentity(){
   const g=document.createElement("div");g.className="cf-scrim";g.setAttribute("role","dialog");g.setAttribute("aria-modal","true");
   g.innerHTML=`<div class="cf"><div class="cf-ic">${IC.lock}</div><h2>Bilgilerin doğru mu?</h2>
     <p class="muted" style="font-size:14px;margin:6px 0 14px">Aşağıdaki bilgileri <b style="color:var(--kagit)">daha sonra değiştiremezsin</b>. Doğruluğundan emin misin?</p>
-    <div class="cf-list"><div><span>Ad soyad</span><b>${esc(ob.ad.trim())} ${esc(ob.soyad.trim())}</b></div><div><span>E-posta</span><b>${esc(ob.email.trim())}</b></div><div><span>Doğum tarihi</span><b>${ob.d} ${AYLAR[ob.m-1]} ${ob.y}</b></div><div><span>Cinsiyet</span><b>${esc(ob.g)}</b></div></div>
+    <div class="cf-list">${ob.provider==="guest"?"":`<div><span>Ad soyad</span><b>${esc(ob.ad.trim())} ${esc(ob.soyad.trim())}</b></div><div><span>E-posta</span><b>${esc(ob.email.trim())}</b></div>`}<div><span>Doğum tarihi</span><b>${ob.d} ${AYLAR[ob.m-1]} ${ob.y}</b></div><div><span>Cinsiyet</span><b>${esc(ob.g)}</b></div></div>
     <p class="hint" style="margin:10px 0 14px">Bu bilgiler diğer kullanıcılara gösterilmez. Takma adın, profil fotoğrafın ve profil cümlen ise istediğin zaman değiştirilebilir.</p>
     <div style="display:grid;gap:8px"><button class="btn wide" id="cfY">Evet, eminim</button><button class="btn line wide" id="cfN">Geri dön ve düzelt</button></div></div>`;
   document.body.appendChild(g);
