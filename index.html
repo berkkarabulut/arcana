@@ -748,7 +748,7 @@ function vMesajlar(){
 function vBen(){
   const me=state.me;
   const mine=state.myPosts;
-  view.innerHTML=`<div class="pro-wrap" style="--acc:${me.c}"><div class="cover" style="${coverCSS(me)}"><button class="cover-edit" id="covBtn">${IC.camera}Kapak</button></div>
+  view.innerHTML=`<div class="pro-wrap" style="--acc:${me.c}"><div class="cover" style="${coverCSS(me)}"><button class="cover-edit" id="covBtn">${IC.camera}Kapak</button><button class="cover-edit" id="outTop" style="right:auto;left:10px">${LOGOUT}Çıkış</button></div>
    <div class="pro2"><div style="position:relative"><span class="ring2" style="display:inline-block">${av("me",96,true)}</span><button class="cam" id="camBtn" aria-label="Profil fotoğrafını değiştir">${IC.camera}</button></div>
    <h2>${esc(me.n)}${pb("me")}</h2>
    <div class="badges"><span class="bd"><span class="glyph">${Z[me.s].g}</span>${Z[me.s].n}</span><span class="bd">${me.age}</span><span class="bd">${me.g}</span></div>
@@ -759,12 +759,26 @@ function vBen(){
    ${me.ad?`<details class="private"><summary>${IC.lock} Gizli bilgilerin<span class="chev">${IC.chev}</span></summary><div class="val" style="margin-top:10px">${esc(me.ad)} ${esc(me.soyad)}<br>${esc(me.email||"")}</div><p>${{google:"Google ile giriş yaptın.",apple:"Apple ile giriş yaptın.",email:"E-posta ile giriş yaptın."}[me.provider]||""} Bunları sadece sen görüyorsun, diğer kullanıcılar seni ${esc(me.n)} olarak görür.</p></details>`:""}
    <div class="tabs"><button aria-pressed="true">İtiraflarım</button></div>
    ${mine.length&&!state.premium?`<button class="pnote" id="feedNote" style="max-width:none;margin:10px 0 2px">${IC.lock}<span>İtirafların şu an sadece profilinde görünüyor. Akışta herkese görünmesi için Premium'a geç.</span></button>`:""}
-   ${mine.length?mine.map(p=>`<div class="mini"><q data-open="${p.id}" style="cursor:pointer">“${esc(p.t)}”</q><div class="on">${CATN[p.cat]}, ${p.cm.length} yorum, ${reactTotal(p)} tepki${state.premium?", akışta":", sadece profilde"}</div></div>`).join(""):`<p class="empty">Henüz itirafın yok. Ortadaki “İtiraf et” ile ilkini yaz.</p>`}</div>`;
+   ${mine.length?mine.map(p=>`<div class="mini"><q data-open="${p.id}" style="cursor:pointer">“${esc(p.t)}”</q><div class="on">${CATN[p.cat]}, ${p.cm.length} yorum, ${reactTotal(p)} tepki${state.premium?", akışta":", sadece profilde"}</div></div>`).join(""):`<p class="empty">Henüz itirafın yok. Ortadaki “İtiraf et” ile ilkini yaz.</p>`}
+   <button class="btn line wide" id="outBtn" style="margin-top:22px;color:var(--nar);border-color:rgba(232,80,91,.35)">${LOGOUT}Çıkış yap</button></div>`;
   const fn=$("#feedNote");if(fn)fn.onclick=()=>premiumGate("İtirafın akışta görünsün","Akışta sadece Premium üyelerin itirafları görünür. Premium'a geçince itirafların herkesin akışına düşer.",()=>vBen());
   const pn=$("#pNote");if(pn)pn.onclick=()=>premiumGate("Fotoğrafın görünsün","Yüklediğin fotoğraf ve kapak Premium üyelerde herkese görünür.",()=>vBen());
   $("#camBtn").onclick=()=>showEditProfile("photo");$("#covBtn").onclick=()=>showEditProfile("banner");
   $("#editPro").onclick=showEditProfile;
+  $("#outTop").onclick=$("#outBtn").onclick=confirmLogout;
   const gp=$("#goPrem");if(gp)gp.onclick=()=>showPremium("profil");
+}
+
+const LOGOUT='<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><path d="M16 17l5-5-5-5"/><path d="M21 12H9"/></svg>';
+function confirmLogout(){
+  const g=document.createElement("div");g.className="cf-scrim";g.setAttribute("role","dialog");g.setAttribute("aria-modal","true");
+  const guest=state.me&&state.me.provider==="guest";
+  g.innerHTML=`<div class="cf"><div class="cf-ic" style="background:rgba(232,80,91,.14);color:var(--nar)">${LOGOUT.replace('width="16" height="16"','width="22" height="22"')}</div><h2>Çıkış yapılsın mı?</h2><p class="muted" style="font-size:14px;margin:6px 0 16px">${guest?"Üye olmadan girdiğin için profilin, itirafların ve sohbetlerin bu cihazdan silinir. Geri dönmek için yeniden profil oluşturman gerekir.":"Tekrar girmek için aynı hesapla giriş yapman yeterli."}</p>
+    <div style="display:grid;gap:8px"><button class="btn wide" id="loY" style="background:var(--nar);color:#fff">Çıkış yap</button><button class="btn line wide" id="loN">Vazgeç</button></div></div>`;
+  document.body.appendChild(g);
+  g.onclick=e=>{if(e.target===g)g.remove()};
+  g.querySelector("#loN").onclick=()=>g.remove();
+  g.querySelector("#loY").onclick=()=>{try{localStorage.removeItem("itiraf_me")}catch(e){}location.reload()};
 }
 
 /* ============ PREMIUM KAPISI ============ */
