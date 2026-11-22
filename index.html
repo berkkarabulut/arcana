@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="tr">
+<html lang="tr" data-v="12">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -772,6 +772,16 @@ a.btn{display:inline-flex;align-items:center;justify-content:center;text-decorat
 :root[data-theme="light"] .au-on,:root[data-theme="light"] .au-stats b.g{color:#12865A}
 .au-del p{font-size:13.5px;margin:0 0 8px}
 @media (max-width:420px){.au-det{padding-left:14px}.au-det dt{flex-basis:92px}}
+.qc{display:block;margin:0 0 14px;padding:14px 16px;border-radius:18px;background:var(--yuzey);border:1px solid var(--cizgi)}
+.qc small{display:block;font-size:12px;font-weight:800;color:var(--altin);letter-spacing:.02em;margin-bottom:4px}
+.qc b{display:block;font-family:var(--display);font-weight:400;font-size:21px;line-height:1.25}
+.qc-f{display:flex;align-items:center;gap:10px;margin-top:12px;font-size:13px;color:var(--soluk)}
+.qc-f span{flex:1}
+.qc-see{font-weight:700;color:var(--kagit);font-size:13px}
+.qc .btn.sm{height:36px;padding:0 16px;font-size:14px}
+.it-q{font-size:13px;font-weight:700;color:var(--altin);margin:2px 0 -2px}
+.wk{position:relative}
+.wk-n{position:absolute;left:-6px;top:-6px;z-index:2;width:28px;height:28px;border-radius:50%;display:grid;place-items:center;font-weight:800;font-size:14px;background:var(--nar);color:var(--on-nar);box-shadow:0 2px 8px rgba(0,0,0,.25)}
 </style>
 </head>
 <body>
@@ -805,7 +815,7 @@ const EL=["Ateş","Toprak","Hava","Su"];
 function signOf(m,d){const c=[[1,20,"oglak","kova"],[2,19,"kova","balik"],[3,21,"balik","koc"],[4,20,"koc","boga"],[5,21,"boga","ikizler"],[6,21,"ikizler","yengec"],[7,23,"yengec","aslan"],[8,23,"aslan","basak"],[9,23,"basak","terazi"],[10,23,"terazi","akrep"],[11,22,"akrep","yay"],[12,22,"yay","oglak"]][m-1];return d<c[1]?c[2]:c[3]}
 const AYLAR=["Ocak","Şubat","Mart","Nisan","Mayıs","Haziran","Temmuz","Ağustos","Eylül","Ekim","Kasım","Aralık"];
 const COLORS=["#FF8A65","#7CC4FF","#2FBF97","#B39CFF","#FF7EA8","#F5B84B"];
-const CATS=[["hepsi","Hepsi"],["ask","Aşk"],["is","İş"],["aile","Aile"],["arkadas","Arkadaşlık"],["kimse","Kimseye söylemedim"]];
+const CATS=[["hepsi","Hepsi"],["soru","Günün sorusu"],["ask","Aşk"],["is","İş"],["aile","Aile"],["arkadas","Arkadaşlık"],["kimse","Kimseye söylemedim"]];
 const CATN=Object.fromEntries(CATS);
 const REACTS=[["bende","Ben de","meToo"],["saril","Sarıl","hug"],["yok","Yok artık","wow"]];
 
@@ -1052,10 +1062,10 @@ function postHTML(p,opts={}){
   const mine=p.u==="me", my=state.react[p.id];
   const long=p.t.length>150;
   return `<article class="it">
-   <div class="it-top">${who(p.u,p.ago)}<span class="it-cat">${CATN[p.cat]}</span></div>
-   <blockquote class="${long?"long":""}" ${opts.full?"":`data-open="${p.id}"`}>${esc(p.t)}</blockquote>
+   <div class="it-top">${who(p.u,p.ago)}<span class="it-cat">${CATN[p.cat]||""}</span></div>
+   ${p.q?`<p class="it-q">${esc(p.q)}</p>`:""}<blockquote class="${long?"long":""}" ${opts.full?"":`data-open="${p.id}"`}>${esc(p.t)}</blockquote>
    <div class="it-foot"><div class="reacts">${REACTS.map(([k,l,ic])=>`<button class="r" data-react="${p.id}:${k}" aria-pressed="${my===k}" title="${l}" aria-label="${l}">${IC[ic]}<span class="n">${(p.r[k]||0)+(!REMOTE&&my===k?1:0)}</span></button>`).join("")}</div>
-   <div class="acts2">${opts.full?"":`<button class="ib" data-open="${p.id}" aria-label="Yorumlar">${IC.cm}${p.cm.length}</button>`}
+   <div class="acts2">${opts.full?"":`<button class="ib" data-open="${p.id}" aria-label="Yorumlar">${IC.cm}${cmN(p)}</button>`}
    ${mine?"":`<button class="ib dm" data-dm="${p.u}" data-from="${p.id}" aria-label="Özelden yaz">${IC.dm}</button>`}
    <button class="ib" data-share="${p.id}" aria-label="Hikâyede paylaş">${IC.share}</button>
    <button class="ib" data-more="${p.id}" aria-label="Diğer seçenekler">${IC.more}</button></div></div></article>`;
@@ -1065,14 +1075,18 @@ function vAkis(){
   let list=allPosts().filter(p=>(state.cat==="hepsi"||p.cat===state.cat)&&!state.hidden.has("p:"+p.id));
   const boosted=list.filter(isBoosted);list=list.filter(p=>!isBoosted(p));
   let feat=null;
+  const WK=7*864e5,score=p=>reactTotal(p)*2+cmN(p);let rank=false;
+  if(state.sort==="hafta"){list=list.concat(boosted.splice(0)).filter(p=>!p.ts||Date.now()-p.ts<WK).sort((a,b)=>score(b)-score(a)).slice(0,10);rank=true}
   if(state.sort==="populer"){list=[...list].sort((a,b)=>(b.u==="me")-(a.u==="me")||reactTotal(b)-reactTotal(a));
     if(state.cat==="hepsi"&&list.length>2){const i=list.findIndex(p=>p.u!=="me");feat=list.splice(i,1)[0]}}
-  view.innerHTML=`${instBanner()}${dailyCard()}<div class="cats" role="toolbar" aria-label="Kategori">${CATS.map(([k,l])=>`<button class="c" data-cat="${k}" aria-pressed="${state.cat===k}">${l}</button>`).join("")}</div>
-   <div class="feed-head"><div class="seg2" role="group" aria-label="Sıralama"><button data-sort="populer" aria-pressed="${state.sort==="populer"}">Popüler</button><button data-sort="yeni" aria-pressed="${state.sort==="yeni"}">Yeni</button></div><span class="feed-count">${list.length+boosted.length+(feat?1:0)} itiraf</span></div>
+  view.innerHTML=`${instBanner()}${dailyCard()}${qCard()}<div class="cats" role="toolbar" aria-label="Kategori">${CATS.map(([k,l])=>`<button class="c" data-cat="${k}" aria-pressed="${state.cat===k}">${l}</button>`).join("")}</div>
+   <div class="feed-head"><div class="seg2" role="group" aria-label="Sıralama"><button data-sort="populer" aria-pressed="${state.sort==="populer"}">Popüler</button><button data-sort="yeni" aria-pressed="${state.sort==="yeni"}">Yeni</button><button data-sort="hafta" aria-pressed="${state.sort==="hafta"}">Haftanın</button></div><span class="feed-count">${list.length+boosted.length+(feat?1:0)} itiraf</span></div>
    ${boosted.map(p=>`<div class="boost-wrap"><div class="boost-tag">${IC.spark}Öne çıkarıldı</div>${postHTML(p)}</div>`).join("")}${feat?`<div class="feat"><div class="it" style="padding-top:12px"><div class="feat-tag">${IC.spark}Bugün en çok sarılan</div>${postHTML(feat).replace('<article class="it">','<article class="it" style="background:none;border:0;padding:0;margin:0">')}</div></div>`:""}
-   ${list.length?list.map(p=>postHTML(p)).join(""):(feat?"":`<p class="empty">Bu kategoride henüz itiraf yok. Ortadaki “İtiraf et” ile ilkini sen yaz.</p>`)}`;
+   ${rank&&list.length?`<p class="hint" style="margin:0 0 10px">Son 7 günün en çok sarılan ve konuşulan itirafları. Paylaş düğmesiyle hikâye görseli yapabilirsin.</p>`:""}
+   ${list.length?list.map((p,i)=>rank?`<div class="wk"><span class="wk-n">${i+1}</span>${postHTML(p)}</div>`:postHTML(p)).join(""):(feat?"":`<p class="empty">${rank?"Bu hafta henüz itiraf yok.":"Bu kategoride henüz itiraf yok. Ortadaki “İtiraf et” ile ilkini sen yaz."}</p>`)}`;
   bindInst();
   const dh=$("#dhCard");if(dh)dh.onclick=()=>showDaily();
+  const qg=$("#qcGo");if(qg)qg.onclick=()=>showConfess({q:todayQ().t});
 }
 function vMesajlar(){
   const free=!state.premium;
@@ -1474,6 +1488,14 @@ function daily(sign){
   return {genel:pick("genel","g"),ask:pick("ask","a"),is:pick("is","i"),ruh:pick("ruh","r"),renk:pick("renk","c"),sayi:1+hsh(d+sign+"n")%49,uyum:best[hsh(d+sign+"u")%best.length].k,
     puan:{ask:2+hsh(d+sign+"pa")%4,is:2+hsh(d+sign+"pi")%4,ruh:2+hsh(d+sign+"pr")%4}};
 }
+/* ============ GÜNÜN SORUSU ============ */
+const QUESTIONS=["En son kime yalan söyledin ve neden?","Hâlâ unutamadığın bir cümle var mı?","Kimseye söylemediğin bir korkun ne?","Geri dönebilsen hangi gün olurdu?","Birinden hâlâ özür bekliyor musun?","En son ne zaman ağladın?","İlk aşkın şimdi ne yapıyor sence?","Ailene hiç söyleyemediğin şey ne?","Şu an aklından geçen kişi kim, adını vermeden anlat.","Hayatında en çok pişman olduğun karar?","Bir günlüğüne görünmez olsan ne yapardın?","En son kimi kıskandın?","Biri sana ‘seni seviyorum’ dese şu an kim olmasını isterdin?","İş yerinde/okulda kimseye söyleyemediğin şey ne?","Eski sevgiline son bir mesaj atabilsen ne yazardın?","En utanç verici anın hangisi?","Kimsenin bilmediği bir yeteneğin var mı?","Bir arkadaşına hiç söylemediğin gerçek ne?","Gece uyumadan önce en çok ne düşünüyorsun?","Hayatında birine ‘keşke’ dediğin an?","Telefonunda kimseye göstermediğin şey ne?","Bugün seni gülümseten küçük bir şey?","Birine hâlâ kızgın mısın? Neden?","İlk görüşte aşka inanır mısın, yaşadın mı?","En son ne zaman yalnız hissettin?","Kendinde değiştirmek istediğin tek şey ne?","Hiç kimseye anlatmadığın bir sırrın?","Annene/babana söyleyemediğin bir teşekkür var mı?","Gizlice hâlâ takip ettiğin biri var mı?","Bir günlüğüne başka biri olsan kim olurdun?","En büyük hayalin ne, kimse bilmiyor olsa bile?","Bugün kimseye anlatamadığın ne oldu?","Bir ilişkide asla affetmeyeceğin şey ne?","Seni en son kim şaşırttı?","Bir mesajı yazıp silip göndermediğin oldu mu? Kime?","Çocukken sakladığın bir şey var mı?","Kendine en son ne zaman ‘aferin’ dedin?","Hiç birinin mesajını görüp cevap vermedin mi? Neden?","En çok özlediğin koku ne?","Şu an hayatında bir şeyi bırakabilsen ne olurdu?","Bir yabancıya söylemesi daha kolay olan şey ne?","En sevdiğin ama utandığın şarkı hangisi?","Kimsenin bilmediği bir alışkanlığın?","Birine hiç söylemediğin bir iltifat var mı?","Sence seni en iyi kim tanıyor?"];
+function todayQ(){const d=new Date(Date.now()+3*3600e3);const n=Math.floor(d.getTime()/864e5);return {i:n%QUESTIONS.length,t:QUESTIONS[n%QUESTIONS.length],day:n}}
+function qCard(){
+  if(!state.me)return "";const q=todayQ();
+  const n=allPosts().filter(p=>p.cat==="soru"&&p.q===q.t).length;
+  return `<div class="qc"><small>Günün sorusu</small><b>${esc(q.t)}</b><div class="qc-f"><span>${n?`${n} cevap`:"İlk cevabı sen yaz"}</span>${n?`<button class="qc-see" data-cat="soru">Cevapları gör</button>`:""}<button class="btn sm" id="qcGo">Cevapla</button></div></div>`;
+}
 function dailyCard(){
   const me=state.me;if(!me)return "";const r=daily(me.s);
   return `<button class="dh" id="dhCard" style="--acc:${me.c||"#E8505B"}"><span class="dh-z">${Z[me.s].g}</span><span class="dh-t"><small>${Z[me.s].n} için bugün</small><span>${r.genel}</span></span><span class="dh-go">${IC.chev}</span></button>`;
@@ -1511,8 +1533,13 @@ function track(ev,data){
 const TR_NAMES=new Set("Mehmet Mustafa Ahmet Ali Hüseyin Hasan İbrahim İsmail Osman Yusuf Murat Ömer Ramazan Halil Süleyman Abdullah Mahmut Recep Emre Burak Kemal Fatih Serkan Hakan Kadir Orhan Can Cem Deniz Berk Arda Kerem Emir Eren Efe Mert Onur Tolga Volkan Uğur Okan Barış Batuhan Furkan Enes Yasin Oğuz Serdar Selim Tuncay Yiğit Kaan Alp Ege Baran Umut Sinan Erkan Gökhan Taner Cengiz Levent Erdem Engin Ercan Tarık Anıl Berkay Doğukan Görkem Halit Emirhan Metehan Alperen Ozan Tuna Koray Sercan Fatma Ayşe Emine Hatice Zeynep Elif Meryem Şerife Zehra Sultan Hanife Merve Esra Özlem Büşra Kübra Ebru Gizem Tuğba Ece Ceren Selin Cansu İrem Damla Buse Dilara Melis Ezgi Derya Seda Sibel Gamze Aslı Burcu Pınar Yasemin Gül Gülşen Nur Esma Beyza Sude Nisa Ecrin Defne Duru Eylül Azra Asya Ela Melike Sevgi Hande Tuba Nihan Nazlı Başak Didem Şeyma Rabia Hilal Aylin Berna Dilek Filiz Songül Yeliz Neslihan Gülay Hülya Serpil Sevda Şule Tuğçe Yağmur Begüm İpek Nehir Ada Lara".split(" "));
 const NAME_OK_NEXT=new Set(["Bey","Hanım","Abi","Abla","Hoca","Hocam","Teyze","Amca","Dayı","Enişte","Yenge"]);
 const DEFAULT_BANNED=["orospu","ibne","yarrak","yarak","amcık","sikiş","sikerim","sikeyim","pezevenk","kahpe","porno","nude","çıplak foto"];
-function bannedList(){try{const l=JSON.parse(localStorage.getItem("arcana_banned")||"null");if(Array.isArray(l))return l}catch(e){}return DEFAULT_BANNED}
+function bannedList(){if(REMOTE&&typeof R!=="undefined"&&R.mod&&Array.isArray(R.mod.words))return R.mod.words;try{const l=JSON.parse(localStorage.getItem("arcana_banned")||"null");if(Array.isArray(l))return l}catch(e){}return DEFAULT_BANNED}
 const lowTR=t=>t.toLocaleLowerCase("tr");
+// sunucu kuralının kullandığı düzenli ifade: kelimenin başı eşleşir (istemci filtresiyle aynı mantık)
+function bannedRegex(words){const ks=[...new Set(words.map(w=>lowTR(w).trim()).filter(Boolean))].map(k=>k.replace(/[.*+?^${}()|[\]\\]/g,"\\$&"));return ks.length?"(^|[^a-zçğıöşü0-9])("+ks.join("|")+")":""}
+async function saveBanned(list){if(!REMOTE){LSset("arcana_banned",list);return}try{await KDB.setModeration(list,bannedRegex(list));toast("Kelime listesi herkese uygulandı")}catch(e){toast("Kaydedilemedi: "+(e.code||e.message))}}
+// sunucunun reddettiği yazmalar için anlaşılır mesaj
+function writeErr(e,kind){const c=e&&e.code||"";if(c==="permission-denied")return {itiraf:"Çok hızlı gidiyorsun. İki itiraf arasında en az 1 dakika olmalı.",yorum:"Biraz yavaş: iki yorum arasında birkaç saniye beklemelisin.",mesaj:"Mesajın gitmedi. Biraz yavaş yaz ya da karşı taraf seni engellemiş olabilir.",istek:"İstek gönderilemedi. Yeni bir istek için biraz bekle ya da bu kişi seni engellemiş olabilir."}[kind]||"Bu işlem şu an yapılamadı.";return "Olmadı: "+(c||e&&e.message||"bilinmeyen hata")}
 function bannedHit(t){
   const low=lowTR(t);
   for(const w of bannedList()){const k=lowTR(w).trim();if(!k)continue;
@@ -1815,7 +1842,7 @@ function showPost(id){
   g.onclick=()=>{const v=t.value.trim();const mc=modCheck(v,"yorum");if(mc){$("#cmWarn").innerHTML=`<p class="warn">${mc}</p>`;return}const bad=contactBlock(v);if(bad){$("#cmWarn").innerHTML=`<p class="warn">Yorumlarda ${bad} paylaşılamaz. Tanışmak istersen “Özelden yaz”ı kullan.</p>`;return}
     if(!state.premium&&p.u!=="me"&&!state.replied.has(p.u)&&state.replied.size>=3){premiumGate("Bugün daha fazla kişiye cevap yazamazsın","Ücretsiz planda günde sınırlı sayıda kişinin itirafına cevap yazabilirsin. Herkese sınırsız cevap yazmak için Premium'a geç.",()=>g.click());return}
     if(p.u!=="me")state.replied.add(p.u);
-    if(REMOTE){g.disabled=true;KDB.addComment(p.id,v,authorSnap()).then(()=>{track("yorum");state.myComments.push({on:p.t,t:v});t.value="";toast("Yorumun gönderildi");if(p.uid&&p.u!=="me")KDB.notify(p.uid,"cm",`itirafına yorum yaptı: “${v.slice(0,60)}”`,{post:p.id});showPost(id)}).catch(e=>{g.disabled=false;toast("Yorum gönderilemedi: "+(e.code||e.message))});return}
+    if(REMOTE){g.disabled=true;KDB.addComment(p.id,v,authorSnap()).then(()=>{track("yorum");state.myComments.push({on:p.t,t:v});t.value="";toast("Yorumun gönderildi");if(p.uid&&p.u!=="me")KDB.notify(p.uid,"cm",`itirafına yorum yaptı: “${v.slice(0,60)}”`,{post:p.id});showPost(id)}).catch(e=>{g.disabled=false;toast(writeErr(e,"yorum"))});return}
     p.cm.push({u:"me",t:v,ago:"Şimdi",ts:Date.now()});track("yorum");state.myComments.push({on:p.t,t:v});toast("Yorumun gönderildi");showPost(id);render()};
 }
 function showMore(id){
@@ -1872,7 +1899,7 @@ function startDM(k,fromId){
   const t=$("#dmIn"),g=$("#dmGo");
   t.oninput=()=>{grow(t);g.disabled=t.value.trim().length<3;$("#dmWarn").innerHTML=""};
   g.onclick=()=>{const v=t.value.trim(),bad=contactBlock(v),mc=modCheck(v,"mesaj");if(mc){$("#dmWarn").innerHTML=`<p class="warn">${mc}</p>`;return}if(bad){$("#dmWarn").innerHTML=`<p class="warn">Mesajında ${bad} var gibi görünüyor. Güvenliğin için iletişim bilgisi paylaşılamaz.</p>`;return}
-    if(REMOTE){g.disabled=true;KDB.startChat(k,p?p.t:null,v).then(()=>{closeSheet();toast(`İstek gönderildi. ${U[k].n} kabul edince sohbet açılır.`);KDB.notify(k,"req","sana mesaj isteği gönderdi",{tab:"mesajlar"})}).catch(e=>{g.disabled=false;toast("İstek gönderilemedi: "+(e.code||e.message))});return}
+    if(REMOTE){g.disabled=true;KDB.startChat(k,p?p.t:null,v).then(()=>{closeSheet();toast(`İstek gönderildi. ${U[k].n} kabul edince sohbet açılır.`);KDB.notify(k,"req","sana mesaj isteği gönderdi",{tab:"mesajlar"})}).catch(e=>{g.disabled=false;toast(writeErr(e,"istek"))});return}
     const c={u:k,from:p?p.t:null,msgs:[{me:true,t:v}],status:"wait",unread:false};state.chats.unshift(c);closeSheet();render();
     toast(`İstek gönderildi. ${U[k].n} kabul edince sohbet açılır.`);
     setTimeout(()=>{c.status="open";c.unread=true;c.msgs.push({me:false,t:replyFor(c)});notify("dm",k,"mesaj isteğini kabul etti",{chat:k});toast(`${U[k].n} isteğini kabul etti`);render();if(openIdx===state.chats.indexOf(c))drawChat()},4500);};
@@ -1909,7 +1936,7 @@ function drawChat(){
   t.onkeydown=e=>{if(e.key==="Enter"&&!e.shiftKey){e.preventDefault();$("#mGo").click()}};
   $("#mGo").onclick=()=>{const v=t.value.trim();if(!v)return;track("mesaj");const mc=modCheck(v,"mesaj");if(mc){$("#mWarn").innerHTML=`<p class="warn">${mc}</p>`;return}const bad=contactBlock(v);
     if(bad){$("#mWarn").innerHTML=`<p class="warn">Bu mesaj gönderilmedi: ${bad} paylaşılamaz. Sohbetler sitede kalır, böylece iki taraf da güvende olur.</p>`;return}
-    if(REMOTE){if(c.status==="wait"){toast("Karşı taraf isteğini kabul edince yazabilirsin");return}t.value="";$("#mGo").disabled=true;const wasMine=c.lastBy===R.uid;KDB.sendMsg(c.id,v).then(()=>{if(!wasMine)KDB.notify(c.u,"dm","sana yeni mesaj gönderdi",{chat:c.u})}).catch(e=>toast("Mesaj gitmedi: "+(e.code||e.message)));c.msgs.push({me:true,t:v});drawChat();setTimeout(()=>{const x=$("#mIn");x&&x.focus()},30);return}
+    if(REMOTE){if(c.status==="wait"){toast("Karşı taraf isteğini kabul edince yazabilirsin");return}t.value="";$("#mGo").disabled=true;const wasMine=c.lastBy===R.uid;KDB.sendMsg(c.id,v).then(()=>{if(!wasMine)KDB.notify(c.u,"dm","sana yeni mesaj gönderdi",{chat:c.u})}).catch(e=>toast(writeErr(e,"mesaj")));c.msgs.push({me:true,t:v});drawChat();setTimeout(()=>{const x=$("#mIn");x&&x.focus()},30);return}
     c.msgs.push({me:true,t:v});drawChat();
     const ci=c;setTimeout(()=>{ci.typing=true;if(state.chats[openIdx]===ci)drawChat()},700);
     setTimeout(()=>{ci.typing=false;ci.msgs.push({me:false,t:replyFor(ci)});if(state.chats[openIdx]===ci)drawChat();else{ci.unread=true;notify("dm",ci.u,"sana yeni mesaj gönderdi",{chat:ci.u});render()}
@@ -1976,23 +2003,25 @@ function showPremium(src){
 }
 
 /* ============ İTİRAF ET ============ */
-function showConfess(){
-  const today=state.myPosts.filter(p=>p.today).length, limit=state.premium?5:1;
-  if(today>=limit){openSheet(`<h2>Bugünlük bu kadar</h2><p class="muted" style="margin:8px 0 16px">Yeni itiraf için yarını bekle ya da Premium ile hemen yaz.</p>${state.premium?"":`<button class="btn gold wide" id="gp">Premium ile hemen yaz</button>`}`);const g=$("#gp");if(g)g.onclick=()=>showPremium("itiraf");return}
-  let cat="ask";
-  openSheet(`<h2>İtiraf et</h2><p class="muted" style="font-size:14px;margin:6px 0 12px">Takma adınla görünür: ${esc(state.me.n)}, ${Z[state.me.s].n}. Gerçek adın hiçbir yerde görünmez.</p>
-   <div class="cats" style="margin:0 -18px;padding:0 18px 12px">${CATS.filter(c=>c[0]!=="hepsi").map(([k,l])=>`<button class="c" data-pc="${k}" aria-pressed="${cat===k}">${l}</button>`).join("")}</div>
-   <div class="box big"><textarea id="cfIn" maxlength="500" placeholder="Kimseye söyleyemediğin şey…"></textarea></div>
+function showConfess(opt={}){
+  const QM=!!opt.q;
+  const today=state.myPosts.filter(p=>p.today&&p.cat!=="soru").length, limit=state.premium?5:1;
+  if(QM&&state.myPosts.some(p=>p.cat==="soru"&&p.q===opt.q)){toast("Bugünün sorusunu zaten cevapladın");return}
+  if(!QM&&today>=limit){openSheet(`<h2>Bugünlük bu kadar</h2><p class="muted" style="margin:8px 0 16px">Yeni itiraf için yarını bekle ya da Premium ile hemen yaz.</p>${state.premium?"":`<button class="btn gold wide" id="gp">Premium ile hemen yaz</button>`}`);const g=$("#gp");if(g)g.onclick=()=>showPremium("itiraf");return}
+  let cat=QM?"soru":"ask";const MIN=QM?3:15;
+  openSheet(`<h2>${QM?"Günün sorusu":"İtiraf et"}</h2>${QM?`<p style="font-family:var(--display);font-style:italic;font-size:19px;margin:8px 0 6px">“${esc(opt.q)}”</p>`:""}<p class="muted" style="font-size:14px;margin:6px 0 12px">Takma adınla görünür: ${esc(state.me.n)}, ${Z[state.me.s].n}. Gerçek adın hiçbir yerde görünmez.</p>
+   ${QM?"":`<div class="cats" style="margin:0 -18px;padding:0 18px 12px">${CATS.filter(c=>c[0]!=="hepsi"&&c[0]!=="soru").map(([k,l])=>`<button class="c" data-pc="${k}" aria-pressed="${cat===k}">${l}</button>`).join("")}</div>`}
+   <div class="box big"><textarea id="cfIn" maxlength="500" placeholder="${QM?"Cevabın…":"Kimseye söyleyemediğin şey…"}"></textarea></div>
    <div class="row" style="border:0;padding:6px 2px 0"><span class="hint" style="margin:0" id="cnt">0 / 500</span></div>
    <div id="cfWarn"></div>
-   <button class="btn wide" id="cfGo" disabled style="margin-top:12px">İtirafı paylaş</button>`);
+   <button class="btn wide" id="cfGo" disabled style="margin-top:12px">${QM?"Cevabı paylaş":"İtirafı paylaş"}</button>`);
   const t=$("#cfIn"),g=$("#cfGo");
   $("#sheet").querySelectorAll("[data-pc]").forEach(b=>b.onclick=()=>{cat=b.dataset.pc;$("#sheet").querySelectorAll("[data-pc]").forEach(x=>x.setAttribute("aria-pressed",x===b))});
-  t.oninput=()=>{$("#cnt").textContent=`${t.value.length} / 500`;g.disabled=t.value.trim().length<15;$("#cfWarn").innerHTML=""};
+  t.oninput=()=>{$("#cnt").textContent=`${t.value.length} / 500`;g.disabled=t.value.trim().length<MIN;$("#cfWarn").innerHTML=""};
   setTimeout(()=>t.focus(),250);
   g.onclick=()=>{const v=t.value.trim(),bad=contactBlock(v);if(bad){$("#cfWarn").innerHTML=`<p class="warn">İtiraflarda ${bad} paylaşılamaz.</p>`;return}
     const mc=modCheck(v,"itiraf");if(mc){$("#cfWarn").innerHTML=`<p class="warn">${mc}</p>`;return}
-    if(REMOTE){g.disabled=true;KDB.addPost({t:v,cat},authorSnap()).then(()=>{closeSheet();state.tab="akis";state.cat="hepsi";state.sort="yeni";render();scrollTo(0,0);toast("İtirafın akışta paylaşıldı");track("itiraf_yazildi",{kategori:cat})}).catch(e=>{g.disabled=false;toast("Paylaşılamadı: "+(e.code||e.message))});return}
+    if(REMOTE){g.disabled=true;KDB.addPost(QM?{t:v,cat,q:opt.q}:{t:v,cat},authorSnap()).then(()=>{closeSheet();state.tab="akis";state.cat=QM?"soru":"hepsi";state.sort="yeni";render();scrollTo(0,0);toast("İtirafın akışta paylaşıldı");track("itiraf_yazildi",{kategori:cat})}).catch(e=>{g.disabled=false;toast(writeErr(e,"itiraf"))});return}
     const p={id:"m"+Date.now(),u:"me",cat,t:v,ago:"Şimdi",r:{bende:0,saril:0,yok:0},cm:[],today:true,day:dayKey(),ts:Date.now()};
     state.myPosts.unshift(p);closeSheet();
     state.tab="akis";state.cat="hepsi";state.sort="yeni";render();scrollTo(0,0);toast("İtirafın akışta paylaşıldı");track("itiraf_yazildi",{kategori:cat});
@@ -2236,7 +2265,7 @@ function authorSnap(){const m=state.me;return {n:m.n,c:m.c,s:m.s,g:m.g,age:m.age
 function monthTR(ts){const d=new Date(ts);return AYLAR[d.getMonth()]+" "+d.getFullYear()}
 function putUser(uid,d){if(!uid||uid===R.uid)return;const o=U[uid]||{};U[uid]=Object.assign(o,{n:d.n||o.n||"kullanıcı",s:d.s||o.s||"koc",age:d.age||o.age||"",g:d.g||o.g||"Belirtmeyeyim",c:d.c||o.c||"#7CC4FF",bio:d.bio!=null?d.bio:(o.bio||""),photo:d.av||o.photo,banner:d.banner||o.banner,since:d.createdAt?monthTR(d.createdAt.toMillis?d.createdAt.toMillis():d.createdAt):(o.since||""),stat:o.stat||[0,0,0]})}
 function mapPost(p){const mine=p.uid===R.uid;if(!mine&&p.a)putUser(p.uid,p.a);
-  return {id:p.id,u:mine?"me":p.uid,uid:p.uid,cat:p.cat,t:p.t,ts:p.ts,ago:agoOf(p.ts),r:p.r||{bende:0,saril:0,yok:0},cm:R.cm[p.id]||[],cmCount:p.cm||0,today:dayKeyOf(Date.now())===dayKeyOf(p.ts)}}
+  return {id:p.id,u:mine?"me":p.uid,uid:p.uid,cat:p.cat,q:p.q||null,t:p.t,ts:p.ts,ago:agoOf(p.ts),r:p.r||{bende:0,saril:0,yok:0},cm:R.cm[p.id]||[],cmCount:p.cm||0,today:dayKeyOf(Date.now())===dayKeyOf(p.ts)}}
 const dayKeyOf=ts=>{const d=new Date(ts);return d.getFullYear()+"-"+(d.getMonth()+1)+"-"+d.getDate()};
 function refreshStats(){const by={};R.posts.forEach(p=>{const k=p.uid;by[k]=by[k]||[0,0,0];by[k][0]++;by[k][2]+=reactTotal(p)});Object.keys(U).forEach(k=>{U[k].stat=by[k]||[0,0,0]})}
 function rerender(){if(!state.me)return;if($("#chat").classList.contains("open"))return void render();render()}
@@ -2266,7 +2295,8 @@ function remoteStartListeners(){
     render();
   });
   setPremiumFrom(null);KDB.listenPremium(setPremiumFrom);playRestore();
-  KDB.isAdmin().then(a=>{R.admin=a;if(a)KDB.listenReports(r=>{R.reports=r})});
+  if(KDB.listenModeration)KDB.listenModeration(d=>{R.mod=d;if($("#adm.open")&&ADM.tab==="kelime")openAdminRemote()});
+  KDB.isAdmin().then(a=>{R.admin=a;if(a){KDB.listenReports(r=>{R.reports=r});if(KDB.listenErrors)KDB.listenErrors(l=>{R.errors=l;if($("#adm.open")&&ADM.tab==="hata")openAdminRemote()})}});
 }
 function askGender(){
   if(!state.me||state.me.g==="Kadın"||state.me.g==="Erkek"||$("#gAsk"))return;
@@ -2304,7 +2334,7 @@ function remoteLoading(on){
 }
 async function remoteAfterAuth(user,provider){
   // sadece e-postası doğrulanmış hesaplar (Google veya e-posta bağlantısı) girebilir
-  if(user.isAnonymous||!user.emailVerified){await KDB.signOut().catch(()=>{});remoteLoading(false);ob.provider=null;ob.step=0;startOnb();toast("Devam etmek için Google ya da e-posta bağlantısıyla giriş yap");return}
+  if(!KDB.isTest&&(user.isAnonymous||!user.emailVerified)){await KDB.signOut().catch(()=>{});remoteLoading(false);ob.provider=null;ob.step=0;startOnb();toast("Devam etmek için Google ya da e-posta bağlantısıyla giriş yap");return}
   remoteLoading(true);
   // kayıtlı kullanıcıyı asla yeniden kayıt ekranına düşürme: profil okunamazsa birkaç kez dene
   let pub=null,ok=false;
@@ -2346,6 +2376,18 @@ function showWebviewHelp(){
   g.querySelector("#wvX").onclick=()=>g.remove();
   g.querySelector("#wvC").onclick=()=>{try{navigator.clipboard.writeText("https://kulistr.com/");toast("Link kopyalandı, tarayıcına yapıştır")}catch(e){toast("kulistr.com")}};
 }
+// sitede oluşan hataları (aynısını tekrar tekrar değil) yönetici paneline bildir
+const ERR_SEEN=new Set();let errLast=0;
+function reportError(msg,where){try{if(!REMOTE||!window.KDB||!KDB.uid||!KDB.logError)return;const k=String(msg).slice(0,120);if(ERR_SEEN.has(k)||Date.now()-errLast<25e3)return;ERR_SEEN.add(k);errLast=Date.now();KDB.logError(msg,where)}catch(e){}}
+addEventListener("error",e=>{if(!e.message)return;reportError(`${e.message} @ ${(e.filename||"").split("/").pop()}:${e.lineno}`,"js")});
+addEventListener("unhandledrejection",e=>{const r=e.reason;reportError((r&&(r.code||r.message))||String(r),"promise")});
+function testLoginButton(){
+  if(!window.KDB||!KDB.isTest||$("#tstBtn"))return;
+  const b=document.createElement("button");b.id="tstBtn";b.className="btn line";b.textContent="TEST GİRİŞİ (sadece beta)";
+  b.style.cssText="position:fixed;left:50%;transform:translateX(-50%);bottom:14px;z-index:95;height:42px;background:var(--yuzey)";
+  b.onclick=()=>KDB.anon().then(u=>{b.remove();ob.provider="google";ob.ad="Test";ob.soyad="Kullanıcı";ob.email="test@kulistr.com";remoteAfterAuth(u,"google")}).catch(e=>toast("Test girişi olmadı: "+(e.code||e.message)));
+  document.body.appendChild(b);
+}
 function remoteInit(){
   // giriş düğmeleri: Google, Apple, e-posta bağlantısı ve misafir girişi
   document.addEventListener("click",e=>{
@@ -2369,7 +2411,7 @@ function remoteInit(){
     }
     let first=true;
     KDB.onAuth(u=>{if(!first)return;first=false;
-      if(u)remoteAfterAuth(u);else{remoteLoading(false);startOnb()}});
+      if(u)remoteAfterAuth(u);else{remoteLoading(false);startOnb();testLoginButton()}});
   };
   if(window.KDB)go();else addEventListener("kdb-ready",go,{once:true});
 }
@@ -2449,7 +2491,8 @@ function openAdminRemote(){
   const now=Date.now(),today=dayStart(),all=admUsers();
   const online=all.filter(u=>now-u.seen<ONLINE_MS),activeToday=all.filter(u=>u.seen>=today),newToday=all.filter(u=>u.created>=today),newWeek=all.filter(u=>now-u.created<7*864e5);
   const reps=(R.reports||[]).map(r=>Object.assign({},r,{status:r.status||"bekliyor"})),openReps=reps.filter(r=>r.status==="bekliyor");
-  const tabs=[["uye","Kullanıcılar",all.length],["sikayet","Şikâyetler",openReps.length],["kelime","Kelimeler",null]];
+  const errs=R.errors||[];
+  const tabs=[["uye","Kullanıcılar",all.length],["sikayet","Şikâyetler",openReps.length],["kelime","Kelimeler",null],["hata","Hatalar",errs.length]];
   let body="";
   if(ADM.tab==="uye"){
     const q=lowTR(ADM.q.trim());
@@ -2484,9 +2527,13 @@ function openAdminRemote(){
       <p>${esc(pv.text).slice(0,220)}</p>${r.status==="bekliyor"?`<div class="adm-acts"><button class="btn" data-adm="kaldir:${r.id}" style="background:var(--nar);color:var(--on-nar)">İçeriği kaldır</button><button class="btn line" data-adm="yoksay:${r.id}">Yoksay</button></div>`:`<small class="adm-st">${r.status==="kaldirildi"?"Kaldırıldı":"Yoksayıldı"}</small>`}</div>`};
     body=`${openReps.length?openReps.map(repRow).join(""):`<p class="muted" style="font-size:14px;padding:18px 4px">Bekleyen şikâyet yok.</p>`}
       ${done.length?`<details class="adm-done"><summary>Sonuçlananlar (${done.length})</summary>${done.map(repRow).join("")}</details>`:""}`;
+  } else if(ADM.tab==="hata"){
+    body=errs.length?`<div style="display:flex;justify-content:flex-end;margin-bottom:8px"><button class="dice" id="errClr">Hepsini temizle</button></div>${errs.map(e=>{const u=(R.usersRaw||[]).find(x=>x.id===e.uid);return `<div class="adm-rep"><div class="adm-rh"><span class="adm-k">${esc(e.where||"site")}</span><b>${esc(u?u.n:"?")}</b><small>${relTime(e.ts)}</small></div><p style="font-family:inherit;font-size:13.5px;overflow-wrap:anywhere">${esc(e.msg)}</p><small class="adm-st" style="overflow-wrap:anywhere">${esc(e.ua||"")}</small></div>`}).join("")}`
+      :`<p class="muted" style="font-size:14px;padding:18px 4px">Hata kaydı yok. Kullanıcıların tarayıcısında bir şey bozulursa burada görünür.</p>`;
   } else {
-    const banned=bannedList();
-    body=`<p class="hint" style="margin:0 0 10px">Bu kelimeler itiraf, yorum ve mesajlarda engellenir. Kelimenin başı eşleşir. Şimdilik sadece bu cihazda kayıtlı; diğer kullanıcılar sitedeki hazır listeyle filtrelenir.</p>
+    const banned=bannedList(),onServer=!!(R.mod&&Array.isArray(R.mod.words));
+    body=`<p class="hint" style="margin:0 0 10px">Bu kelimeler itiraf, yorum, mesaj, takma ad ve profil yazısında engellenir. Kelimenin başı eşleşir. ${onServer?"Liste sunucuda: eklediğin kelime anında herkese uygulanır.":"Liste henüz sunucuda değil."}</p>
+    ${onServer?"":`<button class="btn wide" id="modSeed" style="margin-bottom:12px">Listeyi sunucuya yükle ve herkese uygula</button>`}
     <div class="adm-words">${banned.map((w,i)=>`<span>${esc(w)}<button data-adm="sil:${i}" aria-label="${esc(w)} kelimesini kaldır">${IC.close}</button></span>`).join("")}</div>
     <div class="adm-add"><input class="city-search" id="admW" placeholder="Kelime ekle" maxlength="40"><button class="btn" id="admWAdd">Ekle</button></div>
     <button class="dice" id="admReset" style="margin-top:8px">Varsayılan listeye dön</button>`;
@@ -2508,11 +2555,13 @@ function openAdminRemote(){
     dg.onclick=async()=>{dg.disabled=true;dg.textContent="Siliniyor…";try{await KDB.adminDeleteUser(u.uid,u.n);R.usersRaw=(R.usersRaw||[]).filter(x=>x.id!==u.uid);delete U[u.uid];ADM.open=null;ADM.confirm=null;toast(`${u.n} silindi`);openAdminRemote()}
       catch(e){dg.disabled=false;dg.textContent="Kalıcı sil";toast("Silinemedi: "+(e.code||e.message))}}}
   el.querySelectorAll("[data-adm]").forEach(b=>b.onclick=()=>{const[a,id]=b.dataset.adm.split(":");
-    if(a==="sil"){const l=[...bannedList()];l.splice(+id,1);LSset("arcana_banned",l);openAdminRemote();return}
+    if(a==="sil"){const l=[...bannedList()];l.splice(+id,1);saveBanned(l).then(openAdminRemote);return}
     const r=reps.find(x=>x.id===id);if(!r)return;const st=a==="kaldir"?"kaldirildi":"yoksayildi";const jobs=[KDB.setReport(id,st)];
     if(a==="kaldir"){const[t,pid,ci]=r.key.split(":");if(t==="p")jobs.push(KDB.deletePost(pid).catch(()=>{}));else if(t==="c"){const c=(R.cm[pid]||[])[+ci];if(c)jobs.push(KDB.deleteComment(pid,c.id))}}
     Promise.all(jobs).then(()=>{toast(a==="kaldir"?"İçerik kaldırıldı":"Şikâyet yoksayıldı");setTimeout(openAdminRemote,500)}).catch(e=>toast("Olmadı: "+(e.code||e.message)))});
-  const w=$("#admW");if(w){const add=()=>{const v=w.value.trim();if(!v)return;const l=[...bannedList()];if(!l.map(lowTR).includes(lowTR(v)))l.push(v);LSset("arcana_banned",l);openAdminRemote()};$("#admWAdd").onclick=add;w.onkeydown=e=>{if(e.key==="Enter")add()};$("#admReset").onclick=()=>{try{localStorage.removeItem("arcana_banned")}catch(e){}openAdminRemote()}}
+  const w=$("#admW");if(w){const add=()=>{const v=w.value.trim();if(!v)return;const l=[...bannedList()];if(!l.map(lowTR).includes(lowTR(v)))l.push(v);saveBanned(l).then(openAdminRemote)};$("#admWAdd").onclick=add;w.onkeydown=e=>{if(e.key==="Enter")add()};$("#admReset").onclick=()=>saveBanned([...DEFAULT_BANNED]).then(openAdminRemote)}
+  const ms=$("#modSeed");if(ms)ms.onclick=()=>saveBanned([...new Set([...DEFAULT_BANNED,...(()=>{try{return JSON.parse(localStorage.getItem("arcana_banned")||"[]")}catch(e){return []}})()])]);
+  const ec=$("#errClr");if(ec)ec.onclick=async()=>{ec.disabled=true;for(const e of errs)await KDB.deleteError(e.id).catch(()=>{});toast("Hata kayıtları temizlendi")};
 }
 
 const WEL=REMOTE?{U:Object.assign({},U),P:POSTS.slice()}:null;
@@ -2555,6 +2604,6 @@ if(REMOTE){
 if(REMOTE)remoteInit();else
 try{const s=JSON.parse(localStorage.getItem("itiraf_me")||"null");if(s&&s.n&&s.s){state.me=s;loadData();render();seedDemo()}else startOnb()}catch(e){startOnb()}
 </script>
-<script type="module">if(REMOTE)import("./kulis-db.js?v=11")</script>
+<script type="module">if(REMOTE)import("./kulis-db.js?v=12")</script>
 </body>
 </html>

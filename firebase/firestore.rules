@@ -1,6 +1,7 @@
 rules_version = '2';
 // Kulis güvenlik kuralları
 // Temel ilke: herkes sadece kendi adına yazar; gizli bilgiler sadece sahibine, mesajlar sadece sohbetin iki tarafına görünür.
+// Sayaçlar (tepki, yorum) ancak gerçek bir tepki/yorumla birlikte değişebilir. Yazma işlemleri hız sınırına tabidir.
 service cloud.firestore {
   match /databases/{database}/documents {
 
@@ -13,12 +14,26 @@ service cloud.firestore {
     }
     function changed() { return request.resource.data.diff(resource.data).affectedKeys(); }
     function str(v, lo, hi) { return v is string && v.size() >= lo && v.size() <= hi; }
-    function step(a, b) { return b is int && b >= 0 && (b - a == 1 || a - b == 1 || a == b); }
 
-    // Yönetici listesi: sadece Firebase panelinden değiştirilir
+    // ---- Hız sınırı: her kullanıcının users/{uid}/meta/rl belgesinde son yazma zamanları durur.
+    // Bir itiraf/yorum/mesaj yazılırken aynı işlemde ilgili alan "şimdi" yapılmak zorunda; kural bir öncekiyle arada süre arar.
+    function rlPath() { return /databases/$(database)/documents/users/$(request.auth.uid)/meta/rl; }
+    function stamped(k) { return existsAfter(rlPath()) && getAfter(rlPath()).data.get(k, null) == request.time; }
+
+    // ---- Küfür / yasaklı kelime filtresi: yönetici panelinden yönetilen config/moderation.re
+    function modPath() { return /databases/$(database)/documents/config/moderation; }
+    function clean(t) {
+      return !exists(modPath()) || get(modPath()).data.get('re', '') == ''
+        || !t.lower().matches('(?s).*' + get(modPath()).data.re + '.*');
+    }
+    function blockedBy(other) { return exists(/databases/$(database)/documents/users/$(other)/blocks/$(request.auth.uid)); }
+
+    // Ayarlar: yönetici listesi sadece Firebase panelinden; yasaklı kelimeler yönetici panelinden
     match /config/{doc} {
       allow read: if signedIn();
-      allow write: if false;
+      allow write: if doc == 'moderation' && isAdmin()
+        && request.resource.data.keys().hasOnly(['re','words','updatedAt'])
+        && request.resource.data.re is string && request.resource.data.re.size() < 20000;
     }
 
     // Herkese açık profil (takma ad, burç, yaş aralığı, cinsiyet, renk, görseller)
@@ -26,18 +41,18 @@ service cloud.firestore {
       allow read: if signedIn();
       allow create: if isMe(uid)
         && request.resource.data.keys().hasOnly(['n','c','s','g','age','bio','av','banner','guest','createdAt','lastSeen'])
-        && str(request.resource.data.n, 3, 20)
+        && str(request.resource.data.n, 3, 20) && clean(request.resource.data.n)
         && request.resource.data.g in ['Kadın','Erkek']
         && request.resource.data.createdAt == request.time;
-      // burç, cinsiyet ve yaş aralığı sonradan değiştirilemez (Eşleş'teki cinsiyet seçimi hariç: g sadece "Belirtmeyeyim"den değişebilir)
+      // burç ve yaş aralığı sonradan değiştirilemez; cinsiyet sadece "Belirtmeyeyim"den bir kez seçilebilir
       allow update: if isMe(uid)
         && changed().hasOnly(['n','c','bio','av','banner','lastSeen','g'])
         && (!('g' in changed()) || (resource.data.g == 'Belirtmeyeyim' && request.resource.data.g in ['Kadın','Erkek']))
-        && (!('n' in changed()) || str(request.resource.data.n, 3, 20))
-        && (!('bio' in changed()) || str(request.resource.data.bio, 0, 120));
+        && (!('n' in changed()) || (str(request.resource.data.n, 3, 20) && clean(request.resource.data.n)))
+        && (!('bio' in changed()) || (str(request.resource.data.bio, 0, 120) && clean(request.resource.data.bio)));
       allow delete: if isMe(uid) || isAdmin();
 
-      // Gizli bilgiler: gerçek ad, e-posta, doğum tarihi. Sadece sahibi görür, sonradan değiştirilemez.
+      // Gizli bilgiler: gerçek ad, e-posta, doğum tarihi. Sahibi ve yönetici görür.
       // premium belgesini sadece ödeme doğrulama fonksiyonu yazar
       match /private/{doc} {
         allow read: if isMe(uid) || isAdmin();
@@ -45,16 +60,33 @@ service cloud.firestore {
         allow update: if false;
         allow delete: if (isMe(uid) && doc != 'premium') || isAdmin();
       }
+      // Hız sınırı belgesi: her alan sadece "şimdi" yapılabilir ve bir öncekinden belli süre sonra
+      match /meta/{d} {
+        function tick(k, secs) {
+          return !(k in request.resource.data)
+            || (resource != null && k in resource.data && request.resource.data[k] == resource.data[k])
+            || (request.resource.data[k] == request.time
+                && (resource == null || !(k in resource.data) || request.time > resource.data[k] + duration.value(secs, 's')));
+        }
+        allow read: if isMe(uid);
+        allow create, update: if isMe(uid) && d == 'rl'
+          && request.resource.data.keys().hasOnly(['postAt','cmAt','ntAt','chAt','msgAt','errAt'])
+          && tick('postAt', 60) && tick('cmAt', 8) && tick('ntAt', 2) && tick('chAt', 20) && tick('msgAt', 1) && tick('errAt', 20);
+      }
       // Engellenenler: sadece sahibi
       match /blocks/{other} {
         allow read, write: if isMe(uid);
       }
-      // Bildirimler: sahibi okur ve siler; başkası sadece kendi adına bildirim bırakabilir
+      // Bildirimler: sahibi okur ve siler; başkası sadece kendi adına, hız sınırıyla bildirim bırakabilir
       match /notifs/{nid} {
         allow read, delete: if isMe(uid);
         allow update: if isMe(uid) && changed().hasOnly(['read']);
-        allow create: if signedIn() && request.resource.data.from == request.auth.uid
-          && str(request.resource.data.text, 1, 200) && request.resource.data.ts == request.time;
+        allow create: if signedIn() && request.auth.uid != uid
+          && request.resource.data.keys().hasOnly(['from','type','text','go','ts','read'])
+          && request.resource.data.from == request.auth.uid
+          && request.resource.data.type in ['cm','react','req','dm','match','like']
+          && str(request.resource.data.text, 1, 200) && request.resource.data.ts == request.time
+          && !blockedBy(uid) && stamped('ntAt');
       }
     }
 
@@ -68,21 +100,30 @@ service cloud.firestore {
 
     // İtiraflar
     match /posts/{pid} {
+      function reactPath() { return /databases/$(database)/documents/posts/$(pid)/reactions/$(request.auth.uid); }
+      function rBefore() { return exists(reactPath()) ? get(reactPath()).data.k : ''; }
+      function rAfter() { return existsAfter(reactPath()) ? getAfter(reactPath()).data.k : ''; }
+      // bir tepki sayacı, ancak bu kullanıcının tepki belgesindeki değişiklik kadar oynayabilir
+      function rOk(k) {
+        return request.resource.data.r[k] - resource.data.r[k] == (rAfter() == k ? 1 : 0) - (rBefore() == k ? 1 : 0);
+      }
       allow read: if signedIn();
       allow create: if signedIn()
+        && request.resource.data.keys().hasOnly(['uid','t','cat','q','r','cm','ts','a'])
         && request.resource.data.uid == request.auth.uid
-        && str(request.resource.data.t, 15, 500)
-        && request.resource.data.cat in ['ask','aile','arkadas','is','okul','kimse']
+        && str(request.resource.data.t, request.resource.data.cat == 'soru' ? 3 : 15, 500) && clean(request.resource.data.t)
+        && request.resource.data.cat in ['ask','aile','arkadas','is','okul','kimse','soru']
+        && (!('q' in request.resource.data) || (request.resource.data.cat == 'soru' && str(request.resource.data.q, 5, 200)))
         && request.resource.data.r == {'bende': 0, 'saril': 0, 'yok': 0}
         && request.resource.data.cm == 0
-        && request.resource.data.ts == request.time;
-      // başkaları sadece tepki ve yorum sayısını birer birer değiştirebilir
+        && request.resource.data.ts == request.time
+        && stamped('postAt');
       allow update: if signedIn() && changed().hasOnly(['r','cm'])
-        && step(resource.data.cm, request.resource.data.cm)
-        && request.resource.data.r.keys().hasOnly(['bende','saril','yok'])
-        && step(resource.data.r.bende, request.resource.data.r.bende)
-        && step(resource.data.r.saril, request.resource.data.r.saril)
-        && step(resource.data.r.yok, request.resource.data.r.yok);
+        && (!('r' in changed()) || (request.resource.data.r.keys().hasOnly(['bende','saril','yok'])
+              && rOk('bende') && rOk('saril') && rOk('yok')))
+        && (!('cm' in changed())
+              || (request.resource.data.cm == resource.data.cm + 1 && stamped('cmAt'))
+              || (request.resource.data.cm == resource.data.cm - 1 && request.resource.data.cm >= 0));
       allow delete: if signedIn() && (resource.data.uid == request.auth.uid || isAdmin());
 
       match /reactions/{uid} {
@@ -93,7 +134,8 @@ service cloud.firestore {
       match /comments/{cid} {
         allow read: if signedIn();
         allow create: if signedIn() && request.resource.data.uid == request.auth.uid
-          && str(request.resource.data.t, 1, 300) && request.resource.data.ts == request.time;
+          && str(request.resource.data.t, 1, 300) && clean(request.resource.data.t)
+          && request.resource.data.ts == request.time && stamped('cmAt');
         allow delete: if signedIn() && (resource.data.uid == request.auth.uid || isAdmin());
         allow update: if false;
       }
@@ -104,6 +146,14 @@ service cloud.firestore {
       allow create: if signedIn() && request.resource.data.by == request.auth.uid
         && str(request.resource.data.reason, 2, 60) && request.resource.data.ts == request.time;
       allow read, update, delete: if isAdmin();
+    }
+
+    // Sitedeki hatalar: kullanıcı tarayıcısı yazar (hız sınırıyla), sadece yönetici görür
+    match /errors/{eid} {
+      allow create: if signedIn() && request.resource.data.uid == request.auth.uid
+        && request.resource.data.keys().hasOnly(['uid','msg','where','ua','v','ts'])
+        && str(request.resource.data.msg, 1, 600) && request.resource.data.ts == request.time && stamped('errAt');
+      allow read, delete: if isAdmin();
     }
 
     // Eşleş beğenileri: belge adı "beğenen_beğenilen"
@@ -128,7 +178,8 @@ service cloud.firestore {
               ? request.resource.data.members[0] + '_' + request.resource.data.members[1]
               : request.resource.data.members[1] + '_' + request.resource.data.members[0])
         && request.resource.data.reqBy == request.auth.uid
-        && (request.resource.data.status == 'wait'
+        && !blockedBy(other(request.resource.data.members))
+        && ((request.resource.data.status == 'wait' && stamped('chAt'))
             // eşleşme: iki taraf da birbirini beğendiyse sohbet direkt açık başlar
             || (request.resource.data.status == 'open' && request.resource.data.match == true
                 && exists(/databases/$(database)/documents/likes/$(request.auth.uid + '_' + other(request.resource.data.members)))
@@ -140,11 +191,13 @@ service cloud.firestore {
       allow delete: if member();
 
       match /messages/{mid} {
-        function chat() { return get(/databases/$(database)/documents/chats/$(cid)).data; }
-        allow read: if signedIn() && request.auth.uid in chat().members;
-        allow create: if signedIn() && request.auth.uid in chat().members
+        function chatAfter() { return getAfter(/databases/$(database)/documents/chats/$(cid)).data; }
+        allow read: if signedIn() && request.auth.uid in get(/databases/$(database)/documents/chats/$(cid)).data.members;
+        allow create: if signedIn() && request.auth.uid in chatAfter().members
+          && !blockedBy(other(chatAfter().members))
           && request.resource.data.uid == request.auth.uid
-          && str(request.resource.data.t, 1, 1000) && request.resource.data.ts == request.time;
+          && str(request.resource.data.t, 1, 1000) && clean(request.resource.data.t)
+          && request.resource.data.ts == request.time && stamped('msgAt');
         allow update, delete: if false;
       }
     }

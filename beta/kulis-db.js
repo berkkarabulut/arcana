@@ -12,7 +12,16 @@ import {
   onSnapshot, serverTimestamp, increment, writeBatch, getDocs
 } from "https://www.gstatic.com/firebasejs/12.8.0/firebase-firestore.js";
 
-const app = initializeApp({
+// /beta/ adresi ayrı test veritabanını kullanır; canlı kullanıcıların verisine dokunmaz
+const IS_TEST = /\/beta\//.test(location.pathname);
+const app = initializeApp(IS_TEST ? {
+  apiKey: "AIzaSyBSjtqmNe7zLRyAkqLBP_ksoeuXXvKKkLQ",
+  authDomain: "kulis-test.firebaseapp.com",
+  projectId: "kulis-test",
+  storageBucket: "kulis-test.firebasestorage.app",
+  messagingSenderId: "631677972627",
+  appId: "1:631677972627:web:d65bd63a3b9f4c5c509d66"
+} : {
   apiKey: "AIzaSyDA7rTiYY8NZHbnXAoUt7u0LiWyXlPolDg",
   authDomain: "kulis-1647d.firebaseapp.com",
   projectId: "kulis-1647d",
@@ -34,9 +43,13 @@ const chatId = (a, b) => a < b ? a + "_" + b : b + "_" + a;
 const unsubs = {};
 function stop(key) { if (unsubs[key]) { unsubs[key](); delete unsubs[key]; } }
 function stopAll() { Object.keys(unsubs).forEach(stop); }
+// Hız sınırı damgası: sunucu kuralları her itiraf/yorum/mesajla birlikte bu belgenin güncellenmesini ister
+const rlRef = () => doc(db, "users", auth.currentUser.uid, "meta", "rl");
+const stamp = (b, ...keys) => b.set(rlRef(), Object.fromEntries(keys.map(k => [k, serverTimestamp()])), { merge: true });
 
 const KDB = {
   ready: true,
+  isTest: IS_TEST,
   get uid() { return auth.currentUser ? auth.currentUser.uid : null; },
   get user() { return auth.currentUser; },
 
@@ -149,11 +162,14 @@ const KDB = {
       s => cb(s.docs.map(d => ({ id: d.id, ...d.data(), ts: ms(d.data().ts) }))), e => console.warn("posts", e));
   },
   async addPost(p, author) {
-    const r = await addDoc(collection(db, "posts"), {
-      uid: KDB.uid, t: p.t, cat: p.cat, r: { bende: 0, saril: 0, yok: 0 }, cm: 0, ts: serverTimestamp(),
+    const b = writeBatch(db), ref = doc(collection(db, "posts"));
+    b.set(ref, {
+      uid: KDB.uid, t: p.t, cat: p.cat, ...(p.q ? { q: String(p.q).slice(0, 200) } : {}), r: { bende: 0, saril: 0, yok: 0 }, cm: 0, ts: serverTimestamp(),
       a: author // yazarın o anki herkese açık bilgileri (takma ad, burç, renk…)
     });
-    return r.id;
+    stamp(b, "postAt");
+    await b.commit();
+    return ref.id;
   },
   deletePost(pid) { return deleteDoc(doc(db, "posts", pid)); },
   async react(pid, newK, oldK) {
@@ -175,6 +191,7 @@ const KDB = {
     const b = writeBatch(db);
     b.set(doc(collection(db, "posts", pid, "comments")), { uid: KDB.uid, t, ts: serverTimestamp(), a: author });
     b.update(doc(db, "posts", pid), { cm: increment(1) });
+    stamp(b, "cmAt");
     await b.commit();
   },
   async deleteComment(pid, cid) {
@@ -187,7 +204,10 @@ const KDB = {
   // ---------- Bildirimler ----------
   notify(toUid, type, text, go) {
     if (!toUid || toUid === KDB.uid) return Promise.resolve();
-    return addDoc(collection(db, "users", toUid, "notifs"), { from: KDB.uid, type, text: String(text).slice(0, 200), go: go || null, read: false, ts: serverTimestamp() }).catch(e => console.warn("notif", e));
+    const b = writeBatch(db);
+    b.set(doc(collection(db, "users", toUid, "notifs")), { from: KDB.uid, type, text: String(text).slice(0, 200), go: go || null, read: false, ts: serverTimestamp() });
+    stamp(b, "ntAt");
+    return b.commit().catch(e => console.warn("notif", e));
   },
   listenNotifs(cb) {
     stop("notifs");
@@ -219,14 +239,20 @@ const KDB = {
     const cid = chatId(KDB.uid, toUid), ref = doc(db, "chats", cid);
     const ex = await getDoc(ref).catch(() => null);
     if (ex && ex.exists()) { await KDB.sendMsg(cid, first); return cid; }
-    await setDoc(ref, { members: [KDB.uid, toUid].sort(), reqBy: KDB.uid, status: "wait", match: false, from: fromText || null, last: first, lastBy: KDB.uid, lastAt: serverTimestamp() });
-    await addDoc(collection(db, "chats", cid, "messages"), { uid: KDB.uid, t: first, ts: serverTimestamp() });
+    const b = writeBatch(db);
+    b.set(ref, { members: [KDB.uid, toUid].sort(), reqBy: KDB.uid, status: "wait", match: false, from: fromText || null, last: first, lastBy: KDB.uid, lastAt: serverTimestamp() });
+    b.set(doc(collection(db, "chats", cid, "messages")), { uid: KDB.uid, t: first, ts: serverTimestamp() });
+    stamp(b, "chAt", "msgAt");
+    await b.commit();
     return cid;
   },
   acceptChat(cid) { return updateDoc(doc(db, "chats", cid), { status: "open" }); },
   declineChat(cid) { return deleteDoc(doc(db, "chats", cid)); },
   async sendMsg(cid, t) {
-    await addDoc(collection(db, "chats", cid, "messages"), { uid: KDB.uid, t, ts: serverTimestamp() });
+    const b = writeBatch(db);
+    b.set(doc(collection(db, "chats", cid, "messages")), { uid: KDB.uid, t, ts: serverTimestamp() });
+    stamp(b, "msgAt");
+    await b.commit();
     await updateDoc(doc(db, "chats", cid), { last: t.slice(0, 120), lastBy: KDB.uid, lastAt: serverTimestamp() }).catch(() => {});
   },
   listenMsgs(cid, cb) {
@@ -235,6 +261,21 @@ const KDB = {
       s => cb(s.docs.map(d => ({ id: d.id, ...d.data(), ts: ms(d.data().ts) }))), e => console.warn("msgs", e));
   },
   stopMsgs() { stop("msgs"); },
+
+  // ---------- Yasaklı kelimeler (sunucu filtresi) ----------
+  listenModeration(cb) { stop("mod"); unsubs.mod = onSnapshot(doc(db, "config", "moderation"), s => cb(s.exists() ? s.data() : null), e => cb(null)); },
+  setModeration(words, re) { return setDoc(doc(db, "config", "moderation"), { words, re, updatedAt: serverTimestamp() }); },
+
+  // ---------- Hata kaydı ----------
+  logError(msg, where) {
+    if (!auth.currentUser) return Promise.resolve();
+    const b = writeBatch(db);
+    b.set(doc(collection(db, "errors")), { uid: auth.currentUser.uid, msg: String(msg).slice(0, 600), where: String(where || "").slice(0, 200), ua: navigator.userAgent.slice(0, 200), v: document.documentElement.dataset.v || "", ts: serverTimestamp() });
+    stamp(b, "errAt");
+    return b.commit().catch(() => {});
+  },
+  listenErrors(cb) { stop("errs"); unsubs.errs = onSnapshot(query(collection(db, "errors"), orderBy("ts", "desc"), limit(50)), s => cb(s.docs.map(d => ({ id: d.id, ...d.data(), ts: ms(d.data().ts) }))), e => cb(null)); },
+  deleteError(id) { return deleteDoc(doc(db, "errors", id)); },
 
   // ---------- Premium (Google Play) ----------
   listenPremium(cb) {
