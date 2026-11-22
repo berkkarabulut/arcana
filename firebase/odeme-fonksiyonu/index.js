@@ -14,7 +14,9 @@ admin.initializeApp();
 const db = admin.firestore();
 
 const PACKAGE = "com.kulistr.app";
-const PRODUCTS = ["kulis_haftalik", "kulis_aylik", "kulis_yillik"];
+// 3 seviye (sohbet, ses, tam) x 3 süre (haftalik, aylik, yillik)
+const PRODUCTS = ["sohbet", "ses", "tam"].flatMap(t => ["haftalik", "aylik", "yillik"].map(p => `kulis_${t}_${p}`));
+const tierOf = id => (String(id).split("_")[1]) || "tam";
 const ORIGINS = ["https://kulistr.com", "https://www.kulistr.com"];
 
 const publisher = google.androidpublisher({
@@ -67,7 +69,7 @@ functions.http("verifyPurchase", async (req, res) => {
     const now = admin.firestore.FieldValue.serverTimestamp();
     await tokenRef.set({ uid, productId: item ? item.productId : productId, state: sub.subscriptionState, until, updatedAt: now }, { merge: true });
     await db.doc(`users/${uid}/private/premium`).set({
-      active, until, productId: item ? item.productId : productId, state: sub.subscriptionState, updatedAt: now
+      active, until, productId: item ? item.productId : productId, tier: tierOf(item ? item.productId : productId), state: sub.subscriptionState, updatedAt: now
     });
     await db.doc(`users/${uid}`).set({ prem: active }, { merge: true });
 
