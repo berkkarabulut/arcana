@@ -9,7 +9,7 @@ android {
     compileSdk 35
     defaultConfig {
         applicationId "com.kulistr.app"
-        minSdk 21
+        minSdk 23
         targetSdk 35
         versionCode vCode
         versionName "1.0.${vCode}"
