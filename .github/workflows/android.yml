@@ -1,0 +1,31 @@
+name: Android paketi (.aab)
+on:
+  push:
+    branches: [main]
+    paths: ["android/**", ".github/workflows/android.yml"]
+  workflow_dispatch:
+jobs:
+  derle:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 17
+      - uses: gradle/actions/setup-gradle@v4
+        with:
+          gradle-version: "8.11.1"
+      - name: İmzasız paketi derle
+        working-directory: android
+        env:
+          VCODE: ${{ github.run_number }}
+        run: |
+          gradle --no-daemon :app:bundleRelease
+          gradle --no-daemon -q :app:dependencies --configuration releaseRuntimeClasspath | grep -E "androidbrowserhelper|billingclient" | sort -u | head -20
+          ls -la app/build/outputs/bundle/release/
+      - uses: actions/upload-artifact@v4
+        with:
+          name: kulis-aab-${{ github.run_number }}
+          path: android/app/build/outputs/bundle/release/*.aab
+          retention-days: 30

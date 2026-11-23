@@ -1,0 +1,10 @@
+[{
+  "relation": ["delegate_permission/common.handle_all_urls"],
+  "target": {
+    "namespace": "android_app",
+    "package_name": "com.kulistr.app",
+    "sha256_cert_fingerprints": [
+      "9E:0D:71:CA:40:A1:B4:BB:5C:A1:B7:98:A9:70:E4:DC:AE:AF:EF:96:A8:97:64:23:1C:11:5A:E5:25:00:16:85"
+    ]
+  }
+}]

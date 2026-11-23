@@ -2701,7 +2701,7 @@ const PERIODS=[["haftalik","Haftalık","Her hafta yenilenir"],["aylik","Aylık",
 const skuOf=(t,p)=>`kulis_${t}_${p}`;
 const ALL_SKUS=TIERS.flatMap(t=>PERIODS.map(([p])=>skuOf(t.k,p)));
 const PREM_PERKS=TIERS[2].perks;
-const IN_APP=(()=>{try{if(document.referrer.startsWith("android-app://"))sessionStorage.setItem("kulis_app","1");return sessionStorage.getItem("kulis_app")==="1"||new URLSearchParams(location.search).get("src")==="twa"}catch(e){return false}})();
+const IN_APP=(()=>{try{if(document.referrer.startsWith("android-app://")||new URLSearchParams(location.search).get("src")==="twa")sessionStorage.setItem("kulis_app","1");return sessionStorage.getItem("kulis_app")==="1"||new URLSearchParams(location.search).get("src")==="twa"}catch(e){return false}})();
 let playSvc=null,playPrices={};
 async function playService(){
   if(playSvc!==null)return playSvc;playSvc=false;

@@ -1,0 +1,30 @@
+// Kulis Android uygulaması: kulistr.com'u tam ekran açan Trusted Web Activity (TWA) + Google Play Billing köprüsü
+plugins { id 'com.android.application' }
+
+def host = "kulistr.com"
+def vCode = Integer.parseInt(System.getenv("VCODE") ?: "1")
+
+android {
+    namespace 'com.kulistr.app'
+    compileSdk 35
+    defaultConfig {
+        applicationId "com.kulistr.app"
+        minSdk 21
+        targetSdk 35
+        versionCode vCode
+        versionName "1.0.${vCode}"
+        resValue "string", "appName", "Kulis: İtiraf & Sohbet"
+        resValue "string", "launcherName", "Kulis"
+        resValue "string", "defaultUrl", "https://${host}/?src=twa"
+        resValue "string", "hostName", host
+        resValue "string", "assetStatements", "[{ \\\"relation\\\": [\\\"delegate_permission/common.handle_all_urls\\\"], \\\"target\\\": {\\\"namespace\\\": \\\"web\\\", \\\"site\\\": \\\"https://${host}\\\"}}]"
+    }
+    buildTypes { release { minifyEnabled false } }
+    compileOptions { sourceCompatibility JavaVersion.VERSION_17; targetCompatibility JavaVersion.VERSION_17 }
+}
+
+dependencies {
+    // en güncel sürümler (Play'in istediği Billing Library sürümü bunlarla gelir)
+    implementation 'com.google.androidbrowserhelper:androidbrowserhelper:+'
+    implementation 'com.google.androidbrowserhelper:billing:+'
+}
