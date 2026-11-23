@@ -148,6 +148,40 @@ await t("Perde bildirimi bırakılabilir", () => {
   return b.commit();
 }, true);
 
+// ---- Moderasyon: konuşma şikâyeti, mesaj silme, ban ----
+const { deleteField } = await import("firebase/firestore");
+await env.withSecurityRulesDisabled(async c => {
+  const d = c.firestore();
+  await setDoc(doc(d, "config/mods"), { uids: ["umod"] });
+  await setDoc(doc(d, "chats/ua_ub/messages/m1"), { uid: "ub", t: "kötü bir mesaj", ts: 1 });
+  await setDoc(doc(d, "chats/ua_ub/messages/m2"), { uid: "ub", t: "", img: "https://x/y.jpg", ts: 2 });
+  await setDoc(doc(d, "users/uban"), { n: "banli", g: "Erkek" });
+  await setDoc(doc(d, "bans/uban"), { by: "umod", reason: "taciz", ts: 1 });
+});
+const MOD = ctx("umod"), BAN = ctx("uban");
+const modDel = { t: "", mod: true, img: deleteField(), aud: deleteField(), dur: deleteField() };
+await t("Konuşma şikâyeti sohbet ve mesaj bilgisiyle gönderilir", () => addDoc(collection(A, "reports"), { by: "ua", key: "k:ub", reason: "Tehdit veya şantaj", preview: "x", status: "bekliyor", ts: serverTimestamp(), target: "ub", cid: "ua_ub", mids: ["m1", "m2"] }), true);
+await t("Şikâyete bilinmeyen alan eklenemez", () => addDoc(collection(A, "reports"), { by: "ua", key: "k:ub", reason: "Diğer", status: "bekliyor", ts: serverTimestamp(), hack: 1 }), false);
+await t("Şikâyet sonuçlanmış olarak gönderilemez", () => addDoc(collection(A, "reports"), { by: "ua", key: "k:ub", reason: "Diğer", status: "kaldirildi", ts: serverTimestamp() }), false);
+let rep; await env.withSecurityRulesDisabled(async c => { rep = await addDoc(collection(c.firestore(), "reports"), { by: "ua", key: "k:ub", reason: "Diğer", status: "bekliyor", ts: 1 }); });
+await t("Sıradan üye şikâyetleri okuyamaz", () => getDocs(collection(A, "reports")), false);
+await t("Moderatör şikâyetleri okur", () => getDocs(collection(MOD, "reports")), true);
+await t("Sıradan üye şikâyeti sonuçlandıramaz", () => updateDoc(doc(A, "reports", rep.id), { status: "yoksayildi" }), false);
+await t("Moderatör şikâyeti sonuçlandırır", () => updateDoc(doc(MOD, "reports", rep.id), { status: "banlandi", doneBy: "umod", doneAt: serverTimestamp() }), true);
+await t("Sıradan üye mesajı 'moderatör sildi' yapamaz", () => updateDoc(doc(A, "chats/ua_ub/messages/m1"), modDel), false);
+await t("Moderatör mesaj metnini başka bir şeyle değiştiremez", () => updateDoc(doc(MOD, "chats/ua_ub/messages/m1"), { t: "değiştirildi", mod: true }), false);
+await t("Moderatör bildirilen yazılı mesajı siler", () => updateDoc(doc(MOD, "chats/ua_ub/messages/m1"), modDel), true);
+await t("Moderatör bildirilen fotoğraflı mesajı siler", () => updateDoc(doc(MOD, "chats/ua_ub/messages/m2"), modDel), true);
+await t("Mesaj tamamen silinemez", () => deleteDoc(doc(MOD, "chats/ua_ub/messages/m1")), false);
+await t("Kimse ban kaydını elle yazamaz (moderatör de)", () => setDoc(doc(MOD, "bans/ub"), { by: "umod" }), false);
+await t("Kendini bandan çıkaramaz", () => deleteDoc(doc(BAN, "bans/uban")), false);
+await t("Banlı kişi kendi ban kaydını görür", () => getDoc(doc(BAN, "bans/uban")), true);
+await t("Banlı kişi profilleri okuyamaz", () => getDoc(doc(BAN, "users/ua")), false);
+await t("Banlı kişi ayar bile yazamaz", () => setDoc(doc(BAN, "users/uban/settings/main"), { quiet: true }, { merge: true }), false);
+await t("Banlı kişi şikâyet gönderemez", () => addDoc(collection(BAN, "reports"), { by: "uban", key: "u:ua", reason: "Diğer", status: "bekliyor", ts: serverTimestamp() }), false);
+await t("Moderatör ban listesini görür", () => getDocs(collection(MOD, "bans")), true);
+await t("Sıradan üye ban listesini göremez", () => getDocs(collection(A, "bans")), false);
+
 await env.cleanup();
 console.log(fail ? `\n${fail} senaryo TUTMADI, yükleme durduruldu.` : "\nTüm senaryolar tamam.");
 process.exit(fail ? 1 : 0);

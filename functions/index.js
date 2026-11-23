@@ -247,3 +247,37 @@ exports.perdeFoto = onCall({ enforceAppCheck: false, memory: "256MiB" }, async (
   }
   return out;
 });
+
+// ---------------- Ban ----------------
+// Moderatör ve yöneticiler kural ihlali yapan kişiyi banlar: hesap kapatılır (giriş yapamaz),
+// açık oturumları sonlandırılır, bans/{uid} kaydı açılır (kurallar banlı hesabın her işlemini reddeder).
+async function rolesOf(uid) {
+  const [a, m] = await Promise.all([db.doc("config/admins").get(), db.doc("config/mods").get()]);
+  const admins = (a.exists && a.data().uids) || [], mods = (m.exists && m.data().uids) || [];
+  return { admin: admins.includes(uid), mod: admins.includes(uid) || mods.includes(uid) };
+}
+exports.banla = onCall({ enforceAppCheck: false }, async (req) => {
+  const me = req.auth && req.auth.uid;
+  if (!me) throw new HttpsError("unauthenticated", "giris");
+  if (!(await rolesOf(me)).mod) throw new HttpsError("permission-denied", "yetki");
+  const uid = String((req.data && req.data.uid) || ""), reason = String((req.data && req.data.reason) || "Kurallara aykırılık").slice(0, 80);
+  if (!/^[A-Za-z0-9]{10,40}$/.test(uid) || uid === me) throw new HttpsError("invalid-argument", "uid");
+  if ((await rolesOf(uid)).mod) throw new HttpsError("failed-precondition", "yonetici banlanamaz");
+  const u = await db.doc(`users/${uid}`).get();
+  await db.doc(`bans/${uid}`).set({ by: me, reason, n: u.exists ? (u.data().n || "") : "", ts: FV.serverTimestamp() });
+  try { await admin.auth().updateUser(uid, { disabled: true }); await admin.auth().revokeRefreshTokens(uid); } catch (e) { logger.warn("banla auth", { uid, err: String(e && e.message) }); }
+  const toks = await db.collection(`users/${uid}/push`).get();
+  await Promise.all(toks.docs.map(d => d.ref.delete().catch(() => {})));
+  logger.info("banla", { uid, by: me, reason });
+  return { ok: true };
+});
+exports.banKaldir = onCall({ enforceAppCheck: false }, async (req) => {
+  const me = req.auth && req.auth.uid;
+  if (!me) throw new HttpsError("unauthenticated", "giris");
+  if (!(await rolesOf(me)).admin) throw new HttpsError("permission-denied", "yetki");
+  const uid = String((req.data && req.data.uid) || "");
+  if (!/^[A-Za-z0-9]{10,40}$/.test(uid)) throw new HttpsError("invalid-argument", "uid");
+  await db.doc(`bans/${uid}`).delete();
+  try { await admin.auth().updateUser(uid, { disabled: false }); } catch (e) { logger.warn("banKaldir auth", { uid, err: String(e && e.message) }); }
+  return { ok: true };
+});
