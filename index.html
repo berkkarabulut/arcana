@@ -203,6 +203,13 @@ h1,h2,h3{font-family:var(--display);font-weight:400;text-wrap:balance}
 button.pl{border:0;color:inherit;cursor:pointer;padding:0}
 .m.modded{font-style:italic;opacity:.7;font-size:13px;background:transparent!important;border:1px dashed var(--cizgi,rgba(255,255,255,.2));color:var(--soluk)!important}
 .adm-by{font-size:12px;color:var(--soluk);margin:-2px 0 6px}.adm-ban{display:inline-block;font-size:11px;font-weight:700;padding:2px 7px;border-radius:999px;background:rgba(var(--nar-rgb),.18);color:var(--nar);margin-left:6px}
+.ek-box{display:flex;flex-direction:column;gap:8px;max-height:52vh;overflow:auto;padding:10px;border-radius:12px;background:rgba(0,0,0,.2);margin:0 0 10px}
+.ek-m{display:flex;flex-direction:column;max-width:84%}.ek-m.r{align-self:flex-end;align-items:flex-end}.ek-m.l{align-self:flex-start}
+.ek-m small{font-size:11px;color:var(--soluk);margin-bottom:2px}.ek-b{padding:8px 11px;border-radius:14px;font-size:14px;line-height:1.45;overflow-wrap:anywhere;background:rgba(255,255,255,.08)}
+.ek-m.st .ek-b{background:rgba(212,175,90,.14);border:1px solid rgba(212,175,90,.4)}
+.ek-in{display:flex;gap:8px;align-items:flex-end}.ek-in textarea{flex:1}
+.ekip-row .ekip-av{background:rgba(212,175,90,.18);display:grid;place-items:center;font-size:22px;border-radius:50%;flex:0 0 auto}
+.ek-row{display:block;width:100%;text-align:left;color:inherit;cursor:pointer}
 .adm-conv{display:flex;flex-direction:column;gap:8px;max-height:420px;overflow:auto;padding:10px;border-radius:12px;background:rgba(0,0,0,.25);margin:0 0 10px}
 .ac-m{display:flex;flex-direction:column;max-width:82%}.ac-m.b{align-self:flex-end;align-items:flex-end}.ac-m.k{align-self:flex-start}
 .ac-m small{font-size:11px;color:var(--soluk);margin-bottom:2px}.ac-b{padding:8px 11px;border-radius:14px;font-size:14px;line-height:1.4;overflow-wrap:anywhere}
@@ -1119,7 +1126,7 @@ function contactBlock(t){
 function render(){
   document.querySelectorAll(".nb").forEach(b=>b.dataset.tab===state.tab?b.setAttribute("aria-current","page"):b.removeAttribute("aria-current"));
   $("#premPill").innerHTML=state.premium?"Premium":`${IC.lock} Premium`;
-  const unread=state.chats.filter(c=>c.unread).length+state.requests.length;
+  const unread=state.chats.filter(c=>c.unread).length+state.requests.length+(REMOTE&&R.ekip&&R.ekip.userUnread?1:0);
   $("#pip").hidden=!unread;$("#pip").textContent=unread;
   const nu=state.notifs.filter(n=>!n.read).length;$("#bellPip").hidden=!nu;$("#bellPip").textContent=nu>9?"9+":nu;$("#topBell").setAttribute("aria-label",nu?`Bildirimler, ${nu} yeni`:"Bildirimler");
   ({akis:vAkis,kesfet:vKesfet,mesajlar:vMesajlar,ben:vBen})[state.tab]();
@@ -1163,8 +1170,10 @@ function vMesajlar(){
   view.innerHTML=`<h1 class="h2s">Mesajlar</h1>
    ${state.requests.length?`<h3 style="font-size:20px;margin:6px 0 8px">Mesaj istekleri</h3>${state.requests.map((r,i)=>`<div class="req">${av(r.u,42)}<div class="t"><b>${esc(U[r.u].n)}${pb(r.u)}</b> <span class="muted" style="font-size:12.5px">${Z[U[r.u].s].n}</span><q>“${esc(r.first)}”</q></div><button class="sbtn no" data-rq="${i}:no">Sil</button><button class="sbtn ok" data-rq="${i}:ok">Kabul et</button></div>`).join("")}`:""}
    <h3 style="font-size:20px;margin:16px 0 4px">Sohbetler</h3>
+   ${REMOTE&&R.ekip?`<button class="row ekip-row" id="ekipRow"><span class="av ekip-av" style="width:46px;height:46px">🛡️</span><span class="t"><b>Kulis Ekibi</b><div>${R.ekip.lastStaff?"":"Sen: "}${esc(R.ekip.last||"")}</div></span><span class="meta">${R.ekip.userUnread?'<span class="dot"></span>':""}</span></button>`:""}
    ${state.chats.length?state.chats.map((c,i)=>{const last=c.msgs[c.msgs.length-1];const locked=last&&!last.me&&isLockedIdx(c,c.msgs.length-1);
-     return `<button class="row" data-chat="${i}">${av(c.u,46)}<span class="t"><b>${esc(U[c.u].n)}${pb(c.u)}${c.match?'<span class="mtag">Eşleşme</span>':""}</b><div class="${locked?"blur":""}">${last?(last.me?"Sen: ":"")+(last.kind==="img"?"Fotoğraf":last.kind==="vid"?"Video":last.kind==="voice"?"Ses kaydı":last.kind==="call"?(last.type==="video"?"Görüntülü arama":"Sesli arama"):esc(last.t)):"Sohbet başladı. İlk mesajı yaz."}</div></span><span class="meta">${c.unread?'<span class="dot"></span>':""}</span></button>`}).join(""):`<p class="empty">Henüz sohbet yok. Akışta seni etkileyen bir itirafın altındaki “Özelden yaz” ile başla.</p>`}`;
+     return `<button class="row" data-chat="${i}">${av(c.u,46)}<span class="t"><b>${esc(U[c.u].n)}${pb(c.u)}${c.match?'<span class="mtag">Eşleşme</span>':""}</b><div class="${locked?"blur":""}">${last?(last.me?"Sen: ":"")+(last.mod?"Mesaj moderatör tarafından silindi":last.kind==="img"?"Fotoğraf":last.kind==="vid"?"Video":last.kind==="voice"?"Ses kaydı":last.kind==="call"?(last.type==="video"?"Görüntülü arama":"Sesli arama"):esc(last.t)):"Sohbet başladı. İlk mesajı yaz."}</div></span><span class="meta">${c.unread?'<span class="dot"></span>':""}</span></button>`}).join(""):`<p class="empty">Henüz sohbet yok. Akışta seni etkileyen bir itirafın altındaki “Özelden yaz” ile başla.</p>`}`;
+  const er=$("#ekipRow");if(er)er.onclick=openEkip;
 }
 function vBen(){
   const me=state.me;
@@ -2641,6 +2650,32 @@ const dayKeyOf=ts=>{const d=new Date(ts);return d.getFullYear()+"-"+(d.getMonth(
 function refreshStats(){const by={};R.posts.forEach(p=>{const k=p.uid;by[k]=by[k]||[0,0,0];by[k][0]++;by[k][2]+=reactTotal(p)});Object.keys(U).forEach(k=>{U[k].stat=by[k]||[0,0,0]})}
 function rerender(){if(!state.me)return;if($("#chat").classList.contains("open"))return void render();render()}
 
+/* ============ KULİS EKİBİ YAZIŞMASI ============ */
+function admName(id){if(!id)return "?";if(id===R.uid)return state.me.n;const u=(R.usersRaw||[]).find(x=>x.id===id);return u?u.n:(U[id]&&U[id].n)||id.slice(0,8)+"…"}
+function ekipMsgsHTML(msgs,staffView,uid){
+  if(!msgs.length)return `<p class="muted" style="font-size:13.5px;text-align:center;padding:16px 4px">${staffView?"Henüz yazışma yok. İlk mesajı sen yaz.":"Henüz mesaj yok."}</p>`;
+  return msgs.map(m=>{const mine=staffView?m.staff:!m.staff;
+    const who=m.staff?(staffView?`${m.role||"Ekip"} · ${admName(m.from)}`:`Kulis Ekibi · ${m.role||"Ekip"}`):(staffView?admName(uid):"Sen");
+    return `<div class="ek-m ${mine?"r":"l"} ${m.staff?"st":""}"><small>${esc(who)} · ${new Date(m.ts).toLocaleString("tr-TR",{day:"numeric",month:"short",hour:"2-digit",minute:"2-digit"})}</small><div class="ek-b">${esc(m.t).replace(/\n/g,"<br>")}</div></div>`}).join("")}
+// kullanıcı tarafı: Mesajlar'daki sabit "Kulis Ekibi" sohbeti
+function openEkip(){
+  let msgs=[];const draw=()=>{const box=$("#ekBox");if(!box)return;box.innerHTML=ekipMsgsHTML(msgs,false);box.scrollTop=box.scrollHeight};
+  openSheet(`<div class="sheet-head"><h2>🛡️ Kulis Ekibi</h2><button class="x" id="ekX" aria-label="Kapat">${IC.close}</button></div>
+    <p class="hint" style="margin:0 0 10px">Kulis yöneticileri ve moderatörleriyle yazışman. Bunu sadece sen ve Kulis ekibi görür.</p>
+    <div class="ek-box" id="ekBox"><p class="muted" style="text-align:center">Yükleniyor…</p></div>
+    <div class="box ek-in"><textarea id="ekIn" rows="1" maxlength="1000" placeholder="Cevap yaz" aria-label="Cevap yaz"></textarea><button class="go" id="ekGo" disabled>Gönder</button></div>`,true);
+  const stopL=()=>{KDB.stopEkipMsgs();return false};sheetGuard=stopL;
+  $("#ekX").onclick=()=>{stopL();closeSheet()};
+  KDB.listenEkipMsgs(R.uid,l=>{msgs=l;draw();if(R.ekip&&R.ekip.userUnread)KDB.ekipRead(R.uid,false)});
+  const t=$("#ekIn"),g=$("#ekGo");t.oninput=()=>{grow(t);g.disabled=!t.value.trim()};
+  t.onkeydown=e=>{if(e.key==="Enter"&&!e.shiftKey){e.preventDefault();g.click()}};
+  g.onclick=()=>{const v=t.value.trim();if(!v)return;const mc=modCheck(v,"mesaj");if(mc){toast(mc);return}g.disabled=true;
+    KDB.ekipSend(R.uid,v).then(()=>{t.value="";grow(t)}).catch(e=>{g.disabled=false;toast(writeErr(e,"mesaj"))})};
+}
+function onEkipThread(th){const prev=R.ekip;R.ekip=th;
+  if(th&&th.lastStaff&&th.userUnread&&prev!==undefined&&(!prev||prev.lastAt!==th.lastAt))toast("🛡️ Kulis Ekibi'nden yeni mesajın var");
+  if(state.tab==="mesajlar")render();else{const pip=$("#pip");if(pip&&th&&th.userUnread)pip.hidden=false}}
+
 /* ============ PERDE ============ */
 // Herkes hazır avatarını görür; gerçek fotoğraf ve kapak "perde arkasında" durur.
 // İki kişi sohbette perdeyi birlikte açınca birbirinin gerçek görsellerini görür.
@@ -2707,6 +2742,8 @@ function playPerde(uid){
 function remoteStartListeners(){
   if(R.started)return;R.started=true;
   if(KDB.listenPerde)KDB.listenPerde(onPerde);
+  if(KDB.listenEkipThread)KDB.listenEkipThread(onEkipThread);
+  try{if(new URLSearchParams(location.search).get("ekip")==="1"){history.replaceState(null,"",location.pathname);setTimeout(()=>{state.tab="mesajlar";render();openEkip()},1200)}}catch(e){}
   KDB.listenUsers(list=>{R.usersRaw=list;list.forEach(u=>putUser(u.id,u));if($("#adm.open")&&ADM.tab==="uye"&&!document.activeElement.closest("#adm input"))openAdminRemote();refreshStats();if(state.tab==="kesfet")rerender()});
   if(KDB.listenMyAnon)KDB.listenMyAnon(ids=>{R.myAnon=new Set(ids);if(R.posts&&R.posts.length){R.mapped=R.posts.map(mapPost);state.myPosts=R.mapped.filter(p=>p.u==="me");rerender()}});
   KDB.listenPosts(list=>{R.posts=list;const mapped=list.map(mapPost);state.myPosts=mapped.filter(p=>p.u==="me");R.mapped=mapped;refreshStats();
@@ -2735,9 +2772,10 @@ function remoteStartListeners(){
   setPremiumFrom(null);KDB.listenPremium(setPremiumFrom);playRestore();
   if(KDB.listenModeration)KDB.listenModeration(d=>{R.mod=d;if($("#adm.open")&&ADM.tab==="kelime")openAdminRemote()});
   const onReps=r=>{R.reports=r;if($("#adm.open")&&ADM.tab==="sikayet")openAdminRemote()};
+  const onEkL=l=>{R.ekipList=l;if($("#adm.open")&&ADM.tab==="destek"&&!ADM.dm)openAdminRemote()};
   const onBans=l=>{R.bans=new Set((l||[]).map(x=>x.id));R.banList=l||[];if($("#adm.open"))openAdminRemote()};
-  if(KDB.isMod)KDB.isMod().then(m=>{R.isMod=m;setPremiumFrom(R.lastPrem);if(m&&!R.admin){KDB.listenReports(onReps);if(KDB.listenBans)KDB.listenBans(onBans)}});
-  KDB.isAdmin().then(a=>{R.admin=a;setPremiumFrom(R.lastPrem);if(a&&KDB.listenMods)KDB.listenMods(l=>{R.mods=l;if($("#adm.open")&&ADM.tab==="mod")openAdminRemote()});if(a){KDB.listenReports(onReps);if(KDB.listenBans)KDB.listenBans(onBans);if(KDB.listenErrors)KDB.listenErrors(l=>{R.errors=l;if($("#adm.open")&&ADM.tab==="hata")openAdminRemote()})}});
+  if(KDB.isMod)KDB.isMod().then(m=>{R.isMod=m;setPremiumFrom(R.lastPrem);if(m&&!R.admin){KDB.listenReports(onReps);if(KDB.listenBans)KDB.listenBans(onBans);if(KDB.listenEkipThreads)KDB.listenEkipThreads(onEkL)}});
+  KDB.isAdmin().then(a=>{R.admin=a;setPremiumFrom(R.lastPrem);if(a&&KDB.listenMods)KDB.listenMods(l=>{R.mods=l;if($("#adm.open")&&ADM.tab==="mod")openAdminRemote()});if(a){KDB.listenReports(onReps);if(KDB.listenBans)KDB.listenBans(onBans);if(KDB.listenEkipThreads)KDB.listenEkipThreads(onEkL);if(KDB.listenErrors)KDB.listenErrors(l=>{R.errors=l;if($("#adm.open")&&ADM.tab==="hata")openAdminRemote()})}});
 }
 function askGender(){
   if(!state.me||state.me.g==="Kadın"||state.me.g==="Erkek"||$("#gAsk"))return;
@@ -2993,13 +3031,13 @@ function admUsers(){
 }
 function openAdminRemote(){
   if(!R.admin&&!R.isMod){toast("Bu panel sadece yöneticiler için");return}
-  if(!R.admin)ADM.tab="sikayet";
+  if(!R.admin&&!["sikayet","destek"].includes(ADM.tab))ADM.tab="sikayet";
   let el=$("#adm");if(!el){el=document.createElement("div");el.id="adm";el.setAttribute("role","dialog");el.setAttribute("aria-label","Yönetici paneli");document.body.appendChild(el)}
   const now=Date.now(),today=dayStart(),all=admUsers();
   const online=all.filter(u=>now-u.seen<ONLINE_MS),activeToday=all.filter(u=>u.seen>=today),newToday=all.filter(u=>u.created>=today),newWeek=all.filter(u=>now-u.created<7*864e5);
   const reps=(R.reports||[]).map(r=>Object.assign({},r,{status:r.status||"bekliyor"})),openReps=reps.filter(r=>r.status==="bekliyor");
   const errs=R.errors||[];
-  const tabs=R.admin?[["uye","Kullanıcılar",all.length],["sikayet","Şikâyetler",openReps.length],["mod","Moderatörler",(R.mods||[]).length||null],["kelime","Kelimeler",null],["hata","Hatalar",errs.length]]:[["sikayet","Şikâyetler",openReps.length]];
+  const tabs=R.admin?[["uye","Kullanıcılar",all.length],["sikayet","Şikâyetler",openReps.length],["mod","Moderatörler",(R.mods||[]).length||null],["destek","Destek",(R.ekipList||[]).filter(x=>x.staffUnread).length||null],["kelime","Kelimeler",null],["hata","Hatalar",errs.length]]:[["sikayet","Şikâyetler",openReps.length],["destek","Destek",(R.ekipList||[]).filter(x=>x.staffUnread).length||null]];
   let body="";
   if(ADM.tab==="uye"){
     const q=lowTR(ADM.q.trim());
@@ -3017,7 +3055,7 @@ function openAdminRemote(){
           `<div><dt>Ad soyad</dt><dd>${esc((pv.ad||"")+" "+(pv.soyad||""))||"—"}</dd></div><div><dt>E-posta</dt><dd>${esc(pv.email||"—")}</dd></div><div><dt>Doğum tarihi</dt><dd>${pv.b?`${pv.b.d} ${AYLAR[pv.b.m-1]} ${pv.b.y}`:"—"}</dd></div><div><dt>Giriş</dt><dd>${{google:"Google",email:"E-posta bağlantısı",apple:"Apple"}[pv.provider]||esc(pv.provider||"—")}</dd></div>`}
           <div><dt>Kullanıcı kimliği</dt><dd class="au-id">${u.uid}</dd></div></dl>
           ${u.me?"":ADM.confirm===u.uid?`<div class="au-del"><p>Silmek için takma adı yaz: <b>${esc(u.n)}</b></p><div class="adm-add"><input class="city-search" id="auDelIn" autocomplete="off" maxlength="20"><button class="btn au-danger-fill" id="auDelGo" disabled>Kalıcı sil</button></div><button class="dice" id="auDelX" style="margin-top:8px">Vazgeç</button></div>`
-            :`${R.bans&&R.bans.has(u.uid)?`<button class="btn line" data-auunban="${u.uid}" style="height:40px;margin-top:12px;margin-right:8px">Banı kaldır</button>`:(R.mods||[]).includes(u.uid)?"":`<button class="btn line" data-auban="${u.uid}" style="height:40px;margin-top:12px;margin-right:8px;color:var(--nar)">Banla</button>`}<button class="btn line" data-aureal="${u.uid}" style="height:40px;margin-top:12px;margin-right:8px">Perde fotoğrafını sil</button><button class="btn line au-danger" data-audel="${u.uid}" style="height:40px;margin-top:12px">Hesabı sil</button>`}
+            :`<button class="btn line" data-admdm="${u.uid}" style="height:40px;margin-top:12px;margin-right:8px">Mesaj gönder</button>${R.bans&&R.bans.has(u.uid)?`<button class="btn line" data-auunban="${u.uid}" style="height:40px;margin-top:12px;margin-right:8px">Banı kaldır</button>`:(R.mods||[]).includes(u.uid)?"":`<button class="btn line" data-auban="${u.uid}" style="height:40px;margin-top:12px;margin-right:8px;color:var(--nar)">Banla</button>`}<button class="btn line" data-aureal="${u.uid}" style="height:40px;margin-top:12px;margin-right:8px">Perde fotoğrafını sil</button><button class="btn line au-danger" data-audel="${u.uid}" style="height:40px;margin-top:12px">Hesabı sil</button>`}
         </div>`:""}</div>`};
     body=`<div class="adm-stats au-stats">
       <div><b>${all.length}</b><small>Toplam üye</small><i>son 200 kayıt</i></div>
@@ -3044,9 +3082,14 @@ function openAdminRemote(){
       ${t==="k"&&r.msgs&&r.msgs.length?`<button class="dice" data-adm="konus:${r.id}" style="margin:2px 0 10px">${ADM.conv===r.id?"Konuşmayı gizle":`Konuşmayı gör (${r.msgs.length} mesaj)`}</button>${ADM.conv===r.id?convHTML(r,nameOf):""}`:t==="k"?`<p class="adm-by">Bu şikâyet eski sürümden geldi, konuşma kaydı yok.</p>`:""}
       ${r.status==="bekliyor"?(ADM.ban===r.id?`<div class="adm-cf"><b>${esc(pv.who)}</b> banlansın mı? Hesabı kapanır, giriş yapamaz ve hiçbir şey yazamaz.<div class="adm-acts" style="margin-top:8px"><button class="btn" data-adm="banok:${r.id}" style="background:var(--nar);color:var(--on-nar)">Evet, banla</button><button class="btn line" data-adm="banno:${r.id}">Vazgeç</button></div></div>`
         :`<div class="adm-acts">${canRemove?`<button class="btn" data-adm="kaldir:${r.id}" style="background:var(--nar);color:var(--on-nar)">${t==="k"?"Mesajları kaldır":"İçeriği kaldır"}</button>`:""}${t==="u"&&R.admin&&/foto/i.test(r.reason)?`<button class="btn" data-adm="foto:${r.id}" style="background:var(--nar);color:var(--on-nar)">Perde fotoğrafını sil</button>`:""}${tg&&!tgStaff&&!tgBanned?`<button class="btn line" data-adm="ban:${r.id}" style="color:var(--nar);border-color:rgba(var(--nar-rgb),.45)">Kişiyi banla</button>`:""}<button class="btn line" data-adm="yoksay:${r.id}">Yoksay</button></div>`)
-        :`<small class="adm-st">${st}</small>`}</div>`};
+        :`<small class="adm-st">${st}</small>`}
+        <div class="adm-acts" style="margin-top:6px">${tg&&!tgStaff?`<button class="dice" data-admdm="${tg}">Bildirilene yaz</button>`:""}${r.by&&r.by!==R.uid?`<button class="dice" data-admdm="${r.by}">Bildirene yaz</button>`:""}</div></div>`};
     body=`${openReps.length?openReps.map(repRow).join(""):`<p class="muted" style="font-size:14px;padding:18px 4px">Bekleyen şikâyet yok.</p>`}
       ${done.length?`<details class="adm-done"><summary>Sonuçlananlar (${done.length})</summary>${done.map(repRow).join("")}</details>`:""}`;
+  } else if(ADM.tab==="destek"){
+    const l=R.ekipList||[];
+    body=`<p class="hint" style="margin:0 0 10px">Kulis Ekibi olarak kullanıcılarla yazışmaların. Kullanıcı seni "Kulis Ekibi · ${R.admin?"Yönetici":"Moderatör"}" olarak görür, takma adını görmez. Yeni yazışmayı ${R.admin?"Kullanıcılar sekmesinden ya da ":""}şikâyet kartlarından başlatabilirsin.</p>
+      ${l.length?l.map(x=>`<button class="adm-rep ek-row" data-ekt="${x.id}"><div class="adm-rh"><b>${esc(admName(x.id))}</b>${x.staffUnread?`<span class="adm-ban" style="background:rgba(212,175,90,.2);color:#E9C77A">Yeni cevap</span>`:""}<small>${relTime(x.lastAt)}</small></div><p style="margin:4px 0 0">${x.lastStaff?"Ekip: ":""}${esc(x.last||"")}</p></button>`).join(""):`<p class="muted" style="font-size:14px;padding:18px 4px">Henüz yazışma yok.</p>`}`;
   } else if(ADM.tab==="mod"){
     const mods=R.mods||[];const nm=id=>{const u=(R.usersRaw||[]).find(x=>x.id===id);return u?u.n:id.slice(0,8)+"…"};
     body=`<p class="hint" style="margin:0 0 10px">Moderatörler itirafları 24 saat öne çıkarabilir, şikâyetleri görüp sonuçlandırabilir, itiraf ve yorum silebilir. Kullanıcıların gizli bilgilerini göremezler. Paneli açmak için onlar da logoya 5 kez dokunur.</p>
@@ -3063,11 +3106,24 @@ function openAdminRemote(){
     <div class="adm-add"><input class="city-search" id="admW" placeholder="Kelime ekle" maxlength="40"><button class="btn" id="admWAdd">Ekle</button></div>
     <button class="dice" id="admReset" style="margin-top:8px">Varsayılan listeye dön</button>`;
   }
+  if(ADM.dm){const uid=ADM.dm;
+    body=`<div class="adm-dm"><button class="dice" id="admDmBack" style="margin-bottom:10px">← Geri</button>
+      <h3 style="margin:0 0 2px">${esc(admName(uid))}</h3><p class="hint" style="margin:0 0 10px">Kullanıcı seni "Kulis Ekibi · ${R.admin?"Yönetici":"Moderatör"}" olarak görür.</p>
+      <div class="ek-box" id="admEkBox">${ekipMsgsHTML(ADM.dmMsgs||[],true,uid)}</div>
+      <div class="box ek-in"><textarea id="admEkIn" rows="2" maxlength="1000" placeholder="Kulis Ekibi olarak yaz" aria-label="Mesaj">${esc(ADM.dmDraft||"")}</textarea><button class="go" id="admEkGo">Gönder</button></div></div>`}
   el.innerHTML=`<div class="adm-in"><div class="adm-top"><h2>Yönetici paneli</h2><button class="icon-btn" id="admX" aria-label="Kapat">${IC.close}</button></div>
     <div class="adm-tabs" role="tablist">${tabs.map(([k,n,c])=>`<button role="tab" data-admt="${k}" aria-selected="${ADM.tab===k}">${n}${c?` <span>${c}</span>`:""}</button>`).join("")}</div>${body}</div>`;
   el.classList.add("open");document.body.style.overflow="hidden";
   $("#admX").onclick=closeAdmin;
-  el.querySelectorAll("[data-admt]").forEach(b=>b.onclick=()=>{ADM.tab=b.dataset.admt;ADM.open=null;ADM.confirm=null;openAdminRemote();el.scrollTop=0});
+  const openDm=uid=>{ADM.dm=uid;ADM.dmMsgs=[];ADM.dmDraft="";KDB.listenEkipMsgs(uid,l=>{if(ADM.dm!==uid)return;ADM.dmMsgs=l;const box=$("#admEkBox");if(box){box.innerHTML=ekipMsgsHTML(l,true,uid);box.scrollTop=box.scrollHeight}
+    const th=(R.ekipList||[]).find(x=>x.id===uid);if(th&&th.staffUnread)KDB.ekipRead(uid,true)});openAdminRemote()};
+  el.querySelectorAll("[data-admdm]").forEach(b=>b.onclick=()=>openDm(b.dataset.admdm));
+  el.querySelectorAll("[data-ekt]").forEach(b=>b.onclick=()=>openDm(b.dataset.ekt));
+  const dmB=$("#admDmBack");if(dmB)dmB.onclick=()=>{ADM.dm=null;KDB.stopEkipMsgs();openAdminRemote()};
+  const eb=$("#admEkBox");if(eb)eb.scrollTop=eb.scrollHeight;
+  const ei=$("#admEkIn"),eg=$("#admEkGo");if(ei){ei.oninput=()=>{ADM.dmDraft=ei.value};
+    eg.onclick=()=>{const v=ei.value.trim();if(!v)return;eg.disabled=true;KDB.ekipSend(ADM.dm,v,R.admin?"Yönetici":"Moderatör").then(()=>{ADM.dmDraft="";ei.value="";eg.disabled=false;toast("Mesaj gönderildi")}).catch(e=>{eg.disabled=false;toast("Gönderilemedi: "+(e.code||e.message))})}}
+  el.querySelectorAll("[data-admt]").forEach(b=>b.onclick=()=>{if(ADM.dm){ADM.dm=null;KDB.stopEkipMsgs()}ADM.tab=b.dataset.admt;ADM.open=null;ADM.confirm=null;openAdminRemote();el.scrollTop=0});
   const q=$("#auQ");if(q)q.oninput=()=>{ADM.q=q.value;const p=q.selectionStart;openAdminRemote();const n=$("#auQ");n.focus();n.setSelectionRange(p,p)};
   el.querySelectorAll("[data-auf]").forEach(b=>b.onclick=()=>{ADM.f=b.dataset.auf;openAdminRemote()});
   el.querySelectorAll("[data-au]").forEach(b=>b.onclick=()=>{const id=b.dataset.au;ADM.confirm=null;ADM.open=ADM.open===id?null:id;
@@ -3151,6 +3207,6 @@ if(REMOTE){
 if(REMOTE)remoteInit();else
 try{const s=JSON.parse(localStorage.getItem("itiraf_me")||"null");if(s&&s.n&&s.s){state.me=s;loadData();render();seedDemo()}else startOnb()}catch(e){startOnb()}
 </script>
-<script type="module">if(REMOTE)import("./kulis-db.js?v=21")</script>
+<script type="module">if(REMOTE)import("./kulis-db.js?v=22")</script>
 </body>
 </html>

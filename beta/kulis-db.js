@@ -274,6 +274,21 @@ const KDB = {
   },
   acceptChat(cid) { return updateDoc(doc(db, "chats", cid), { status: "open" }); },
   declineChat(cid) { return deleteDoc(doc(db, "chats", cid)); },
+  // ---------- Kulis Ekibi yazışması ----------
+  listenEkipThread(cb) { stop("ekipT"); unsubs.ekipT = onSnapshot(doc(db, "ekip", KDB.uid), s => cb(s.exists() ? { ...s.data(), lastAt: s.data().lastAt ? ms(s.data().lastAt) : Date.now() } : null), e => cb(null)); },
+  listenEkipThreads(cb) { stop("ekipL"); unsubs.ekipL = onSnapshot(query(collection(db, "ekip"), orderBy("lastAt", "desc"), limit(100)), s => cb(s.docs.map(d => ({ id: d.id, ...d.data(), lastAt: d.data().lastAt ? ms(d.data().lastAt) : Date.now() }))), e => cb([])); },
+  listenEkipMsgs(uid, cb) { stop("ekipM"); unsubs.ekipM = onSnapshot(query(collection(db, "ekip", uid, "m"), orderBy("ts", "asc"), limit(300)), s => cb(s.docs.map(d => ({ id: d.id, ...d.data(), ts: d.data().ts ? ms(d.data().ts) : Date.now() }))), e => cb([])); },
+  stopEkipMsgs() { stop("ekipM"); },
+  // staff: yönetici/moderatör olarak yaz; değilse kullanıcı kendi yazışmasına cevap verir
+  ekipSend(uid, t, role) {
+    const staff = !!role, b = writeBatch(db), m = { from: KDB.uid, staff, t, ts: serverTimestamp() };
+    if (staff) m.role = role;
+    b.set(doc(collection(db, "ekip", uid, "m")), m);
+    b.set(doc(db, "ekip", uid), { uid, last: t.slice(0, 120), lastAt: serverTimestamp(), lastBy: KDB.uid, lastStaff: staff, staffUnread: !staff, userUnread: staff }, { merge: true });
+    if (!staff) stamp(b, "msgAt");
+    return b.commit();
+  },
+  ekipRead(uid, staff) { return updateDoc(doc(db, "ekip", uid), staff ? { staffUnread: false } : { userUnread: false }).catch(() => {}); },
   // ---------- Perde ----------
   listenPerde(cb) {
     stop("perde");
