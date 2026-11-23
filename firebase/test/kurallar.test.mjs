@@ -183,6 +183,31 @@ await t("Banlı kişi şikâyet gönderemez", () => addDoc(collection(BAN, "repo
 await t("Moderatör ban listesini görür", () => getDocs(collection(MOD, "bans")), true);
 await t("Sıradan üye ban listesini göremez", () => getDocs(collection(A, "bans")), false);
 
+// ---- Kulis Ekibi yazışması ----
+const ADM_ = ctx("uadmin");
+const ekipYaz = (d, from, uid, staff, role, t = "Merhaba, şikâyetin hakkında yazıyoruz") => {
+  const b = writeBatch(d), m = { from, staff, t, ts: serverTimestamp() }; if (role) m.role = role;
+  b.set(doc(collection(d, "ekip", uid, "m")), m);
+  b.set(doc(d, "ekip", uid), { uid, last: t.slice(0, 120), lastAt: serverTimestamp(), lastBy: from, lastStaff: staff, staffUnread: !staff, userUnread: staff }, { merge: true });
+  if (!staff) b.set(rl(d, from), { msgAt: serverTimestamp() }, { merge: true });
+  return b.commit();
+};
+await t("Kullanıcı ekip yazışmasını kendisi başlatamaz", () => ekipYaz(C, "uc", "uc", false), false);
+await t("Sıradan üye başkasına ekip olarak yazamaz", () => ekipYaz(C, "uc", "ub", true, "Moderatör"), false);
+await t("Moderatör kendini yönetici gösteremez", () => ekipYaz(MOD, "umod", "ub", true, "Yönetici"), false);
+await t("Moderatör kullanıcıya ekip mesajı atar", () => ekipYaz(MOD, "umod", "ub", true, "Moderatör"), true);
+await t("Yönetici kullanıcıya ekip mesajı atar", () => ekipYaz(ADM_, "uadmin", "uc", true, "Yönetici"), true);
+await t("Kullanıcı kendi ekip yazışmasını okur", () => getDocs(collection(B, "ekip/ub/m")), true);
+await t("Başkası ekip yazışmasını okuyamaz", () => getDocs(collection(C, "ekip/ub/m")), false);
+await wait(1200);
+await t("Kullanıcı ekibe cevap verir", () => ekipYaz(B, "ub", "ub", false), true);
+await wait(1200);
+await t("Kullanıcı cevabını ekip mesajı gibi gösteremez", () => ekipYaz(B, "ub", "ub", true, "Moderatör"), false);
+await t("Ekip mesajı sonradan değiştirilemez", async () => { const l = await getDocs(collection(MOD, "ekip/ub/m")); return updateDoc(l.docs[0].ref, { t: "değişti" }); }, false);
+await t("Moderatör bütün yazışmaları listeler", () => getDocs(collection(MOD, "ekip")), true);
+await t("Sıradan üye yazışma listesini göremez", () => getDocs(collection(A, "ekip")), false);
+await t("Kullanıcı okundu işaretler", () => updateDoc(doc(B, "ekip/ub"), { userUnread: false }), true);
+
 await env.cleanup();
 console.log(fail ? `\n${fail} senaryo TUTMADI, yükleme durduruldu.` : "\nTüm senaryolar tamam.");
 process.exit(fail ? 1 : 0);

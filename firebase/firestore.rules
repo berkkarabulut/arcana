@@ -159,6 +159,32 @@ service cloud.firestore {
       allow delete: if signedIn() && request.auth.uid in resource.data.members;
     }
 
+    // Kulis Ekibi yazışması: yönetici/moderatör kullanıcıya yazar, kullanıcı sadece ekibin açtığı yazışmaya cevap verir
+    match /ekip/{uid} {
+      function thr() { return request.resource.data; }
+      function thrOk() {
+        return thr().keys().hasOnly(['uid','last','lastAt','lastBy','lastStaff','staffUnread','userUnread'])
+          && thr().uid == uid && str(thr().get('last', ''), 0, 120);
+      }
+      allow read: if isMe(uid) || isMod();
+      allow create: if isMod() && thrOk() && thr().lastBy == request.auth.uid && thr().lastStaff == true;
+      allow update: if thrOk() && (
+          (isMod() && (!('lastBy' in changed()) || thr().lastBy == request.auth.uid))
+          || (isMe(uid) && (!('lastBy' in changed()) || thr().lastBy == uid) && (!('lastStaff' in changed()) || thr().lastStaff == false)));
+      allow delete: if isAdmin();
+
+      match /m/{mid} {
+        function msg() { return request.resource.data; }
+        allow read: if isMe(uid) || isMod();
+        allow create: if msg().keys().hasOnly(['from','staff','role','t','ts']) && msg().ts == request.time
+          && str(msg().t, 1, 1000) && (
+            (isMod() && msg().from == request.auth.uid && msg().staff == true && (msg().role == 'Moderatör' || (msg().role == 'Yönetici' && isAdmin())))
+            || (isMe(uid) && msg().from == uid && msg().staff == false && !('role' in msg())
+                && exists(/databases/$(database)/documents/ekip/$(uid)) && clean(msg().t) && stamped('msgAt')));
+        allow update, delete: if false;
+      }
+    }
+
     // Banlar: sadece sunucu fonksiyonu yazar. Kişi kendi ban kaydını görebilir (giriş yapamaz ama nedenini görür).
     match /bans/{uid} {
       allow read: if (request.auth != null && request.auth.uid == uid) || isMod();

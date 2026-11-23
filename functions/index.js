@@ -281,3 +281,12 @@ exports.banKaldir = onCall({ enforceAppCheck: false }, async (req) => {
   try { await admin.auth().updateUser(uid, { disabled: false }); } catch (e) { logger.warn("banKaldir auth", { uid, err: String(e && e.message) }); }
   return { ok: true };
 });
+
+// ---------------- Kulis Ekibi mesajı ----------------
+// Ekipten (yönetici/moderatör) kullanıcıya mesaj gelince telefonuna bildirim gönder
+exports.ekipMesaji = onDocumentCreated("ekip/{uid}/m/{mid}", async (event) => {
+  const m = event.data && event.data.data();
+  if (!m || !m.staff) return;
+  const uid = event.params.uid;
+  await sendPush(uid, { title: "Kulis Ekibi", body: String(m.t || "").slice(0, 160), link: SITE + "?ekip=1", tag: "ekip" });
+});
