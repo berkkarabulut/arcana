@@ -224,7 +224,8 @@ service cloud.firestore {
     // Şikâyetler: herkes gönderebilir, sadece yönetici görür
     match /reports/{rid} {
       allow create: if signedIn() && request.resource.data.by == request.auth.uid
-        && request.resource.data.keys().hasOnly(['by','key','reason','preview','status','ts','target','cid','mids'])
+        && request.resource.data.keys().hasOnly(['by','key','reason','preview','status','ts','target','cid','mids','msgs'])
+        && (!('msgs' in request.resource.data) || (request.resource.data.msgs is list && request.resource.data.msgs.size() <= 30))
         && str(request.resource.data.reason, 2, 60) && request.resource.data.ts == request.time
         && request.resource.data.status == 'bekliyor'
         && (!('mids' in request.resource.data) || (request.resource.data.mids is list && request.resource.data.mids.size() <= 20));

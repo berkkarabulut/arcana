@@ -160,7 +160,8 @@ await env.withSecurityRulesDisabled(async c => {
 });
 const MOD = ctx("umod"), BAN = ctx("uban");
 const modDel = { t: "", mod: true, img: deleteField(), aud: deleteField(), dur: deleteField() };
-await t("Konuşma şikâyeti sohbet ve mesaj bilgisiyle gönderilir", () => addDoc(collection(A, "reports"), { by: "ua", key: "k:ub", reason: "Tehdit veya şantaj", preview: "x", status: "bekliyor", ts: serverTimestamp(), target: "ub", cid: "ua_ub", mids: ["m1", "m2"] }), true);
+await t("Konuşma şikâyeti sohbet ve mesaj bilgisiyle gönderilir", () => addDoc(collection(A, "reports"), { by: "ua", key: "k:ub", reason: "Tehdit veya şantaj", preview: "x", status: "bekliyor", ts: serverTimestamp(), target: "ub", cid: "ua_ub", mids: ["m1", "m2"], msgs: [{ w: "b", t: "selam", ts: 1 }, { w: "k", t: "kötü", ts: 2, id: "m1" }, { w: "k", t: "", img: "https://x/y.jpg", ts: 3, id: "m2" }] }), true);
+await t("Şikâyette 30'dan fazla mesaj kaydı reddedilir", () => addDoc(collection(A, "reports"), { by: "ua", key: "k:ub", reason: "Diğer", status: "bekliyor", ts: serverTimestamp(), msgs: Array.from({ length: 31 }, (_, i) => ({ w: "k", t: "m" + i })) }), false);
 await t("Şikâyete bilinmeyen alan eklenemez", () => addDoc(collection(A, "reports"), { by: "ua", key: "k:ub", reason: "Diğer", status: "bekliyor", ts: serverTimestamp(), hack: 1 }), false);
 await t("Şikâyet sonuçlanmış olarak gönderilemez", () => addDoc(collection(A, "reports"), { by: "ua", key: "k:ub", reason: "Diğer", status: "kaldirildi", ts: serverTimestamp() }), false);
 let rep; await env.withSecurityRulesDisabled(async c => { rep = await addDoc(collection(c.firestore(), "reports"), { by: "ua", key: "k:ub", reason: "Diğer", status: "bekliyor", ts: 1 }); });
