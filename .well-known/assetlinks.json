@@ -1,10 +1,15 @@
-[{
-  "relation": ["delegate_permission/common.handle_all_urls"],
-  "target": {
-    "namespace": "android_app",
-    "package_name": "com.kulistr.app",
-    "sha256_cert_fingerprints": [
-      "9E:0D:71:CA:40:A1:B4:BB:5C:A1:B7:98:A9:70:E4:DC:AE:AF:EF:96:A8:97:64:23:1C:11:5A:E5:25:00:16:85"
-    ]
+[
+  {
+    "relation": [
+      "delegate_permission/common.handle_all_urls"
+    ],
+    "target": {
+      "namespace": "android_app",
+      "package_name": "com.kulistr.app",
+      "sha256_cert_fingerprints": [
+        "D0:59:A1:D7:C0:60:59:85:A0:94:DA:90:9A:AE:9A:D8:F2:B0:09:07:6E:79:F8:0B:A2:48:03:7C:BC:92:C8:8A",
+        "9E:0D:71:CA:40:A1:B4:BB:5C:A1:B7:98:A9:70:E4:DC:AE:AF:EF:96:A8:97:64:23:1C:11:5A:E5:25:00:16:85"
+      ]
+    }
   }
-}]
+]
