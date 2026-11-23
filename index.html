@@ -1349,6 +1349,21 @@ async function installApp(){
     <div class="inst-hero"><img src="icons/icon-192.png" alt="" width="64" height="64"><div><b>Kulis</b><small>Telefonunda uygulama gibi dursun</small></div></div>${body}
     <button class="btn wide" style="margin-top:16px" onclick="closeSheet()">Tamam</button>`);
 }
+// iPhone/iPad'de Safari'den girenlere bir kere "ana ekrana ekle" açılır penceresi (3 günde bir en fazla)
+function iosInstallNudge(){
+  if(!isIOS()||isStandalone())return;
+  let last=0;try{last=+localStorage.getItem("kulis_ios_nudge")||0}catch(e){}
+  let now=false;try{now=sessionStorage.getItem("kulis_ios_now")==="1";sessionStorage.removeItem("kulis_ios_now")}catch(e){}
+  if(!now&&Date.now()-last<3*864e5)return;
+  setTimeout(()=>{
+    if(isStandalone()||$("#scrim").classList.contains("open")||$("#gAsk")||$(".cf-scrim")){if(now)try{sessionStorage.setItem("kulis_ios_now","1")}catch(e){}return}
+    try{localStorage.setItem("kulis_ios_nudge",String(Date.now()))}catch(e){}
+    installApp();
+    const sh=$("#sheet"),ok=sh.querySelector(".btn.wide");
+    if(ok){ok.textContent="Tamam, ekledim";const l=document.createElement("button");l.className="dice";l.style.cssText="margin:10px auto 0;display:flex";l.textContent="Sonra hatırlat";l.onclick=closeSheet;ok.after(l)}
+    const h=sh.querySelector(".sheet-head h2");if(h)h.textContent="iPhone'una Kulis'i ekle";
+  },now?1200:4000);
+}
 if("serviceWorker" in navigator&&location.protocol==="https:")addEventListener("load",()=>navigator.serviceWorker.register("sw.js").catch(()=>{}));
 
 
@@ -2107,7 +2122,7 @@ function showReport(key){
 /* ============ KAYIT ============ */
 const ADJ=["gece","sessiz","mavi","yorgun","kırmızı","eski","yarım","uykusuz","gizli","son"],NOUN=["kuşu","limon","plak","kaptan","mektup","vapur","fener","defter","sokak","bilet"];
 const rndNick=()=>ADJ[Math.floor(Math.random()*ADJ.length)]+NOUN[Math.floor(Math.random()*NOUN.length)];
-const ob={step:0,provider:null,email:"",ad:"",soyad:"",tel:"",kod:"",codeSent:false,n:"",c:COLORS[0],d:12,m:3,y:1997,g:null,ok:false};
+const ob={step:0,provider:null,email:"",ad:"",soyad:"",tel:"",kod:"",codeSent:false,n:"",c:COLORS[0],d:12,m:3,y:1997,g:null,ok:false,inst:true};
 const STEPS=5;
 const range=(a,b,f=x=>x)=>Array.from({length:b-a+1},(_,i)=>[a+i,f(a+i)]);
 function wheel(id,items,sel){return `<div class="wheel" id="${id}" tabindex="0" aria-label="${id}"><div class="pad"></div>${items.map(([v,l])=>`<button data-v="${v}" class="${v==sel?"sel":""}" tabindex="-1">${l}</button>`).join("")}<div class="pad"></div></div>`}
@@ -2163,7 +2178,7 @@ function drawOnb(){
     <div>${IC.chk}<span>Kimsenin gerçek adını, okulunu, iş yerini yazma. Başkasını ifşa eden itiraf silinir.</span></div>
     <div>${IC.chk}<span>Cinsel içerik ve müstehcen paylaşım yasak, görülen içerik kaldırılır.</span></div>
     <div>${IC.chk}<span>Rahatsız olursan tek dokunuşla engelle ve şikâyet et.</span></div></div>
-    <button class="check" id="ck" role="checkbox" aria-checked="${ob.ok}"><span class="bx">${ob.ok?'<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3"><path d="M5 12.5l4.2 4.2L19 7"/></svg>':""}</span><span style="font-size:14.5px">18 yaşından büyüğüm. <a href="kurallar.html" data-legal="kurallar">Topluluk kurallarını</a> ve <a href="kosullar.html" data-legal="kosullar">kullanım koşullarını</a> kabul ediyorum, <a href="gizlilik.html" data-legal="kvkk">KVKK aydınlatma metnini</a> okudum.</span></button>`;
+    <button class="check" id="ck" role="checkbox" aria-checked="${ob.ok}"><span class="bx">${ob.ok?'<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3"><path d="M5 12.5l4.2 4.2L19 7"/></svg>':""}</span><span style="font-size:14.5px">18 yaşından büyüğüm. <a href="kurallar.html" data-legal="kurallar">Topluluk kurallarını</a> ve <a href="kosullar.html" data-legal="kosullar">kullanım koşullarını</a> kabul ediyorum, <a href="gizlilik.html" data-legal="kvkk">KVKK aydınlatma metnini</a> okudum.</span></button>${!ob.editing&&!isStandalone()&&(instEvt||isIOS())?`<button class="check" id="ckI" role="checkbox" aria-checked="${ob.inst}" style="margin-top:10px"><span class="bx">${ob.inst?'<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3"><path d="M5 12.5l4.2 4.2L19 7"/></svg>':""}</span><span style="font-size:14.5px">Kulis'i ana ekranıma ekle<small style="display:block;color:var(--soluk,#8a8f98);font-size:13px;margin-top:3px;line-height:1.4">Uygulama gibi tam ekran açılır, tek dokunuşla girersin. Bildirimler de telefonuna gelir.</small></span></button>`:""}`;
     ok=ob.ok;cta=ob.editing?"Değişiklikleri kaydet":"İtiraflara gir";}
   $("#onbIn").classList.toggle("wel",s===0&&!ob.provider);
   $("#onbIn").innerHTML=`${ob.editing?`<button class="ob-back show" id="obX" style="float:right">Vazgeç</button>`:""}<button class="ob-back ${(s>0||ob.provider)&&!(ob.editing&&s===1)?"show":""}" id="obB">${IC.back}Geri</button><div class="steps">${Array.from({length:STEPS},(_,i)=>`<i class="${i<=s?"on":""}"></i>`).join("")}</div>
@@ -2185,7 +2200,7 @@ function drawOnb(){
   if(s===2){const upd=()=>{if(!$("#sb"))return;const ad=ageOf(ob.y,ob.m,ob.d)>=18;const w=$("#ageWarn");if(w)w.hidden=ad;const nb=$("#obN");if(nb)nb.disabled=!ad;const sign=Z[signOf(ob.m,ob.d)];$("#sb").innerHTML=`<div class="g glyph">${sign.g}</div><div><b style="font-size:17px">${sign.n}</b><div class="muted" style="font-size:13px">${EL[sign.e]} grubu, ${ageBand(ageOf(ob.y,ob.m,ob.d))} yaş aralığı</div></div>`};
     bindWheel("gun",v=>{ob.d=v;upd()});bindWheel("ay",v=>{ob.m=v;fixDays();upd()});bindWheel("yil",v=>{ob.y=v;fixDays();upd()})}
   if(s===3)document.querySelectorAll("[data-g]").forEach(b=>b.onclick=()=>{ob.g=b.dataset.g;drawOnb()});
-  if(s===4)$("#ck").onclick=()=>{ob.ok=!ob.ok;drawOnb()};
+  if(s===4){$("#ck").onclick=()=>{ob.ok=!ob.ok;drawOnb()};const ci=$("#ckI");if(ci)ci.onclick=()=>{ob.inst=!ob.inst;drawOnb()}}
 }
 function fixDays(){const days=new Date(ob.y,ob.m,0).getDate();const w=$("#gun");if(w&&w.querySelectorAll("button").length!==days){if(ob.d>days)ob.d=days;drawOnb()}}
 function confirmIdentity(){
@@ -2209,6 +2224,10 @@ function obNext(){
   if(ob.step<STEPS-1){ob.step++;drawOnb();$("#onb").scrollTop=0;return}
   const bio=state.me?state.me.bio:"";
   if(ageOf(ob.y,ob.m,ob.d)<18){ob.step=2;drawOnb();toast("18 yaşından küçükler kayıt olamaz");return}
+  if(!ob.editing&&ob.inst&&!isStandalone()){
+    if(instEvt){const ev=instEvt;instEvt=null;try{ev.prompt();ev.userChoice.then(r=>{if(r&&r.outcome==="accepted")toast("Kulis ana ekranına ekleniyor")}).catch(()=>{})}catch(e){}}
+    else if(isIOS()){try{sessionStorage.setItem("kulis_ios_now","1")}catch(e){}}
+  }
   if(REMOTE&&!ob.editing){remoteFinishOnb();return}
   if(!ob.editing)track("kayit",{yontem:ob.provider});
   state.me={n:ob.n,c:ob.c,s:signOf(ob.m,ob.d),g:ob.g,age:ageBand(ageOf(ob.y,ob.m,ob.d)),bio,b:{d:ob.d,m:ob.m,y:ob.y},ad:ob.ad.trim(),soyad:ob.soyad.trim(),email:ob.email.trim(),provider:ob.provider,photo:state.me?state.me.photo:undefined,banner:state.me?state.me.banner:undefined};
@@ -2345,7 +2364,7 @@ function remoteEnterApp(pub,priv){
     ad:priv?priv.ad||"":"",soyad:priv?priv.soyad||"":"",email:priv?priv.email||"":"",b:priv?priv.b:undefined,provider:priv?priv.provider:(pub.guest?"guest":"")};
   R.syncedMe=JSON.stringify({n:state.me.n,c:state.me.c,bio:state.me.bio,photo:state.me.photo,banner:state.me.banner,g:state.me.g});
   $("#onb").hidden=true;$("#remLoad")&&$("#remLoad").remove();
-  remoteStartListeners();render();askGender();
+  remoteStartListeners();render();askGender();iosInstallNudge();
   if(KDB.pushSupported)KDB.pushSupported().then(ok=>{R.pushOk=ok;if(ok&&LS("kulis_push_on",false))KDB.refreshPush();if(state.tab==="ben")render()});
   const tch=()=>{if(KDB.touch)KDB.touch()};tch();if(!R.hb){R.hb=setInterval(()=>{if(!document.hidden)tch()},120e3);document.addEventListener("visibilitychange",()=>{if(!document.hidden)tch()})}
 }
