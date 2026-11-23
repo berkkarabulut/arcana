@@ -4,6 +4,8 @@ on:
     branches: [main]
     paths: ["android/**", ".github/workflows/android.yml"]
   workflow_dispatch:
+permissions:
+  contents: write
 jobs:
   derle:
     runs-on: ubuntu-latest
@@ -29,3 +31,9 @@ jobs:
           name: kulis-aab-${{ github.run_number }}
           path: android/app/build/outputs/bundle/release/*.aab
           retention-days: 30
+      - name: İmzasız paketi android-paket dalına koy (imzalama ayrı yapılır)
+        run: |
+          mkdir -p /tmp/out && cp android/app/build/outputs/bundle/release/app-release.aab /tmp/out/kulis-${{ github.run_number }}-imzasiz.aab
+          cd /tmp/out && git init -q && git checkout -q -b android-paket
+          git -c user.name=ci -c user.email=ci@kulistr.com add . && git -c user.name=ci -c user.email=ci@kulistr.com commit -qm "paket ${{ github.run_number }}"
+          git push -qf "https://x-access-token:${{ github.token }}@github.com/${{ github.repository }}.git" android-paket
