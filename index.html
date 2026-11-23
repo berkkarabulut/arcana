@@ -200,6 +200,8 @@ h1,h2,h3{font-family:var(--display);font-weight:400;text-wrap:balance}
 .m.media img,.m.media video{display:block;max-width:230px;max-height:300px;border-radius:15px}
 .voice{display:flex;align-items:center;gap:10px;min-width:180px}
 .voice .pl{width:30px;height:30px;border-radius:50%;background:rgba(255,255,255,.22);display:grid;place-items:center;flex:0 0 auto}
+button.pl{border:0;color:inherit;cursor:pointer;padding:0}
+.m.media img{cursor:zoom-in;max-width:240px;max-height:320px;border-radius:14px;display:block}
 .wave{display:flex;align-items:center;gap:2px;flex:1;height:24px}
 .wave i{width:3px;border-radius:2px;background:currentColor;opacity:.7}
 .callmsg{align-self:center;display:inline-flex;align-items:center;gap:8px;font-size:13px;color:var(--soluk);background:var(--yuzey);padding:7px 12px;border-radius:99px;margin:4px 0}
@@ -1821,6 +1823,7 @@ function showEditProfile(focus){
   const nickOk=()=>/^[a-zçğıöşü0-9._]{3,16}$/.test(draft.n);
   const dirty=()=>draft.photo!==me.photo||draft.banner!==me.banner||draft.bio.trim()!==(me.bio||"")||draft.c!==me.c||draft.n!==me.n;
   const commit=()=>{if(!nickOk()){toast("Takma ad en az 3 karakter olmalı, boşluk içeremez");return}me.n=draft.n;["photo","banner"].forEach(k=>{if(draft[k])me[k]=draft[k];else delete me[k]});me.bio=draft.bio.trim();me.c=draft.c;
+    if(REMOTE){save();closeSheet();toast(R.upl&&Object.keys(R.upl).length?"Profilin kaydediliyor…":"Profilin kaydedildi");render();return}
     try{localStorage.setItem("itiraf_me",JSON.stringify(me))}catch(e){toast("Görsel çok büyük, kaydedilemedi. Daha küçük bir görsel dene.");return}
     closeSheet();toast("Profilin kaydedildi");render()};
   const askLeave=()=>{openSheet(`<h2>Değişiklikler kaydedilmedi</h2><p class="muted" style="font-size:14px;margin:8px 0 16px">Profilinde yaptığın değişiklikleri kaydetmeden çıkarsan hepsi kaybolur.</p>
@@ -1898,7 +1901,7 @@ function showMore(id){
   const p=allPosts().find(x=>x.id===id); if(!p)return; const mine=p.u==="me";state.lastMore=id;
   openSheet(`<div class="menu">
     <button id="m1">${IC.link}Bağlantıyı kopyala</button>
-    ${REMOTE&&(R.admin||R.mod)?`<button id="mF">${IC.spark}${isBoosted(p)?"Öne çıkarmayı kaldır ("+boostLeft(p)+" kaldı)":"Moderatör: 24 saat öne çıkar"}</button>`:""}
+    ${REMOTE&&(R.admin||R.isMod)?`<button id="mF">${IC.spark}${isBoosted(p)?"Öne çıkarmayı kaldır ("+boostLeft(p)+" kaldı)":"Moderatör: 24 saat öne çıkar"}</button>`:""}
     ${mine?`${REMOTE?"":`<button id="mB">${IC.spark}${isBoosted(p)?"Öne çıkarıldı, "+boostLeft(p)+" kaldı":"24 saat öne çıkar"}${state.premium?"":`<span class="lk-mini">${IC.lock}</span>`}</button>`}<button id="mD" class="danger">${IC.close}İtirafı sil</button>`:""}
     ${mine?"":`<button id="m2">${IC.flag}İtirafı şikâyet et</button>${p.anon?"":`<button id="m3" class="danger">${IC.block}${esc(U[p.u].n)} kullanıcısını engelle</button>`}`}
     <button id="m4">${IC.close}Vazgeç</button></div>`);
@@ -1977,10 +1980,12 @@ function drawChat(){
      ${full?`<div class="wall"><h3>${hidden?`${esc(u.n)} sana ${hidden} yeni mesaj yazdı`:`Sohbetin burada duraklatıldı`}</h3><p>${hidden?"Okumak ve cevap vermek için":"Sohbete devam etmek için"} Premium'a geç. ${esc(u.n)} sana yazmaya devam edebilir, mesajları burada birikir.</p><button class="btn gold wide" id="wallGo">Premium ile devam et</button></div>`:""}
    </div>
    <div class="composer">${full?`<button class="btn line wide" id="wallGo2">${IC.lock} Mesaj yazmak için Premium gerekli</button>`:
-    `<div class="box">${c.status==="open"&&!REMOTE?`<button class="tb" data-media="photo" aria-label="Fotoğraf veya video gönder">${IC.cam}${lockBadge()}</button><button class="tb" data-media="voice" aria-label="Ses kaydı gönder">${IC.mic}${lockBadge()}</button>`:""}<textarea id="mIn" rows="1" maxlength="500" placeholder="${c.status==="wait"?"Kabul edilince yazabilirsin":"Mesaj yaz"}" ${c.status==="wait"?"disabled":""}></textarea><button class="go" id="mGo" disabled>Gönder</button></div><div id="mWarn"></div>`}</div>`;
+    `<div class="box">${c.status==="open"?`<button class="tb" data-media="photo" aria-label="Fotoğraf veya video gönder">${IC.cam}${lockBadge()}</button><button class="tb" data-media="voice" aria-label="Ses kaydı gönder">${IC.mic}${lockBadge()}</button>`:""}<textarea id="mIn" rows="1" maxlength="500" placeholder="${c.status==="wait"?"Kabul edilince yazabilirsin":"Mesaj yaz"}" ${c.status==="wait"?"disabled":""}></textarea><button class="go" id="mGo" disabled>Gönder</button></div><div id="mWarn"></div>`}</div>`;
   const box=$("#msgs");box.scrollTop=box.scrollHeight;
   $("#cBack").onclick=closeChat;
   $("#chatIn").querySelectorAll("[data-media]").forEach(b=>b.onclick=()=>media(b.dataset.media,c));
+  $("#chatIn").querySelectorAll("[data-play]").forEach(b=>b.onclick=()=>playVoice(b));
+  $("#chatIn").querySelectorAll("[data-zoom]").forEach(b=>b.onclick=()=>zoomImg(b.dataset.zoom));
   [$("#wallGo"),$("#wallGo2")].forEach(b=>b&&(b.onclick=()=>showPremium("mesaj")));
   const t=$("#mIn");if(!t)return;
   t.oninput=()=>{grow(t);$("#mGo").disabled=!t.value.trim();$("#mWarn").innerHTML=""};
@@ -2003,8 +2008,11 @@ const fmt=s=>`${Math.floor(s/60)}:${String(s%60).padStart(2,"0")}`;
 function msgHTML(m,lk){
   const cls=`m ${m.me?"me":"them"} ${lk?"locked":""}`;
   if((m.kind==="img"||m.kind==="vid")&&!m.src)return `<div class="${cls}"><span style="opacity:.75">${m.kind==="vid"?"Video":"Fotoğraf"} gönderildi</span></div>`;
-  if(m.kind==="img")return `<div class="${cls} media"><img src="${m.src}" alt="Gönderilen fotoğraf"></div>`;
+  if(m.kind==="img")return `<div class="${cls} media"><img src="${esc(m.src)}" alt="Gönderilen fotoğraf" loading="lazy" data-zoom="${esc(m.src)}"></div>`;
   if(m.kind==="vid")return `<div class="${cls} media"><video src="${m.src}" controls playsinline></video></div>`;
+  if(m.kind==="voice"&&m.src&&!lk)return `<div class="${cls}"><div class="voice"><button class="pl" data-play="${esc(m.src)}" aria-label="Sesli mesajı oynat">${IC.play}</button><span class="wave">${waveHTML(m.dur||3)}</span><span style="font-size:12.5px;font-variant-numeric:tabular-nums">${fmt(m.dur||0)}</span></div></div>`;
+  if(m.kind==="img"&&m.src&&lk)return `<div class="${cls}"><span style="opacity:.75">Fotoğraf gönderildi</span></div>`;
+  if(m.kind==="voice"&&lk)return `<div class="${cls}"><span style="opacity:.75">Sesli mesaj gönderildi</span></div>`;
   if(m.kind==="voice")return `<div class="${cls}"><div class="voice"><span class="pl">${IC.play}</span><span class="wave">${waveHTML(m.dur)}</span><span style="font-size:12.5px;font-variant-numeric:tabular-nums">${fmt(m.dur)}</span></div></div>`;
   if(m.kind==="call")return `<div class="callmsg">${m.type==="video"?IC.video:IC.phone}${m.type==="video"?"Görüntülü arama":"Sesli arama"}, ${fmt(m.dur)}</div>`;
   return `<div class="${cls}">${esc(m.t)}</div>`;
@@ -2014,6 +2022,8 @@ function media(kind,c){
   if(REMOTE&&(kind==="call"||kind==="video")){startCallRemote(kind,c);return}
   if(!state.premium){showPremium("medya");return}
   if(c.status!=="open"){toast("Önce isteğin kabul edilmeli");return}
+  if(REMOTE&&kind==="photo"){sendPhotoRemote(c);return}
+  if(REMOTE&&kind==="voice"){recordVoiceRemote(c);return}
   if(kind==="photo"){
     if(!picker){picker=document.createElement("input");picker.type="file";picker.accept="image/*,video/*";picker.hidden=true;document.body.appendChild(picker)}
     picker.onchange=()=>{const f=picker.files[0];if(!f)return;const url=URL.createObjectURL(f);c.msgs.push({me:true,kind:f.type.startsWith("video")?"vid":"img",src:url});picker.value="";drawChat();fakeReply(c,"Vay, güzelmiş 🙂")};
@@ -2025,6 +2035,56 @@ function media(kind,c){
     $("#recS").onclick=()=>{clearInterval(iv);closeSheet();c.msgs.push({me:true,kind:"voice",dur:Math.max(2,sec)});drawChat();fakeReply(c,"Sesin çok farklıymış, hayal ettiğim gibi değil haha")};return}
   if(kind==="call"||kind==="video")startCall(kind,c);
 }
+/* ---- gerçek fotoğraf ve sesli mesaj ---- */
+function shrinkImg(file,max=1600){return new Promise((ok,no)=>{const u=URL.createObjectURL(file),im=new Image();
+  im.onload=()=>{const k=Math.min(1,max/Math.max(im.width,im.height)),cv=document.createElement("canvas");cv.width=Math.round(im.width*k);cv.height=Math.round(im.height*k);
+    cv.getContext("2d").drawImage(im,0,0,cv.width,cv.height);URL.revokeObjectURL(u);cv.toBlob(b=>b?ok(b):no(new Error("görsel işlenemedi")),"image/jpeg",.82)};
+  im.onerror=()=>{URL.revokeObjectURL(u);no(new Error("Bu fotoğraf açılamadı"))};im.src=u})}
+function mediaSent(c){const wasMine=c.lastBy===R.uid;askPushOnce("mesaj");if(!wasMine)KDB.notify(c.u,"dm","sana yeni mesaj gönderdi",{chat:c.u})}
+function sendPhotoRemote(c){
+  if(!picker){picker=document.createElement("input");picker.type="file";picker.hidden=true;document.body.appendChild(picker)}
+  picker.accept="image/*";
+  picker.onchange=async()=>{const f=picker.files[0];picker.value="";if(!f)return;
+    if(!f.type.startsWith("image/")){toast("Lütfen bir fotoğraf seç");return}
+    const tmp={me:true,kind:"img",src:URL.createObjectURL(f),sending:true};c.msgs.push(tmp);drawChat();toast("Fotoğraf gönderiliyor…");
+    try{const blob=await shrinkImg(f);const url=await KDB.upload("m",blob,"jpg");await KDB.sendMedia(c.id,{img:url});mediaSent(c)}
+    catch(e){c.msgs=c.msgs.filter(x=>x!==tmp);drawChat();toast("Fotoğraf gönderilemedi: "+(e.code||e.message))}};
+  picker.click()}
+function recordVoiceRemote(c){
+  if(!navigator.mediaDevices||!window.MediaRecorder){toast("Bu cihaz ses kaydını desteklemiyor");return}
+  const types=["audio/webm;codecs=opus","audio/mp4","audio/webm","audio/ogg;codecs=opus"];const mt=types.find(t=>MediaRecorder.isTypeSupported(t))||"";
+  let rec,stream,chunks=[],sec=0,iv,cancel=false,t0=0;
+  openSheet(`<div class="rec"><div class="big">${IC.mic}</div><div class="tm" id="recT">0:00</div><p class="muted" style="font-size:13px" id="recP">Mikrofon açılıyor…</p>
+    <div style="display:flex;gap:8px;width:100%"><button class="btn line" style="flex:1" id="recX">Vazgeç</button><button class="btn" style="flex:1" id="recS" disabled>Gönder</button></div></div>`);
+  const stopAll=()=>{clearInterval(iv);try{stream&&stream.getTracks().forEach(t=>t.stop())}catch(e){}};
+  $("#recX").onclick=()=>{cancel=true;try{rec&&rec.state!=="inactive"&&rec.stop()}catch(e){}stopAll();closeSheet()};
+  navigator.mediaDevices.getUserMedia({audio:{echoCancellation:true,noiseSuppression:true}}).then(s=>{
+    stream=s;if(!$("#recS")){stopAll();return}
+    rec=new MediaRecorder(s,mt?{mimeType:mt,audioBitsPerSecond:32000}:undefined);
+    rec.ondataavailable=e=>{if(e.data&&e.data.size)chunks.push(e.data)};
+    rec.onstop=async()=>{stopAll();if(cancel)return;closeSheet();
+      const dur=Math.max(1,Math.min(120,Math.round((Date.now()-t0)/1000)));
+      const type=(rec.mimeType||mt||"audio/webm").split(";")[0];const blob=new Blob(chunks,{type});
+      if(blob.size<800){toast("Kayıt çok kısa");return}
+      const tmp={me:true,kind:"voice",dur,sending:true};c.msgs.push(tmp);drawChat();
+      try{const url=await KDB.upload("m",blob,type.includes("mp4")?"m4a":type.includes("ogg")?"ogg":"webm");await KDB.sendMedia(c.id,{aud:url,dur});mediaSent(c)}
+      catch(e){c.msgs=c.msgs.filter(x=>x!==tmp);drawChat();toast("Sesli mesaj gönderilemedi: "+(e.code||e.message))}};
+    rec.start(1000);t0=Date.now();$("#recP").textContent="Kaydediliyor. En fazla 2 dakika.";$("#recS").disabled=false;
+    iv=setInterval(()=>{sec=Math.round((Date.now()-t0)/1000);const e=$("#recT");if(!e){cancel=true;try{rec.stop()}catch(x){}stopAll();return}e.textContent=fmt(sec);if(sec>=120)$("#recS").click()},250);
+    $("#recS").onclick=()=>{$("#recS").disabled=true;try{rec.stop()}catch(e){}};
+  }).catch(()=>{stopAll();closeSheet();toast("Mikrofon izni verilmedi. Tarayıcı ayarlarından izin verip tekrar dene.")});
+}
+let vAudio=null,vBtn=null;
+function playVoice(b){
+  if(vAudio&&vBtn===b){if(vAudio.paused){vAudio.play()}else{vAudio.pause()}return}
+  if(vAudio){vAudio.pause();if(vBtn)vBtn.innerHTML=IC.play}
+  vAudio=new Audio(b.dataset.play);vBtn=b;
+  vAudio.onplay=()=>{b.innerHTML='<svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><rect x="6" y="5" width="4" height="14" rx="1"/><rect x="14" y="5" width="4" height="14" rx="1"/></svg>'};
+  vAudio.onpause=vAudio.onended=()=>{b.innerHTML=IC.play};
+  vAudio.onerror=()=>{b.innerHTML=IC.play;toast("Bu sesli mesaj bu cihazda oynatılamadı")};
+  vAudio.play().catch(()=>{})}
+function zoomImg(src){const g=document.createElement("div");g.className="cf-scrim";g.style.cssText="display:grid;place-items:center;padding:16px;cursor:zoom-out";g.setAttribute("role","dialog");
+  g.innerHTML=`<img src="${esc(src)}" alt="Fotoğraf" style="max-width:100%;max-height:100%;border-radius:12px">`;g.onclick=()=>g.remove();document.body.appendChild(g)}
 function fakeReply(c,t){setTimeout(()=>{c.typing=true;if(state.chats[openIdx]===c)drawChat()},800);setTimeout(()=>{c.typing=false;c.msgs.push({me:false,t});if(state.chats[openIdx]===c)drawChat()},2400)}
 function startCall(type,c){
   const u=U[c.u];let el=$("#callscr");if(!el){el=document.createElement("div");el.id="callscr";el.className="callscr";el.setAttribute("role","dialog");document.body.appendChild(el)}
@@ -2043,6 +2103,8 @@ function startCall(type,c){
 /* ============ SESLİ / GÖRÜNTÜLÜ ARAMA (WebRTC, eşler arası) ============ */
 // Ses ve görüntü iki telefon arasında doğrudan akar; sunucu sadece bağlantı bilgisini taşır.
 const ICE={iceServers:[{urls:["stun:stun.l.google.com:19302","stun:stun1.l.google.com:19302","stun:stun2.l.google.com:19302"]}]};
+// TURN (aktarma sunucusu): bilgileri config/turn belgesinden, sadece giriş yapmış kullanıcılara gelir
+function loadTurn(){if(R.turnOk||!KDB.getTurn)return;KDB.getTurn().then(t=>{if(t&&Array.isArray(t.urls)&&t.u&&t.p&&!R.turnOk){R.turnOk=1;ICE.iceServers.push({urls:t.urls,username:t.u,credential:t.p})}}).catch(()=>{})}
 const CALL={id:null};
 const RING_MS=40000;
 // paket kilidi: Sohbet paketinde arama yok, Sohbet + Ses'te sadece sesli, Kulis Tam'da hepsi
@@ -2488,7 +2550,7 @@ addEventListener("pagehide",saveData);document.addEventListener("visibilitychang
 // Sadece REMOTE modda (beta adresi) çalışır. Demo sürümün davranışı değişmez.
 const R={posts:[],cm:{},cmPid:null,chats:{},users:{},reports:null,admin:false,started:false,syncedMe:null,uid:null};
 const cmN=p=>p.cmCount!=null?p.cmCount:p.cm.length;
-function authorSnap(){const m=state.me;return {n:m.n,c:m.c,s:m.s,g:m.g,age:m.age,av:(m.photo&&String(m.photo).startsWith("preset:"))?m.photo:null}}
+function authorSnap(){const m=state.me;return {n:m.n,c:m.c,s:m.s,g:m.g,age:m.age,av:(m.photo&&(String(m.photo).startsWith("preset:")||String(m.photo).startsWith(ST_URL)))?m.photo:null}}
 function monthTR(ts){const d=new Date(ts);return AYLAR[d.getMonth()]+" "+d.getFullYear()}
 function putUser(uid,d){if(!uid||uid===R.uid)return;const o=U[uid]||{};U[uid]=Object.assign(o,{n:d.n||o.n||"kullanıcı",s:d.s||o.s||"koc",age:d.age||o.age||"",g:d.g||o.g||"Belirtmeyeyim",c:d.c||o.c||"#7CC4FF",bio:d.bio!=null?d.bio:(o.bio||""),photo:d.av||o.photo,banner:d.banner||o.banner,since:d.createdAt?monthTR(d.createdAt.toMillis?d.createdAt.toMillis():d.createdAt):(o.since||""),stat:o.stat||[0,0,0]})}
 function mapPost(p){
@@ -2528,8 +2590,8 @@ function remoteStartListeners(){
   });
   setPremiumFrom(null);KDB.listenPremium(setPremiumFrom);playRestore();
   if(KDB.listenModeration)KDB.listenModeration(d=>{R.mod=d;if($("#adm.open")&&ADM.tab==="kelime")openAdminRemote()});
-  if(KDB.isMod)KDB.isMod().then(m=>{R.mod=m;if(m&&!R.admin)KDB.listenReports(r=>{R.reports=r})});
-  KDB.isAdmin().then(a=>{R.admin=a;if(a&&KDB.listenMods)KDB.listenMods(l=>{R.mods=l;if($("#adm.open")&&ADM.tab==="mod")openAdminRemote()});if(a){KDB.listenReports(r=>{R.reports=r});if(KDB.listenErrors)KDB.listenErrors(l=>{R.errors=l;if($("#adm.open")&&ADM.tab==="hata")openAdminRemote()})}});
+  if(KDB.isMod)KDB.isMod().then(m=>{R.isMod=m;setPremiumFrom(R.lastPrem);if(m&&!R.admin)KDB.listenReports(r=>{R.reports=r})});
+  KDB.isAdmin().then(a=>{R.admin=a;setPremiumFrom(R.lastPrem);if(a&&KDB.listenMods)KDB.listenMods(l=>{R.mods=l;if($("#adm.open")&&ADM.tab==="mod")openAdminRemote()});if(a){KDB.listenReports(r=>{R.reports=r});if(KDB.listenErrors)KDB.listenErrors(l=>{R.errors=l;if($("#adm.open")&&ADM.tab==="hata")openAdminRemote()})}});
 }
 function askGender(){
   if(!state.me||state.me.g==="Kadın"||state.me.g==="Erkek"||$("#gAsk"))return;
@@ -2545,19 +2607,28 @@ function remoteEnterApp(pub,priv){
     ad:priv?priv.ad||"":"",soyad:priv?priv.soyad||"":"",email:priv?priv.email||"":"",b:priv?priv.b:undefined,provider:priv?priv.provider:(pub.guest?"guest":"")};
   R.syncedMe=JSON.stringify({n:state.me.n,c:state.me.c,bio:state.me.bio,photo:state.me.photo,banner:state.me.banner,g:state.me.g});
   $("#onb").hidden=true;$("#remLoad")&&$("#remLoad").remove();
-  remoteStartListeners();render();askGender();iosInstallNudge();
+  remoteStartListeners();render();askGender();iosInstallNudge();loadTurn();
   if(KDB.logAccess)KDB.logAccess("giris");
   try{const cq=new URLSearchParams(location.search).get("call");if(cq&&KDB.getCall){history.replaceState(null,"",location.pathname);KDB.getCall(cq).then(d=>{if(d&&d.status==="ring"&&d.to===R.uid)showIncoming(d)}).catch(()=>{})}}catch(e){}
   if(KDB.pushSupported)KDB.pushSupported().then(ok=>{R.pushOk=ok;if(ok&&LS("kulis_push_on",false))KDB.refreshPush();if(state.tab==="ben")render()});
   const tch=()=>{if(KDB.touch)KDB.touch()};tch();if(!R.hb){R.hb=setInterval(()=>{if(!document.hidden)tch()},120e3);document.addEventListener("visibilitychange",()=>{if(!document.hidden)tch()})}
 }
 // profil değişikliklerini sunucuya yaz (takma ad, renk, profil cümlesi, hazır görseller, cinsiyet seçimi)
+const ST_URL="https://firebasestorage.googleapis.com/v0/b/kulis-1647d.firebasestorage.app/o/";
+function dataBlob(d){const [h,b]=d.split(",");const bin=atob(b),u=new Uint8Array(bin.length);for(let i=0;i<bin.length;i++)u[i]=bin.charCodeAt(i);return new Blob([u],{type:h.slice(5).split(";")[0]})}
 function remoteSyncMe(){
   if(!state.me||!R.syncedMe||!KDB.uid)return;
   const cur={n:state.me.n,c:state.me.c,bio:state.me.bio||"",photo:state.me.photo,banner:state.me.banner,g:state.me.g};
   const old=JSON.parse(R.syncedMe);if(JSON.stringify(cur)===R.syncedMe)return;
   const f={};if(cur.n!==old.n)f.n=cur.n;if(cur.c!==old.c)f.c=cur.c;if(cur.bio!==old.bio)f.bio=cur.bio;
-  const pre=v=>(v&&String(v).startsWith("preset:"))?v:null;
+  // yüklenen görsel (data:) önce depoya gider, bağlantısı gelince profil güncellenir
+  R.upl=R.upl||{};
+  ["photo","banner"].forEach(k=>{const v=cur[k];if(!v||!String(v).startsWith("data:")||R.upl[k]===v)return;R.upl[k]=v;
+    KDB.upload("p",dataBlob(v),"jpg").then(url=>{if(state.me[k]!==v)return;state.me[k]=url;delete R.upl[k];remoteSyncMe();render();toast(k==="photo"?"Profil fotoğrafın kaydedildi":"Kapak görselin kaydedildi")})
+      .catch(e=>{delete R.upl[k];toast("Görsel yüklenemedi: "+(e.code||e.message))})});
+  if(Object.keys(R.upl).length&&["photo","banner"].some(k=>String(cur[k]||"").startsWith("data:"))){
+    ["photo","banner"].forEach(k=>{if(String(cur[k]||"").startsWith("data:"))cur[k]=old[k]})}
+  const pre=v=>(v&&(String(v).startsWith("preset:")||String(v).startsWith(ST_URL)))?v:null;
   if(pre(cur.photo)!==pre(old.photo))f.av=pre(cur.photo);if(pre(cur.banner)!==pre(old.banner))f.banner=pre(cur.banner);
   if(cur.g!==old.g&&old.g==="Belirtmeyeyim")f.g=cur.g;
   R.syncedMe=JSON.stringify(cur);
@@ -2690,7 +2761,7 @@ function remoteInit(){
 /* ============ PREMIUM: GOOGLE PLAY ÖDEMESİ ============ */
 // Play'den indirilen uygulamada gerçek abonelik (Google Play Billing, Digital Goods API).
 // Tarayıcıdan girenlere uygulama yayınlanana kadar Premium ücretsiz.
-const WEB_FREE_PREMIUM=true;
+const WEB_FREE_PREMIUM=false;
 const PLAY_BILLING="https://play.google.com/billing";
 // Üyelik paketleri: 3 seviye x 3 süre. Ürün kimliği: kulis_<seviye>_<süre>
 const TIERS=[
@@ -2710,9 +2781,11 @@ async function playService(){
   return playSvc;
 }
 function setPremiumFrom(p){
+  if(REMOTE)R.lastPrem=p;
   const on=!!(p&&p.active&&(p.until||0)>Date.now());
+  // Premium sadece satın alanlarda. Yönetici ve moderatörlerde her şey açık.
   // Google Play inceleme hesabı: satın alma yapamadıkları için tüm özellikler açık
-  const web=REMOTE&&((WEB_FREE_PREMIUM&&!IN_APP)||["kulistrinfo@gmail.com"].includes(String(KDB.email||"").toLowerCase()));
+  const web=REMOTE&&((WEB_FREE_PREMIUM&&!IN_APP)||R.admin===true||R.isMod===true||["kulistrinfo@gmail.com"].includes(String(KDB.email||"").toLowerCase()));
   const was=state.premium,wasT=state.tier;state.premium=web||on;state.premUntil=on?p.until:0;
   state.tier=web?"tam":on?(p.tier||(String(p.productId||"").split("_")[1])||"tam"):null;
   if(wasT!==state.tier&&state.me&&was===state.premium){render();if(openIdx>=0)drawChat()}
@@ -2742,12 +2815,12 @@ function showPremiumRemote(src){
   let tier="ses",per="aylik";const web=!IN_APP;
   const draw=()=>{const T=TIERS.find(x=>x.k===tier);
    openSheet(`<h2>Kulis Premium</h2>
-   ${web?`<p class="prem-free">${IC.spark}<span>Web'de şu an tüm paketler <b>ücretsiz</b>. Fiyatlar Android uygulaması çıkınca geçerli olacak.</span></p>`:""}
+   ${web?`<p class="prem-free">${IC.spark}<span>Premium, Google Play'deki <b>Kulis uygulamasından</b> alınır. Aldığın üyelik aynı hesapla web'de de geçerli olur.</span></p>`:""}
    <div class="tier-tabs" role="tablist">${TIERS.map(x=>`<button role="tab" data-tier="${x.k}" aria-selected="${tier===x.k}"><b>${x.n}</b><small>${x.d}</small></button>`).join("")}</div>
    <div class="perks">${T.perks.map(t=>`<div>${IC.chk}${t}</div>`).join("")}</div>
    ${state.premUntil?`<p class="hint" style="margin:0 0 10px">Premium üyeliğin ${new Date(state.premUntil).toLocaleDateString("tr-TR")} tarihine kadar açık.</p>`:""}
    <div class="plans">${PERIODS.map(([k,n,sub])=>`<button class="plan" data-per="${k}" aria-pressed="${per===k}"><span><b>${n}</b><small>${sub}</small></span><span class="p">${playPrices[skuOf(tier,k)]||T.pr[k]}</span></button>`).join("")}</div>
-   ${web?`<button class="btn wide" id="buyX">Tamam</button>`:`<button class="btn gold wide" id="buy">Google Play ile abone ol</button>
+   ${web?`<a class="btn gold wide" href="https://play.google.com/store/apps/details?id=com.kulistr.app" target="_blank" rel="noopener" style="display:flex;justify-content:center;align-items:center;text-decoration:none">Uygulamayı Google Play'den aç</a><button class="btn line wide" id="buyX" style="margin-top:8px">Kapat</button>`:`<button class="btn gold wide" id="buy">Google Play ile abone ol</button>
    <p class="hint" style="text-align:center">Abonelik her dönem sonunda otomatik yenilenir. İstediğin zaman Google Play > Ödemeler ve abonelikler'den iptal edebilirsin.</p>`}`);
    const x=$("#buyX");if(x)x.onclick=closeSheet;
    $("#sheet").querySelectorAll("[data-tier]").forEach(b=>b.onclick=()=>{tier=b.dataset.tier;draw()});
@@ -2768,7 +2841,7 @@ function admUsers(){
   return (R.usersRaw||[]).map(u=>({uid:u.id,n:u.n,c:u.c,s:u.s,g:u.g,age:u.age,av:u.av,prem:!!u.prem,created:u.createdAt||0,seen:Math.max(u.lastSeen||0,u.createdAt||0),posts:posts[u.id]||0,me:u.id===R.uid}));
 }
 function openAdminRemote(){
-  if(!R.admin&&!R.mod){toast("Bu panel sadece yöneticiler için");return}
+  if(!R.admin&&!R.isMod){toast("Bu panel sadece yöneticiler için");return}
   if(!R.admin)ADM.tab="sikayet";
   let el=$("#adm");if(!el){el=document.createElement("div");el.id="adm";el.setAttribute("role","dialog");el.setAttribute("aria-label","Yönetici paneli");document.body.appendChild(el)}
   const now=Date.now(),today=dayStart(),all=admUsers();
@@ -2885,7 +2958,7 @@ if(REMOTE){
   const open0=openChat;
   openChat=function(i){const c=state.chats[i];if(!c)return;open0(i);
     const seen=LS("kulis_seen",{});seen[c.id]=Date.now();LSset("kulis_seen",seen);
-    KDB.listenMsgs(c.id,list=>{c.msgs=list.map(m=>({me:m.uid===R.uid,t:m.t,ts:m.ts}));const s=LS("kulis_seen",{});s[c.id]=Date.now();LSset("kulis_seen",s);if(state.chats[openIdx]===c)drawChat()})};
+    KDB.listenMsgs(c.id,list=>{c.msgs=list.map(m=>({me:m.uid===R.uid,t:m.t,ts:m.ts,kind:m.img?"img":m.aud?"voice":undefined,src:m.img||m.aud,dur:m.dur}));const s=LS("kulis_seen",{});s[c.id]=Date.now();LSset("kulis_seen",s);if(state.chats[openIdx]===c)drawChat()})};
   const closeC0=closeChat;closeChat=function(){KDB.stopMsgs();closeC0()};
   // bildirimleri okundu say
   const notifs0=showNotifs;showNotifs=function(){const ids=state.notifs.filter(n=>!n.read).map(n=>n.id);notifs0();if(ids.length)KDB.markNotifsRead(ids).catch(()=>{})};
@@ -2896,6 +2969,6 @@ if(REMOTE){
 if(REMOTE)remoteInit();else
 try{const s=JSON.parse(localStorage.getItem("itiraf_me")||"null");if(s&&s.n&&s.s){state.me=s;loadData();render();seedDemo()}else startOnb()}catch(e){startOnb()}
 </script>
-<script type="module">if(REMOTE)import("./kulis-db.js?v=17")</script>
+<script type="module">if(REMOTE)import("./kulis-db.js?v=18")</script>
 </body>
 </html>

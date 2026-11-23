@@ -13,6 +13,7 @@ import {
 } from "https://www.gstatic.com/firebasejs/12.8.0/firebase-firestore.js";
 import { getMessaging, getToken, deleteToken, isSupported as msgSupported } from "https://www.gstatic.com/firebasejs/12.8.0/firebase-messaging.js";
 import { getFunctions, httpsCallable } from "https://www.gstatic.com/firebasejs/12.8.0/firebase-functions.js";
+import { getStorage, ref as sRef, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/12.8.0/firebase-storage.js";
 
 // /beta/ adresi ayrı test veritabanını kullanır; canlı kullanıcıların verisine dokunmaz
 const IS_TEST = /\/beta\//.test(location.pathname);
@@ -257,6 +258,25 @@ const KDB = {
   },
   acceptChat(cid) { return updateDoc(doc(db, "chats", cid), { status: "open" }); },
   declineChat(cid) { return deleteDoc(doc(db, "chats", cid)); },
+  async getTurn() { const s = await getDoc(doc(db, "config", "turn")); return s.exists() ? s.data() : null; },
+  // Dosya yükle: dir "p" (profil görselleri) ya da "m" (mesaj ekleri). İndirme bağlantısını döndürür.
+  async upload(dir, blob, ext) {
+    const st = getStorage(app);
+    const name = Date.now().toString(36) + Math.random().toString(36).slice(2, 10) + "." + ext;
+    const r = sRef(st, `${dir}/${KDB.uid}/${name}`);
+    await uploadBytes(r, blob, { contentType: blob.type, cacheControl: "public,max-age=31536000" });
+    return await getDownloadURL(r);
+  },
+  // Fotoğraf ya da sesli mesaj gönder
+  async sendMedia(cid, m) {
+    const b = writeBatch(db), d = { uid: KDB.uid, t: m.t || "", ts: serverTimestamp() };
+    if (m.img) d.img = m.img;
+    if (m.aud) { d.aud = m.aud; d.dur = Math.max(1, Math.min(120, Math.round(m.dur || 1))); }
+    b.set(doc(collection(db, "chats", cid, "messages")), d);
+    stamp(b, "msgAt");
+    await b.commit();
+    await updateDoc(doc(db, "chats", cid), { last: m.img ? "📷 Fotoğraf" : "🎤 Sesli mesaj", lastBy: KDB.uid, lastAt: serverTimestamp() }).catch(() => {});
+  },
   async sendMsg(cid, t) {
     const b = writeBatch(db);
     b.set(doc(collection(db, "chats", cid, "messages")), { uid: KDB.uid, t, ts: serverTimestamp() });
