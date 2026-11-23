@@ -2,8 +2,11 @@
 // - bildirimTelefona: yeni bildirim gelince kullanıcının telefonuna/tarayıcısına anlık bildirim (FCM) yollar
 // - anonimItiraf: takma ad bile görünmeden itiraf; yazarın kimliği sadece sunucuda tutulur
 // - davetOdulu: davet linkiyle gelen her 3 yeni üye için davet edene 1 hafta Premium
+// - aramaBildirimi: gelen sesli/görüntülü aramayı telefona bildirir
+// - erisimKaydi: 5651 için IP + zaman kaydı (2 yıl)
+// - verifyPurchase: Google Play abonelik doğrulaması
 const { onDocumentCreated } = require("firebase-functions/v2/firestore");
-const { onCall, HttpsError } = require("firebase-functions/v2/https");
+const { onCall, onRequest, HttpsError } = require("firebase-functions/v2/https");
 const { setGlobalOptions, logger } = require("firebase-functions/v2");
 const admin = require("firebase-admin");
 
@@ -13,35 +16,141 @@ const FV = admin.firestore.FieldValue;
 setGlobalOptions({ region: "europe-west1", maxInstances: 10 });
 
 const SITE = "https://kulistr.com/";
-const TITLES = { cm: "Yeni yorum", react: "İtirafına tepki", req: "Mesaj isteği", dm: "Yeni mesaj", match: "Eşleştiniz", like: "Biri seni beğendi" };
+const TITLES = { cm: "Yeni yorum", react: "İtirafına tepki", req: "Mesaj isteği", dm: "Yeni mesaj", match: "Eşleştiniz", like: "Biri seni beğendi", call: "Cevapsız arama" };
 
-// ---------------- Telefona bildirim ----------------
-exports.bildirimTelefona = onDocumentCreated("users/{uid}/notifs/{nid}", async (event) => {
-  const n = event.data && event.data.data();
-  if (!n) return;
-  const uid = event.params.uid;
+// ---------------- Kullanıcı ayarları ----------------
+// users/{uid}/settings/main: n (bildirim türü -> açık/kapalı), quiet + qFrom/qTo (Türkiye saatiyle sessiz saatler)
+async function settingsOf(uid) {
+  const s = await db.doc(`users/${uid}/settings/main`).get().catch(() => null);
+  return s && s.exists ? s.data() : {};
+}
+function inQuiet(st) {
+  if (!st.quiet) return false;
+  const f = Number.isInteger(st.qFrom) ? st.qFrom : 0, t = Number.isInteger(st.qTo) ? st.qTo : 8;
+  const h = (new Date().getUTCHours() + 3) % 24; // Türkiye UTC+3
+  return f === t ? false : f < t ? (h >= f && h < t) : (h >= f || h < t);
+}
+async function sendPush(uid, data, ttlSec) {
   const toks = await db.collection(`users/${uid}/push`).get();
   if (toks.empty) return;
-  let who = "Biri";
-  if (n.from) {
-    const f = await db.doc(`users/${n.from}`).get().catch(() => null);
-    if (f && f.exists && f.data().n) who = f.data().n;
-  }
   const tokens = toks.docs.map(d => d.id);
   const res = await admin.messaging().sendEachForMulticast({
-    tokens,
-    data: { title: TITLES[n.type] || "Kulis", body: `${who} ${n.text || ""}`.slice(0, 180), link: SITE, tag: n.type || "kulis" },
-    webpush: { headers: { Urgency: "high", TTL: "86400" } },
-    android: { priority: "high" }
+    tokens, data,
+    webpush: { headers: { Urgency: "high", TTL: String(ttlSec || 86400) } },
+    android: { priority: "high", ttl: (ttlSec || 86400) * 1000 }
   });
-  // geçersiz olmuş anahtarları temizle
   const dead = [];
   res.responses.forEach((r, i) => {
     const c = r.error && r.error.code;
     if (c === "messaging/registration-token-not-registered" || c === "messaging/invalid-registration-token" || c === "messaging/invalid-argument") dead.push(tokens[i]);
   });
   await Promise.all(dead.map(t => db.doc(`users/${uid}/push/${t}`).delete().catch(() => {})));
-  logger.info("push", { uid, sent: res.successCount, failed: res.failureCount });
+  logger.info("push", { uid, tag: data.tag, sent: res.successCount, failed: res.failureCount });
+}
+
+// ---------------- Telefona bildirim ----------------
+exports.bildirimTelefona = onDocumentCreated("users/{uid}/notifs/{nid}", async (event) => {
+  const n = event.data && event.data.data();
+  if (!n) return;
+  const uid = event.params.uid;
+  const st = await settingsOf(uid);
+  if (st.n && st.n[n.type] === false) return; // bu türü kapatmış
+  if (inQuiet(st)) return;                     // sessiz saatler
+  let who = "Biri";
+  if (n.from) {
+    const f = await db.doc(`users/${n.from}`).get().catch(() => null);
+    if (f && f.exists && f.data().n) who = f.data().n;
+  }
+  await sendPush(uid, { title: TITLES[n.type] || "Kulis", body: `${who} ${n.text || ""}`.slice(0, 180), link: SITE, tag: n.type || "kulis" });
+});
+
+// ---------------- Gelen arama bildirimi ----------------
+exports.aramaBildirimi = onDocumentCreated("calls/{id}", async (event) => {
+  const c = event.data && event.data.data();
+  if (!c || c.status !== "ring") return;
+  const st = await settingsOf(c.to);
+  if (st.n && st.n.call === false) return;
+  if (inQuiet(st)) return;
+  const f = await db.doc(`users/${c.from}`).get().catch(() => null);
+  const who = f && f.exists && f.data().n ? f.data().n : "Biri";
+  await sendPush(c.to, {
+    title: c.type === "video" ? "Görüntülü arama" : "Sesli arama",
+    body: `${who} seni arıyor`, link: SITE + "?call=" + event.params.id, tag: "call", call: event.params.id
+  }, 45);
+});
+
+// ---------------- 5651 erişim kaydı ----------------
+// Giriş ve paylaşımlarda IP adresi + zaman sunucuda tutulur; kimse okuyamaz (kurallar kapalı), 2 yıl sonra silinir.
+const KAYIT_GUN = 730;
+const ACTS = ["giris", "itiraf", "yorum", "mesaj", "arama"];
+exports.erisimKaydi = onCall({ enforceAppCheck: false }, async (req) => {
+  const a = req.auth;
+  if (!a) throw new HttpsError("unauthenticated", "giris");
+  const act = ACTS.includes(req.data && req.data.act) ? req.data.act : "giris";
+  const r = req.rawRequest;
+  const fwd = String(r.headers["x-forwarded-for"] || "").split(",")[0].trim();
+  const ip = fwd || r.ip || "";
+  const port = String(r.headers["x-forwarded-port"] || "");
+  const now = Date.now();
+  await db.collection("accessLogs").add({
+    uid: a.uid, act, ip, port, ua: String(r.headers["user-agent"] || "").slice(0, 300),
+    ts: FV.serverTimestamp(), del: admin.firestore.Timestamp.fromMillis(now + KAYIT_GUN * 864e5)
+  });
+  // süresi dolanları ara ara temizle (ayrı zamanlayıcıya gerek kalmasın)
+  if (Math.random() < 0.02) {
+    const old = await db.collection("accessLogs").where("del", "<", admin.firestore.Timestamp.now()).limit(300).get();
+    if (!old.empty) { const b = db.batch(); old.docs.forEach(d => b.delete(d.ref)); await b.commit(); }
+  }
+  return { ok: true };
+});
+
+// ---------------- Google Play satın alma doğrulaması ----------------
+// Uygulama, Play'den aldığı purchaseToken'ı buraya yollar; token Google'a sorulur, gerçekse onaylanır ve premium yazılır.
+// Çalışan servis hesabının Play Console'da "Finansal verileri görüntüleme + Siparişleri ve abonelikleri yönetme" izni olmalı.
+const PACKAGE = "com.kulistr.app";
+const PRODUCTS = ["sohbet", "ses", "tam"].flatMap(t => ["haftalik", "aylik", "yillik"].map(p => `kulis_${t}_${p}`));
+const tierOf = id => (String(id).split("_")[1]) || "tam";
+let publisher = null;
+function playApi() {
+  if (!publisher) {
+    const ap = require("@googleapis/androidpublisher");
+    publisher = ap.androidpublisher({ version: "v3", auth: new ap.auth.GoogleAuth({ scopes: ["https://www.googleapis.com/auth/androidpublisher"] }) });
+  }
+  return publisher;
+}
+exports.verifyPurchase = onRequest({ cors: ["https://kulistr.com", "https://www.kulistr.com"] }, async (req, res) => {
+  if (req.method !== "POST") return res.status(405).json({ error: "method" });
+  try {
+    const m = (req.get("authorization") || "").match(/^Bearer (.+)$/);
+    if (!m) return res.status(401).json({ error: "giris" });
+    const user = await admin.auth().verifyIdToken(m[1]);
+    if (!user.email_verified) return res.status(403).json({ error: "dogrulanmamis" });
+    const uid = user.uid;
+    const { productId, purchaseToken } = req.body || {};
+    if (!PRODUCTS.includes(productId) || typeof purchaseToken !== "string" || purchaseToken.length < 10 || purchaseToken.length > 4096)
+      return res.status(400).json({ error: "gecersiz" });
+    const tokenRef = db.collection("purchases").doc(require("crypto").createHash("sha256").update(purchaseToken).digest("hex"));
+    const prev = await tokenRef.get();
+    if (prev.exists && prev.data().uid !== uid) return res.status(409).json({ error: "baska_hesap" });
+    const api = playApi();
+    const { data: sub } = await api.purchases.subscriptionsv2.get({ packageName: PACKAGE, token: purchaseToken });
+    const item = (sub.lineItems || []).find(li => li.productId === productId) || (sub.lineItems || [])[0];
+    const until = item && item.expiryTime ? Date.parse(item.expiryTime) : 0;
+    const active = ["SUBSCRIPTION_STATE_ACTIVE", "SUBSCRIPTION_STATE_IN_GRACE_PERIOD", "SUBSCRIPTION_STATE_CANCELED"].includes(sub.subscriptionState) && until > Date.now();
+    if (sub.acknowledgementState === "ACKNOWLEDGEMENT_STATE_PENDING" && active) {
+      await api.purchases.subscriptions.acknowledge({ packageName: PACKAGE, subscriptionId: item.productId, token: purchaseToken, requestBody: {} });
+    }
+    const pid = item ? item.productId : productId;
+    const now = FV.serverTimestamp();
+    await tokenRef.set({ uid, productId: pid, state: sub.subscriptionState, until, updatedAt: now }, { merge: true });
+    await db.doc(`users/${uid}/private/premium`).set({ active, until, productId: pid, tier: tierOf(pid), state: sub.subscriptionState, updatedAt: now });
+    await db.doc(`users/${uid}`).set({ prem: active }, { merge: true });
+    return res.json({ active, until, tier: tierOf(pid) });
+  } catch (e) {
+    logger.error("verifyPurchase", e);
+    const code = e && e.code === 404 ? 404 : 500;
+    return res.status(code).json({ error: code === 404 ? "bulunamadi" : "sunucu" });
+  }
 });
 
 // ---------------- Anonim itiraf ----------------

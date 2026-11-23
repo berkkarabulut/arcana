@@ -77,10 +77,20 @@ service cloud.firestore {
         }
         allow read: if isMe(uid);
         allow create, update: if isMe(uid) && d == 'rl'
-          && request.resource.data.keys().hasOnly(['postAt','cmAt','ntAt','chAt','msgAt','errAt'])
-          && tick('postAt', 900) && tick('cmAt', 8) && tick('ntAt', 2) && tick('chAt', 20) && tick('msgAt', 1) && tick('errAt', 20);
+          && request.resource.data.keys().hasOnly(['postAt','cmAt','ntAt','chAt','msgAt','errAt','callAt'])
+          && tick('callAt', 10) && tick('postAt', 900) && tick('cmAt', 8) && tick('ntAt', 2) && tick('chAt', 20) && tick('msgAt', 1) && tick('errAt', 20);
       }
       // Bildirim anahtarları (telefon/tarayıcı): sadece sahibi
+      // Ayarlar: telefon bildirimi tercihleri, sessiz saatler, arama izinleri. Arama izinlerini arayan taraf da okuyabilmeli.
+      match /settings/{d} {
+        allow read: if signedIn();
+        allow create, update: if isMe(uid) && d == 'main'
+          && request.resource.data.keys().hasOnly(['n','quiet','qFrom','qTo','callVoice','callVideo','updatedAt'])
+          && (!('n' in request.resource.data) || request.resource.data.n is map)
+          && (!('qFrom' in request.resource.data) || (request.resource.data.qFrom is int && request.resource.data.qFrom >= 0 && request.resource.data.qFrom < 24))
+          && (!('qTo' in request.resource.data) || (request.resource.data.qTo is int && request.resource.data.qTo >= 0 && request.resource.data.qTo < 24));
+        allow delete: if isMe(uid) || isAdmin();
+      }
       match /push/{token} {
         allow read, write: if isMe(uid);
       }
@@ -100,7 +110,7 @@ service cloud.firestore {
         allow create: if signedIn() && request.auth.uid != uid
           && request.resource.data.keys().hasOnly(['from','type','text','go','ts','read'])
           && request.resource.data.from == request.auth.uid
-          && request.resource.data.type in ['cm','react','req','dm','match','like']
+          && request.resource.data.type in ['cm','react','req','dm','match','like','call']
           && str(request.resource.data.text, 1, 200) && request.resource.data.ts == request.time
           && !blockedBy(uid) && stamped('ntAt');
       }
@@ -189,6 +199,41 @@ service cloud.firestore {
     }
 
     // Sohbetler: belge adı iki kişinin kimliğinin sıralı birleşimi, sadece iki taraf görür
+    // Sesli / görüntülü arama: WebRTC bağlantı bilgileri. Sadece açık sohbeti olanlar, engellenmemişse ve karşı taraf izin veriyorsa.
+    match /calls/{id} {
+      function inCall() { return signedIn() && (resource.data.from == request.auth.uid || resource.data.to == request.auth.uid); }
+      function setPath(u) { return /databases/$(database)/documents/users/$(u)/settings/main; }
+      function allows(u, t) { return !exists(setPath(u)) || get(setPath(u)).data.get(t == 'video' ? 'callVideo' : 'callVoice', true) != false; }
+      function chatPath(a, b) { return /databases/$(database)/documents/chats/$(a < b ? a + '_' + b : b + '_' + a); }
+      allow read: if inCall();
+      allow create: if signedIn()
+        && request.resource.data.keys().hasOnly(['from','to','members','type','status','offer','ts'])
+        && request.resource.data.from == request.auth.uid
+        && request.resource.data.to is string && request.resource.data.to != request.auth.uid
+        && request.resource.data.members == [request.auth.uid, request.resource.data.to]
+        && request.resource.data.type in ['voice','video'] && request.resource.data.status == 'ring'
+        && request.resource.data.offer is map && request.resource.data.ts == request.time
+        && exists(chatPath(request.auth.uid, request.resource.data.to))
+        && get(chatPath(request.auth.uid, request.resource.data.to)).data.status == 'open'
+        && !blockedBy(request.resource.data.to)
+        && allows(request.resource.data.to, request.resource.data.type)
+        && stamped('callAt');
+      allow update: if inCall()
+        && changed().hasOnly(['status','answer'])
+        && request.resource.data.status in ['ring','accept','decline','end','miss']
+        && (!('answer' in changed()) || resource.data.to == request.auth.uid)
+        && (!(request.resource.data.status in ['accept','decline']) || resource.data.to == request.auth.uid || request.resource.data.status == resource.data.status)
+        && (request.resource.data.status != 'miss' || resource.data.from == request.auth.uid);
+      allow delete: if false;
+      match /{side}/{cid} {
+        function call() { return get(/databases/$(database)/documents/calls/$(id)).data; }
+        allow read: if signedIn() && request.auth.uid in call().members;
+        allow create: if signedIn()
+          && ((side == 'fc' && call().from == request.auth.uid) || (side == 'tc' && call().to == request.auth.uid))
+          && request.resource.data.keys().hasOnly(['c']) && str(request.resource.data.c, 2, 2000);
+      }
+    }
+
     match /chats/{cid} {
       function member() { return signedIn() && request.auth.uid in resource.data.members; }
       function other(m) { return m[0] == request.auth.uid ? m[1] : m[0]; }

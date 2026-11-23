@@ -217,6 +217,19 @@ h1,h2,h3{font-family:var(--display);font-weight:400;text-wrap:balance}
 .cb{width:62px;height:62px;border-radius:50%;background:rgba(255,255,255,.14);display:grid;place-items:center;color:#fff}
 .cb[aria-pressed="true"]{background:#fff;color:#14101A}
 .cb.end{background:#E5484D}
+.cb.ok{background:#2FBF71}
+.c-remote{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;background:#000}
+.c-local{position:absolute;right:16px;top:calc(16px + env(safe-area-inset-top));width:104px;height:150px;object-fit:cover;border-radius:16px;border:1px solid rgba(255,255,255,.25);background:#2A2233;z-index:2;transform:scaleX(-1)}
+.callscr .c-top h2{text-shadow:0 1px 8px rgba(0,0,0,.5)}
+.ayar-h{font-family:var(--body);font-size:13px;font-weight:600;color:var(--soluk);margin:18px 0 6px;letter-spacing:.01em}
+.set-row{display:flex;align-items:center;gap:12px;width:100%;text-align:left;padding:11px 2px;border-bottom:1px solid var(--cizgi,rgba(128,128,128,.18));background:none;color:inherit}
+.set-row>span{flex:1;min-width:0}.set-row b{display:block;font-weight:500;font-size:15px}.set-row small{display:block;font-size:12.5px;color:var(--soluk);margin-top:2px}
+.tgl{position:relative;flex:none;width:44px;height:26px;border-radius:13px;background:rgba(128,128,128,.35);transition:background .15s}
+.tgl i{position:absolute;top:3px;left:3px;width:20px;height:20px;border-radius:50%;background:#fff;transition:transform .15s;box-shadow:0 1px 3px rgba(0,0,0,.3)}
+.set-row[aria-checked="true"] .tgl{background:var(--nar)}.set-row[aria-checked="true"] .tgl i{transform:translateX(18px)}
+.set-q{display:flex;gap:10px;margin-top:10px}.set-q label{flex:1;font-size:13px;color:var(--soluk);display:grid;gap:4px}
+.set-q select{height:42px;border-radius:12px;padding:0 10px;background:var(--yuzey);color:inherit;border:1px solid rgba(128,128,128,.25);font:inherit}
+.lnk{background:none;color:var(--nar);text-decoration:underline;padding:0;font:inherit}
 .cb svg{width:26px;height:26px}
 .cnote{font-size:12px;opacity:.6;margin-top:14px}
 .typing{display:inline-flex;gap:4px;padding:12px 14px;background:var(--yuzey2);border-radius:18px;align-self:flex-start}
@@ -1132,11 +1145,13 @@ function vBen(){
    ${isStandalone()?"":`<button class="btn line wide" id="instPro" style="margin-top:22px">${PHONE_DL}Ana ekrana ekle</button>`}
    ${themePicker()}
    <div class="lg-links"><a href="kurallar.html" data-legal="kurallar">Topluluk kuralları</a><a href="kosullar.html" data-legal="kosullar">Kullanım koşulları</a><a href="gizlilik.html" data-legal="kvkk">KVKK ve gizlilik</a>${GA_ID?'<a href="#" id="ckPref">Çerez tercihleri</a>':""}</div>
+   ${REMOTE?`<button class="btn line wide" id="setBtn" style="margin-top:22px">Ayarlar</button>`:""}
    <button class="btn line wide" id="outBtn" style="margin-top:22px;color:var(--nar);border-color:rgba(var(--nar-rgb),.35)">${LOGOUT}Çıkış yap</button>${REMOTE?`${pushState()==="acik"?`<button class="dice" data-push="off" style="margin:14px auto 0;display:flex">Telefon bildirimlerini kapat</button>`:""}<button class="dice" id="delAcc" style="margin:14px auto 0;display:flex">Hesabımı sil</button>`:""}</div>`;
   const pn=$("#pNote");if(pn)pn.onclick=()=>premiumGate("Fotoğrafın görünsün","Yüklediğin fotoğraf ve kapak Premium üyelerde herkese görünür.",()=>vBen());
   $("#camBtn").onclick=()=>showEditProfile("photo");$("#covBtn").onclick=()=>showEditProfile("banner");
   $("#editPro").onclick=showEditProfile;
   $("#outTop").onclick=$("#outBtn").onclick=confirmLogout;
+  const sb=$("#setBtn");if(sb)sb.onclick=showSettings;
   if($("#delAcc"))$("#delAcc").onclick=confirmDeleteAccount;
   const ip=$("#instPro");if(ip)ip.onclick=installApp;
   const ck=$("#ckPref");if(ck)ck.onclick=e=>{e.preventDefault();showConsent(true)};
@@ -1244,7 +1259,7 @@ function vEsles(){
     </div>`}
     <p class="hint" style="text-align:center;max-width:340px;margin:12px auto 0">Sağa kaydır: bana dokundu. Sola kaydır: geç. Sen ${tg==="Erkek"?"erkeklerin":"kadınların"} itiraflarını görürsün. Birbirinizi beğenirseniz eşleşirsiniz, sohbet açılır.</p>
     ${state.myPosts.length?"":`<button class="pnote" id="swNudge" style="max-width:none;margin:14px 0 0">${IC.spark}<span>Kendi itirafını yazanlar daha çok eşleşiyor. İnsanlar seni yazdıklarınla tanır.</span></button>`}`;
-  const L=$("#likers");if(L)L.onclick=e=>{if(!state.premium){premiumGate("Seni kimler beğendi?","Seni beğenen kişileri görmek ve onların itirafını hemen önüne getirmek Premium ile açılır.",()=>vKesfet());return}
+  const L=$("#likers");if(L)L.onclick=e=>{if(REMOTE?!hasFeat("tam"):!state.premium){premiumGate("Seni kimler beğendi?","Seni beğenen kişileri görmek ve onların itirafını hemen önüne getirmek Premium ile açılır.",()=>vKesfet());return}
     const a=e.target.closest("[data-lk]");if(a){sw.front=a.dataset.lk;vEsles()}};
   const P=$("#swPrem");if(P)P.onclick=()=>showPremium("esles");
   const SI=$("#swInv");if(SI)SI.onclick=()=>showInvite();
@@ -1287,7 +1302,7 @@ function decide(c,like){
   if(m)showMatch(c);else if(like)toast(`${U[c.u].n} itirafını beğendiğini görmeyecek, sadece o da seni beğenirse eşleşirsiniz`);
 }
 function undoSwipe(){
-  if(!state.premium){premiumGate("Son kartı geri al","Yanlışlıkla geçtiğin itirafı geri getirmek Premium ile açılır.",()=>vKesfet());return}
+  if(REMOTE?!hasFeat("tam"):!state.premium){premiumGate("Son kartı geri al","Yanlışlıkla geçtiğin itirafı geri getirmek Premium ile açılır.",()=>vKesfet());return}
   const h=sw.hist[sw.hist.length-1];if(!h){toast("Geri alınacak kart yok");return}
   if(h.match){toast("Eşleşme geri alınamaz");return}
   sw.hist.pop();sw.done.delete(h.id);sw.used=Math.max(0,sw.used-1);sw.front=h.u;vEsles();
@@ -1673,7 +1688,7 @@ function showInvite(){
 
 /* ============ YASAL METİNLER ============ */
 const CONTACT_EMAIL="mberkarabulut@gmail.com";
-const LEGAL={"guncelleme": "22 Kasım 2026", "sorumlu": "Mehmet Berk KARABULUT", "docs": [{"id": "kosullar", "file": "kosullar.html", "title": "Kullanım Koşulları", "sections": [["Kulis nedir?", "Kulis, kullanıcıların takma adla itiraf paylaştığı, bu itiraflara tepki ve yorum bıraktığı, birbirleriyle eşleşip mesajlaştığı bir uygulamadır. Bu koşullar Kulis'i kullanan herkes için geçerlidir. Uygulamaya üye olarak ya da üye olmadan kullanarak bu koşulları kabul etmiş sayılırsın."], ["Kimler kullanabilir?", "Kulis'i yalnızca 18 yaşını doldurmuş kişiler kullanabilir. Kayıt sırasında doğum tarihini doğru girmekle yükümlüsün. 18 yaşından küçük olduğu anlaşılan hesaplar uyarı yapılmadan kapatılır."], ["Hesabın", "Hesabını başkasıyla paylaşamaz, başkası adına hesap açamazsın. Adın, soyadın ve e-postan diğer kullanıcılara gösterilmez; herkes seni seçtiğin takma adla görür. Takma adın başka bir kişiyi taklit edemez, hakaret ya da cinsel içerik barındıramaz. Hesabının güvenliğinden sen sorumlusun."], ["Paylaştığın içerik", "İtiraf, yorum ve mesajlarının sorumluluğu sana aittir. Paylaştığın içeriğin Kulis içinde gösterilmesi, öne çıkarılması ve hikâye görseli olarak paylaşılabilmesi için Kulis'e ücretsiz, münhasır olmayan bir kullanım izni vermiş olursun. İçeriğini sildiğinde bu izin sona erer; yasal saklama yükümlülükleri saklıdır."], ["Yasak olanlar", "Şunlar yasaktır: başka bir kişinin adını, soyadını, okulunu, iş yerini, fotoğrafını veya onu tanınır kılacak bilgileri paylaşmak; telefon numarası, sosyal medya hesabı gibi iletişim bilgisi paylaşmak; cinsel ya da müstehcen içerik; taciz, tehdit, zorbalık, nefret söylemi; dolandırıcılık, spam ve reklam; 18 yaşından küçüklere ilişkin her türlü uygunsuz içerik; suç teşkil eden ya da suça teşvik eden içerik; Kulis'in işleyişini bozmaya yönelik girişimler. Ayrıntılar Topluluk Kuralları'nda yer alır."], ["Denetim ve yaptırımlar", "Kulis, kurallara aykırı içerikleri otomatik filtreler, kullanıcı şikâyetleri ve yönetici incelemesiyle tespit eder. Aykırı içerik önceden haber verilmeksizin kaldırılabilir; ihlalin ağırlığına göre uyarı verilebilir, hesap geçici olarak kısıtlanabilir ya da kalıcı olarak kapatılabilir. Şikâyetler en geç 24 saat içinde incelenir. Kanunen gerekli hallerde bilgiler yetkili mercilerle paylaşılır."], ["Premium ve ödemeler", "Bazı özellikler ücretli Premium üyelikle sunulur. Ödemeler yalnızca App Store veya Google Play üzerinden alınır; Kulis kart bilgisi istemez ve saklamaz. Abonelik, iptal edilmedikçe dönem sonunda mağaza tarafından yenilenir. İptal ve iade talepleri ilgili mağazanın kurallarına tabidir. Kurallara aykırılık nedeniyle kapatılan hesaplar için kalan süre iadesi yapılmaz."], ["Eşleşme ve mesajlaşma", "Eşleşme özelliği, iki kullanıcının birbirinin itirafını beğenmesi halinde sohbet başlatır. Tanıştığın kişilerle ilgili kararların sorumluluğu sana aittir. Kişisel bilgilerini paylaşırken ve yüz yüze görüşme kararı verirken dikkatli ol. Rahatsız olduğunda kullanıcıyı engelleyebilir ve şikâyet edebilirsin."], ["Sorumluluğun sınırı", "Kulis, kullanıcıların paylaştığı içeriklerin doğruluğunu garanti etmez ve bunları önceden denetleme yükümlülüğü taşımaz; 5651 sayılı Kanun kapsamında yer sağlayıcı olarak hukuka aykırı içerikten haberdar edildiğinde gerekli işlemi yapar. Günlük burç yorumları eğlence amaçlıdır ve tavsiye niteliği taşımaz. Uygulamanın kesintisiz ya da hatasız çalışacağı garanti edilmez."], ["Hesabını kapatma", "Hesabını istediğin zaman kapatabilirsin. Hesabın kapandığında itirafların, yorumların ve mesajların silinir; yasal zorunluluk nedeniyle saklanması gereken kayıtlar ilgili süre boyunca saklanır ve sonra silinir."], ["Değişiklikler", "Bu koşullar güncellenebilir. Önemli değişiklikler uygulama içinde duyurulur. Değişiklikten sonra Kulis'i kullanmaya devam etmen güncel koşulları kabul ettiğin anlamına gelir."], ["Uygulanacak hukuk", "Bu koşullar Türkiye Cumhuriyeti hukukuna tabidir. Uyuşmazlıklarda tüketici işlemleri bakımından Tüketici Hakem Heyetleri ve Tüketici Mahkemeleri, diğer hallerde Ankara Mahkemeleri ve İcra Daireleri yetkilidir."]]}, {"id": "kvkk", "file": "gizlilik.html", "title": "KVKK Aydınlatma Metni ve Gizlilik Politikası", "sections": [["Veri sorumlusu", "6698 sayılı Kişisel Verilerin Korunması Kanunu (KVKK) kapsamında veri sorumlusu Mehmet Berk KARABULUT'tur (bundan sonra “Kulis”). Bu metin, Kulis'i kullanırken hangi kişisel verilerinin, hangi amaçlarla ve nasıl işlendiğini açıklar."], ["İşlenen veriler", "Kimlik ve iletişim: ad, soyad, e-posta adresi (Google, Apple veya e-posta ile üyelikte). Profil: takma ad, doğum tarihi (yalnızca burç ve yaş aralığı gösterilir), cinsiyet, profil rengi, isteğe bağlı profil ve kapak görseli, kısa tanıtım yazısı. Kullanıcı içeriği: itiraflar, yorumlar, tepkiler, mesajlar, gönderilen fotoğraf, ses ve videolar, eşleşme tercihlerin. İşlem güvenliği: giriş kayıtları, IP adresi, cihaz ve tarayıcı bilgisi, şikâyet ve engelleme kayıtları. Ödeme: Premium satın alımlarında yalnızca mağazanın ilettiği abonelik durumu; kart bilgisi Kulis'e ulaşmaz."], ["Hangi amaçlarla?", "Üyeliğini oluşturmak ve yönetmek; itiraf, yorum, eşleşme ve mesajlaşma hizmetlerini sunmak; 18 yaş sınırını uygulamak; kurallara aykırı içerikleri tespit etmek ve şikâyetleri incelemek; hesap ve platform güvenliğini sağlamak; Premium üyeliği yönetmek; hizmeti geliştirmek için toplu ve kimliği belirsiz istatistikler çıkarmak; yasal yükümlülükleri yerine getirmek ve yetkili mercilerin taleplerini karşılamak."], ["Hukuki sebepler", "Verilerin KVKK'nın 5. maddesindeki şu sebeplere dayanılarak işlenir: sözleşmenin kurulması ve ifası (üyelik ve hizmetin sunulması), veri sorumlusunun hukuki yükümlülüğü (5651 sayılı Kanun kapsamındaki kayıtlar, yetkili merci talepleri), meşru menfaat (güvenlik, dolandırıcılık ve kötüye kullanımın önlenmesi, hizmetin geliştirilmesi) ve gerektiğinde açık rızan. Cinsel hayata veya sağlığa ilişkin bilgiler gibi özel nitelikli kişisel verilerini itiraflarına yazmaman önerilir; yazman halinde bu bilgiler senin tarafından alenileştirilmiş sayılır ve yalnızca hizmetin sunulması için işlenir."], ["Kimlerle paylaşılır?", "Takma adın, burcun, yaş aralığın, cinsiyetin ve paylaştığın içerikler diğer kullanıcılara görünür. Adın, soyadın, e-postan ve doğum tarihin hiçbir kullanıcıya gösterilmez. Veriler hizmetin işletilmesi için barındırma, veritabanı, e-posta, içerik denetimi ve kimlik doğrulama hizmeti aldığımız tedarikçilerle; çerez onayı vermen halinde istatistik amacıyla Google Analytics ile; ödemeler için App Store ve Google Play ile; kanunen yetkili kamu kurum ve kuruluşlarıyla paylaşılabilir. Bu tedarikçilerin bir kısmının sunucuları yurt dışında bulunduğundan, verilerin KVKK'nın 9. maddesinde öngörülen güvenceler (standart sözleşme vb.) çerçevesinde yurt dışına aktarılabilir."], ["Ne kadar süre saklanır?", "Hesap verileri hesabın açık olduğu sürece saklanır. Hesabını kapattığında profilin, itirafların, yorumların ve mesajların silinir. 5651 sayılı Kanun ve ilgili mevzuat gereği tutulması zorunlu işlem kayıtları mevzuatta öngörülen süre boyunca saklanır. Şikâyet ve yaptırım kayıtları, kötüye kullanımın tekrarını önlemek amacıyla en fazla 2 yıl saklanır. Süresi dolan veriler silinir, yok edilir ya da anonim hale getirilir."], ["Çerezler ve istatistik", "Kulis reklam çerezi kullanmaz. Oturumunun açık kalması, ayarlarının ve taslaklarının hatırlanması için tarayıcının yerel depolama alanı kullanılır; bunlar zorunludur. Uygulamayı geliştirmek için, yalnızca çerez uyarısında “Kabul et” dersen Google Analytics kullanılır. Bu durumda hangi ekranları açtığın, ne kadar kaldığın, cihaz ve tarayıcı türün ile IP adresinden çıkarılan yaklaşık şehir bilgisi Google LLC'ye (ABD) iletilir; itirafların, mesajların, adın ve e-postan iletilmez. “Sadece gerekli” dersen Google Analytics hiç yüklenmez. Tercihini istediğin zaman Profilim'in altındaki “Çerez tercihleri” bağlantısından değiştirebilirsin. Yazı tipleri Google Fonts üzerinden yüklenir; bu sırada IP adresin Google'a iletilebilir."], ["Hakların", "KVKK'nın 11. maddesi uyarınca; verilerinin işlenip işlenmediğini öğrenme, işlenmişse bilgi talep etme, işlenme amacını ve amacına uygun kullanılıp kullanılmadığını öğrenme, aktarıldığı üçüncü kişileri bilme, eksik veya yanlış işlenmişse düzeltilmesini, silinmesini veya yok edilmesini isteme, bu işlemlerin aktarıldığı kişilere bildirilmesini isteme, otomatik sistemlerle analiz edilmesi sonucu aleyhine bir sonuç çıkmasına itiraz etme ve kanuna aykırı işleme nedeniyle zarara uğraman halinde zararın giderilmesini talep etme haklarına sahipsin."], ["Başvuru", "Haklarını kullanmak için aşağıdaki iletişim adresine yazabilirsin. Başvurun en geç 30 gün içinde ücretsiz olarak sonuçlandırılır. Başvurunun reddedilmesi veya cevabı yetersiz bulman halinde Kişisel Verileri Koruma Kurulu'na şikâyette bulunabilirsin."]]}, {"id": "kurallar", "file": "kurallar.html", "title": "Topluluk Kuralları", "sections": [["Kulis'in ruhu", "Burası içinden geçeni kimseyi incitmeden söyleyebildiğin bir yer. Herkes takma adla yazıyor, kimse yargılanmak için gelmiyor. Okuduğun itirafa nasıl yaklaşılmasını istersen sen de öyle yaklaş."], ["Kimseyi ifşa etme", "İtiraflarında, yorumlarında ve mesajlarında başkasının adını, soyadını, okulunu, iş yerini, adresini, kullanıcı adını ya da fotoğrafını paylaşma. “Bir arkadaşım”, “iş yerindeki biri” demen yeterli. Başkasını tanınır kılan içerikler kaldırılır."], ["İletişim bilgisi yok", "Telefon numarası, Instagram, Snapchat, WhatsApp, Telegram gibi hesaplar ve e-posta adresleri paylaşılamaz. Tanışmak istediğin biriyle Kulis içinden mesajlaş. Bu kural seni dolandırıcılara ve tacizcilere karşı korur."], ["Cinsel içerik yok", "Müstehcen yazı, fotoğraf, ses veya video paylaşmak yasaktır. Karşı tarafın istemediği cinsel içerikli mesajlar hesabın kalıcı olarak kapatılmasına neden olur."], ["Saygı", "Hakaret, tehdit, zorbalık, ırk, din, cinsiyet, cinsel yönelim, engellilik gibi özelliklere yönelik nefret söylemi yasaktır. Tartışabilirsin ama kişiye saldırma."], ["Güvenlik", "18 yaşından küçük olduğunu düşündüğün birini gördüğünde şikâyet et. Para, hediye kartı veya kişisel bilgi isteyen birini görürsen konuşmayı kes ve şikâyet et. Kendine veya başkasına zarar verme düşüncesi içeren bir itiraf görürsen şikâyet et; acil durumlarda 112'yi ara."], ["Şikâyet ve engelleme", "Rahatsız olduğun her içeriği ve kullanıcıyı tek dokunuşla şikâyet edebilir ya da engelleyebilirsin. Kimin şikâyet ettiği gösterilmez. Şikâyetler en geç 24 saat içinde incelenir."], ["Kurallar çiğnenirse", "İlk ihlalde içerik kaldırılır ve uyarı verilir. Tekrarlayan ya da ağır ihlallerde hesap geçici olarak kısıtlanır veya kalıcı olarak kapatılır. Kapatılan hesapla yeniden hesap açmak yasaktır."]]}]};
+const LEGAL={"guncelleme": "23 Kasım 2026", "sorumlu": "Mehmet Berk KARABULUT", "docs": [{"id": "kosullar", "file": "kosullar.html", "title": "Kullanım Koşulları", "sections": [["Kulis nedir?", "Kulis, kullanıcıların takma adla itiraf paylaştığı, bu itiraflara tepki ve yorum bıraktığı, birbirleriyle eşleşip mesajlaştığı bir uygulamadır. Bu koşullar Kulis'i kullanan herkes için geçerlidir. Uygulamaya üye olarak ya da üye olmadan kullanarak bu koşulları kabul etmiş sayılırsın."], ["Kimler kullanabilir?", "Kulis'i yalnızca 18 yaşını doldurmuş kişiler kullanabilir. Kayıt sırasında doğum tarihini doğru girmekle yükümlüsün. 18 yaşından küçük olduğu anlaşılan hesaplar uyarı yapılmadan kapatılır."], ["Hesabın", "Hesabını başkasıyla paylaşamaz, başkası adına hesap açamazsın. Adın, soyadın ve e-postan diğer kullanıcılara gösterilmez; herkes seni seçtiğin takma adla görür. Takma adın başka bir kişiyi taklit edemez, hakaret ya da cinsel içerik barındıramaz. Hesabının güvenliğinden sen sorumlusun."], ["Paylaştığın içerik", "İtiraf, yorum ve mesajlarının sorumluluğu sana aittir. Paylaştığın içeriğin Kulis içinde gösterilmesi, öne çıkarılması ve hikâye görseli olarak paylaşılabilmesi için Kulis'e ücretsiz, münhasır olmayan bir kullanım izni vermiş olursun. İçeriğini sildiğinde bu izin sona erer; yasal saklama yükümlülükleri saklıdır."], ["Yasak olanlar", "Şunlar yasaktır: başka bir kişinin adını, soyadını, okulunu, iş yerini, fotoğrafını veya onu tanınır kılacak bilgileri paylaşmak; telefon numarası, sosyal medya hesabı gibi iletişim bilgisi paylaşmak; cinsel ya da müstehcen içerik; taciz, tehdit, zorbalık, nefret söylemi; dolandırıcılık, spam ve reklam; 18 yaşından küçüklere ilişkin her türlü uygunsuz içerik; suç teşkil eden ya da suça teşvik eden içerik; Kulis'in işleyişini bozmaya yönelik girişimler. Ayrıntılar Topluluk Kuralları'nda yer alır."], ["Denetim ve yaptırımlar", "Kulis, kurallara aykırı içerikleri otomatik filtreler, kullanıcı şikâyetleri ve yönetici incelemesiyle tespit eder. Aykırı içerik önceden haber verilmeksizin kaldırılabilir; ihlalin ağırlığına göre uyarı verilebilir, hesap geçici olarak kısıtlanabilir ya da kalıcı olarak kapatılabilir. Şikâyetler en geç 24 saat içinde incelenir. Kanunen gerekli hallerde bilgiler yetkili mercilerle paylaşılır."], ["Premium ve ödemeler", "Bazı özellikler ücretli Premium üyelikle sunulur. Ödemeler yalnızca App Store veya Google Play üzerinden alınır; Kulis kart bilgisi istemez ve saklamaz. Abonelik, iptal edilmedikçe dönem sonunda mağaza tarafından yenilenir. İptal ve iade talepleri ilgili mağazanın kurallarına tabidir. Kurallara aykırılık nedeniyle kapatılan hesaplar için kalan süre iadesi yapılmaz."], ["Eşleşme ve mesajlaşma", "Eşleşme özelliği, iki kullanıcının birbirinin itirafını beğenmesi halinde sohbet başlatır. Tanıştığın kişilerle ilgili kararların sorumluluğu sana aittir. Kişisel bilgilerini paylaşırken ve yüz yüze görüşme kararı verirken dikkatli ol. Rahatsız olduğunda kullanıcıyı engelleyebilir ve şikâyet edebilirsin."], ["Sorumluluğun sınırı", "Kulis, kullanıcıların paylaştığı içeriklerin doğruluğunu garanti etmez ve bunları önceden denetleme yükümlülüğü taşımaz; 5651 sayılı Kanun kapsamında yer sağlayıcı olarak hukuka aykırı içerikten haberdar edildiğinde gerekli işlemi yapar. Günlük burç yorumları eğlence amaçlıdır ve tavsiye niteliği taşımaz. Uygulamanın kesintisiz ya da hatasız çalışacağı garanti edilmez."], ["Hesabını kapatma", "Hesabını istediğin zaman kapatabilirsin. Hesabın kapandığında itirafların, yorumların ve mesajların silinir; yasal zorunluluk nedeniyle saklanması gereken kayıtlar ilgili süre boyunca saklanır ve sonra silinir."], ["Değişiklikler", "Bu koşullar güncellenebilir. Önemli değişiklikler uygulama içinde duyurulur. Değişiklikten sonra Kulis'i kullanmaya devam etmen güncel koşulları kabul ettiğin anlamına gelir."], ["Uygulanacak hukuk", "Bu koşullar Türkiye Cumhuriyeti hukukuna tabidir. Uyuşmazlıklarda tüketici işlemleri bakımından Tüketici Hakem Heyetleri ve Tüketici Mahkemeleri, diğer hallerde Ankara Mahkemeleri ve İcra Daireleri yetkilidir."]]}, {"id": "kvkk", "file": "gizlilik.html", "title": "KVKK Aydınlatma Metni ve Gizlilik Politikası", "sections": [["Veri sorumlusu", "6698 sayılı Kişisel Verilerin Korunması Kanunu (KVKK) kapsamında veri sorumlusu Mehmet Berk KARABULUT'tur (bundan sonra “Kulis”). Bu metin, Kulis'i kullanırken hangi kişisel verilerinin, hangi amaçlarla ve nasıl işlendiğini açıklar."], ["İşlenen veriler", "Kimlik ve iletişim: ad, soyad, e-posta adresi (Google, Apple veya e-posta ile üyelikte). Profil: takma ad, doğum tarihi (yalnızca burç ve yaş aralığı gösterilir), cinsiyet, profil rengi, isteğe bağlı profil ve kapak görseli, kısa tanıtım yazısı. Kullanıcı içeriği: itiraflar, yorumlar, tepkiler, mesajlar, gönderilen fotoğraf, ses ve videolar, eşleşme tercihlerin. İşlem güvenliği: giriş kayıtları, IP adresi, cihaz ve tarayıcı bilgisi, şikâyet ve engelleme kayıtları. Sesli ve görüntülü aramalar: aramanın kimle, ne zaman yapıldığı ve süresi. Görüşmenin sesi ve görüntüsü iki cihaz arasında doğrudan iletilir, Kulis tarafından kaydedilmez. Ödeme: Premium satın alımlarında yalnızca mağazanın ilettiği abonelik durumu; kart bilgisi Kulis'e ulaşmaz."], ["Hangi amaçlarla?", "Üyeliğini oluşturmak ve yönetmek; itiraf, yorum, eşleşme ve mesajlaşma hizmetlerini sunmak; 18 yaş sınırını uygulamak; kurallara aykırı içerikleri tespit etmek ve şikâyetleri incelemek; hesap ve platform güvenliğini sağlamak; Premium üyeliği yönetmek; hizmeti geliştirmek için toplu ve kimliği belirsiz istatistikler çıkarmak; yasal yükümlülükleri yerine getirmek ve yetkili mercilerin taleplerini karşılamak."], ["Hukuki sebepler", "Verilerin KVKK'nın 5. maddesindeki şu sebeplere dayanılarak işlenir: sözleşmenin kurulması ve ifası (üyelik ve hizmetin sunulması), veri sorumlusunun hukuki yükümlülüğü (5651 sayılı Kanun kapsamındaki kayıtlar, yetkili merci talepleri), meşru menfaat (güvenlik, dolandırıcılık ve kötüye kullanımın önlenmesi, hizmetin geliştirilmesi) ve gerektiğinde açık rızan. Cinsel hayata veya sağlığa ilişkin bilgiler gibi özel nitelikli kişisel verilerini itiraflarına yazmaman önerilir; yazman halinde bu bilgiler senin tarafından alenileştirilmiş sayılır ve yalnızca hizmetin sunulması için işlenir."], ["Kimlerle paylaşılır?", "Takma adın, burcun, yaş aralığın, cinsiyetin ve paylaştığın içerikler diğer kullanıcılara görünür. Adın, soyadın, e-postan ve doğum tarihin hiçbir kullanıcıya gösterilmez. Veriler hizmetin işletilmesi için barındırma, veritabanı, e-posta, içerik denetimi ve kimlik doğrulama hizmeti aldığımız tedarikçilerle; çerez onayı vermen halinde istatistik amacıyla Google Analytics ile; ödemeler için App Store ve Google Play ile; kanunen yetkili kamu kurum ve kuruluşlarıyla paylaşılabilir. Bu tedarikçilerin bir kısmının sunucuları yurt dışında bulunduğundan, verilerin KVKK'nın 9. maddesinde öngörülen güvenceler (standart sözleşme vb.) çerçevesinde yurt dışına aktarılabilir."], ["Ne kadar süre saklanır?", "Hesap verileri hesabın açık olduğu sürece saklanır. Hesabını kapattığında profilin, itirafların, yorumların ve mesajların silinir. 5651 sayılı Kanun ve ilgili mevzuat gereği tutulması zorunlu erişim kayıtları (IP adresi, port, tarih ve saat) 2 yıl saklanır ve bu sürenin sonunda otomatik olarak silinir; bu kayıtlara yalnızca yasal bir talep olduğunda erişilir. Şikâyet ve yaptırım kayıtları, kötüye kullanımın tekrarını önlemek amacıyla en fazla 2 yıl saklanır. Süresi dolan veriler silinir, yok edilir ya da anonim hale getirilir."], ["Çerezler ve istatistik", "Kulis reklam çerezi kullanmaz. Oturumunun açık kalması, ayarlarının ve taslaklarının hatırlanması için tarayıcının yerel depolama alanı kullanılır; bunlar zorunludur. Uygulamayı geliştirmek için, yalnızca çerez uyarısında “Kabul et” dersen Google Analytics kullanılır. Bu durumda hangi ekranları açtığın, ne kadar kaldığın, cihaz ve tarayıcı türün ile IP adresinden çıkarılan yaklaşık şehir bilgisi Google LLC'ye (ABD) iletilir; itirafların, mesajların, adın ve e-postan iletilmez. “Sadece gerekli” dersen Google Analytics hiç yüklenmez. Tercihini istediğin zaman Profilim'in altındaki “Çerez tercihleri” bağlantısından değiştirebilirsin. Yazı tipleri Google Fonts üzerinden yüklenir; bu sırada IP adresin Google'a iletilebilir."], ["Hakların", "KVKK'nın 11. maddesi uyarınca; verilerinin işlenip işlenmediğini öğrenme, işlenmişse bilgi talep etme, işlenme amacını ve amacına uygun kullanılıp kullanılmadığını öğrenme, aktarıldığı üçüncü kişileri bilme, eksik veya yanlış işlenmişse düzeltilmesini, silinmesini veya yok edilmesini isteme, bu işlemlerin aktarıldığı kişilere bildirilmesini isteme, otomatik sistemlerle analiz edilmesi sonucu aleyhine bir sonuç çıkmasına itiraz etme ve kanuna aykırı işleme nedeniyle zarara uğraman halinde zararın giderilmesini talep etme haklarına sahipsin."], ["Başvuru", "Haklarını kullanmak için aşağıdaki iletişim adresine yazabilirsin. Başvurun en geç 30 gün içinde ücretsiz olarak sonuçlandırılır. Başvurunun reddedilmesi veya cevabı yetersiz bulman halinde Kişisel Verileri Koruma Kurulu'na şikâyette bulunabilirsin."]]}, {"id": "kurallar", "file": "kurallar.html", "title": "Topluluk Kuralları", "sections": [["Kulis'in ruhu", "Burası içinden geçeni kimseyi incitmeden söyleyebildiğin bir yer. Herkes takma adla yazıyor, kimse yargılanmak için gelmiyor. Okuduğun itirafa nasıl yaklaşılmasını istersen sen de öyle yaklaş."], ["Kimseyi ifşa etme", "İtiraflarında, yorumlarında ve mesajlarında başkasının adını, soyadını, okulunu, iş yerini, adresini, kullanıcı adını ya da fotoğrafını paylaşma. “Bir arkadaşım”, “iş yerindeki biri” demen yeterli. Başkasını tanınır kılan içerikler kaldırılır."], ["İletişim bilgisi yok", "Telefon numarası, Instagram, Snapchat, WhatsApp, Telegram gibi hesaplar ve e-posta adresleri paylaşılamaz. Tanışmak istediğin biriyle Kulis içinden mesajlaş. Bu kural seni dolandırıcılara ve tacizcilere karşı korur."], ["Cinsel içerik yok", "Müstehcen yazı, fotoğraf, ses veya video paylaşmak yasaktır. Karşı tarafın istemediği cinsel içerikli mesajlar hesabın kalıcı olarak kapatılmasına neden olur."], ["Saygı", "Hakaret, tehdit, zorbalık, ırk, din, cinsiyet, cinsel yönelim, engellilik gibi özelliklere yönelik nefret söylemi yasaktır. Tartışabilirsin ama kişiye saldırma."], ["Güvenlik", "18 yaşından küçük olduğunu düşündüğün birini gördüğünde şikâyet et. Para, hediye kartı veya kişisel bilgi isteyen birini görürsen konuşmayı kes ve şikâyet et. Kendine veya başkasına zarar verme düşüncesi içeren bir itiraf görürsen şikâyet et; acil durumlarda 112'yi ara."], ["Şikâyet ve engelleme", "Rahatsız olduğun her içeriği ve kullanıcıyı tek dokunuşla şikâyet edebilir ya da engelleyebilirsin. Kimin şikâyet ettiği gösterilmez. Şikâyetler en geç 24 saat içinde incelenir."], ["Kurallar çiğnenirse", "İlk ihlalde içerik kaldırılır ve uyarı verilir. Tekrarlayan ya da ağır ihlallerde hesap geçici olarak kısıtlanır veya kalıcı olarak kapatılır. Kapatılan hesapla yeniden hesap açmak yasaktır."]]}]};
 function showLegal(id){
   const d=LEGAL.docs.find(x=>x.id===id)||LEGAL.docs[0];
   let el=$("#legal");if(!el){el=document.createElement("div");el.id="legal";el.setAttribute("role","dialog");el.setAttribute("aria-modal","true");document.body.appendChild(el)}
@@ -1732,7 +1747,7 @@ applyTheme();
 const SUN='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg>';
 const MOON='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 14.5A8 8 0 0 1 9.5 4a8 8 0 1 0 10.5 10.5z"/></svg>';
 const AUTO='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="13" rx="2"/><path d="M8 21h8M12 17v4"/></svg>';
-function themePicker(){const t=temaPref();return `<div class="set-h">Görünüm</div><div class="theme-pick" role="group" aria-label="Görünüm">${[["sistem",AUTO,"Sistem"],["acik",SUN,"Açık"],["koyu",MOON,"Koyu"]].map(([k,ic,l])=>`<button data-tema="${k}" aria-pressed="${t===k}">${ic}${l}</button>`).join("")}</div>`}
+function themePicker(){const t=temaPref();return `<div class="ayar-h">Görünüm</div><div class="theme-pick" role="group" aria-label="Görünüm">${[["sistem",AUTO,"Sistem"],["acik",SUN,"Açık"],["koyu",MOON,"Koyu"]].map(([k,ic,l])=>`<button data-tema="${k}" aria-pressed="${t===k}">${ic}${l}</button>`).join("")}</div>`}
 document.addEventListener("click",e=>{const b=e.target.closest("[data-tema]");if(b){setTheme(b.dataset.tema)}});
 
 /* ============ PREMIUM KAPISI ============ */
@@ -1876,7 +1891,7 @@ function showPost(id){
   g.onclick=()=>{const v=t.value.trim();const mc=modCheck(v,"yorum");if(mc){$("#cmWarn").innerHTML=`<p class="warn">${mc}</p>`;return}const bad=contactBlock(v);if(bad){$("#cmWarn").innerHTML=`<p class="warn">Yorumlarda ${bad} paylaşılamaz. Tanışmak istersen “Özelden yaz”ı kullan.</p>`;return}
     if(!state.premium&&p.u!=="me"&&!state.replied.has(p.u)&&state.replied.size>=3){premiumGate("Bugün daha fazla kişiye cevap yazamazsın","Ücretsiz planda günde sınırlı sayıda kişinin itirafına cevap yazabilirsin. Herkese sınırsız cevap yazmak için Premium'a geç.",()=>g.click());return}
     if(p.u!=="me")state.replied.add(p.u);
-    if(REMOTE){g.disabled=true;KDB.addComment(p.id,v,authorSnap()).then(()=>{track("yorum");state.myComments.push({on:p.t,t:v});t.value="";toast("Yorumun gönderildi");if(p.uid&&p.u!=="me"&&!p.anon)KDB.notify(p.uid,"cm",`itirafına yorum yaptı: “${v.slice(0,60)}”`,{post:p.id});showPost(id)}).catch(e=>{g.disabled=false;toast(writeErr(e,"yorum"))});return}
+    if(REMOTE){g.disabled=true;KDB.addComment(p.id,v,authorSnap()).then(()=>{track("yorum");KDB.logAccess&&KDB.logAccess("yorum");state.myComments.push({on:p.t,t:v});t.value="";toast("Yorumun gönderildi");if(p.uid&&p.u!=="me"&&!p.anon)KDB.notify(p.uid,"cm",`itirafına yorum yaptı: “${v.slice(0,60)}”`,{post:p.id});showPost(id)}).catch(e=>{g.disabled=false;toast(writeErr(e,"yorum"))});return}
     p.cm.push({u:"me",t:v,ago:"Şimdi",ts:Date.now()});track("yorum");state.myComments.push({on:p.t,t:v});toast("Yorumun gönderildi");showPost(id);render()};
 }
 function showMore(id){
@@ -1935,7 +1950,7 @@ function startDM(k,fromId){
   const t=$("#dmIn"),g=$("#dmGo");
   t.oninput=()=>{grow(t);g.disabled=t.value.trim().length<3;$("#dmWarn").innerHTML=""};
   g.onclick=()=>{const v=t.value.trim(),bad=contactBlock(v),mc=modCheck(v,"mesaj");if(mc){$("#dmWarn").innerHTML=`<p class="warn">${mc}</p>`;return}if(bad){$("#dmWarn").innerHTML=`<p class="warn">Mesajında ${bad} var gibi görünüyor. Güvenliğin için iletişim bilgisi paylaşılamaz.</p>`;return}
-    if(REMOTE){g.disabled=true;KDB.startChat(k,p?p.t:null,v).then(()=>{closeSheet();toast(`İstek gönderildi. ${U[k].n} kabul edince sohbet açılır.`);KDB.notify(k,"req","sana mesaj isteği gönderdi",{tab:"mesajlar"})}).catch(e=>{g.disabled=false;toast(writeErr(e,"istek"))});return}
+    if(REMOTE){g.disabled=true;KDB.startChat(k,p?p.t:null,v).then(()=>{closeSheet();askPushOnce("mesaj");KDB.logAccess&&KDB.logAccess("mesaj");toast(`İstek gönderildi. ${U[k].n} kabul edince sohbet açılır.`);KDB.notify(k,"req","sana mesaj isteği gönderdi",{tab:"mesajlar"})}).catch(e=>{g.disabled=false;toast(writeErr(e,"istek"))});return}
     const c={u:k,from:p?p.t:null,msgs:[{me:true,t:v}],status:"wait",unread:false};state.chats.unshift(c);closeSheet();render();
     toast(`İstek gönderildi. ${U[k].n} kabul edince sohbet açılır.`);
     setTimeout(()=>{c.status="open";c.unread=true;c.msgs.push({me:false,t:replyFor(c)});notify("dm",k,"mesaj isteğini kabul etti",{chat:k});toast(`${U[k].n} isteğini kabul etti`);render();if(openIdx===state.chats.indexOf(c))drawChat()},4500);};
@@ -1953,7 +1968,7 @@ function drawChat(){
   const used=c.msgs.length, left=Math.max(0,FREE_LIMIT-used), full=!state.premium&&used>=FREE_LIMIT;
   const hidden=c.msgs.filter((m,i)=>!m.me&&isLockedIdx(c,i)).length;
   $("#chatIn").innerHTML=`<div class="chat-h"><button class="back" id="cBack" aria-label="Geri">${IC.back}</button>${who(c.u,c.status==="wait"?"istek bekliyor":"çevrimiçi")}
-    <button class="hb" data-media="call" aria-label="Sesli ara">${IC.phone}${lockBadge()}</button><button class="hb" data-media="video" aria-label="Görüntülü ara">${IC.video}${lockBadge()}</button></div>
+    <button class="hb" data-media="call" aria-label="Sesli ara">${IC.phone}${REMOTE?(hasFeat("voice")?"":lockIc()):lockBadge()}</button><button class="hb" data-media="video" aria-label="Görüntülü ara">${IC.video}${REMOTE?(hasFeat("video")?"":lockIc()):lockBadge()}</button></div>
    <div class="msgs" id="msgs">
      ${c.from?`<div class="origin"><small>${c.match?"Eşleştiniz. Bu itirafını beğenmiştin":"Bu itiraf üzerinden tanıştınız"}</small><q>“${esc(c.from)}”</q></div>`:`<div class="origin"><small>Profil üzerinden tanıştınız</small></div>`}
      ${c.msgs.map((m,i)=>{const lk=!m.me&&isLockedIdx(c,i);return msgHTML(m,lk)}).join("")}
@@ -1962,7 +1977,7 @@ function drawChat(){
      ${full?`<div class="wall"><h3>${hidden?`${esc(u.n)} sana ${hidden} yeni mesaj yazdı`:`Sohbetin burada duraklatıldı`}</h3><p>${hidden?"Okumak ve cevap vermek için":"Sohbete devam etmek için"} Premium'a geç. ${esc(u.n)} sana yazmaya devam edebilir, mesajları burada birikir.</p><button class="btn gold wide" id="wallGo">Premium ile devam et</button></div>`:""}
    </div>
    <div class="composer">${full?`<button class="btn line wide" id="wallGo2">${IC.lock} Mesaj yazmak için Premium gerekli</button>`:
-    `<div class="box">${c.status==="open"?`<button class="tb" data-media="photo" aria-label="Fotoğraf veya video gönder">${IC.cam}${lockBadge()}</button><button class="tb" data-media="voice" aria-label="Ses kaydı gönder">${IC.mic}${lockBadge()}</button>`:""}<textarea id="mIn" rows="1" maxlength="500" placeholder="${c.status==="wait"?"Kabul edilince yazabilirsin":"Mesaj yaz"}" ${c.status==="wait"?"disabled":""}></textarea><button class="go" id="mGo" disabled>Gönder</button></div><div id="mWarn"></div>`}</div>`;
+    `<div class="box">${c.status==="open"&&!REMOTE?`<button class="tb" data-media="photo" aria-label="Fotoğraf veya video gönder">${IC.cam}${lockBadge()}</button><button class="tb" data-media="voice" aria-label="Ses kaydı gönder">${IC.mic}${lockBadge()}</button>`:""}<textarea id="mIn" rows="1" maxlength="500" placeholder="${c.status==="wait"?"Kabul edilince yazabilirsin":"Mesaj yaz"}" ${c.status==="wait"?"disabled":""}></textarea><button class="go" id="mGo" disabled>Gönder</button></div><div id="mWarn"></div>`}</div>`;
   const box=$("#msgs");box.scrollTop=box.scrollHeight;
   $("#cBack").onclick=closeChat;
   $("#chatIn").querySelectorAll("[data-media]").forEach(b=>b.onclick=()=>media(b.dataset.media,c));
@@ -1972,7 +1987,7 @@ function drawChat(){
   t.onkeydown=e=>{if(e.key==="Enter"&&!e.shiftKey){e.preventDefault();$("#mGo").click()}};
   $("#mGo").onclick=()=>{const v=t.value.trim();if(!v)return;track("mesaj");const mc=modCheck(v,"mesaj");if(mc){$("#mWarn").innerHTML=`<p class="warn">${mc}</p>`;return}const bad=contactBlock(v);
     if(bad){$("#mWarn").innerHTML=`<p class="warn">Bu mesaj gönderilmedi: ${bad} paylaşılamaz. Sohbetler sitede kalır, böylece iki taraf da güvende olur.</p>`;return}
-    if(REMOTE){if(c.status==="wait"){toast("Karşı taraf isteğini kabul edince yazabilirsin");return}t.value="";$("#mGo").disabled=true;const wasMine=c.lastBy===R.uid;KDB.sendMsg(c.id,v).then(()=>{if(!wasMine)KDB.notify(c.u,"dm","sana yeni mesaj gönderdi",{chat:c.u})}).catch(e=>toast(writeErr(e,"mesaj")));c.msgs.push({me:true,t:v});drawChat();setTimeout(()=>{const x=$("#mIn");x&&x.focus()},30);return}
+    if(REMOTE){if(c.status==="wait"){toast("Karşı taraf isteğini kabul edince yazabilirsin");return}t.value="";$("#mGo").disabled=true;const wasMine=c.lastBy===R.uid;KDB.sendMsg(c.id,v).then(()=>{askPushOnce("mesaj");if(!R.loggedMsg){R.loggedMsg=1;KDB.logAccess&&KDB.logAccess("mesaj")}if(!wasMine)KDB.notify(c.u,"dm","sana yeni mesaj gönderdi",{chat:c.u})}).catch(e=>toast(writeErr(e,"mesaj")));c.msgs.push({me:true,t:v});drawChat();setTimeout(()=>{const x=$("#mIn");x&&x.focus()},30);return}
     c.msgs.push({me:true,t:v});drawChat();
     const ci=c;setTimeout(()=>{ci.typing=true;if(state.chats[openIdx]===ci)drawChat()},700);
     setTimeout(()=>{ci.typing=false;ci.msgs.push({me:false,t:replyFor(ci)});if(state.chats[openIdx]===ci)drawChat();else{ci.unread=true;notify("dm",ci.u,"sana yeni mesaj gönderdi",{chat:ci.u});render()}
@@ -1982,6 +1997,7 @@ function drawChat(){
 
 /* ============ MEDYA (Premium) ============ */
 const lockBadge=()=>state.premium?"":`<span class="lk">${IC.lock}</span>`;
+const lockIc=()=>`<span class="lk">${IC.lock}</span>`;
 function waveHTML(seed){let h="";for(let i=0;i<26;i++){const v=6+((seed*31+i*17)%18);h+=`<i style="height:${v}px"></i>`}return h}
 const fmt=s=>`${Math.floor(s/60)}:${String(s%60).padStart(2,"0")}`;
 function msgHTML(m,lk){
@@ -1995,6 +2011,7 @@ function msgHTML(m,lk){
 }
 let picker=null;
 function media(kind,c){
+  if(REMOTE&&(kind==="call"||kind==="video")){startCallRemote(kind,c);return}
   if(!state.premium){showPremium("medya");return}
   if(c.status!=="open"){toast("Önce isteğin kabul edilmeli");return}
   if(kind==="photo"){
@@ -2021,6 +2038,168 @@ function startCall(type,c){
     $("#cEnd").onclick=()=>{clearInterval(iv);el.classList.remove("open");if(live){c.msgs.push({kind:"call",type,dur:sec});drawChat()}else toast("Arama iptal edildi")};};
   el.classList.add("open");draw();
   setTimeout(()=>{if(!el.classList.contains("open"))return;live=true;draw();iv=setInterval(()=>{sec++;const st=el.querySelector(".st");if(st)st.textContent=fmt(sec)},1000)},2500);
+}
+
+/* ============ SESLİ / GÖRÜNTÜLÜ ARAMA (WebRTC, eşler arası) ============ */
+// Ses ve görüntü iki telefon arasında doğrudan akar; sunucu sadece bağlantı bilgisini taşır.
+const ICE={iceServers:[{urls:["stun:stun.l.google.com:19302","stun:stun1.l.google.com:19302","stun:stun2.l.google.com:19302"]}]};
+const CALL={id:null};
+const RING_MS=40000;
+// paket kilidi: Sohbet paketinde arama yok, Sohbet + Ses'te sadece sesli, Kulis Tam'da hepsi
+function hasFeat(f){
+  if(!state.premium)return false;
+  const t=state.tier||"tam";
+  if(f==="voice")return t!=="sohbet";
+  if(f==="video"||f==="tam")return t==="tam";
+  return true;
+}
+function callScr(){let el=$("#callscr");if(!el){el=document.createElement("div");el.id="callscr";el.className="callscr";el.setAttribute("role","dialog");el.setAttribute("aria-modal","true");document.body.appendChild(el)}return el}
+function callDraw(){
+  const el=callScr(),k=CALL,u=U[k.peer]||{n:"Kullanıcı",c:"#888"},vid=k.type==="video";
+  const st=k.phase==="live"?fmt(k.sec||0):k.phase==="incoming"?(vid?"Seni görüntülü arıyor":"Seni sesli arıyor"):k.phase==="connecting"?"Bağlanıyor…":(vid?"Görüntülü aranıyor…":"Aranıyor…");
+  const on=k.phase==="live"||k.phase==="connecting";
+  el.style.background=vid&&on?"#0E0B12":`linear-gradient(180deg,#2A2233,#14101A)`;
+  el.innerHTML=`${vid?`${on?`<video id="cRemote" class="c-remote" autoplay playsinline></video>`:""}${k.local?`<video id="cLocal" class="c-local" autoplay playsinline muted></video>`:""}`:`<audio id="cRemoteA" autoplay></audio>`}
+    <div class="c-top" style="position:relative;display:flex;flex-direction:column;align-items:center">${k.phase==="live"&&vid?"":av(k.peer,110)}<h2>${esc(u.n)}</h2><div class="st">${st}</div></div>
+    <div style="position:relative">${k.phase==="incoming"?`<div class="cbtns"><button class="cb end" id="cDec" aria-label="Reddet">${IC.end}</button><button class="cb ok" id="cAcc" aria-label="Cevapla">${vid?IC.video:IC.phone}</button></div>`:
+    `<div class="cbtns"><button class="cb" id="cMute" aria-pressed="${!!k.mute}" aria-label="Sessize al">${IC.mic}</button>${vid?`<button class="cb" id="cCam" aria-pressed="${!!k.camOff}" aria-label="Kamerayı kapat">${IC.video}</button><button class="cb" id="cFlip" aria-label="Kamerayı çevir">${IC.cam}</button>`:""}<button class="cb end" id="cEnd" aria-label="Aramayı bitir">${IC.end}</button></div>`}</div>`;
+  el.classList.add("open");
+  const lv=$("#cLocal");if(lv&&k.local){lv.srcObject=k.local}
+  const rv=$("#cRemote")||$("#cRemoteA");if(rv&&k.remote){rv.srcObject=k.remote}
+  const q=id=>el.querySelector(id);
+  if(q("#cAcc"))q("#cAcc").onclick=acceptCall;
+  if(q("#cDec"))q("#cDec").onclick=()=>{KDB.callUpdate(k.id,{status:"decline"}).catch(()=>{});callCleanup()};
+  if(q("#cEnd"))q("#cEnd").onclick=()=>hangUp();
+  if(q("#cMute"))q("#cMute").onclick=()=>{k.mute=!k.mute;k.local&&k.local.getAudioTracks().forEach(t=>t.enabled=!k.mute);callDraw()};
+  if(q("#cCam"))q("#cCam").onclick=()=>{k.camOff=!k.camOff;k.local&&k.local.getVideoTracks().forEach(t=>t.enabled=!k.camOff);callDraw()};
+  if(q("#cFlip"))q("#cFlip").onclick=flipCam;
+}
+async function flipCam(){
+  const k=CALL;if(!k.pc||!k.local)return;k.facing=k.facing==="environment"?"user":"environment";
+  try{const s=await navigator.mediaDevices.getUserMedia({video:{facingMode:k.facing}});const nt=s.getVideoTracks()[0];
+    const snd=k.pc.getSenders().find(x=>x.track&&x.track.kind==="video");if(snd)await snd.replaceTrack(nt);
+    k.local.getVideoTracks().forEach(t=>{t.stop();k.local.removeTrack(t)});k.local.addTrack(nt);callDraw()}catch(e){toast("Kamera çevrilemedi")}
+}
+// zil sesi (dosya indirmeden, tarayıcının kendi ses motoruyla)
+function ringStart(out){
+  ringStop();try{const C=window.AudioContext||window.webkitAudioContext;const ctx=new C();CALL.ctx=ctx;
+    const beep=()=>{const o=ctx.createOscillator(),g=ctx.createGain();o.frequency.value=out?425:660;g.gain.value=0;o.connect(g);g.connect(ctx.destination);const t=ctx.currentTime;
+      g.gain.setValueAtTime(0,t);g.gain.linearRampToValueAtTime(out?.08:.18,t+.05);g.gain.setValueAtTime(out?.08:.18,t+(out?1:.4));g.gain.linearRampToValueAtTime(0,t+(out?1.05:.45));
+      if(!out){g.gain.linearRampToValueAtTime(.18,t+.6);g.gain.setValueAtTime(.18,t+.95);g.gain.linearRampToValueAtTime(0,t+1)}o.start(t);o.stop(t+1.1)};
+    beep();CALL.ringIv=setInterval(beep,out?4000:2500)}catch(e){}
+  if(!out&&navigator.vibrate)try{navigator.vibrate([400,300,400,300,400])}catch(e){}
+}
+function ringStop(){clearInterval(CALL.ringIv);CALL.ringIv=null;if(CALL.ctx){CALL.ctx.close().catch(()=>{});CALL.ctx=null}if(navigator.vibrate)try{navigator.vibrate(0)}catch(e){}}
+function newPC(side){
+  const k=CALL,pc=new RTCPeerConnection(ICE);k.pc=pc;k.remote=new MediaStream();k.pend=[];
+  pc.ontrack=e=>{e.streams[0]?e.streams[0].getTracks().forEach(t=>{if(!k.remote.getTracks().includes(t))k.remote.addTrack(t)}):k.remote.addTrack(e.track);const rv=$("#cRemote")||$("#cRemoteA");if(rv&&rv.srcObject!==k.remote)rv.srcObject=k.remote};
+  pc.onicecandidate=e=>{if(!e.candidate)return;const c=e.candidate.toJSON();if(k.id)KDB.addCand(k.id,side,c);else k.pend.push(c)};
+  pc.onconnectionstatechange=()=>{const s=pc.connectionState;
+    if(s==="connected"&&k.phase!=="live"){k.phase="live";k.sec=0;ringStop();clearTimeout(k.ringT);callDraw();k.iv=setInterval(()=>{k.sec++;const st=$("#callscr .st");if(st)st.textContent=fmt(k.sec)},1000)}
+    if(s==="failed"){toast("Bağlantı kurulamadı. İnternet bağlantını kontrol edip tekrar dene.");hangUp()}
+    if(s==="disconnected"){clearTimeout(k.dcT);k.dcT=setTimeout(()=>{if(pc.connectionState==="disconnected"){toast("Bağlantı koptu");hangUp()}},8000)}};
+  k.local.getTracks().forEach(t=>pc.addTrack(t,k.local));
+  return pc;
+}
+async function getMedia(type){
+  return navigator.mediaDevices.getUserMedia({audio:{echoCancellation:true,noiseSuppression:true},video:type==="video"?{facingMode:"user",width:{ideal:720},height:{ideal:1280}}:false});
+}
+async function startCallRemote(kind,c){
+  const type=kind==="video"?"video":"voice";
+  if(CALL.id||CALL.busy){toast("Zaten bir aramadasın");return}
+  if(!hasFeat(type)){premiumGate(type==="video"?"Görüntülü arama":"Sesli arama",type==="video"?"Görüntülü arama Kulis Tam paketinde var.":"Sesli arama Sohbet + Ses ve Kulis Tam paketlerinde var.",()=>{});return}
+  if(c.status!=="open"){toast("Önce isteğin kabul edilmeli");return}
+  if(!window.RTCPeerConnection||!navigator.mediaDevices){toast("Bu tarayıcı aramayı desteklemiyor");return}
+  CALL.busy=true;
+  const st=await KDB.getSettings(c.u);
+  if(st[type==="video"?"callVideo":"callVoice"]===false){CALL.busy=false;toast(`${(U[c.u]||{}).n||"Bu kişi"} ${type==="video"?"görüntülü":"sesli"} aramaları kapatmış`);return}
+  try{CALL.local=await getMedia(type)}catch(e){CALL.busy=false;toast(type==="video"?"Kamera ve mikrofon izni gerekli":"Mikrofon izni gerekli");return}
+  Object.assign(CALL,{peer:c.u,type,role:"out",phase:"ring",chat:c,mute:false,camOff:false,facing:"user"});
+  callDraw();ringStart(true);
+  try{
+    const pc=newPC("fc");const off=await pc.createOffer();await pc.setLocalDescription(off);
+    CALL.id=await KDB.callStart(c.u,type,{type:off.type,sdp:off.sdp});
+    CALL.pend.forEach(x=>KDB.addCand(CALL.id,"fc",x));CALL.pend=[];
+    KDB.logAccess("arama");
+    KDB.listenCall(CALL.id,async d=>{
+      if(!d||!CALL.pc)return;
+      if(d.status==="accept"&&d.answer&&!CALL.pc.currentRemoteDescription){CALL.phase="connecting";ringStop();callDraw();
+        try{await CALL.pc.setRemoteDescription(d.answer);KDB.listenCand(CALL.id,"tc",x=>CALL.pc&&CALL.pc.addIceCandidate(x).catch(()=>{}))}catch(e){hangUp()}}
+      if(d.status==="decline"){toast(`${(U[CALL.peer]||{}).n||"Karşı taraf"} şu an cevap veremiyor`);callCleanup("red")}
+      if(d.status==="end"){callCleanup()}
+    });
+    CALL.ringT=setTimeout(()=>{if(CALL.id&&CALL.phase==="ring"){KDB.callUpdate(CALL.id,{status:"miss"}).catch(()=>{});
+      KDB.notify(CALL.peer,"call",`seni ${type==="video"?"görüntülü":"sesli"} aradı`,{chat:R.uid});toast("Cevap vermedi");callCleanup("cevapsiz")}},RING_MS);
+  }catch(e){toast(e&&e.code==="permission-denied"?"Bu kişiyi şu an arayamazsın":"Arama başlatılamadı");callCleanup()}
+}
+function showIncoming(d){
+  if(CALL.id||CALL.busy)return;
+  if(Date.now()-(d.ts||Date.now())>RING_MS)return;
+  if(state.hidden&&state.hidden.has("u:"+d.from))return;
+  Object.assign(CALL,{id:d.id,peer:d.from,type:d.type,role:"in",phase:"incoming",offer:d.offer,mute:false,camOff:false,facing:"user"});
+  if(!U[d.from]&&R.usersRaw){const x=R.usersRaw.find(z=>z.id===d.from);if(x)putUser(x.id,x)}
+  callDraw();ringStart(false);
+  KDB.listenCall(d.id,x=>{if(!x||["end","miss","decline"].includes(x.status)){if(CALL.phase!=="live")callCleanup()}else if(x.status==="end")callCleanup()});
+  CALL.ringT=setTimeout(()=>{if(CALL.phase==="incoming")callCleanup()},RING_MS+3000);
+}
+async function acceptCall(){
+  const k=CALL;if(!k.id)return;ringStop();
+  try{k.local=await getMedia(k.type)}catch(e){toast(k.type==="video"?"Kamera ve mikrofon izni gerekli":"Mikrofon izni gerekli");KDB.callUpdate(k.id,{status:"decline"}).catch(()=>{});callCleanup();return}
+  k.phase="connecting";callDraw();
+  try{
+    const pc=newPC("tc");await pc.setRemoteDescription(k.offer);const ans=await pc.createAnswer();await pc.setLocalDescription(ans);
+    await KDB.callUpdate(k.id,{status:"accept",answer:{type:ans.type,sdp:ans.sdp}});
+    KDB.listenCand(k.id,"fc",x=>k.pc&&k.pc.addIceCandidate(x).catch(()=>{}));
+    KDB.listenCall(k.id,x=>{if(!x||x.status==="end")callCleanup()});
+    KDB.logAccess("arama");
+  }catch(e){toast("Aramaya bağlanılamadı");callCleanup()}
+}
+function hangUp(){if(CALL.id)KDB.callUpdate(CALL.id,{status:"end"}).catch(()=>{});callCleanup()}
+function callCleanup(why){
+  const k=CALL;if(!k.id&&!k.busy&&!k.pc)return;
+  const wasLive=k.phase==="live",sec=k.sec||0,out=k.role==="out",type=k.type,chat=k.chat;
+  ringStop();clearTimeout(k.ringT);clearTimeout(k.dcT);clearInterval(k.iv);
+  try{k.pc&&k.pc.close()}catch(e){}
+  k.local&&k.local.getTracks().forEach(t=>t.stop());
+  KDB.stopCall&&KDB.stopCall();
+  const el=$("#callscr");if(el){el.classList.remove("open");el.innerHTML=""}
+  // aramayı yapan taraf sohbete kısa bir kayıt düşer
+  if(out&&chat&&(wasLive||why==="cevapsiz")){const tn=type==="video"?"Görüntülü arama":"Sesli arama";KDB.sendMsg(chat.id,wasLive?`📞 ${tn}, ${fmt(sec)}`:`📞 Cevapsız ${tn.toLocaleLowerCase("tr")}`).catch(()=>{})}
+  if(wasLive)toast(`Arama bitti, ${fmt(sec)}`);
+  for(const x in k)delete k[x];CALL.id=null;
+}
+addEventListener("pagehide",()=>{if(CALL.id)KDB.callUpdate(CALL.id,{status:CALL.phase==="incoming"?"decline":"end"}).catch(()=>{})});
+
+/* ============ AYARLAR ============ */
+const NOTIF_KINDS=[["dm","Mesajlar"],["req","Mesaj istekleri"],["call","Aramalar"],["cm","Yorumlar"],["react","Tepkiler"],["match","Eşleşmeler"],["like","Beğeniler"]];
+function swHTML(id,on,label,sub){return `<button class="set-row" data-set="${id}" role="switch" aria-checked="${on}"><span><b>${label}</b>${sub?`<small>${sub}</small>`:""}</span><i class="tgl"><i></i></i></button>`}
+function showSettings(){
+  const S=R.settings||{},n=S.n||{};const qf=Number.isInteger(S.qFrom)?S.qFrom:0,qt=Number.isInteger(S.qTo)?S.qTo:8;
+  const hrs=sel=>Array.from({length:24},(_,h)=>`<option value="${h}" ${h===sel?"selected":""}>${String(h).padStart(2,"0")}:00</option>`).join("");
+  openSheet(`<div class="sheet-head"><h2>Ayarlar</h2></div>
+    <h3 class="ayar-h">Aramalar</h3>
+    ${swHTML("callVoice",S.callVoice!==false,"Beni sesli arayabilirler","Sadece sohbetin açık olduğu kişiler arayabilir")}
+    ${swHTML("callVideo",S.callVideo!==false,"Beni görüntülü arayabilirler","")}
+    <h3 class="ayar-h">Telefonuma gelen bildirimler</h3>
+    ${pushState()==="acik"?"":`<p class="hint" style="margin:0 0 8px">Telefon bildirimleri şu an kapalı. ${pushState()==="kapali"?`<button class="lnk" data-push="on">Aç</button>`:""}</p>`}
+    ${NOTIF_KINDS.map(([k,l])=>swHTML("n."+k,n[k]!==false,l,"")).join("")}
+    <h3 class="ayar-h">Sessiz saatler</h3>
+    ${swHTML("quiet",!!S.quiet,"Sessiz saatleri aç","Bu saatlerde telefonuna bildirim gelmez, uygulama içinde yine görünür")}
+    <div class="set-q" ${S.quiet?"":"hidden"}><label>Başlangıç<select id="qF">${hrs(qf)}</select></label><label>Bitiş<select id="qT">${hrs(qt)}</select></label></div>
+    <button class="btn wide" style="margin-top:18px" onclick="closeSheet()">Tamam</button>`);
+  const save=d=>{R.settings=Object.assign({},R.settings||{},d);KDB.saveSettings(d).catch(e=>toast("Kaydedilemedi: "+(e.code||e.message)))};
+  $("#sheet").querySelectorAll("[data-set]").forEach(b=>b.onclick=()=>{const on=b.getAttribute("aria-checked")!=="true";b.setAttribute("aria-checked",on);const k=b.dataset.set;
+    if(k.startsWith("n.")){const nn=Object.assign({},(R.settings||{}).n||{});nn[k.slice(2)]=on;save({n:nn})}
+    else{save({[k]:on});if(k==="quiet"){const q=$(".set-q");if(q)q.hidden=!on;if(on)save({qFrom:+$("#qF").value,qTo:+$("#qT").value})}}});
+  $("#qF").onchange=e=>save({qFrom:+e.target.value});$("#qT").onchange=e=>save({qTo:+e.target.value});
+}
+// ilk itiraf / ilk mesajdan sonra bir kere "bildirim açılsın mı" sorusu
+function askPushOnce(why){
+  if(!REMOTE||pushState()!=="kapali"||LS("kulis_push_asked",false))return;
+  LSset("kulis_push_asked",true);
+  setTimeout(()=>{if($("#scrim").classList.contains("open")||CALL.id)return;
+    openSheet(`<div class="inst-hero"><img src="icons/icon-192.png" alt="" width="56" height="56"><div><b>${why==="mesaj"?"Cevap gelince haber verelim mi?":"Tepki ve yorum gelince haber verelim mi?"}</b><small>Site kapalıyken bile telefonuna bildirim gelir. Hangi bildirimlerin geleceğini Ayarlar'dan seçebilirsin.</small></div></div>
+      <button class="btn wide" data-push="on" style="margin-top:14px">Bildirimleri aç</button><button class="btn line wide" style="margin-top:8px" onclick="closeSheet()">Şimdi değil</button>`)},1500);
 }
 
 /* ============ PREMIUM ============ */
@@ -2064,8 +2243,8 @@ function showConfess(opt={}){
   g.onclick=()=>{const v=t.value.trim(),bad=contactBlock(v);if(bad){$("#cfWarn").innerHTML=`<p class="warn">İtiraflarda ${bad} paylaşılamaz.</p>`;return}
     const mc=modCheck(v,"itiraf");if(mc){$("#cfWarn").innerHTML=`<p class="warn">${mc}</p>`;return}
     const anonOn=!!($("#cfAnon")&&$("#cfAnon").checked);
-    if(REMOTE&&anonOn){g.disabled=true;KDB.anonPost(v,cat).then(()=>{closeSheet();state.tab="akis";state.cat="hepsi";state.sort="yeni";render();scrollTo(0,0);toast("Anonim itirafın akışta");track("itiraf_yazildi",{kategori:cat,anonim:1})}).catch(e=>{g.disabled=false;const m=String(e&&e.message||"");toast(/hiz/.test(m)?"İki itiraf arasında en az 15 dakika olmalı.":/kelime/.test(m)?"İtirafında yasaklı bir kelime var.":"Anonim itiraf gönderilemedi: "+(e.code||m))});return}
-    if(REMOTE){g.disabled=true;KDB.addPost(QM?{t:v,cat,q:opt.q}:{t:v,cat},authorSnap()).then(()=>{closeSheet();state.tab="akis";state.cat=QM?"soru":"hepsi";state.sort="yeni";render();scrollTo(0,0);toast("İtirafın akışta paylaşıldı");track("itiraf_yazildi",{kategori:cat})}).catch(e=>{g.disabled=false;toast(writeErr(e,"itiraf"))});return}
+    if(REMOTE&&anonOn){g.disabled=true;KDB.anonPost(v,cat).then(()=>{closeSheet();askPushOnce("itiraf");state.tab="akis";state.cat="hepsi";state.sort="yeni";render();scrollTo(0,0);toast("Anonim itirafın akışta");track("itiraf_yazildi",{kategori:cat,anonim:1})}).catch(e=>{g.disabled=false;const m=String(e&&e.message||"");toast(/hiz/.test(m)?"İki itiraf arasında en az 15 dakika olmalı.":/kelime/.test(m)?"İtirafında yasaklı bir kelime var.":"Anonim itiraf gönderilemedi: "+(e.code||m))});return}
+    if(REMOTE){g.disabled=true;KDB.addPost(QM?{t:v,cat,q:opt.q}:{t:v,cat},authorSnap()).then(()=>{closeSheet();askPushOnce("itiraf");KDB.logAccess&&KDB.logAccess("itiraf");state.tab="akis";state.cat=QM?"soru":"hepsi";state.sort="yeni";render();scrollTo(0,0);toast("İtirafın akışta paylaşıldı");track("itiraf_yazildi",{kategori:cat})}).catch(e=>{g.disabled=false;toast(writeErr(e,"itiraf"))});return}
     const p={id:"m"+Date.now(),u:"me",cat,t:v,ago:"Şimdi",r:{bende:0,saril:0,yok:0},cm:[],today:true,day:dayKey(),ts:Date.now()};
     state.myPosts.unshift(p);closeSheet();
     state.tab="akis";state.cat="hepsi";state.sort="yeni";render();scrollTo(0,0);toast("İtirafın akışta paylaşıldı");track("itiraf_yazildi",{kategori:cat});
@@ -2326,6 +2505,8 @@ function remoteStartListeners(){
   if(KDB.listenMyAnon)KDB.listenMyAnon(ids=>{R.myAnon=new Set(ids);if(R.posts&&R.posts.length){R.mapped=R.posts.map(mapPost);state.myPosts=R.mapped.filter(p=>p.u==="me");rerender()}});
   KDB.listenPosts(list=>{R.posts=list;const mapped=list.map(mapPost);state.myPosts=mapped.filter(p=>p.u==="me");R.mapped=mapped;refreshStats();
     if(!$("#scrim").classList.contains("open")||!R.cmPid)rerender()});
+  if(KDB.listenIncoming)KDB.listenIncoming(list=>{const d=list.sort((a,b)=>b.ts-a.ts)[0];if(d)showIncoming(d)});
+  if(KDB.listenSettings)KDB.listenSettings(st=>{R.settings=st});
   KDB.listenNotifs(list=>{state.notifs=list.map(n=>({id:n.id,type:n.type,u:n.from,text:n.text,go:n.go,ts:n.ts,read:!!n.read}));render()});
   KDB.listenBlocks(ids=>{ids.forEach(id=>{(R.mapped||[]).filter(p=>p.uid===id).forEach(p=>state.hidden.add("p:"+p.id));state.hidden.add("u:"+id)});rerender()});
   KDB.listenLikesToMe(list=>{LIKED_ME.clear();list.forEach(l=>LIKED_ME.add(l.from));if(state.tab==="kesfet"&&sw.mode==="eslesme")vEsles()});
@@ -2365,6 +2546,8 @@ function remoteEnterApp(pub,priv){
   R.syncedMe=JSON.stringify({n:state.me.n,c:state.me.c,bio:state.me.bio,photo:state.me.photo,banner:state.me.banner,g:state.me.g});
   $("#onb").hidden=true;$("#remLoad")&&$("#remLoad").remove();
   remoteStartListeners();render();askGender();iosInstallNudge();
+  if(KDB.logAccess)KDB.logAccess("giris");
+  try{const cq=new URLSearchParams(location.search).get("call");if(cq&&KDB.getCall){history.replaceState(null,"",location.pathname);KDB.getCall(cq).then(d=>{if(d&&d.status==="ring"&&d.to===R.uid)showIncoming(d)}).catch(()=>{})}}catch(e){}
   if(KDB.pushSupported)KDB.pushSupported().then(ok=>{R.pushOk=ok;if(ok&&LS("kulis_push_on",false))KDB.refreshPush();if(state.tab==="ben")render()});
   const tch=()=>{if(KDB.touch)KDB.touch()};tch();if(!R.hb){R.hb=setInterval(()=>{if(!document.hidden)tch()},120e3);document.addEventListener("visibilitychange",()=>{if(!document.hidden)tch()})}
 }
@@ -2529,7 +2712,9 @@ async function playService(){
 function setPremiumFrom(p){
   const on=!!(p&&p.active&&(p.until||0)>Date.now());
   const web=REMOTE&&WEB_FREE_PREMIUM&&!IN_APP;
-  const was=state.premium;state.premium=web||on;state.premUntil=on?p.until:0;
+  const was=state.premium,wasT=state.tier;state.premium=web||on;state.premUntil=on?p.until:0;
+  state.tier=web?"tam":on?(p.tier||(String(p.productId||"").split("_")[1])||"tam"):null;
+  if(wasT!==state.tier&&state.me&&was===state.premium){render();if(openIdx>=0)drawChat()}
   if(was!==state.premium&&state.me){render();if(openIdx>=0)drawChat()}
 }
 // uygulama açılınca mevcut abonelikleri yeniden doğrula (yenilenme / iptal güncellensin)
@@ -2710,6 +2895,6 @@ if(REMOTE){
 if(REMOTE)remoteInit();else
 try{const s=JSON.parse(localStorage.getItem("itiraf_me")||"null");if(s&&s.n&&s.s){state.me=s;loadData();render();seedDemo()}else startOnb()}catch(e){startOnb()}
 </script>
-<script type="module">if(REMOTE)import("./kulis-db.js?v=15")</script>
+<script type="module">if(REMOTE)import("./kulis-db.js?v=16")</script>
 </body>
 </html>

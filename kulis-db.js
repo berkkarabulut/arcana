@@ -133,6 +133,7 @@ const KDB = {
     await wipe(query(collection(db, "chats"), where("members", "array-contains", uid)));
     await wipe(collection(db, "users", uid, "notifs"));
     await wipe(collection(db, "users", uid, "blocks"));
+    await deleteDoc(doc(db, "users", uid, "settings", "main")).catch(() => {});
     await KDB.deleteAccount();
     const u = auth.currentUser;
     try { await deleteUser(u); }
@@ -317,6 +318,37 @@ const KDB = {
   },
   listenErrors(cb) { stop("errs"); unsubs.errs = onSnapshot(query(collection(db, "errors"), orderBy("ts", "desc"), limit(50)), s => cb(s.docs.map(d => ({ id: d.id, ...d.data(), ts: ms(d.data().ts) }))), e => cb(null)); },
   deleteError(id) { return deleteDoc(doc(db, "errors", id)); },
+
+  // ---------- Ayarlar ----------
+  listenSettings(cb) { stop("set"); unsubs.set = onSnapshot(doc(db, "users", KDB.uid, "settings", "main"), s => cb(s.exists() ? s.data() : {}), e => cb({})); },
+  async getSettings(uid) { try { const s = await getDoc(doc(db, "users", uid, "settings", "main")); return s.exists() ? s.data() : {}; } catch (e) { return {}; } },
+  saveSettings(d) { return setDoc(doc(db, "users", KDB.uid, "settings", "main"), { ...d, updatedAt: serverTimestamp() }, { merge: true }); },
+
+  // ---------- Sesli / görüntülü arama (WebRTC sinyalleşme) ----------
+  async callStart(to, type, offer) {
+    const ref = doc(collection(db, "calls")), b = writeBatch(db);
+    b.set(ref, { from: KDB.uid, to, members: [KDB.uid, to], type, status: "ring", offer, ts: serverTimestamp() });
+    stamp(b, "callAt");
+    await b.commit();
+    return ref.id;
+  },
+  callUpdate(id, d) { return updateDoc(doc(db, "calls", id), d); },
+  async getCall(id) { const s = await getDoc(doc(db, "calls", id)); return s.exists() ? { id: s.id, ...s.data(), ts: ms(s.data().ts) } : null; },
+  listenCall(id, cb) { stop("call"); unsubs.call = onSnapshot(doc(db, "calls", id), s => cb(s.exists() ? { id: s.id, ...s.data() } : null), e => cb(null)); },
+  addCand(id, side, c) { return addDoc(collection(db, "calls", id, side), { c: JSON.stringify(c) }).catch(() => {}); },
+  listenCand(id, side, cb) {
+    stop("cand");
+    unsubs.cand = onSnapshot(collection(db, "calls", id, side), s => s.docChanges().forEach(ch => { if (ch.type === "added") { try { cb(JSON.parse(ch.doc.data().c)); } catch (e) {} } }), e => {});
+  },
+  stopCall() { stop("call"); stop("cand"); },
+  listenIncoming(cb) {
+    stop("inc");
+    unsubs.inc = onSnapshot(query(collection(db, "calls"), where("to", "==", KDB.uid), where("status", "==", "ring")),
+      s => cb(s.docs.map(d => ({ id: d.id, ...d.data(), ts: ms(d.data().ts) }))), e => console.warn("inc", e));
+  },
+
+  // ---------- 5651 erişim kaydı (IP sunucuda tutulur) ----------
+  logAccess(act) { if (IS_TEST || !auth.currentUser) return Promise.resolve(); return httpsCallable(fns, "erisimKaydi")({ act }).catch(() => {}); },
 
   // ---------- Premium (Google Play) ----------
   listenPremium(cb) {

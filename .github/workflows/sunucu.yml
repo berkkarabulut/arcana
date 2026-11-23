@@ -7,6 +7,7 @@ on:
       - "firebase/firestore.rules"
       - "functions/**"
       - "firebase.json"
+      - "firebase/test/**"
       - ".github/workflows/sunucu.yml"
   workflow_dispatch:
 
@@ -26,6 +27,14 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 22
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 21
+      - name: Güvenlik kurallarını test et (emülatörde)
+        run: |
+          npm install --prefix firebase/test --no-audit --no-fund --legacy-peer-deps
+          npx -y firebase-tools@latest emulators:exec --only firestore --project demo-kulis "node firebase/test/kurallar.test.mjs"
       - uses: google-github-actions/auth@v2
         with:
           workload_identity_provider: projects/165708007413/locations/global/workloadIdentityPools/github/providers/github
