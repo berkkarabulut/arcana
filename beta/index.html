@@ -205,17 +205,17 @@ button.pl{border:0;color:inherit;cursor:pointer;padding:0}
 .m.modded{font-style:italic;opacity:.7;font-size:13px;background:transparent!important;border:1px dashed var(--cizgi,rgba(255,255,255,.2));color:var(--soluk)!important}
 .adm-by{font-size:12px;color:var(--soluk);margin:-2px 0 6px}.adm-ban{display:inline-block;font-size:11px;font-weight:700;padding:2px 7px;border-radius:999px;background:rgba(var(--nar-rgb),.18);color:var(--nar);margin-left:6px}
 .ek-box{display:flex;flex-direction:column;gap:8px;max-height:52vh;overflow:auto;padding:10px;border-radius:12px;background:rgba(0,0,0,.2);margin:0 0 10px}
-.ek-m{display:flex;flex-direction:column;max-width:84%;flex-shrink:0}.ek-m.r{align-self:flex-end;align-items:flex-end}.ek-m.l{align-self:flex-start}
+.ek-m{display:flex;flex-direction:column;max-width:84%;flex-shrink:0;height:auto}.ek-m.ek-sag{align-self:flex-end;align-items:flex-end}.ek-m.ek-sol{align-self:flex-start;align-items:flex-start}
 .ek-m small{font-size:11px;color:var(--soluk);margin-bottom:3px;display:block;line-height:1.3}
 #adm .ek-box{min-height:180px}#adm .ek-b{font-family:inherit}.ek-b{padding:8px 11px;border-radius:14px;font-size:14px;line-height:1.45;overflow-wrap:anywhere;background:rgba(255,255,255,.08)}
-.ek-m.st .ek-b{background:rgba(212,175,90,.14);border:1px solid rgba(212,175,90,.4)}
+.ek-m.ek-ekip .ek-b{background:rgba(212,175,90,.14);border:1px solid rgba(212,175,90,.4)}
 .ek-in{display:flex;gap:8px;align-items:flex-end}.ek-in textarea{flex:1}
 .ekip-row .ekip-av{background:rgba(212,175,90,.18);display:grid;place-items:center;font-size:22px;border-radius:50%;flex:0 0 auto}
 .ek-row{display:block;width:100%;text-align:left;color:inherit;cursor:pointer}
 .adm-conv{display:flex;flex-direction:column;gap:8px;max-height:420px;overflow:auto;padding:10px;border-radius:12px;background:rgba(0,0,0,.25);margin:0 0 10px}
-.ac-m{display:flex;flex-direction:column;max-width:82%;flex-shrink:0}.ac-m.b{align-self:flex-end;align-items:flex-end}.ac-m.k{align-self:flex-start}
+.ac-m{display:flex;flex-direction:column;max-width:82%;flex-shrink:0;height:auto}.ac-m.ac-sag{align-self:flex-end;align-items:flex-end}.ac-m.ac-sol{align-self:flex-start}
 .ac-m small{font-size:11px;color:var(--soluk);margin-bottom:2px}.ac-b{padding:8px 11px;border-radius:14px;font-size:14px;line-height:1.4;overflow-wrap:anywhere}
-.ac-m.k .ac-b{background:rgba(var(--nar-rgb),.16);border:1px solid rgba(var(--nar-rgb),.35)}.ac-m.b .ac-b{background:rgba(255,255,255,.08)}
+.ac-m.ac-sol .ac-b{background:rgba(var(--nar-rgb),.16);border:1px solid rgba(var(--nar-rgb),.35)}.ac-m.ac-sag .ac-b{background:rgba(255,255,255,.08)}
 .ac-b img{max-width:200px;max-height:240px;border-radius:10px;display:block}.ac-b audio{max-width:220px;height:36px}
 .adm-cf{border:1px solid rgba(var(--nar-rgb),.4);border-radius:12px;padding:10px 12px;margin-top:10px;font-size:13.5px}
 .m.media img{cursor:zoom-in;max-width:240px;max-height:320px;border-radius:14px;display:block}
@@ -2659,7 +2659,7 @@ function ekipMsgsHTML(msgs,staffView,uid){
   if(!msgs.length)return `<p class="muted" style="font-size:13.5px;text-align:center;padding:16px 4px">${staffView?"Henüz yazışma yok. İlk mesajı sen yaz.":"Henüz mesaj yok."}</p>`;
   return msgs.map(m=>{const mine=staffView?m.staff:!m.staff;
     const who=m.staff?(staffView&&m.from===R.uid?`Kulis Ekibi · ${m.role||"Ekip"} (sen)`:`Kulis Ekibi · ${m.role||"Ekip"}`):(staffView?admName(uid):"Sen");
-    return `<div class="ek-m ${mine?"r":"l"} ${m.staff?"st":""}"><small>${esc(who)} · ${new Date(m.ts).toLocaleString("tr-TR",{day:"numeric",month:"short",hour:"2-digit",minute:"2-digit"})}</small><div class="ek-b">${esc(m.t).replace(/\n/g,"<br>")}</div></div>`}).join("")}
+    return `<div class="ek-m ${mine?"ek-sag":"ek-sol"} ${m.staff?"ek-ekip":""}"><small>${esc(who)} · ${new Date(m.ts).toLocaleString("tr-TR",{day:"numeric",month:"short",hour:"2-digit",minute:"2-digit"})}</small><div class="ek-b">${esc(m.t).replace(/\n/g,"<br>")}</div></div>`}).join("")}
 // kullanıcı tarafı: Mesajlar'daki sabit "Kulis Ekibi" sohbeti
 function openEkip(){
   let msgs=[];const draw=()=>{const box=$("#ekBox");if(!box)return;box.innerHTML=ekipMsgsHTML(msgs,false);box.scrollTop=box.scrollHeight};
@@ -3023,7 +3023,7 @@ const ADM={tab:"uye",q:"",f:"hepsi",open:null,priv:{},confirm:null,ban:null,conv
 function convHTML(r,nameOf){const bn=nameOf(r.by),kn=nameOf(r.target);const del=new Set();
   return `<div class="adm-conv">${r.msgs.map(m=>{const me=m.w==="b";const who=me?bn+" (bildiren)":kn+" (bildirilen)";
     const body=m.mod?`<i>Moderatör tarafından silinmiş</i>`:m.img?`<a href="${esc(m.img)}" target="_blank" rel="noopener"><img src="${esc(m.img)}" alt="Gönderilen fotoğraf"></a>${m.t?`<div>${esc(m.t)}</div>`:""}`:m.aud?`<audio controls preload="none" src="${esc(m.aud)}"></audio>`:esc(m.t);
-    return `<div class="ac-m ${me?"b":"k"}"><small>${esc(who)}${m.ts?" · "+new Date(m.ts).toLocaleString("tr-TR",{day:"numeric",month:"short",hour:"2-digit",minute:"2-digit"}):""}</small><div class="ac-b">${body}</div></div>`}).join("")}</div>`}
+    return `<div class="ac-m ${me?"ac-sag":"ac-sol"}"><small>${esc(who)}${m.ts?" · "+new Date(m.ts).toLocaleString("tr-TR",{day:"numeric",month:"short",hour:"2-digit",minute:"2-digit"}):""}</small><div class="ac-b">${body}</div></div>`}).join("")}</div>`}
 const ONLINE_MS=5*60e3;
 const dayStart=()=>{const d=new Date();d.setHours(0,0,0,0);return d.getTime()};
 function relTime(ts){if(!ts)return "bilinmiyor";const m=Math.floor((Date.now()-ts)/60000);if(m<1)return "az önce";if(m<60)return m+" dk önce";const h=Math.floor(m/60);if(h<24)return h+" sa önce";const d=Math.floor(h/24);return d===1?"dün":d<30?d+" gün önce":new Date(ts).toLocaleDateString("tr-TR",{day:"numeric",month:"short",year:"numeric"})}
@@ -3212,6 +3212,6 @@ if(REMOTE){
 if(REMOTE)remoteInit();else
 try{const s=JSON.parse(localStorage.getItem("itiraf_me")||"null");if(s&&s.n&&s.s){state.me=s;loadData();render();seedDemo()}else startOnb()}catch(e){startOnb()}
 </script>
-<script type="module">if(REMOTE)import("./kulis-db.js?v=23")</script>
+<script type="module">if(REMOTE)import("./kulis-db.js?v=24")</script>
 </body>
 </html>
