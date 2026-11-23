@@ -1,0 +1,31 @@
+rules_version = '2';
+// Kulis dosya kuralları
+// p/{uid}/... : profil fotoğrafı ve kapak görseli (sadece sahibi yükler)
+// m/{uid}/... : mesajlarda gönderilen fotoğraf ve ses kayıtları (sadece gönderen yükler)
+// Dosyalar, mesaj ya da profil belgesindeki tahmin edilemez indirme bağlantısıyla gösterilir.
+service firebase.storage {
+  match /b/{bucket}/o {
+    function ok() { return request.auth != null && request.auth.token.email_verified == true; }
+
+    match /p/{uid}/{file} {
+      allow read: if ok();
+      allow create, update: if ok() && request.auth.uid == uid
+        && request.resource.size < 2 * 1024 * 1024
+        && request.resource.contentType.matches('image/(jpeg|png|webp)');
+      allow delete: if ok() && request.auth.uid == uid;
+    }
+
+    match /m/{uid}/{file} {
+      allow read: if ok();
+      allow create: if ok() && request.auth.uid == uid
+        && request.resource.size < 8 * 1024 * 1024
+        && (request.resource.contentType.matches('image/(jpeg|png|webp)')
+            || request.resource.contentType.matches('audio/.*'));
+      allow delete: if ok() && request.auth.uid == uid;
+    }
+
+    match /{all=**} {
+      allow read, write: if false;
+    }
+  }
+}

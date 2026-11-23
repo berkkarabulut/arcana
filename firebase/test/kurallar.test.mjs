@@ -92,6 +92,34 @@ await t("Öne çıkarma sıradan üyede reddedilir", async () => {
   return updateDoc(doc(A, "posts/p1"), { feat: Date.now() + 864e5 });
 }, false);
 
+// ---- Fotoğraf / sesli mesaj ve profil görselleri ----
+const ST = "https://firebasestorage.googleapis.com/v0/b/kulis-1647d.firebasestorage.app/o/";
+const stu = (dir, uid) => `${ST}${dir}%2F${uid}%2Fabc123.jpg?alt=media&token=0f3a9c1e-1111-4a2b-9c3d-abcdef012345`;
+const wait = ms => new Promise(r => setTimeout(r, ms));
+async function msgAs(d, uid, cid, data) {
+  const b = writeBatch(d);
+  b.set(doc(collection(d, "chats", cid, "messages")), { uid, ts: serverTimestamp(), ...data });
+  b.set(rl(d, uid), { msgAt: serverTimestamp() }, { merge: true });
+  await b.commit();
+}
+await wait(1200);
+await t("Yazılı mesaj gönderilir", () => msgAs(A, "ua", "ua_ub", { t: "selam" }), true);
+await wait(1200);
+await t("Fotoğraflı mesaj gönderilir", () => msgAs(A, "ua", "ua_ub", { t: "", img: stu("m", "ua") }), true);
+await wait(1200);
+await t("Sesli mesaj gönderilir", () => msgAs(A, "ua", "ua_ub", { t: "", aud: stu("m", "ua"), dur: 7 }), true);
+await wait(1200);
+await t("Boş mesaj reddedilir", () => msgAs(A, "ua", "ua_ub", { t: "" }), false);
+await t("Başka sitedeki görsel reddedilir", () => msgAs(A, "ua", "ua_ub", { t: "", img: "https://kotu.site/x.jpg" }), false);
+await t("Başkasının klasöründeki dosya reddedilir", () => msgAs(A, "ua", "ua_ub", { t: "", img: stu("m", "ub") }), false);
+await t("2 dakikadan uzun ses reddedilir", () => msgAs(A, "ua", "ua_ub", { t: "", aud: stu("m", "ua"), dur: 500 }), false);
+await t("Mesaja bilinmeyen alan eklenemez", () => msgAs(A, "ua", "ua_ub", { t: "x", hack: 1 }), false);
+await t("Kendi yüklediği profil fotoğrafını kaydeder", () => updateDoc(doc(A, "users/ua"), { av: stu("p", "ua") }), true);
+await t("Hazır avatar ve kapak kaydedilir", () => updateDoc(doc(A, "users/ua"), { av: "preset:k1", banner: "preset:b2" }), true);
+await t("Dışarıdan görsel bağlantısı profil fotoğrafı olamaz", () => updateDoc(doc(A, "users/ua"), { av: "https://kotu.site/x.jpg" }), false);
+await t("Başkasının dosyası kapak olamaz", () => updateDoc(doc(A, "users/ua"), { banner: stu("p", "ub") }), false);
+await t("Profil görseli kaldırılabilir", () => updateDoc(doc(A, "users/ua"), { av: null }), true);
+
 await env.cleanup();
 console.log(fail ? `\n${fail} senaryo TUTMADI, yükleme durduruldu.` : "\nTüm senaryolar tamam.");
 process.exit(fail ? 1 : 0);

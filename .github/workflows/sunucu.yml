@@ -5,6 +5,7 @@ on:
     branches: [main]
     paths:
       - "firebase/firestore.rules"
+      - "firebase/storage.rules"
       - "functions/**"
       - "firebase.json"
       - "firebase/test/**"
@@ -43,3 +44,5 @@ jobs:
         run: npm install --prefix functions --no-audit --no-fund
       - name: Firebase'e yükle
         run: npx -y firebase-tools@latest deploy --only firestore:rules,functions --project kulis-1647d --non-interactive --force
+      - name: Dosya (Storage) kurallarını yükle
+        run: npx -y firebase-tools@latest deploy --only storage --project kulis-1647d --non-interactive --force

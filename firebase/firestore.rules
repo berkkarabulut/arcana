@@ -19,6 +19,13 @@ service cloud.firestore {
     }
     function changed() { return request.resource.data.diff(resource.data).affectedKeys(); }
     function str(v, lo, hi) { return v is string && v.size() >= lo && v.size() <= hi; }
+    // Yüklenen dosyalar sadece Kulis'in kendi depolama alanından gelebilir
+    function stUrl(v, dir) {
+      return v is string && v.size() < 600
+        && v.matches('https://firebasestorage[.]googleapis[.]com/v0/b/kulis-1647d[.]firebasestorage[.]app/o/' + dir + '%2F' + request.auth.uid + '%2F[^/?#]+[?]alt=media&token=[0-9a-f-]+');
+    }
+    // profil görseli: boş, hazır görsel ya da kendi yüklediği dosya
+    function img(v) { return v == null || (v is string && v.matches('preset:[a-z0-9]{1,8}')) || stUrl(v, 'p'); }
 
     // ---- Hız sınırı: her kullanıcının users/{uid}/meta/rl belgesinde son yazma zamanları durur.
     // Bir itiraf/yorum/mesaj yazılırken aynı işlemde ilgili alan "şimdi" yapılmak zorunda; kural bir öncekiyle arada süre arar.
@@ -56,7 +63,9 @@ service cloud.firestore {
         && changed().hasOnly(['n','c','bio','av','banner','lastSeen','g'])
         && (!('g' in changed()) || (resource.data.g == 'Belirtmeyeyim' && request.resource.data.g in ['Kadın','Erkek']))
         && (!('n' in changed()) || (str(request.resource.data.n, 3, 20) && clean(request.resource.data.n)))
-        && (!('bio' in changed()) || (str(request.resource.data.bio, 0, 120) && clean(request.resource.data.bio)));
+        && (!('bio' in changed()) || (str(request.resource.data.bio, 0, 120) && clean(request.resource.data.bio)))
+        && (!('av' in changed()) || img(request.resource.data.av))
+        && (!('banner' in changed()) || img(request.resource.data.banner));
       allow delete: if isMe(uid) || isAdmin();
 
       // Gizli bilgiler: gerçek ad, e-posta, doğum tarihi. Sahibi ve yönetici görür.
@@ -263,7 +272,13 @@ service cloud.firestore {
         allow create: if signedIn() && request.auth.uid in chatAfter().members
           && !blockedBy(other(chatAfter().members))
           && request.resource.data.uid == request.auth.uid
-          && str(request.resource.data.t, 1, 1000) && clean(request.resource.data.t)
+          && request.resource.data.keys().hasOnly(['uid','t','ts','img','aud','dur'])
+          && str(request.resource.data.t, 0, 1000) && clean(request.resource.data.t)
+          && (request.resource.data.t.size() > 0 || 'img' in request.resource.data || 'aud' in request.resource.data)
+          && (!('img' in request.resource.data) || stUrl(request.resource.data.img, 'm'))
+          && (!('aud' in request.resource.data) || (stUrl(request.resource.data.aud, 'm')
+                && request.resource.data.dur is number && request.resource.data.dur > 0 && request.resource.data.dur <= 120))
+          && (!('dur' in request.resource.data) || 'aud' in request.resource.data)
           && request.resource.data.ts == request.time && stamped('msgAt');
         allow update, delete: if false;
       }
