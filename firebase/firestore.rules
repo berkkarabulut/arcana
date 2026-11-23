@@ -24,8 +24,8 @@ service cloud.firestore {
       return v is string && v.size() < 600
         && v.matches('https://firebasestorage[.]googleapis[.]com/v0/b/kulis-1647d[.]firebasestorage[.]app/o/' + dir + '%2F' + request.auth.uid + '%2F[^/?#]+[?]alt=media&token=[0-9a-f-]+');
     }
-    // profil görseli: boş, hazır görsel ya da kendi yüklediği dosya
-    function img(v) { return v == null || (v is string && v.matches('preset:[a-z0-9]{1,8}')) || stUrl(v, 'p'); }
+    // herkese açık profil görseli: boş ya da hazır görsel. Gerçek fotoğraflar perde arkasında (gizli/foto)
+    function img(v) { return v == null || (v is string && v.matches('preset:[a-z0-9]{1,8}')); }
 
     // ---- Hız sınırı: her kullanıcının users/{uid}/meta/rl belgesinde son yazma zamanları durur.
     // Bir itiraf/yorum/mesaj yazılırken aynı işlemde ilgili alan "şimdi" yapılmak zorunda; kural bir öncekiyle arada süre arar.
@@ -76,6 +76,15 @@ service cloud.firestore {
         allow update: if false;
         allow delete: if (isMe(uid) && doc == 'info') || isAdmin();
       }
+      // Perde arkası: gerçek fotoğraf ve kapağın depodaki yolu. Sadece sahibi görür; perdesi açık olanlara sunucu verir.
+      match /gizli/{d} {
+        function rp(v) { return v == null || (v is string && v.matches('r/' + uid + '/[A-Za-z0-9._-]{1,60}')); }
+        allow read: if isMe(uid);
+        allow create, update: if isMe(uid) && d == 'foto'
+          && request.resource.data.keys().hasOnly(['av','banner','ts'])
+          && rp(request.resource.data.get('av', null)) && rp(request.resource.data.get('banner', null));
+        allow delete: if isMe(uid) || isAdmin();
+      }
       // Hız sınırı belgesi: her alan sadece "şimdi" yapılabilir ve bir öncekinden belli süre sonra
       match /meta/{d} {
         function tick(k, secs) {
@@ -119,10 +128,33 @@ service cloud.firestore {
         allow create: if signedIn() && request.auth.uid != uid
           && request.resource.data.keys().hasOnly(['from','type','text','go','ts','read'])
           && request.resource.data.from == request.auth.uid
-          && request.resource.data.type in ['cm','react','req','dm','match','like','call']
+          && request.resource.data.type in ['cm','react','req','dm','match','like','call','perde']
           && str(request.resource.data.text, 1, 200) && request.resource.data.ts == request.time
           && !blockedBy(uid) && stamped('ntAt');
       }
+    }
+
+    // Perde: iki kişi karşılıklı onaylayınca birbirinin gerçek fotoğrafını görür. Belge kimliği sohbet kimliğiyle aynı.
+    match /perde/{pid} {
+      function pm() { return request.resource.data.members; }
+      function otherOf(l) { return l[0] == request.auth.uid ? l[1] : l[0]; }
+      allow read: if signedIn() && request.auth.uid in resource.data.members;
+      allow create: if signedIn()
+        && request.resource.data.keys().hasOnly(['members','by','status','ts'])
+        && pm() is list && pm().size() == 2 && pm()[0] is string && pm()[1] is string && pm()[0] < pm()[1]
+        && pid == pm()[0] + '_' + pm()[1]
+        && request.auth.uid in pm() && request.resource.data.by == request.auth.uid
+        && request.resource.data.status == 'istek' && request.resource.data.ts == request.time
+        && exists(/databases/$(database)/documents/chats/$(pid))
+        && get(/databases/$(database)/documents/chats/$(pid)).data.status == 'open'
+        && !blockedBy(otherOf(pm()));
+      // isteği sadece karşı taraf kabul eder
+      allow update: if signedIn() && request.auth.uid in resource.data.members
+        && resource.data.status == 'istek' && resource.data.by != request.auth.uid
+        && changed().hasOnly(['status','ts'])
+        && request.resource.data.status == 'acik' && request.resource.data.ts == request.time;
+      // iki taraftan biri istediği an perdeyi kapatır (ya da isteği reddeder)
+      allow delete: if signedIn() && request.auth.uid in resource.data.members;
     }
 
     // Takma adlar benzersiz olsun

@@ -114,11 +114,39 @@ await t("Başka sitedeki görsel reddedilir", () => msgAs(A, "ua", "ua_ub", { t:
 await t("Başkasının klasöründeki dosya reddedilir", () => msgAs(A, "ua", "ua_ub", { t: "", img: stu("m", "ub") }), false);
 await t("2 dakikadan uzun ses reddedilir", () => msgAs(A, "ua", "ua_ub", { t: "", aud: stu("m", "ua"), dur: 500 }), false);
 await t("Mesaja bilinmeyen alan eklenemez", () => msgAs(A, "ua", "ua_ub", { t: "x", hack: 1 }), false);
-await t("Kendi yüklediği profil fotoğrafını kaydeder", () => updateDoc(doc(A, "users/ua"), { av: stu("p", "ua") }), true);
+await t("Yüklenen gerçek fotoğraf herkese açık profile konamaz (perde arkasında durur)", () => updateDoc(doc(A, "users/ua"), { av: stu("p", "ua") }), false);
 await t("Hazır avatar ve kapak kaydedilir", () => updateDoc(doc(A, "users/ua"), { av: "preset:k1", banner: "preset:b2" }), true);
 await t("Dışarıdan görsel bağlantısı profil fotoğrafı olamaz", () => updateDoc(doc(A, "users/ua"), { av: "https://kotu.site/x.jpg" }), false);
 await t("Başkasının dosyası kapak olamaz", () => updateDoc(doc(A, "users/ua"), { banner: stu("p", "ub") }), false);
 await t("Profil görseli kaldırılabilir", () => updateDoc(doc(A, "users/ua"), { av: null }), true);
+
+// ---- Perde ----
+const { deleteDoc } = await import("firebase/firestore");
+const pd = (d, id) => doc(d, "perde", id);
+const perdeNew = (d, by, members, id) => setDoc(pd(d, id || members.join("_")), { members, by, status: "istek", ts: serverTimestamp() });
+await t("Açık sohbette perde isteği gönderilir", () => perdeNew(A, "ua", ["ua", "ub"]), true);
+await t("Üçüncü kişi perdeyi okuyamaz", () => getDoc(pd(C, "ua_ub")), false);
+await t("Karşı taraf perde isteğini okur", () => getDoc(pd(B, "ua_ub")), true);
+await t("İsteyen kendi isteğini kabul edemez", () => updateDoc(pd(A, "ua_ub"), { status: "acik", ts: serverTimestamp() }), false);
+await t("Üçüncü kişi isteği kabul edemez", () => updateDoc(pd(C, "ua_ub"), { status: "acik", ts: serverTimestamp() }), false);
+await t("Karşı taraf perdeyi açar", () => updateDoc(pd(B, "ua_ub"), { status: "acik", ts: serverTimestamp() }), true);
+await t("Açık perdede üye listesi değiştirilemez", () => updateDoc(pd(A, "ua_ub"), { members: ["ua", "uc"] }), false);
+await t("Kabul edilmemiş sohbette perde isteği reddedilir", () => perdeNew(A, "ua", ["ua", "uc"]), false);
+await t("Engelleyen kişiye perde isteği reddedilir", () => perdeNew(A, "ua", ["ua", "ud"]), false);
+await t("Başkası adına perde isteği reddedilir", () => setDoc(pd(C, "ua_ub2"), { members: ["ua", "ub"], by: "ua", status: "istek", ts: serverTimestamp() }), false);
+await t("Doğrudan açık perde oluşturulamaz", () => setDoc(pd(A, "ua_ux"), { members: ["ua", "ux"], by: "ua", status: "acik", ts: serverTimestamp() }), false);
+await t("Üçüncü kişi perdeyi kapatamaz", () => deleteDoc(pd(C, "ua_ub")), false);
+await t("Taraflardan biri perdeyi kapatır", () => deleteDoc(pd(B, "ua_ub")), true);
+await t("Gerçek fotoğraf yolunu kaydeder", () => setDoc(doc(A, "users/ua/gizli/foto"), { av: "r/ua/abc.jpg", banner: null, ts: serverTimestamp() }), true);
+await t("Başkası gerçek fotoğraf yolunu okuyamaz", () => getDoc(doc(B, "users/ua/gizli/foto")), false);
+await t("Başkasının klasörü gerçek fotoğraf olamaz", () => setDoc(doc(A, "users/ua/gizli/foto"), { av: "r/ub/abc.jpg" }), false);
+await t("Başkası gerçek fotoğraf kaydını değiştiremez", () => setDoc(doc(B, "users/ua/gizli/foto"), { av: null }), false);
+await t("Perde bildirimi bırakılabilir", () => {
+  const b = writeBatch(B);
+  b.set(doc(B, "users/ua/notifs/pn1"), { from: "ub", type: "perde", text: "seninle perdeyi açmak istiyor", ts: serverTimestamp() });
+  b.set(rl(B, "ub"), { ntAt: serverTimestamp() }, { merge: true });
+  return b.commit();
+}, true);
 
 await env.cleanup();
 console.log(fail ? `\n${fail} senaryo TUTMADI, yükleme durduruldu.` : "\nTüm senaryolar tamam.");

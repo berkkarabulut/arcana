@@ -15,6 +15,15 @@ service firebase.storage {
       allow delete: if ok() && request.auth.uid == uid;
     }
 
+    // r/{uid}/... : perde arkasındaki gerçek fotoğraf ve kapak. Sadece sahibi okur; perdesi açık olana sunucu verir.
+    match /r/{uid}/{file} {
+      allow read: if ok() && request.auth.uid == uid;
+      allow create, update: if ok() && request.auth.uid == uid
+        && request.resource.size < 2 * 1024 * 1024
+        && request.resource.contentType.matches('image/(jpeg|png|webp)');
+      allow delete: if ok() && request.auth.uid == uid;
+    }
+
     match /m/{uid}/{file} {
       allow read: if ok();
       allow create: if ok() && request.auth.uid == uid

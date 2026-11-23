@@ -16,7 +16,7 @@ const FV = admin.firestore.FieldValue;
 setGlobalOptions({ region: "europe-west1", maxInstances: 10 });
 
 const SITE = "https://kulistr.com/";
-const TITLES = { cm: "Yeni yorum", react: "İtirafına tepki", req: "Mesaj isteği", dm: "Yeni mesaj", match: "Eşleştiniz", like: "Biri seni beğendi", call: "Cevapsız arama" };
+const TITLES = { cm: "Yeni yorum", react: "İtirafına tepki", req: "Mesaj isteği", dm: "Yeni mesaj", match: "Eşleştiniz", like: "Biri seni beğendi", call: "Cevapsız arama", perde: "Perde" };
 
 // ---------------- Kullanıcı ayarları ----------------
 // users/{uid}/settings/main: n (bildirim türü -> açık/kapalı), quiet + qFrom/qTo (Türkiye saatiyle sessiz saatler)
@@ -216,4 +216,34 @@ exports.davetOdulu = onDocumentCreated("users/{uid}/private/info", async (event)
     text: rewarded ? `davetinle katıldı. ${DAVET_ESIK} kişi tamam, 1 hafta Premium kazandın!` : "davetinle Kulis'e katıldı",
     go: null, read: false, ts: FV.serverTimestamp()
   });
+});
+
+// ---------------- Perde ----------------
+// Perde arkasındaki gerçek fotoğraf ve kapağı sadece perdesi açık olan kişiye (ya da sahibine) verir.
+// Dosyalar herkese açık bağlantıyla değil, buradan veri olarak gönderilir; böylece bağlantı sızsa bile açılamaz.
+const BUCKET = "kulis-1647d.firebasestorage.app";
+exports.perdeFoto = onCall({ enforceAppCheck: false, memory: "256MiB" }, async (req) => {
+  const me = req.auth && req.auth.uid;
+  if (!me || !(req.auth.token && req.auth.token.email_verified)) throw new HttpsError("unauthenticated", "giris");
+  const other = String((req.data && req.data.uid) || "");
+  if (!/^[A-Za-z0-9]{10,40}$/.test(other)) throw new HttpsError("invalid-argument", "uid");
+  if (other !== me) {
+    const pid = me < other ? me + "_" + other : other + "_" + me;
+    const p = await db.doc(`perde/${pid}`).get();
+    if (!p.exists || p.data().status !== "acik") throw new HttpsError("permission-denied", "perde kapali");
+  }
+  const g = await db.doc(`users/${other}/gizli/foto`).get();
+  if (!g.exists) return {};
+  const bucket = admin.storage().bucket(BUCKET), out = {};
+  for (const k of ["av", "banner"]) {
+    const path = g.data()[k];
+    if (typeof path !== "string" || !path.startsWith(`r/${other}/`)) continue;
+    try {
+      const f = bucket.file(path);
+      const [[buf], [md]] = await Promise.all([f.download(), f.getMetadata()]);
+      if (buf.length > 2 * 1024 * 1024) continue;
+      out[k] = `data:${md.contentType || "image/jpeg"};base64,${buf.toString("base64")}`;
+    } catch (e) { logger.warn("perdeFoto", { other, k, err: String(e && e.message) }); }
+  }
+  return out;
 });
