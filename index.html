@@ -202,6 +202,33 @@ h1,h2,h3{font-family:var(--display);font-weight:400;text-wrap:balance}
 .voice .pl{width:30px;height:30px;border-radius:50%;background:rgba(255,255,255,.22);display:grid;place-items:center;flex:0 0 auto}
 button.pl{border:0;color:inherit;cursor:pointer;padding:0}
 .m.media img{cursor:zoom-in;max-width:240px;max-height:320px;border-radius:14px;display:block}
+.pd-pill{display:inline-flex;align-items:center;gap:5px;height:30px;padding:0 10px;border-radius:999px;font-size:12px;font-weight:700;border:1px solid rgba(212,175,90,.55);color:#E9C77A;background:transparent;flex:0 0 auto;white-space:nowrap;cursor:pointer}
+.pd-pill.acik,.pd-pill.bende{border-color:var(--cizgi,rgba(255,255,255,.15));color:var(--soluk)}
+.pd-pill.onda{background:#D4AF5A;color:#2A1C05;border-color:#D4AF5A}
+@media (max-width:380px){.pd-pill span{display:none}}
+.perde-req{align-self:center;width:min(92%,340px);background:rgba(212,175,90,.08);border:1px solid rgba(212,175,90,.45);border-radius:16px;padding:12px 14px;text-align:center;margin:6px 0;font-size:14px}
+.perde-req .pr-t{font-size:12px;color:#E9C77A;font-weight:700;margin-bottom:4px}
+.perde-req small{display:block;color:var(--soluk);font-size:12px;margin-top:4px}
+.perde-req .pr-b{display:flex;gap:8px;justify-content:center;margin-top:10px}
+.perde-card{display:flex;align-items:center;gap:12px;width:100%;text-align:left;margin:12px 0 2px;padding:12px 14px;border-radius:16px;border:1px solid rgba(212,175,90,.4);background:rgba(212,175,90,.07);color:inherit;cursor:pointer}
+.perde-card .pc-ic{font-size:22px}.perde-card .pc-tx{flex:1;display:flex;flex-direction:column;gap:2px}.perde-card small{color:var(--soluk);font-size:12.5px;line-height:1.35}
+.perde-card img{width:44px;height:44px;border-radius:50%;object-fit:cover;filter:blur(3px);box-shadow:0 0 0 2px #D4AF5A}
+.perde-card .pc-add{font-size:12.5px;font-weight:700;color:#E9C77A}
+.perde-sec{border:1px solid rgba(212,175,90,.35);border-radius:16px;padding:12px;background:rgba(212,175,90,.05)}
+.perde-up{display:flex;gap:12px;align-items:center}.perde-up .pk img{width:100%;height:100%;object-fit:cover}
+#perdeOv{position:fixed;inset:0;z-index:9999;overflow:hidden;cursor:pointer}
+#perdeOv .po-stg{position:absolute;inset:0;background:#0B0710}
+#perdeOv .po-beam{position:absolute;inset:0;opacity:0;background:radial-gradient(42% 36% at 50% 47%,rgba(255,220,160,.32),rgba(255,220,160,.07) 55%,transparent 75%)}
+#perdeOv .po-rv{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;opacity:0}
+#perdeOv .po-big{width:min(46vw,190px);height:min(46vw,190px);border-radius:50%;overflow:hidden;display:grid;place-items:center;box-shadow:0 0 0 3px #D4AF5A,0 22px 50px rgba(0,0,0,.6)}
+#perdeOv .po-big img{width:100%;height:100%;object-fit:cover}
+#perdeOv .po-n{font-size:22px;font-weight:800;color:#fff}#perdeOv .po-s{font-size:14px;color:#E9C77A}
+#perdeOv .po-cu{position:absolute;top:0;bottom:0;width:51%;z-index:2;background:linear-gradient(180deg,rgba(0,0,0,.45),transparent 22%,transparent 78%,rgba(0,0,0,.55)),repeating-linear-gradient(90deg,#3E0710 0,#6E1020 18%,#A31F33 34%,#C23246 42%,#A31F33 52%,#6E1020 72%,#3E0710 100%);background-size:100% 100%,46px 100%}
+#perdeOv .po-l{left:0;transform-origin:0 0}#perdeOv .po-r{right:0;transform-origin:100% 0}
+#perdeOv .po-tie{position:absolute;top:53%;width:34px;height:9px;border-radius:5px;background:#C9A14E;z-index:4;opacity:0}
+#perdeOv .po-sw{position:absolute;left:-6%;right:-6%;top:0;height:calc(58px + env(safe-area-inset-top));z-index:5;background:linear-gradient(180deg,#4A0812,#7E1424 60%,#5A0B16);-webkit-mask:radial-gradient(36px 28px at 36px 100%,transparent 97%,#000) 0 0/72px 100% repeat-x;mask:radial-gradient(36px 28px at 36px 100%,transparent 97%,#000) 0 0/72px 100% repeat-x}
+#perdeOv .po-fr{position:absolute;left:0;right:0;top:calc(42px + env(safe-area-inset-top));height:7px;z-index:6;background:repeating-linear-gradient(90deg,#D4AF5A 0 2px,#8A6A2A 2px 4px)}
+#perdeOv .po-rod{position:absolute;left:0;right:0;top:0;height:calc(6px + env(safe-area-inset-top));z-index:7;background:#2A1A10}
 .wave{display:flex;align-items:center;gap:2px;flex:1;height:24px}
 .wave i{width:3px;border-radius:2px;background:currentColor;opacity:.7}
 .callmsg{align-self:center;display:inline-flex;align-items:center;gap:8px;font-size:13px;color:var(--soluk);background:var(--yuzey);padding:7px 12px;border-radius:99px;margin:4px 0}
@@ -995,7 +1022,8 @@ function constellationURI(sign){
   return constCache[sign]="data:image/svg+xml,"+encodeURIComponent(svg);
 }
 function coverCSS(u){
-  if(u.banner)return `background:#2A2233 url('${presetURI(u.banner)}') center/cover no-repeat`;
+  const bn=(u!==state.me&&u.realBn)||u.banner;
+  if(bn)return `background:#2A2233 url('${presetURI(bn)}') center/cover no-repeat`;
   const g=`radial-gradient(120% 160% at 100% 0%,color-mix(in srgb,${u.c||"#E8505B"} 45%,transparent),transparent 65%),linear-gradient(160deg,#1C2945,#0B1220 70%)`;
   const cu=u.s&&constellationURI(u.s);
   return cu?`background:url('${cu}') right 4% center/auto 92% no-repeat,${g}`:`background:${g}`;
@@ -1014,7 +1042,7 @@ document.addEventListener("keydown",e=>{if(e.key!=="Escape")return;if(!$("#onb")
 function grow(t){t.style.height="auto";t.style.height=Math.min(t.scrollHeight,150)+"px"}
 function save(){try{localStorage.setItem("itiraf_me",JSON.stringify(state.me))}catch(e){}}
 const userOf=k=>k==="me"?state.me:U[k];
-function av(k,size=36,noZ){const u=userOf(k);return `<span class="av" style="width:${size}px;height:${size}px;background:${u.photo?"var(--yuzey2)":u.c};font-size:${size*.42}px">${u.photo?`<img src="${presetURI(u.photo)}" alt="">`:esc(u.n.charAt(0).toLocaleUpperCase("tr"))}${noZ?"":`<span class="z glyph">${Z[u.s].g}</span>`}</span>`}
+function av(k,size=36,noZ){const u=userOf(k),ph=(k!=="me"&&u.realAv)||u.photo;return `<span class="av" style="width:${size}px;height:${size}px;background:${ph?"var(--yuzey2)":u.c};font-size:${size*.42}px">${ph?`<img src="${presetURI(ph)}" alt="">`:esc(u.n.charAt(0).toLocaleUpperCase("tr"))}${noZ?"":`<span class="z glyph">${Z[u.s].g}</span>`}</span>`}
 const isPrem=k=>k==="me"?state.premium:!!(U[k]&&U[k].prem);
 const PB='<svg class="pb" viewBox="0 0 24 24" aria-label="Premium üye" role="img"><title>Premium üye</title><path fill="#E9B96E" d="M4 8l4.5 4L12 5l3.5 7L20 8l-1.6 10H5.6z"/><rect x="5.5" y="19" width="13" height="2" rx="1" fill="#E9B96E"/></svg>';
 const pb=k=>isPrem(k)?PB:"";
@@ -1137,7 +1165,7 @@ function vBen(){
    <div class="pro2"><div style="position:relative"><span class="ring2" style="display:inline-block">${av("me",96,true)}</span><button class="cam" id="camBtn" aria-label="Profil fotoğrafını değiştir">${IC.camera}</button></div>
    <h2>${esc(me.n)}${pb("me")}</h2>
    <div class="badges"><span class="bd"><span class="glyph">${Z[me.s].g}</span>${Z[me.s].n}</span><span class="bd">${me.age}</span><span class="bd">${me.g}</span></div>
-   ${(isUpload(me.photo)||isUpload(me.banner))&&!state.premium?`<button class="pnote" id="pNote">${IC.lock}<span>Yüklediğin ${isUpload(me.photo)&&isUpload(me.banner)?"fotoğraf ve kapak":isUpload(me.photo)?"fotoğraf":"kapak"} şu an sadece sana görünüyor. Diğer kullanıcılar hazır görünümü görür. Göstermek için Premium'a geç.</span></button>`:""}
+   ${REMOTE?perdeCard():(isUpload(me.photo)||isUpload(me.banner))&&!state.premium?`<button class="pnote" id="pNote">${IC.lock}<span>Yüklediğin ${isUpload(me.photo)&&isUpload(me.banner)?"fotoğraf ve kapak":isUpload(me.photo)?"fotoğraf":"kapak"} şu an sadece sana görünüyor. Diğer kullanıcılar hazır görünümü görür. Göstermek için Premium'a geç.</span></button>`:""}
    <p class="bio">${me.bio?esc(me.bio):'<span class="muted" style="font-family:var(--body);font-size:13.5px">Profiline kendini anlatan tek bir cümle ekle.</span>'}</p></div>
    <div class="stats"><div><b>${mine.length}</b><span>itiraf</span></div><div><b>${state.myComments.length}</b><span>yorum</span></div><div><b>${mine.reduce((a,p)=>a+reactTotal(p),0)}</b><span>tepki</span></div></div>
    <div class="pro-btns"><button class="btn line sm" id="editPro">${IC.edit.replace('<svg','<svg width="16" height="16"')}Profili düzenle</button>${state.premium?"":`<button class="btn gold sm" id="goPrem">Premium'a geç</button>`}</div>
@@ -1149,6 +1177,7 @@ function vBen(){
    <div class="lg-links"><a href="kurallar.html" data-legal="kurallar">Topluluk kuralları</a><a href="kosullar.html" data-legal="kosullar">Kullanım koşulları</a><a href="gizlilik.html" data-legal="kvkk">KVKK ve gizlilik</a>${GA_ID?'<a href="#" id="ckPref">Çerez tercihleri</a>':""}</div>
    ${REMOTE?`<button class="btn line wide" id="setBtn" style="margin-top:22px">Ayarlar</button>`:""}
    <button class="btn line wide" id="outBtn" style="margin-top:22px;color:var(--nar);border-color:rgba(var(--nar-rgb),.35)">${LOGOUT}Çıkış yap</button>${REMOTE?`${pushState()==="acik"?`<button class="dice" data-push="off" style="margin:14px auto 0;display:flex">Telefon bildirimlerini kapat</button>`:""}<button class="dice" id="delAcc" style="margin:14px auto 0;display:flex">Hesabımı sil</button>`:""}</div>`;
+  const pcd=$("#perdeCard");if(pcd)pcd.onclick=()=>showEditProfile("perde");
   const pn=$("#pNote");if(pn)pn.onclick=()=>premiumGate("Fotoğrafın görünsün","Yüklediğin fotoğraf ve kapak Premium üyelerde herkese görünür.",()=>vBen());
   $("#camBtn").onclick=()=>showEditProfile("photo");$("#covBtn").onclick=()=>showEditProfile("banner");
   $("#editPro").onclick=showEditProfile;
@@ -1497,7 +1526,7 @@ function notify(type,u,text,go,ts=Date.now(),read=false){
   state.notifs.unshift({id:"n"+ts+Math.random().toString(36).slice(2,6),type,u,text,go:go||null,ts,read});
   if(state.notifs.length>60)state.notifs.length=60;
 }
-const NIC={dm:"dm",req:"dm",cm:"cm",react:"meToo",like:"spark",match:"spark",sys:"spark"};
+const NIC={dm:"dm",req:"dm",cm:"cm",react:"meToo",like:"spark",match:"spark",sys:"spark",perde:"spark"};
 function notifRow(n){
   const ic=IC[NIC[n.type]]||IC.spark;
   const who=n.u&&U[n.u]?`${av(n.u,42,true)}`:`<span class="nf-sys">${ic}</span>`;
@@ -1589,7 +1618,7 @@ const lowTR=t=>t.toLocaleLowerCase("tr");
 function bannedRegex(words){const ks=[...new Set(words.map(w=>lowTR(w).trim()).filter(Boolean))].map(k=>k.replace(/[.*+?^${}()|[\]\\]/g,"\\$&"));return ks.length?"(^|[^a-zçğıöşü0-9])("+ks.join("|")+")":""}
 async function saveBanned(list){if(!REMOTE){LSset("arcana_banned",list);return}try{await KDB.setModeration(list,bannedRegex(list));toast("Kelime listesi herkese uygulandı")}catch(e){toast("Kaydedilemedi: "+(e.code||e.message))}}
 // sunucunun reddettiği yazmalar için anlaşılır mesaj
-function writeErr(e,kind){const c=e&&e.code||"";if(c==="permission-denied")return {itiraf:"İki itiraf arasında en az 15 dakika olmalı. Biraz sonra tekrar dene.",yorum:"Biraz yavaş: iki yorum arasında birkaç saniye beklemelisin.",mesaj:"Mesajın gitmedi. Biraz yavaş yaz ya da karşı taraf seni engellemiş olabilir.",istek:"İstek gönderilemedi. Yeni bir istek için biraz bekle ya da bu kişi seni engellemiş olabilir."}[kind]||"Bu işlem şu an yapılamadı.";return "Olmadı: "+(c||e&&e.message||"bilinmeyen hata")}
+function writeErr(e,kind){const c=e&&e.code||"";if(c==="permission-denied")return {itiraf:"İki itiraf arasında en az 15 dakika olmalı. Biraz sonra tekrar dene.",yorum:"Biraz yavaş: iki yorum arasında birkaç saniye beklemelisin.",mesaj:"Mesajın gitmedi. Biraz yavaş yaz ya da karşı taraf seni engellemiş olabilir.",istek:"İstek gönderilemedi. Yeni bir istek için biraz bekle ya da bu kişi seni engellemiş olabilir.",perde:"Perde isteği gönderilemedi. Sohbet henüz kabul edilmemiş ya da zaten bir istek var."}[kind]||"Bu işlem şu an yapılamadı.";return "Olmadı: "+(c||e&&e.message||"bilinmeyen hata")}
 function bannedHit(t){
   const low=lowTR(t);
   for(const w of bannedList()){const k=lowTR(w).trim();if(!k)continue;
@@ -1627,6 +1656,7 @@ function reportPreview(key){
   const [t,id]=key.split(":");
   if(t==="p"){const p=allPosts().find(x=>x.id===id);return p?{who:p.anon?"Anonim":userOf(p.u).n,text:p.t,kind:"İtiraf"}:{who:"?",text:"(silinmiş itiraf)",kind:"İtiraf"}}
   if(t==="u"){const u=U[id];return {who:u?u.n:id,text:u?u.bio||"":"",kind:"Kullanıcı"}}
+  if(t==="k"){const u=U[id],c=state.chats.find(x=>x.u===id);const last=c?c.msgs.filter(m=>!m.me).slice(-6).map(m=>m.kind==="img"?"[fotoğraf]":m.kind==="voice"?"[ses]":m.t).join(" / "):"";return {who:u?u.n:id,text:last||"(mesaj yok)",kind:"Konuşma"}}
   return {who:"?",text:key,kind:"İçerik"};
 }
 const STAT_NAMES=[["kayit","Yeni üye"],["itiraf_yazildi","İtiraf"],["yorum","Yorum"],["mesaj","Mesaj"],["begen","Sağa kaydırma"],["eslesme","Eşleşme"],["paylas","Hikâye paylaşımı"],["davet","Davet linki paylaşımı"],["sikayet","Şikâyet"],["filtre_kelime","Filtre: kelime"],["filtre_isim","Filtre: ad soyad"],["filtre_kurum","Filtre: okul/iş yeri"],["filtre_kullaniciadi","Filtre: kullanıcı adı"]];
@@ -1816,14 +1846,16 @@ function pickPhoto(done,target,kind){
 }
 function showEditProfile(focus){
   const me=state.me;
-  const draft={photo:me.photo,banner:me.banner,bio:me.bio||"",c:me.c,n:me.n};
+  const real0=me.real||{};
+  const draft={photo:me.photo,banner:me.banner,bio:me.bio||"",c:me.c,n:me.n,rAv:real0.av||null,rBn:real0.banner||null};
   const curAv=AVATARS.find(a=>"preset:"+a.id===me.photo);
   const tabs=me.g==="Kadın"?["Kadın","Simge"]:me.g==="Erkek"?["Erkek","Simge"]:["Kadın","Erkek","Simge"];
   let avTab=curAv&&tabs.includes(curAv.g||"Simge")?(curAv.g||"Simge"):tabs[0];
   const nickOk=()=>/^[a-zçğıöşü0-9._]{3,16}$/.test(draft.n);
-  const dirty=()=>draft.photo!==me.photo||draft.banner!==me.banner||draft.bio.trim()!==(me.bio||"")||draft.c!==me.c||draft.n!==me.n;
+  const realDirty=()=>draft.rAv!==(real0.av||null)||draft.rBn!==(real0.banner||null);
+  const dirty=()=>draft.photo!==me.photo||draft.banner!==me.banner||draft.bio.trim()!==(me.bio||"")||draft.c!==me.c||draft.n!==me.n||realDirty();
   const commit=()=>{if(!nickOk()){toast("Takma ad en az 3 karakter olmalı, boşluk içeremez");return}me.n=draft.n;["photo","banner"].forEach(k=>{if(draft[k])me[k]=draft[k];else delete me[k]});me.bio=draft.bio.trim();me.c=draft.c;
-    if(REMOTE){save();closeSheet();toast(R.upl&&Object.keys(R.upl).length?"Profilin kaydediliyor…":"Profilin kaydedildi");render();return}
+    if(REMOTE){const rd=realDirty();save();closeSheet();if(rd)saveMyReal(draft.rAv,draft.rBn);else toast("Profilin kaydedildi");render();return}
     try{localStorage.setItem("itiraf_me",JSON.stringify(me))}catch(e){toast("Görsel çok büyük, kaydedilemedi. Daha küçük bir görsel dene.");return}
     closeSheet();toast("Profilin kaydedildi");render()};
   const askLeave=()=>{openSheet(`<h2>Değişiklikler kaydedilmedi</h2><p class="muted" style="font-size:14px;margin:8px 0 16px">Profilinde yaptığın değişiklikleri kaydetmeden çıkarsan hepsi kaybolur.</p>
@@ -1834,16 +1866,22 @@ function showEditProfile(focus){
     openSheet(`<div class="sheet-head"><h2>Profili düzenle</h2><button class="x" id="ex" aria-label="Kapat">${IC.close}</button></div>
     <div class="ed-prev pro-wrap" style="--acc:${draft.c}"><div class="ed-cover" style="${coverCSS(draft)}"></div><div class="ed-av">${prevAv}</div></div>
 
-    <div class="ed-sec" id="secBanner"><div class="ed-h"><b>Kapak görseli</b>${draft.banner?`<button class="lnk" id="bnx" style="height:28px">Kaldır</button>`:""}</div>
+    ${REMOTE?`<div class="ed-sec perde-sec" id="secPerde"><div class="ed-h"><b>🎭 Perde arkası</b><span class="muted" style="font-size:12px">ücretsiz</span></div>
+    <p class="hint" style="margin:0 0 10px">Gerçek fotoğrafını ve kapağını buraya koy. Herkes aşağıda seçtiğin hazır görünümü görür. Bunları sadece perdeyi birlikte açtığın kişiler görür.</p>
+    <div class="perde-up"><button class="pk up round" id="rAvUp" aria-label="Gerçek fotoğrafını yükle">${draft.rAv?`<img src="${draft.rAv}" alt="">`:`${IC.camera}<span>Fotoğraf</span>`}</button>
+    <button class="pk up wide-pk" id="rBnUp" aria-label="Gerçek kapağını yükle">${draft.rBn?`<img src="${draft.rBn}" alt="">`:`${IC.camera}<span>Kapak</span>`}</button></div>
+    ${draft.rAv||draft.rBn?`<div style="display:flex;gap:14px;margin-top:8px">${draft.rAv?`<button class="lnk" id="rAvX">Fotoğrafı kaldır</button>`:""}${draft.rBn?`<button class="lnk" id="rBnX">Kapağı kaldır</button>`:""}</div>`:""}</div>`:""}
+
+    <div class="ed-sec" id="secBanner"><div class="ed-h"><b>${REMOTE?"Herkese görünen kapak":"Kapak görseli"}</b>${draft.banner?`<button class="lnk" id="bnx" style="height:28px">Kaldır</button>`:""}</div>
     <div class="picker">
-      <button class="pk up" id="bnUp" aria-label="Kendi kapak görselini yükle">${IC.camera}<span>Yükle</span>${state.premium?"":`<i class="pk-lock">${IC.lock}</i>`}</button>
+      ${REMOTE?"":`<button class="pk up" id="bnUp" aria-label="Kendi kapak görselini yükle">${IC.camera}<span>Yükle</span>${state.premium?"":`<i class="pk-lock">${IC.lock}</i>`}</button>`}
       ${BANNERS.map(b=>`<button class="pk wide-pk" data-bn="preset:${b.id}" aria-pressed="${draft.banner==="preset:"+b.id}" aria-label="${b.n}"><img src="${presetURI("preset:"+b.id)}" alt=""><span>${b.n}</span></button>`).join("")}
     </div></div>
 
-    <div class="ed-sec" id="secPhoto"><div class="ed-h"><b>Profil fotoğrafı</b>${draft.photo?`<button class="lnk" id="phx" style="height:28px">Kaldır</button>`:""}</div>
+    <div class="ed-sec" id="secPhoto"><div class="ed-h"><b>${REMOTE?"Herkese görünen avatar":"Profil fotoğrafı"}</b>${draft.photo?`<button class="lnk" id="phx" style="height:28px">Kaldır</button>`:""}</div>
     <div class="seg2" role="group" aria-label="Avatar türü" style="margin-bottom:10px">${tabs.map(k=>`<button data-avt="${k}" aria-pressed="${avTab===k}">${k}</button>`).join("")}</div>
     <div class="picker">
-      <button class="pk up round" id="phUp" aria-label="Kendi fotoğrafını yükle">${IC.camera}<span>Yükle</span>${state.premium?"":`<i class="pk-lock">${IC.lock}</i>`}</button>
+      ${REMOTE?"":`<button class="pk up round" id="phUp" aria-label="Kendi fotoğrafını yükle">${IC.camera}<span>Yükle</span>${state.premium?"":`<i class="pk-lock">${IC.lock}</i>`}</button>`}
       ${AVATARS.filter(a=>(a.g||"Simge")===avTab).map(a=>`<button class="pk round" data-av="preset:${a.id}" aria-pressed="${draft.photo==="preset:"+a.id}" aria-label="Hazır görsel"><img src="${presetURI("preset:"+a.id)}" alt=""></button>`).join("")}
     </div></div>
 
@@ -1857,15 +1895,18 @@ function showEditProfile(focus){
     <div class="ed-sec"><div class="ed-h"><b>Profil rengi</b></div><div class="swatches" style="margin-top:0">${COLORS.map(x=>`<button class="sw" style="background:${x}" data-sc="${x}" aria-pressed="${draft.c===x}" aria-label="Renk"></button>`).join("")}</div>
     <p class="hint">Profilindeki vurgular bu renkte görünür: avatar halkası, sayılar, sekmeler ve butonlar. Kapak seçmezsen kapak da bu renkte olur.</p></div>
 
-    <p class="hint">${state.premium?"Kapak ve profil fotoğrafın herkese görünür. Yüzünü göstermek zorunda değilsin.":"Hazır avatar ve kapaklar ücretsiz. Kendi fotoğrafını ve kapağını yüklemek Premium'a özel."}</p>
+    <p class="hint">${REMOTE?"Hazır avatar ve kapaklar herkese görünür. Gerçek fotoğrafın sadece perde açılınca görünür.":state.premium?"Kapak ve profil fotoğrafın herkese görünür. Yüzünü göstermek zorunda değilsin.":"Hazır avatar ve kapaklar ücretsiz. Kendi fotoğrafını ve kapağını yüklemek Premium'a özel."}</p>
     <p class="hint" id="dirtyNote" style="color:var(--altin);${dirty()?"":"visibility:hidden"}">Kaydedilmemiş değişiklikler var.</p>
     <div class="ed-foot"><button class="btn line" style="flex:1" id="cn">Vazgeç</button><button class="btn" style="flex:2" id="sv" ${dirty()&&nickOk()?"":"disabled"}>Kaydet</button></div>`,true);
     sheetGuard=()=>{if(dirty()){askLeave();return true}return false};
     const upd=()=>{$("#sv").disabled=!dirty()||!nickOk();$("#dirtyNote").style.visibility=dirty()?"visible":"hidden";$("#nkErr").style.display=nickOk()?"none":""};
     const nk=$("#nkIn");nk.oninput=()=>{const v=nk.value.replace(/\s/g,"").toLocaleLowerCase("tr");if(nk.value!==v)nk.value=v;draft.n=v;upd()};
     $("#ex").onclick=tryCloseSheet;$("#cn").onclick=tryCloseSheet;
-    $("#phUp").onclick=()=>state.premium?pickPhoto(draw,draft,"photo"):premiumGate("Kendi fotoğrafın Premium'a özel","Hazır avatarlar herkese açık. Kendi fotoğrafını yüklemek ve diğer kullanıcılara göstermek için Premium'a geç.",()=>{draw();pickPhoto(draw,draft,"photo")});
-    $("#bnUp").onclick=()=>state.premium?pickPhoto(draw,draft,"banner"):premiumGate("Kendi kapağın Premium'a özel","Hazır kapaklar herkese açık. Kendi görselini kapak yapmak için Premium'a geç.",()=>{draw();pickPhoto(draw,draft,"banner")});
+    const ru=(k)=>{const tmp={};pickPhoto(()=>{if(k==="photo")draft.rAv=tmp.photo;else draft.rBn=tmp.banner;draw()},tmp,k)};
+    const ra=$("#rAvUp");if(ra)ra.onclick=()=>ru("photo");const rb=$("#rBnUp");if(rb)rb.onclick=()=>ru("banner");
+    const rax=$("#rAvX");if(rax)rax.onclick=()=>{draft.rAv=null;draw()};const rbx=$("#rBnX");if(rbx)rbx.onclick=()=>{draft.rBn=null;draw()};
+    if($("#phUp"))$("#phUp").onclick=()=>state.premium?pickPhoto(draw,draft,"photo"):premiumGate("Kendi fotoğrafın Premium'a özel","Hazır avatarlar herkese açık. Kendi fotoğrafını yüklemek ve diğer kullanıcılara göstermek için Premium'a geç.",()=>{draw();pickPhoto(draw,draft,"photo")});
+    if($("#bnUp"))$("#bnUp").onclick=()=>state.premium?pickPhoto(draw,draft,"banner"):premiumGate("Kendi kapağın Premium'a özel","Hazır kapaklar herkese açık. Kendi görselini kapak yapmak için Premium'a geç.",()=>{draw();pickPhoto(draw,draft,"banner")});
     const px=$("#phx");if(px)px.onclick=()=>{draft.photo=undefined;draw()};
     const bx=$("#bnx");if(bx)bx.onclick=()=>{draft.banner=undefined;draw()};
     $("#sheet").querySelectorAll("[data-av]").forEach(b=>b.onclick=()=>{draft.photo=b.dataset.av;draw()});
@@ -1877,6 +1918,7 @@ function showEditProfile(focus){
   draw();
   if(focus==="banner")setTimeout(()=>{const e=$("#secBanner");e&&e.scrollIntoView({block:"start",behavior:"smooth"})},60);
   if(focus==="photo")setTimeout(()=>{const e=$("#secPhoto");e&&e.scrollIntoView({block:"start",behavior:"smooth"})},60);
+  if(focus==="perde")setTimeout(()=>{const e=$("#secPerde");e&&e.scrollIntoView({block:"start",behavior:"smooth"})},60);
 }
 
 /* ============ İTİRAF DETAY ============ */
@@ -1934,7 +1976,9 @@ function showProfile(k){
     <div class="tabs"><button data-pt="itiraf" aria-pressed="${tab==="itiraf"}">İtirafları</button><button data-pt="yorum" aria-pressed="${tab==="yorum"}">Yorumları</button></div>
     ${tab==="itiraf"?(posts.length?posts.map(x=>`<div class="mini"><q data-open="${x.id}" style="cursor:pointer">“${esc(x.t)}”</q><div class="on">${CATN[x.cat]}, ${x.ago}, ${x.cm.length} yorum</div></div>`).join(""):`<p class="empty">Herkese açık itirafı yok.</p>`)
      :(comments.length?comments.map(c=>`<div class="mini"><div class="on" style="margin:0 0 4px">Şu itirafa yorum yaptı: “${esc(c.on.slice(0,60))}…”</div><div style="font-size:15px">${esc(c.t)}</div></div>`).join(""):`<p class="empty">Henüz yorumu yok.</p>`)}
-    <div class="pro-acts">${chatIdx>=0?`<button class="btn wide" data-chat="${chatIdx}">Sohbete git</button>`:`<button class="btn wide" data-dm="${k}" data-from="">Özelden yaz</button>`}<button class="btn line" data-block="${k}" aria-label="Engelle veya şikâyet et">Engelle</button></div></div>`);
+    <div class="pro-acts">${chatIdx>=0?`<button class="btn wide" data-chat="${chatIdx}">Sohbete git</button>`:`<button class="btn wide" data-dm="${k}" data-from="">Özelden yaz</button>`}<button class="btn line" data-block="${k}" aria-label="Engelle veya şikâyet et">Engelle</button></div>
+    ${REMOTE&&(u.realAv||u.realBn)?`<button class="dice" id="rpPhoto" style="margin:14px auto 0;display:flex">Fotoğrafı şikâyet et</button>`:""}</div>`);
+    const rpp=$("#rpPhoto");if(rpp)rpp.onclick=()=>{logReport("u:"+k,"Uygunsuz perde fotoğrafı");toast("Şikâyetin alındı. Fotoğraf incelenecek.")};
     $("#sheet").querySelectorAll("[data-pt]").forEach(b=>b.onclick=()=>{tab=b.dataset.pt;draw()});};
   draw();
 }
@@ -1971,10 +2015,12 @@ function drawChat(){
   const used=c.msgs.length, left=Math.max(0,FREE_LIMIT-used), full=!state.premium&&used>=FREE_LIMIT;
   const hidden=c.msgs.filter((m,i)=>!m.me&&isLockedIdx(c,i)).length;
   $("#chatIn").innerHTML=`<div class="chat-h"><button class="back" id="cBack" aria-label="Geri">${IC.back}</button>${who(c.u,c.status==="wait"?"istek bekliyor":"çevrimiçi")}
-    <button class="hb" data-media="call" aria-label="Sesli ara">${IC.phone}${REMOTE?(hasFeat("voice")?"":lockIc()):lockBadge()}</button><button class="hb" data-media="video" aria-label="Görüntülü ara">${IC.video}${REMOTE?(hasFeat("video")?"":lockIc()):lockBadge()}</button></div>
+    ${perdeBtnHTML(c)}<button class="hb" id="cRep" aria-label="Konuşmayı bildir" title="Konuşmayı bildir">${IC.flag}</button><button class="hb" data-media="call" aria-label="Sesli ara">${IC.phone}${REMOTE?(hasFeat("voice")?"":lockIc()):lockBadge()}</button><button class="hb" data-media="video" aria-label="Görüntülü ara">${IC.video}${REMOTE?(hasFeat("video")?"":lockIc()):lockBadge()}</button></div>
    <div class="msgs" id="msgs">
      ${c.from?`<div class="origin"><small>${c.match?"Eşleştiniz. Bu itirafını beğenmiştin":"Bu itiraf üzerinden tanıştınız"}</small><q>“${esc(c.from)}”</q></div>`:`<div class="origin"><small>Profil üzerinden tanıştınız</small></div>`}
      ${c.msgs.map((m,i)=>{const lk=!m.me&&isLockedIdx(c,i);return msgHTML(m,lk)}).join("")}
+     ${REMOTE&&perdeState(c.u)==="acik"?`<div class="sys">🎭 Perde açık. Birbirinizin gerçek fotoğrafını görüyorsunuz.</div>`:""}
+     ${perdeReqHTML(c)}
      ${c.status==="wait"?`<div class="sys">${esc(u.n)} isteğini henüz görmedi</div>`:""}
      ${c.typing?`<div class="typing"><i></i><i></i><i></i></div>`:""}
      ${full?`<div class="wall"><h3>${hidden?`${esc(u.n)} sana ${hidden} yeni mesaj yazdı`:`Sohbetin burada duraklatıldı`}</h3><p>${hidden?"Okumak ve cevap vermek için":"Sohbete devam etmek için"} Premium'a geç. ${esc(u.n)} sana yazmaya devam edebilir, mesajları burada birikir.</p><button class="btn gold wide" id="wallGo">Premium ile devam et</button></div>`:""}
@@ -1985,6 +2031,10 @@ function drawChat(){
   $("#cBack").onclick=closeChat;
   $("#chatIn").querySelectorAll("[data-media]").forEach(b=>b.onclick=()=>media(b.dataset.media,c));
   $("#chatIn").querySelectorAll("[data-play]").forEach(b=>b.onclick=()=>playVoice(b));
+  const cRep=$("#cRep");if(cRep)cRep.onclick=()=>showChatReport(c);
+  const pdB=$("#pdB");if(pdB)pdB.onclick=()=>{if(perdeState(c.u)==="onda"){const r=$(".perde-req");r&&r.scrollIntoView({block:"center",behavior:"smooth"});return}perdeAction(c)};
+  const prOk=$("#prOk");if(prOk)prOk.onclick=()=>{prOk.disabled=true;KDB.perdeKabul(c.u).catch(e=>{prOk.disabled=false;toast(writeErr(e,"perde"))})};
+  const prNo=$("#prNo");if(prNo)prNo.onclick=()=>KDB.perdeKapat(c.u).then(()=>toast("Perde isteği reddedildi")).catch(e=>toast(writeErr(e,"perde")));
   $("#chatIn").querySelectorAll("[data-zoom]").forEach(b=>b.onclick=()=>zoomImg(b.dataset.zoom));
   [$("#wallGo"),$("#wallGo2")].forEach(b=>b&&(b.onclick=()=>showPremium("mesaj")));
   const t=$("#mIn");if(!t)return;
@@ -2350,6 +2400,21 @@ $("#confessBtn").onclick=()=>{closeChat();showConfess()};
 $("#premPill").onclick=()=>{if(!state.premium)showPremium("pill");else toast("Premium üyesin")};
 
 /* ============ ŞİKÂYET ============ */
+// Konuşmayı bildir: sohbetteki karşı tarafı ve son mesajlarını yöneticiye iletir
+function showChatReport(c){
+  const u=U[c.u]||{n:"Bu kişi"};
+  const reasons=["Taciz veya rahatsız edici mesajlar","İstenmeyen cinsel içerik veya fotoğraf","Tehdit veya şantaj","Para, hediye veya kişisel bilgi istiyor","Sahte hesap veya dolandırıcılık","18 yaşından küçük olabilir","Nefret söylemi","Diğer"];let sel=null;
+  const draw=()=>{openSheet(`<h2>Konuşmayı bildir</h2><p class="muted" style="font-size:14px;margin:6px 0 14px">${esc(u.n)} ile konuşmanda neyi bildirmek istiyorsun? Son mesajlar yöneticiye iletilir ve 24 saat içinde incelenir. Kimin bildirdiği karşı tarafa gösterilmez.</p>
+    <div class="plans">${reasons.map(r=>`<button class="plan" data-crs="${r}" aria-pressed="${sel===r}"><b style="font-weight:600">${r}</b></button>`).join("")}</div>
+    <button class="btn wide" id="crGo" ${sel?"":"disabled"}>Bildir</button>
+    <p class="hint" style="text-align:center;margin-top:10px">Acil bir tehlike varsa 112'yi ara.</p>`);
+    $("#sheet").querySelectorAll("[data-crs]").forEach(b=>b.onclick=()=>{sel=b.dataset.crs;draw()});
+    $("#crGo").onclick=()=>{logReport("k:"+c.u,sel);
+      openSheet(`<h2>Bildirimin alındı</h2><p class="muted" style="font-size:14px;margin:8px 0 16px">Teşekkürler. Konuşma incelenecek. İstersen ${esc(u.n)} kişisini engelleyebilirsin; engellediğin kişi sana yazamaz ve seni arayamaz.</p>
+        <div style="display:grid;gap:8px"><button class="btn line wide" data-block="${c.u}">Engelle</button><button class="btn wide" id="crOk">Tamam</button></div>`);
+      $("#crOk").onclick=closeSheet}};
+  draw();
+}
 function showReport(key){
   const reasons=["Taciz veya zorbalık","Cinsel içerik","Başkasını ifşa ediyor","Nefret söylemi","Spam veya dolandırıcılık","18 yaşından küçük olabilir","Çocuk istismarı veya reşit olmayan","Diğer"];let sel=null;
   const draw=()=>{openSheet(`<h2>Neden şikâyet ediyorsun?</h2><p class="muted" style="font-size:14px;margin:6px 0 14px">Şikâyetler 24 saat içinde incelenir. Kimin şikâyet ettiği gösterilmez.</p>
@@ -2548,11 +2613,11 @@ addEventListener("pagehide",saveData);document.addEventListener("visibilitychang
 
 /* ============ GERÇEK SUNUCU (Firebase) BAĞLANTISI ============ */
 // Sadece REMOTE modda (beta adresi) çalışır. Demo sürümün davranışı değişmez.
-const R={posts:[],cm:{},cmPid:null,chats:{},users:{},reports:null,admin:false,started:false,syncedMe:null,uid:null};
+const R={posts:[],cm:{},cmPid:null,chats:{},users:{},reports:null,admin:false,started:false,syncedMe:null,uid:null,real:{},perde:{}};
 const cmN=p=>p.cmCount!=null?p.cmCount:p.cm.length;
-function authorSnap(){const m=state.me;return {n:m.n,c:m.c,s:m.s,g:m.g,age:m.age,av:(m.photo&&(String(m.photo).startsWith("preset:")||String(m.photo).startsWith(ST_URL)))?m.photo:null}}
+function authorSnap(){const m=state.me;return {n:m.n,c:m.c,s:m.s,g:m.g,age:m.age,av:(m.photo&&String(m.photo).startsWith("preset:"))?m.photo:null}}
 function monthTR(ts){const d=new Date(ts);return AYLAR[d.getMonth()]+" "+d.getFullYear()}
-function putUser(uid,d){if(!uid||uid===R.uid)return;const o=U[uid]||{};U[uid]=Object.assign(o,{n:d.n||o.n||"kullanıcı",s:d.s||o.s||"koc",age:d.age||o.age||"",g:d.g||o.g||"Belirtmeyeyim",c:d.c||o.c||"#7CC4FF",bio:d.bio!=null?d.bio:(o.bio||""),photo:d.av||o.photo,banner:d.banner||o.banner,since:d.createdAt?monthTR(d.createdAt.toMillis?d.createdAt.toMillis():d.createdAt):(o.since||""),stat:o.stat||[0,0,0]})}
+function putUser(uid,d){if(!uid||uid===R.uid)return;const o=U[uid]||{};const rl=R.real&&R.real[uid];if(rl){o.realAv=rl.av||null;o.realBn=rl.banner||null}U[uid]=Object.assign(o,{n:d.n||o.n||"kullanıcı",s:d.s||o.s||"koc",age:d.age||o.age||"",g:d.g||o.g||"Belirtmeyeyim",c:d.c||o.c||"#7CC4FF",bio:d.bio!=null?d.bio:(o.bio||""),photo:d.av||o.photo,banner:d.banner||o.banner,since:d.createdAt?monthTR(d.createdAt.toMillis?d.createdAt.toMillis():d.createdAt):(o.since||""),stat:o.stat||[0,0,0]})}
 function mapPost(p){
   if(p.anon){const m=!!(R.myAnon&&R.myAnon.has(p.id));return {id:p.id,feat:p.feat||0,anon:true,ag:p.a&&p.a.g||null,u:m?"me":"anon",uid:"anon",cat:p.cat,q:null,t:p.t,ts:p.ts,ago:agoOf(p.ts),r:p.r||{bende:0,saril:0,yok:0},cm:R.cm[p.id]||[],cmCount:p.cm||0,today:dayKeyOf(Date.now())===dayKeyOf(p.ts)}}
   const mine=p.uid===R.uid;if(!mine&&p.a)putUser(p.uid,p.a);
@@ -2561,8 +2626,72 @@ const dayKeyOf=ts=>{const d=new Date(ts);return d.getFullYear()+"-"+(d.getMonth(
 function refreshStats(){const by={};R.posts.forEach(p=>{const k=p.uid;by[k]=by[k]||[0,0,0];by[k][0]++;by[k][2]+=reactTotal(p)});Object.keys(U).forEach(k=>{U[k].stat=by[k]||[0,0,0]})}
 function rerender(){if(!state.me)return;if($("#chat").classList.contains("open"))return void render();render()}
 
+/* ============ PERDE ============ */
+// Herkes hazır avatarını görür; gerçek fotoğraf ve kapak "perde arkasında" durur.
+// İki kişi sohbette perdeyi birlikte açınca birbirinin gerçek görsellerini görür.
+function perdeCard(){const r=state.me.real||{},has=r.av||r.banner;
+  return `<button class="perde-card" id="perdeCard"><span class="pc-ic">🎭</span><span class="pc-tx"><b>Perde arkası</b><small>${has?"Gerçek fotoğrafını sadece perdeyi birlikte açtığın kişiler görür.":"Gerçek fotoğrafını ve kapağını ekle. Sadece perdeyi birlikte açtığın kişiler görür."}</small></span>${r.av?`<img src="${r.av}" alt="">`:`<span class="pc-add">Ekle</span>`}</button>`}
+function loadMyReal(){if(!KDB.getReal)return;KDB.getReal().then(g=>{R.realPaths=g||{};if(g&&(g.av||g.banner))return KDB.perdeFoto(R.uid).then(d=>{state.me.real={av:d.av||null,banner:d.banner||null};if(state.tab==="ben")render()})}).catch(()=>{})}
+async function saveMyReal(av,bn){
+  const old=state.me.real||{},g=R.realPaths||{};let pa=g.av||null,pbn=g.banner||null;
+  state.me.real={av,banner:bn};render();toast("Perde arkası kaydediliyor…");
+  try{if(av!==(old.av||null))pa=av?await KDB.uploadReal(dataBlob(av)):null;
+    if(bn!==(old.banner||null))pbn=bn?await KDB.uploadReal(dataBlob(bn)):null;
+    await KDB.saveReal(pa,pbn);R.realPaths={av:pa,banner:pbn};toast("Perde arkası kaydedildi")}
+  catch(e){state.me.real=old;render();toast("Perde arkası kaydedilemedi: "+(e.code||e.message))}}
+const perdeOf=uid=>R.perde[uid]||null;
+function perdeState(uid){const p=perdeOf(uid);if(!p)return "yok";if(p.status==="acik")return "acik";return p.by===R.uid?"bende":"onda"}
+function setReal(uid,d){R.real[uid]=d;const u=U[uid];if(u){u.realAv=d?d.av||null:null;u.realBn=d?d.banner||null:null}}
+function loadReal(uid,anim){KDB.perdeFoto(uid).then(d=>{setReal(uid,d);if(anim)playPerde(uid);else{render();if(openIdx>=0)drawChat()}}).catch(()=>{if(anim)playPerde(uid)})}
+function onPerde(list){
+  const seen=LS("kulis_perde_seen",[]),now={},first=!R.perdeReady;R.perdeReady=true;
+  list.forEach(p=>{const o=p.members.find(x=>x!==R.uid);if(!o)return;now[o]=p;const prev=R.perde[o];
+    if(p.status==="acik"&&(!prev||prev.status!=="acik")){const key=p.id+":"+p.ts;const anim=!seen.includes(key)&&(!first||Date.now()-p.ts<36e5);
+      if(anim){seen.push(key);LSset("kulis_perde_seen",seen.slice(-200))}loadReal(o,anim)}
+    if(p.status==="istek"&&p.by!==R.uid&&!first&&(!prev||prev.status!==p.status))toast(`${(U[o]&&U[o].n)||"Biri"} seninle perdeyi açmak istiyor 🎭`)});
+  Object.keys(R.perde).forEach(o=>{if(!now[o]&&R.perde[o].status==="acik"){setReal(o,null)}});
+  R.perde=now;render();if(openIdx>=0)drawChat();
+}
+function perdeAction(c){
+  const st=perdeState(c.u),u=U[c.u]||{n:"Bu kişi"};
+  if(st==="yok"){KDB.perdeIste(c.u).then(()=>{KDB.notify(c.u,"perde","seninle perdeyi açmak istiyor",{chat:c.u});toast("Perde isteğin gönderildi")}).catch(e=>toast(writeErr(e,"perde")));return}
+  if(st==="bende"){openSheet(`<h2>Perde isteğin bekliyor</h2><p class="muted" style="font-size:14px;margin:8px 0 16px">${esc(u.n)} kabul edince birbirinizin gerçek fotoğrafını göreceksiniz.</p><div style="display:grid;gap:8px"><button class="btn line wide" id="pdC">İsteği geri çek</button><button class="btn wide" id="pdK">Tamam</button></div>`);
+    $("#pdK").onclick=closeSheet;$("#pdC").onclick=()=>{closeSheet();KDB.perdeKapat(c.u).then(()=>toast("Perde isteğin geri çekildi")).catch(e=>toast(writeErr(e,"perde")))};return}
+  if(st==="acik"){openSheet(`<h2>Perdeyi kapat?</h2><p class="muted" style="font-size:14px;margin:8px 0 16px">Kapatırsan ikiniz de yeniden sadece hazır avatarlarınızı görürsünüz. İstediğiniz zaman tekrar açabilirsiniz.</p><div style="display:grid;gap:8px"><button class="btn wide" id="pdX" style="background:var(--nar)">Perdeyi kapat</button><button class="btn line wide" id="pdN">Vazgeç</button></div>`);
+    $("#pdN").onclick=closeSheet;$("#pdX").onclick=()=>{closeSheet();KDB.perdeKapat(c.u).then(()=>toast("Perde kapandı")).catch(e=>toast(writeErr(e,"perde")))};return}
+}
+function perdeReqHTML(c){if(!REMOTE||c.status!=="open"||perdeState(c.u)!=="onda")return "";const u=U[c.u]||{n:"Biri"};
+  return `<div class="perde-req"><div class="pr-t">🎭 Perde isteği</div><div><b>${esc(u.n)}</b> seninle perdeyi açmak istiyor</div><small>Kabul edersen birbirinizin gerçek fotoğrafını görürsünüz.</small><div class="pr-b"><button class="btn line sm" id="prNo">Şimdi değil</button><button class="btn gold sm" id="prOk">Kabul et</button></div></div>`}
+function perdeBtnHTML(c){if(!REMOTE||c.status!=="open")return "";const st=perdeState(c.u);
+  const t={yok:"Perdeyi aç",bende:"İstek gitti",onda:"Perde isteği",acik:"Perde açık"}[st];
+  return `<button class="pd-pill ${st}" id="pdB" aria-label="${t}">🎭<span>${t}</span></button>`}
+// Perde animasyonu: kadife perde yavaşça iki yana toplanır, spot ışığında karşı tarafın gerçek fotoğrafı belirir
+function playPerde(uid){
+  const u=U[uid]||{n:"",c:"#C79AF2"};$("#perdeOv")&&$("#perdeOv").remove();
+  const ph=u.realAv?`<img src="${u.realAv}" alt="">`:`<span style="font-size:50px;font-weight:700;color:#14101A">${esc((u.n||"?").charAt(0).toLocaleUpperCase("tr"))}</span>`;
+  const ov=document.createElement("div");ov.id="perdeOv";ov.setAttribute("role","dialog");ov.setAttribute("aria-label","Perde açılıyor");
+  ov.innerHTML=`<div class="po-stg"></div><div class="po-beam"></div><div class="po-rv"><div class="po-big" style="background:${u.c}">${ph}</div><div class="po-n">${esc(u.n)}</div><div class="po-s">Perde açıldı</div></div>
+   <div class="po-cu po-l"></div><div class="po-cu po-r"></div><div class="po-tie" style="left:2px"></div><div class="po-tie" style="right:2px"></div><div class="po-sw"></div><div class="po-fr"></div><div class="po-rod"></div>`;
+  document.body.appendChild(ov);
+  const q=x=>ov.querySelector(x),L=q(".po-l"),Rr=q(".po-r"),B=q(".po-beam"),V=q(".po-rv"),T=ov.querySelectorAll(".po-tie");
+  const red=matchMedia("(prefers-reduced-motion: reduce)").matches,D=red?1400:4200,END=red?3200:8600;
+  const ease=x=>x<.5?4*x*x*x:1-Math.pow(-2*x+2,3)/2,lerp=(a,b,t)=>a+(b-a)*t,cl=x=>Math.max(0,Math.min(1,x));
+  const L0=[[0,0],[100,0],[100,46],[100,57],[100,100],[0,100]],L1=[[0,0],[100,0],[62,46],[44,57],[72,100],[0,100]];
+  const poly=(t,m)=>"polygon("+L0.map((p,i)=>{let x=lerp(p[0],L1[i][0],t);const y=lerp(p[1],L1[i][1],t);if(m)x=100-x;return x+"% "+y+"%"}).join(",")+")";
+  let done=false,raf=0;const s0=performance.now()+500;
+  const finish=()=>{if(done)return;done=true;cancelAnimationFrame(raf);ov.style.transition="opacity .8s";ov.style.opacity="0";setTimeout(()=>{ov.remove();render();if(openIdx>=0)drawChat()},800)};
+  const step=n=>{const ms=n-s0,e=ease(cl(ms/D));
+    [[L,0],[Rr,1]].forEach(([c,m])=>{c.style.width=lerp(51,19,e)+"%";c.style.backgroundSize="100% 100%,"+lerp(46,12,e)+"px 100%";c.style.clipPath=poly(e,m);
+      const sw=!red&&ms>D?Math.sin((ms-D)/260)*2.2*Math.exp(-(ms-D)/700):0;c.style.transform="skewX("+(m?-sw:sw)+"deg)"});
+    T.forEach(x=>x.style.opacity=cl((ms-D*.86)/600));B.style.opacity=cl((ms-D*.43)/(D*.52));
+    const r=ease(cl((ms-D*.55)/(D*.43)));V.style.opacity=r;V.style.transform="scale("+lerp(.88,1,r)+")";V.style.filter="blur("+lerp(8,0,r)+"px)";
+    if(ms<END)raf=requestAnimationFrame(step);else finish()};
+  ov.style.opacity="0";requestAnimationFrame(()=>{ov.style.transition="opacity .6s";ov.style.opacity="1";raf=requestAnimationFrame(step)});
+  ov.onclick=finish;
+}
 function remoteStartListeners(){
   if(R.started)return;R.started=true;
+  if(KDB.listenPerde)KDB.listenPerde(onPerde);
   KDB.listenUsers(list=>{R.usersRaw=list;list.forEach(u=>putUser(u.id,u));if($("#adm.open")&&ADM.tab==="uye"&&!document.activeElement.closest("#adm input"))openAdminRemote();refreshStats();if(state.tab==="kesfet")rerender()});
   if(KDB.listenMyAnon)KDB.listenMyAnon(ids=>{R.myAnon=new Set(ids);if(R.posts&&R.posts.length){R.mapped=R.posts.map(mapPost);state.myPosts=R.mapped.filter(p=>p.u==="me");rerender()}});
   KDB.listenPosts(list=>{R.posts=list;const mapped=list.map(mapPost);state.myPosts=mapped.filter(p=>p.u==="me");R.mapped=mapped;refreshStats();
@@ -2603,11 +2732,13 @@ function askGender(){
 }
 function remoteEnterApp(pub,priv){
   R.uid=KDB.uid;
+  const isPre=v=>v&&String(v).startsWith("preset:");
+  if((pub.av&&!isPre(pub.av))||(pub.banner&&!isPre(pub.banner))){const f={};if(pub.av&&!isPre(pub.av))f.av=null;if(pub.banner&&!isPre(pub.banner))f.banner=null;KDB.updateProfile(f).catch(()=>{});if(pub.av&&!isPre(pub.av))pub.av=null;if(pub.banner&&!isPre(pub.banner))pub.banner=null}
   state.me={n:pub.n,c:pub.c,s:pub.s,g:pub.g,age:pub.age,bio:pub.bio||"",photo:pub.av||undefined,banner:pub.banner||undefined,
     ad:priv?priv.ad||"":"",soyad:priv?priv.soyad||"":"",email:priv?priv.email||"":"",b:priv?priv.b:undefined,provider:priv?priv.provider:(pub.guest?"guest":"")};
   R.syncedMe=JSON.stringify({n:state.me.n,c:state.me.c,bio:state.me.bio,photo:state.me.photo,banner:state.me.banner,g:state.me.g});
   $("#onb").hidden=true;$("#remLoad")&&$("#remLoad").remove();
-  remoteStartListeners();render();askGender();iosInstallNudge();loadTurn();
+  remoteStartListeners();render();askGender();iosInstallNudge();loadTurn();loadMyReal();
   if(KDB.logAccess)KDB.logAccess("giris");
   try{const cq=new URLSearchParams(location.search).get("call");if(cq&&KDB.getCall){history.replaceState(null,"",location.pathname);KDB.getCall(cq).then(d=>{if(d&&d.status==="ring"&&d.to===R.uid)showIncoming(d)}).catch(()=>{})}}catch(e){}
   if(KDB.pushSupported)KDB.pushSupported().then(ok=>{R.pushOk=ok;if(ok&&LS("kulis_push_on",false))KDB.refreshPush();if(state.tab==="ben")render()});
@@ -2621,14 +2752,7 @@ function remoteSyncMe(){
   const cur={n:state.me.n,c:state.me.c,bio:state.me.bio||"",photo:state.me.photo,banner:state.me.banner,g:state.me.g};
   const old=JSON.parse(R.syncedMe);if(JSON.stringify(cur)===R.syncedMe)return;
   const f={};if(cur.n!==old.n)f.n=cur.n;if(cur.c!==old.c)f.c=cur.c;if(cur.bio!==old.bio)f.bio=cur.bio;
-  // yüklenen görsel (data:) önce depoya gider, bağlantısı gelince profil güncellenir
-  R.upl=R.upl||{};
-  ["photo","banner"].forEach(k=>{const v=cur[k];if(!v||!String(v).startsWith("data:")||R.upl[k]===v)return;R.upl[k]=v;
-    KDB.upload("p",dataBlob(v),"jpg").then(url=>{if(state.me[k]!==v)return;state.me[k]=url;delete R.upl[k];remoteSyncMe();render();toast(k==="photo"?"Profil fotoğrafın kaydedildi":"Kapak görselin kaydedildi")})
-      .catch(e=>{delete R.upl[k];toast("Görsel yüklenemedi: "+(e.code||e.message))})});
-  if(Object.keys(R.upl).length&&["photo","banner"].some(k=>String(cur[k]||"").startsWith("data:"))){
-    ["photo","banner"].forEach(k=>{if(String(cur[k]||"").startsWith("data:"))cur[k]=old[k]})}
-  const pre=v=>(v&&(String(v).startsWith("preset:")||String(v).startsWith(ST_URL)))?v:null;
+  const pre=v=>(v&&String(v).startsWith("preset:"))?v:null;
   if(pre(cur.photo)!==pre(old.photo))f.av=pre(cur.photo);if(pre(cur.banner)!==pre(old.banner))f.banner=pre(cur.banner);
   if(cur.g!==old.g&&old.g==="Belirtmeyeyim")f.g=cur.g;
   R.syncedMe=JSON.stringify(cur);
@@ -2866,7 +2990,7 @@ function openAdminRemote(){
           `<div><dt>Ad soyad</dt><dd>${esc((pv.ad||"")+" "+(pv.soyad||""))||"—"}</dd></div><div><dt>E-posta</dt><dd>${esc(pv.email||"—")}</dd></div><div><dt>Doğum tarihi</dt><dd>${pv.b?`${pv.b.d} ${AYLAR[pv.b.m-1]} ${pv.b.y}`:"—"}</dd></div><div><dt>Giriş</dt><dd>${{google:"Google",email:"E-posta bağlantısı",apple:"Apple"}[pv.provider]||esc(pv.provider||"—")}</dd></div>`}
           <div><dt>Kullanıcı kimliği</dt><dd class="au-id">${u.uid}</dd></div></dl>
           ${u.me?"":ADM.confirm===u.uid?`<div class="au-del"><p>Silmek için takma adı yaz: <b>${esc(u.n)}</b></p><div class="adm-add"><input class="city-search" id="auDelIn" autocomplete="off" maxlength="20"><button class="btn au-danger-fill" id="auDelGo" disabled>Kalıcı sil</button></div><button class="dice" id="auDelX" style="margin-top:8px">Vazgeç</button></div>`
-            :`<button class="btn line au-danger" data-audel="${u.uid}" style="height:40px;margin-top:12px">Hesabı sil</button>`}
+            :`<button class="btn line" data-aureal="${u.uid}" style="height:40px;margin-top:12px;margin-right:8px">Perde fotoğrafını sil</button><button class="btn line au-danger" data-audel="${u.uid}" style="height:40px;margin-top:12px">Hesabı sil</button>`}
         </div>`:""}</div>`};
     body=`<div class="adm-stats au-stats">
       <div><b>${all.length}</b><small>Toplam üye</small><i>son 200 kayıt</i></div>
@@ -2909,6 +3033,7 @@ function openAdminRemote(){
   el.querySelectorAll("[data-au]").forEach(b=>b.onclick=()=>{const id=b.dataset.au;ADM.confirm=null;ADM.open=ADM.open===id?null:id;
     if(ADM.open&&!(id in ADM.priv))KDB.adminPrivate(id).then(p=>{ADM.priv[id]=p;if(ADM.open===id)openAdminRemote()}).catch(()=>{ADM.priv[id]=null;if(ADM.open===id)openAdminRemote()});
     openAdminRemote()});
+  el.querySelectorAll("[data-aureal]").forEach(b=>b.onclick=()=>{b.disabled=true;KDB.adminDelReal(b.dataset.aureal).then(()=>toast("Perde fotoğrafı silindi")).catch(e=>{b.disabled=false;toast("Silinemedi: "+(e.code||e.message))})});
   el.querySelectorAll("[data-audel]").forEach(b=>b.onclick=()=>{ADM.confirm=b.dataset.audel;openAdminRemote();setTimeout(()=>{const i=$("#auDelIn");i&&i.focus()},30)});
   const dx=$("#auDelX");if(dx)dx.onclick=()=>{ADM.confirm=null;openAdminRemote()};
   const di=$("#auDelIn"),dg=$("#auDelGo");
@@ -2969,6 +3094,6 @@ if(REMOTE){
 if(REMOTE)remoteInit();else
 try{const s=JSON.parse(localStorage.getItem("itiraf_me")||"null");if(s&&s.n&&s.s){state.me=s;loadData();render();seedDemo()}else startOnb()}catch(e){startOnb()}
 </script>
-<script type="module">if(REMOTE)import("./kulis-db.js?v=18")</script>
+<script type="module">if(REMOTE)import("./kulis-db.js?v=19")</script>
 </body>
 </html>

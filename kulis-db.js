@@ -136,6 +136,8 @@ const KDB = {
     await wipe(collection(db, "users", uid, "notifs"));
     await wipe(collection(db, "users", uid, "blocks"));
     await deleteDoc(doc(db, "users", uid, "settings", "main")).catch(() => {});
+    await deleteDoc(doc(db, "users", uid, "gizli", "foto")).catch(() => {});
+    await wipe(query(collection(db, "perde"), where("members", "array-contains", uid)));
     await KDB.deleteAccount();
     const u = auth.currentUser;
     try { await deleteUser(u); }
@@ -258,6 +260,23 @@ const KDB = {
   },
   acceptChat(cid) { return updateDoc(doc(db, "chats", cid), { status: "open" }); },
   declineChat(cid) { return deleteDoc(doc(db, "chats", cid)); },
+  // ---------- Perde ----------
+  listenPerde(cb) {
+    stop("perde");
+    unsubs.perde = onSnapshot(query(collection(db, "perde"), where("members", "array-contains", KDB.uid)),
+      s => cb(s.docs.map(d => ({ id: d.id, ...d.data(), ts: d.data().ts ? ms(d.data().ts) : Date.now() }))), e => console.warn("perde", e));
+  },
+  perdeIste(other) {
+    const m = [KDB.uid, other].sort(), b = writeBatch(db);
+    b.set(doc(db, "perde", m.join("_")), { members: m, by: KDB.uid, status: "istek", ts: serverTimestamp() });
+    return b.commit();
+  },
+  perdeKabul(other) { return updateDoc(doc(db, "perde", chatId(KDB.uid, other)), { status: "acik", ts: serverTimestamp() }); },
+  perdeKapat(other) { return deleteDoc(doc(db, "perde", chatId(KDB.uid, other))); },
+  async perdeFoto(uid) { const r = await httpsCallable(fns, "perdeFoto")({ uid }); return r.data || {}; },
+  async getReal() { const s = await getDoc(doc(db, "users", KDB.uid, "gizli", "foto")); return s.exists() ? s.data() : null; },
+  saveReal(av, banner) { return setDoc(doc(db, "users", KDB.uid, "gizli", "foto"), { av: av || null, banner: banner || null, ts: serverTimestamp() }); },
+  adminDelReal(uid) { return deleteDoc(doc(db, "users", uid, "gizli", "foto")); },
   async getTurn() { const s = await getDoc(doc(db, "config", "turn")); return s.exists() ? s.data() : null; },
   // Dosya yükle: dir "p" (profil görselleri) ya da "m" (mesaj ekleri). İndirme bağlantısını döndürür.
   async upload(dir, blob, ext) {
@@ -266,6 +285,13 @@ const KDB = {
     const r = sRef(st, `${dir}/${KDB.uid}/${name}`);
     await uploadBytes(r, blob, { contentType: blob.type, cacheControl: "public,max-age=31536000" });
     return await getDownloadURL(r);
+  },
+  // Perde arkası görsel: herkese açık bağlantı OLUŞTURULMAZ, sadece depodaki yol döner
+  async uploadReal(blob) {
+    const st = getStorage(app);
+    const path = `r/${KDB.uid}/${Date.now().toString(36)}${Math.random().toString(36).slice(2, 10)}.jpg`;
+    await uploadBytes(sRef(st, path), blob, { contentType: "image/jpeg" });
+    return path;
   },
   // Fotoğraf ya da sesli mesaj gönder
   async sendMedia(cid, m) {
