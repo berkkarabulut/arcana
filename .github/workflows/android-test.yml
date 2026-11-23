@@ -30,7 +30,8 @@ jobs:
             adb install -r android/app/build/outputs/apk/debug/app-debug.apk
             adb logcat -c
             adb shell am start -n com.kulistr.app/com.google.androidbrowserhelper.trusted.LauncherActivity
-            sleep 20
+            sleep 25
+            adb shell dumpsys activity activities | grep -E "mResumedActivity|topResumedActivity" | head -3
             adb logcat -d -b crash > /tmp/crash.txt || true
             echo "===== CRASH ====="; cat /tmp/crash.txt | head -80
             echo "===== RUNTIME ====="; adb logcat -d | grep -E "AndroidRuntime|FATAL|kulistr|TWA|LauncherActivity" | head -80
