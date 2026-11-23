@@ -9,7 +9,7 @@ import {
 import {
   initializeFirestore, persistentLocalCache, persistentMultipleTabManager,
   doc, getDoc, setDoc, addDoc, updateDoc, deleteDoc, collection, query, where, orderBy, limit,
-  onSnapshot, serverTimestamp, increment, writeBatch, getDocs
+  onSnapshot, serverTimestamp, increment, writeBatch, getDocs, deleteField
 } from "https://www.gstatic.com/firebasejs/12.8.0/firebase-firestore.js";
 import { getMessaging, getToken, deleteToken, isSupported as msgSupported } from "https://www.gstatic.com/firebasejs/12.8.0/firebase-messaging.js";
 import { getFunctions, httpsCallable } from "https://www.gstatic.com/firebasejs/12.8.0/firebase-functions.js";
@@ -229,13 +229,27 @@ const KDB = {
   async markNotifsRead(ids) { const b = writeBatch(db); ids.forEach(id => b.update(doc(db, "users", KDB.uid, "notifs", id), { read: true })); if (ids.length) await b.commit(); },
 
   // ---------- Şikâyet, engel ----------
-  report(key, reason, preview) { return addDoc(collection(db, "reports"), { by: KDB.uid, key, reason, preview: preview || null, status: "bekliyor", ts: serverTimestamp() }); },
+  report(key, reason, preview, extra) {
+    const d = { by: KDB.uid, key, reason, preview: preview || null, status: "bekliyor", ts: serverTimestamp() };
+    if (extra) { if (extra.target) d.target = extra.target; if (extra.cid) d.cid = extra.cid; if (extra.mids && extra.mids.length) d.mids = extra.mids.slice(-20); }
+    return addDoc(collection(db, "reports"), d);
+  },
   listenReports(cb) {
     stop("reports");
     unsubs.reports = onSnapshot(query(collection(db, "reports"), orderBy("ts", "desc"), limit(100)),
       s => cb(s.docs.map(d => ({ id: d.id, ...d.data(), ts: ms(d.data().ts) }))), e => cb(null));
   },
-  setReport(id, status) { return updateDoc(doc(db, "reports", id), { status }); },
+  setReport(id, status) { return updateDoc(doc(db, "reports", id), { status, doneBy: KDB.uid, doneAt: serverTimestamp() }); },
+  // Moderatör: bildirilen mesajları sil (yerine "moderatör tarafından silindi" yazısı çıkar)
+  async modDeleteMsgs(cid, mids) {
+    const b = writeBatch(db);
+    mids.forEach(id => b.update(doc(db, "chats", cid, "messages", id), { t: "", mod: true, img: deleteField(), aud: deleteField(), dur: deleteField() }));
+    await b.commit();
+  },
+  async ban(uid, reason) { const r = await httpsCallable(fns, "banla")({ uid, reason }); return r.data; },
+  async unban(uid) { const r = await httpsCallable(fns, "banKaldir")({ uid }); return r.data; },
+  listenBans(cb) { stop("bans"); unsubs.bans = onSnapshot(collection(db, "bans"), s => cb(s.docs.map(d => ({ id: d.id, ...d.data() }))), e => cb([])); },
+  async myBan() { try { const s = await getDoc(doc(db, "bans", KDB.uid)); return s.exists() ? s.data() : null; } catch (e) { return null; } },
   async isAdmin() { try { const s = await getDoc(doc(db, "config", "admins")); return s.exists() && (s.data().uids || []).includes(KDB.uid); } catch (e) { return false; } },
   block(uid) { return setDoc(doc(db, "users", KDB.uid, "blocks", uid), { ts: serverTimestamp() }); },
   listenBlocks(cb) { stop("blocks"); unsubs.blocks = onSnapshot(collection(db, "users", KDB.uid, "blocks"), s => cb(s.docs.map(d => d.id)), e => console.warn("blocks", e)); },
