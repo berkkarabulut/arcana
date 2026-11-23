@@ -204,6 +204,11 @@ h1,h2,h3{font-family:var(--display);font-weight:400;text-wrap:balance}
 button.pl{border:0;color:inherit;cursor:pointer;padding:0}
 .m.modded{font-style:italic;opacity:.7;font-size:13px;background:transparent!important;border:1px dashed var(--cizgi,rgba(255,255,255,.2));color:var(--soluk)!important}
 .adm-by{font-size:12px;color:var(--soluk);margin:-2px 0 6px}.adm-ban{display:inline-block;font-size:11px;font-weight:700;padding:2px 7px;border-radius:999px;background:rgba(var(--nar-rgb),.18);color:var(--nar);margin-left:6px}
+.adm-conv{display:flex;flex-direction:column;gap:8px;max-height:420px;overflow:auto;padding:10px;border-radius:12px;background:rgba(0,0,0,.25);margin:0 0 10px}
+.ac-m{display:flex;flex-direction:column;max-width:82%}.ac-m.b{align-self:flex-end;align-items:flex-end}.ac-m.k{align-self:flex-start}
+.ac-m small{font-size:11px;color:var(--soluk);margin-bottom:2px}.ac-b{padding:8px 11px;border-radius:14px;font-size:14px;line-height:1.4;overflow-wrap:anywhere}
+.ac-m.k .ac-b{background:rgba(var(--nar-rgb),.16);border:1px solid rgba(var(--nar-rgb),.35)}.ac-m.b .ac-b{background:rgba(255,255,255,.08)}
+.ac-b img{max-width:200px;max-height:240px;border-radius:10px;display:block}.ac-b audio{max-width:220px;height:36px}
 .adm-cf{border:1px solid rgba(var(--nar-rgb),.4);border-radius:12px;padding:10px 12px;margin-top:10px;font-size:13.5px}
 .m.media img{cursor:zoom-in;max-width:240px;max-height:320px;border-radius:14px;display:block}
 .pd-pill{display:inline-flex;align-items:center;gap:5px;height:30px;padding:0 10px;border-radius:999px;font-size:12px;font-weight:700;border:1px solid rgba(212,175,90,.55);color:#E9C77A;background:transparent;flex:0 0 auto;white-space:nowrap;cursor:pointer}
@@ -1657,7 +1662,8 @@ const LS=(k,d)=>{try{const v=JSON.parse(localStorage.getItem(k)||"null");return 
 const LSset=(k,v)=>{try{localStorage.setItem(k,JSON.stringify(v))}catch(e){}};
 function logReport(key,reason,extra){if(REMOTE){let pv=null;try{const o=reportPreview(key);pv=`${o.kind}: ${o.who} | ${o.text}`.slice(0,400)}catch(e){}
   const [t,id]=key.split(":");extra=extra||{};if(!extra.target&&(t==="u"||t==="k"))extra.target=id;
-  if(t==="k"){const c=state.chats.find(x=>x.u===id);if(c){extra.cid=c.id;extra.mids=c.msgs.filter(m=>!m.me&&m.id&&!m.mod).slice(-10).map(m=>m.id)}}
+  if(t==="k"){const c=state.chats.find(x=>x.u===id);if(c){extra.cid=c.id;extra.mids=c.msgs.filter(m=>!m.me&&m.id&&!m.mod).slice(-20).map(m=>m.id);
+    extra.msgs=c.msgs.filter(m=>m.id||m.t).slice(-30).map(m=>{const o={w:m.me?"b":"k",t:String(m.t||"").slice(0,500),ts:m.ts||0};if(m.id)o.id=m.id;if(m.kind==="img"&&m.src)o.img=m.src;if(m.kind==="voice"&&m.src){o.aud=m.src;o.dur=m.dur||0}if(m.mod)o.mod=true;return o})}}
   if(t==="p"&&!extra.target){const rp=(R.posts||[]).find(x=>x.id===id);if(rp&&rp.uid&&!rp.anon)extra.target=rp.uid}
   if(t==="c"&&!extra.target){const cc=(R.cm[id]||[])[+key.split(":")[2]];if(cc&&cc.uid)extra.target=cc.uid}
   return KDB.report(key,reason,pv,extra).then(()=>track("sikayet")).catch(e=>{toast("Şikâyet gönderilemedi: "+(e.code||e.message));throw e})}const l=LS("arcana_reports",[]);l.unshift({id:"r"+Date.now(),key,reason,ts:Date.now(),status:"bekliyor"});LSset("arcana_reports",l.slice(0,200));track("sikayet")}
@@ -2972,7 +2978,12 @@ function showPremiumRemote(src){
 }
 
 /* ============ YÖNETİCİ PANELİ (sunucu) ============ */
-const ADM={tab:"uye",q:"",f:"hepsi",open:null,priv:{},confirm:null,ban:null};
+const ADM={tab:"uye",q:"",f:"hepsi",open:null,priv:{},confirm:null,ban:null,conv:null};
+// Bildirilen konuşmanın kaydı (bildirim anındaki son 30 mesaj): kim ne yazdı, fotoğraf ve sesler dahil
+function convHTML(r,nameOf){const bn=nameOf(r.by),kn=nameOf(r.target);const del=new Set();
+  return `<div class="adm-conv">${r.msgs.map(m=>{const me=m.w==="b";const who=me?bn+" (bildiren)":kn+" (bildirilen)";
+    const body=m.mod?`<i>Moderatör tarafından silinmiş</i>`:m.img?`<a href="${esc(m.img)}" target="_blank" rel="noopener"><img src="${esc(m.img)}" alt="Gönderilen fotoğraf"></a>${m.t?`<div>${esc(m.t)}</div>`:""}`:m.aud?`<audio controls preload="none" src="${esc(m.aud)}"></audio>`:esc(m.t);
+    return `<div class="ac-m ${me?"b":"k"}"><small>${esc(who)}${m.ts?" · "+new Date(m.ts).toLocaleString("tr-TR",{day:"numeric",month:"short",hour:"2-digit",minute:"2-digit"}):""}</small><div class="ac-b">${body}</div></div>`}).join("")}</div>`}
 const ONLINE_MS=5*60e3;
 const dayStart=()=>{const d=new Date();d.setHours(0,0,0,0);return d.getTime()};
 function relTime(ts){if(!ts)return "bilinmiyor";const m=Math.floor((Date.now()-ts)/60000);if(m<1)return "az önce";if(m<60)return m+" dk önce";const h=Math.floor(m/60);if(h<24)return h+" sa önce";const d=Math.floor(h/24);return d===1?"dün":d<30?d+" gün önce":new Date(ts).toLocaleDateString("tr-TR",{day:"numeric",month:"short",year:"numeric"})}
@@ -3030,7 +3041,9 @@ function openAdminRemote(){
       const st={kaldirildi:"Kaldırıldı",yoksayildi:"Yoksayıldı",banlandi:"Banlandı"}[r.status]||r.status;
       return `<div class="adm-rep ${r.status!=="bekliyor"?"done":""}"><div class="adm-rh"><span class="adm-k">${esc(pv.kind)}</span><b>${esc(pv.who)}</b>${tgBanned?`<span class="adm-ban">Banlı</span>`:""}<span class="adm-reason">${esc(r.reason)}</span><small>${relTime(r.ts)}</small></div>
       <div class="adm-by">Bildiren: ${esc(nameOf(r.by))}${t==="k"&&r.mids?` · ${r.mids.length} mesaj`:""}</div>
-      <p>${esc(pv.text).slice(0,400)}</p>${r.status==="bekliyor"?(ADM.ban===r.id?`<div class="adm-cf"><b>${esc(pv.who)}</b> banlansın mı? Hesabı kapanır, giriş yapamaz ve hiçbir şey yazamaz.<div class="adm-acts" style="margin-top:8px"><button class="btn" data-adm="banok:${r.id}" style="background:var(--nar);color:var(--on-nar)">Evet, banla</button><button class="btn line" data-adm="banno:${r.id}">Vazgeç</button></div></div>`
+      <p>${esc(pv.text).slice(0,400)}</p>
+      ${t==="k"&&r.msgs&&r.msgs.length?`<button class="dice" data-adm="konus:${r.id}" style="margin:2px 0 10px">${ADM.conv===r.id?"Konuşmayı gizle":`Konuşmayı gör (${r.msgs.length} mesaj)`}</button>${ADM.conv===r.id?convHTML(r,nameOf):""}`:t==="k"?`<p class="adm-by">Bu şikâyet eski sürümden geldi, konuşma kaydı yok.</p>`:""}
+      ${r.status==="bekliyor"?(ADM.ban===r.id?`<div class="adm-cf"><b>${esc(pv.who)}</b> banlansın mı? Hesabı kapanır, giriş yapamaz ve hiçbir şey yazamaz.<div class="adm-acts" style="margin-top:8px"><button class="btn" data-adm="banok:${r.id}" style="background:var(--nar);color:var(--on-nar)">Evet, banla</button><button class="btn line" data-adm="banno:${r.id}">Vazgeç</button></div></div>`
         :`<div class="adm-acts">${canRemove?`<button class="btn" data-adm="kaldir:${r.id}" style="background:var(--nar);color:var(--on-nar)">${t==="k"?"Mesajları kaldır":"İçeriği kaldır"}</button>`:""}${t==="u"&&R.admin&&/foto/i.test(r.reason)?`<button class="btn" data-adm="foto:${r.id}" style="background:var(--nar);color:var(--on-nar)">Perde fotoğrafını sil</button>`:""}${tg&&!tgStaff&&!tgBanned?`<button class="btn line" data-adm="ban:${r.id}" style="color:var(--nar);border-color:rgba(var(--nar-rgb),.45)">Kişiyi banla</button>`:""}<button class="btn line" data-adm="yoksay:${r.id}">Yoksay</button></div>`)
         :`<small class="adm-st">${st}</small>`}</div>`};
     body=`${openReps.length?openReps.map(repRow).join(""):`<p class="muted" style="font-size:14px;padding:18px 4px">Bekleyen şikâyet yok.</p>`}
@@ -3076,6 +3089,7 @@ function openAdminRemote(){
     if(a==="sil"){const l=[...bannedList()];l.splice(+id,1);saveBanned(l).then(openAdminRemote);return}
     const r=reps.find(x=>x.id===id);if(!r)return;
     if(a==="ban"){ADM.ban=id;openAdminRemote();return}
+    if(a==="konus"){ADM.conv=ADM.conv===id?null:id;openAdminRemote();return}
     if(a==="banno"){ADM.ban=null;openAdminRemote();return}
     const[t,pid,ci]=r.key.split(":"),tg=r.target||((t==="u"||t==="k")?pid:null);
     let job,st,msg;
@@ -3138,6 +3152,6 @@ if(REMOTE){
 if(REMOTE)remoteInit();else
 try{const s=JSON.parse(localStorage.getItem("itiraf_me")||"null");if(s&&s.n&&s.s){state.me=s;loadData();render();seedDemo()}else startOnb()}catch(e){startOnb()}
 </script>
-<script type="module">if(REMOTE)import("./kulis-db.js?v=20")</script>
+<script type="module">if(REMOTE)import("./kulis-db.js?v=21")</script>
 </body>
 </html>

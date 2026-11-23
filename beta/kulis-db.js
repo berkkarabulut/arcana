@@ -231,7 +231,7 @@ const KDB = {
   // ---------- Şikâyet, engel ----------
   report(key, reason, preview, extra) {
     const d = { by: KDB.uid, key, reason, preview: preview || null, status: "bekliyor", ts: serverTimestamp() };
-    if (extra) { if (extra.target) d.target = extra.target; if (extra.cid) d.cid = extra.cid; if (extra.mids && extra.mids.length) d.mids = extra.mids.slice(-20); }
+    if (extra) { if (extra.target) d.target = extra.target; if (extra.cid) d.cid = extra.cid; if (extra.mids && extra.mids.length) d.mids = extra.mids.slice(-20); if (extra.msgs && extra.msgs.length) d.msgs = extra.msgs.slice(-30); }
     return addDoc(collection(db, "reports"), d);
   },
   listenReports(cb) {
