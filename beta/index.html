@@ -2290,7 +2290,7 @@ $("#premPill").onclick=()=>{if(!state.premium)showPremium("pill");else toast("Pr
 
 /* ============ ŞİKÂYET ============ */
 function showReport(key){
-  const reasons=["Taciz veya zorbalık","Cinsel içerik","Başkasını ifşa ediyor","Nefret söylemi","Spam veya dolandırıcılık","18 yaşından küçük olabilir","Diğer"];let sel=null;
+  const reasons=["Taciz veya zorbalık","Cinsel içerik","Başkasını ifşa ediyor","Nefret söylemi","Spam veya dolandırıcılık","18 yaşından küçük olabilir","Çocuk istismarı veya reşit olmayan","Diğer"];let sel=null;
   const draw=()=>{openSheet(`<h2>Neden şikâyet ediyorsun?</h2><p class="muted" style="font-size:14px;margin:6px 0 14px">Şikâyetler 24 saat içinde incelenir. Kimin şikâyet ettiği gösterilmez.</p>
     <div class="plans">${reasons.map(r=>`<button class="plan" data-rs="${r}" aria-pressed="${sel===r}"><b style="font-weight:600">${r}</b></button>`).join("")}</div>
     <button class="btn wide" id="rpGo" ${sel?"":"disabled"}>Şikâyeti gönder</button>`);
