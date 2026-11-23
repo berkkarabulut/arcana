@@ -2711,7 +2711,8 @@ async function playService(){
 }
 function setPremiumFrom(p){
   const on=!!(p&&p.active&&(p.until||0)>Date.now());
-  const web=REMOTE&&WEB_FREE_PREMIUM&&!IN_APP;
+  // Google Play inceleme hesabı: satın alma yapamadıkları için tüm özellikler açık
+  const web=REMOTE&&((WEB_FREE_PREMIUM&&!IN_APP)||["kulistrinfo@gmail.com"].includes(String(KDB.email||"").toLowerCase()));
   const was=state.premium,wasT=state.tier;state.premium=web||on;state.premUntil=on?p.until:0;
   state.tier=web?"tam":on?(p.tier||(String(p.productId||"").split("_")[1])||"tam"):null;
   if(wasT!==state.tier&&state.me&&was===state.premium){render();if(openIdx>=0)drawChat()}
@@ -2895,6 +2896,6 @@ if(REMOTE){
 if(REMOTE)remoteInit();else
 try{const s=JSON.parse(localStorage.getItem("itiraf_me")||"null");if(s&&s.n&&s.s){state.me=s;loadData();render();seedDemo()}else startOnb()}catch(e){startOnb()}
 </script>
-<script type="module">if(REMOTE)import("./kulis-db.js?v=16")</script>
+<script type="module">if(REMOTE)import("./kulis-db.js?v=17")</script>
 </body>
 </html>

@@ -67,6 +67,7 @@ const KDB = {
     return (await signInWithPopup(auth, p)).user;
   },
   async anon() { return (await signInAnonymously(auth)).user; },
+  get email() { return (auth.currentUser && auth.currentUser.email) || ""; },
   async sendLink(email) {
     const url = location.origin + location.pathname;
     await sendSignInLinkToEmail(auth, email, { url, handleCodeInApp: true });
