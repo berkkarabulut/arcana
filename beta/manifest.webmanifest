@@ -1,4 +1,5 @@
 {
+  "id": "/",
   "name": "Kulis: İtiraf & Sohbet",
   "short_name": "Kulis",
   "description": "Aramızda. Takma adınla itiraf et, burcunla tanış, seni anlayanla sohbete başla.",
@@ -28,5 +29,9 @@
       "type": "image/png",
       "purpose": "maskable"
     }
+  ],
+  "categories": [
+    "social",
+    "lifestyle"
   ]
 }
