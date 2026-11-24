@@ -187,6 +187,15 @@ for (const cihaz of CIHAZLAR) {
       () => (!document.querySelector(".eng-row") && /kalmadı/.test(document.querySelector("#engIc").innerText)) || "engel kaldırılamadı");
     await page.evaluate(() => { delete window.KDB; closeSheet() });
 
+    await adim(page, cihaz, "Zil butonu güncel bildirim ekranını açıyor (okundu sunucuya yazılsın)", async () => {
+      await page.evaluate(() => { const o = showNotifs; window.__nf = 0; showNotifs = function () { window.__nf++; return o() }; window.__nfo = o });
+      await page.click("#topBell"); await page.evaluate(() => { showNotifs = window.__nfo });
+    }, () => window.__nf === 1 || "zil eski fonksiyonu çağırıyor");
+    await adim(page, cihaz, "Bildirimler: tümünü okundu işaretle", async () => {
+      await page.evaluate(() => { closeSheet(); state.notifs.forEach(n => n.read = false); showNotifs(); state.notifs.forEach(n => n.read = false); closeSheet(); showNotifs() });
+      if (await page.locator("#nfAll").count()) await page.click("#nfAll");
+    }, () => state.notifs.every(n => n.read) || "okunmamış kaldı");
+    await kapat(page);
     await adim(page, cihaz, "Yönetici paneli (sonradan yüklenen)", async () => { await page.evaluate(() => openAdmin()); await page.waitForTimeout(1500) },
       () => /Yönetici|Şikâyet|Kullanıcı|İstatistik/.test(document.body.innerText) || "panel açılmadı");
     await adim(page, cihaz, "Yönetici paneli kapanıyor", () => page.evaluate(() => closeAdmin()));

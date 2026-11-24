@@ -15,7 +15,7 @@ function notifRow(n){
 }
 function showNotifs(){
   const list=state.notifs,fresh=list.filter(n=>!n.read),old=list.filter(n=>n.read);
-  openSheet(`<div class="sheet-head"><h2>Bildirimler</h2></div>${typeof pushCard==="function"?pushCard("nf"):""}
+  openSheet(`<div class="sheet-head"><h2>Bildirimler</h2>${fresh.length?`<button class="lnk nf-all" id="nfAll">Tümünü okundu işaretle</button>`:""}</div>${typeof pushCard==="function"?pushCard("nf"):""}
     ${list.length?`${fresh.length?`<h3 class="nf-h">Yeni</h3>${fresh.map(notifRow).join("")}`:""}${old.length?`<h3 class="nf-h">Önceki</h3>${old.map(notifRow).join("")}`:""}`
     :`<div class="empty" style="text-align:center;padding:30px 10px">${IC.spark}<p style="margin-top:8px">Henüz bildirimin yok. İtirafına tepki geldiğinde, biri sana yazdığında ya da eşleştiğinde burada görürsün.</p></div>`}`);
   $("#sheet").querySelectorAll("[data-nf]").forEach(b=>b.onclick=()=>{
@@ -28,5 +28,6 @@ function showNotifs(){
     render();
   });
   if(fresh.length){state.notifs.forEach(n=>n.read=true);const nu=$("#bellPip");nu.hidden=true;saveData()}
+  const all=$("#nfAll");if(all)all.onclick=()=>{state.notifs.forEach(n=>n.read=true);toast("Hepsi okundu işaretlendi");showNotifs()};
 }
 

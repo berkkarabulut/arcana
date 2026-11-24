@@ -28,6 +28,7 @@ document.addEventListener("click",e=>{
   else if(d.block){openSheet(`<h2>${esc(U[d.block].n)}</h2><div style="display:grid;gap:8px;margin-top:14px"><button class="btn line wide" id="bl1">Engelle</button><button class="btn line wide" id="bl2">Şikâyet et</button></div><p class="hint">Engellediğin kişi seni göremez ve sana yazamaz. Şikâyetler 24 saat içinde incelenir.</p>`);
     const bu=d.block;$("#bl1").onclick=()=>{closeSheet();if(REMOTE)KDB.block(bu).then(()=>toast("Engellendi")).catch(e=>toast("Olmadı: "+(e.code||e.message)));else toast("Engellendi")};$("#bl2").onclick=()=>{closeSheet();if(REMOTE)showReport("u:"+bu);else toast("Şikâyetin alındı, inceleyeceğiz")}}
 });
-$("#topBell").onclick=showNotifs;
+// sonradan genişletilen sürüm (okundu bilgisini sunucuya yazan) çağrılsın diye fonksiyon her tıklamada adıyla çağrılır
+$("#topBell").onclick=()=>showNotifs();
 $("#confessBtn").onclick=()=>{closeChat();showConfess()};
 $("#premPill").onclick=()=>{if(!state.premium)showPremium("pill");else toast("Premium üyesin")};
