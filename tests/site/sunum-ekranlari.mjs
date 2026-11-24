@@ -80,7 +80,7 @@ for (const p of ITIRAFLAR) {
 }
 const o = uidOf("kedikahve"), CID = [ben.uid, o].sort().join("_");
 const son = SOHBET[SOHBET.length - 1];
-await yaz("chats/" + CID, { members: [ben.uid, o].sort(), reqBy: o, status: "open", match: true, from: "p8", last: son[1], lastBy: o, lastAt: once(son[2]), n: SOHBET.length });
+await yaz("chats/" + CID, { members: [ben.uid, o].sort(), reqBy: o, status: "open", match: true, from: "Annemlere iş gezisi dedim, tek başıma Mardin'e gittim.", last: son[1], lastBy: o, lastAt: once(son[2]), n: SOHBET.length });
 let i = 0;
 for (const [kim, t, dk] of SOHBET) await yaz(`chats/${CID}/messages/m${String(i++).padStart(2, "0")}`, { uid: kim === "ben" ? ben.uid : o, t, ts: once(dk) });
 console.log("Demo veri hazır");
@@ -96,6 +96,7 @@ await p.evaluate(async t => { const c = await window.__emuGiris(t); await remote
 try { await p.waitForFunction(() => typeof state !== "undefined" && state.me && state.chats && state.chats.length > 0, null, { timeout: 25000 }); }
 catch (e) { console.log(log.slice(-40).join("\n")); throw e; }
 await p.waitForTimeout(3000);
+console.log("TEŞHİS", JSON.stringify(await p.evaluate(() => ({ posts: R.posts && R.posts.length, mapped: R.mapped && R.mapped.length, all: allPosts().length, me: state.me.g, cat: state.cat, sort: state.sort, U: Object.keys(U).length, ornek: R.mapped && R.mapped[0] && { u: R.mapped[0].u, g: U[R.mapped[0].u] && U[R.mapped[0].u].g } }))));
 const temizle = () => p.evaluate(() => { document.querySelectorAll("#ckb,.toast,#toast").forEach(e => e.remove()); });
 async function cek(ad, hazirla, bekle = 1500) {
   try {

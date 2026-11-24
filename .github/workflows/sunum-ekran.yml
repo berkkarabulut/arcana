@@ -15,6 +15,7 @@ jobs:
         run: |
           npm i --no-save --no-audit --no-fund typescript@5.7.3
           node build/derle.mjs --out dist
+          cp -rn icons og.jpg dist/ 2>/dev/null || true
       - name: Araçları kur
         working-directory: tests/site
         run: |
