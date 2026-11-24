@@ -1,6 +1,6 @@
 // Kulis service worker: sayfa her zaman ağdan taze gelir, internet yoksa son kopya açılır.
 // Ayrıca telefona/tarayıcıya gelen anlık bildirimleri (Firebase Cloud Messaging) gösterir.
-const CACHE = "kulis-8c963f2d9d";
+const CACHE = "kulis-db6525c73d";
 const CORE = ["./", "./index.html", "./manifest.webmanifest", "./icons/icon-192.png", "./icons/icon-512.png", "./icons/apple-touch-icon.png"];
 self.addEventListener("install", e => {
   e.waitUntil(caches.open(CACHE).then(c => c.addAll(CORE)).then(() => self.skipWaiting()));
