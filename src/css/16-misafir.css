@@ -1,0 +1,23 @@
+/* ============ MİSAFİR: üye olmadan göz atma ============ */
+body.misafir .cats,body.misafir .feed-head,body.misafir .acts2 .ib.dm{display:none}
+.msf-ust{margin:4px 0 14px}
+.msf-ust b{display:block;font-family:var(--display);font-size:24px;font-weight:600;line-height:1.2}
+.msf-ust span{display:block;margin-top:4px;font-size:14px;color:rgba(var(--kagit-rgb),.66)}
+.msf-yuk{display:grid;gap:14px;margin-top:8px}
+.msf-yuk span{height:150px;border-radius:22px;background:linear-gradient(90deg,var(--yuzey) 0%,var(--yuzey2) 50%,var(--yuzey) 100%);background-size:200% 100%;animation:msfPar 1.2s linear infinite}
+@keyframes msfPar{to{background-position:-200% 0}}
+.msf-son{position:relative;margin:6px 0 calc(120px + env(safe-area-inset-bottom));min-height:330px}
+.msf-hayal{display:grid;gap:12px;filter:blur(7px);opacity:.55;pointer-events:none}
+.msf-hayal i{display:block;height:110px;border-radius:22px;background:var(--yuzey2)}
+.msf-son-in{position:absolute;inset:0;display:flex;flex-direction:column;justify-content:center;gap:10px;padding:22px;text-align:center;border-radius:24px;background:linear-gradient(180deg,rgba(var(--zemin-rgb),.2),rgba(var(--zemin-rgb),.9) 35%)}
+.msf-son-in b{font-family:var(--display);font-size:24px;font-weight:600}
+.msf-son-in p{font-size:14.5px;line-height:1.45;color:rgba(var(--kagit-rgb),.75);margin:0 0 6px}
+#msfDuvar{position:fixed;inset:0;z-index:90;display:flex;align-items:flex-end;justify-content:center;background:rgba(var(--zemin-rgb),.62);animation:fade .2s}
+.msf-kart{position:relative;width:100%;max-width:480px;background:var(--sheet,var(--yuzey));border:1px solid var(--cizgi);border-bottom:0;border-radius:26px 26px 0 0;padding:26px 22px calc(22px + env(safe-area-inset-bottom));text-align:center;display:grid;gap:10px;justify-items:center;animation:up .3s cubic-bezier(.2,.8,.2,1)}
+.msf-kart img{border-radius:16px}
+.msf-kart h2{font-family:var(--display);font-size:25px;font-weight:600;margin-top:4px}
+.msf-kart p{font-size:14.5px;line-height:1.45;color:rgba(var(--kagit-rgb),.75);margin-bottom:6px}
+.msf-kart small{font-size:12.5px;color:rgba(var(--kagit-rgb),.55)}
+.msf-x{position:absolute;top:10px;right:10px}
+#msfGeri{position:fixed;top:calc(10px + env(safe-area-inset-top));right:12px;z-index:61}
+@media (min-width:700px){#msfDuvar{align-items:center}.msf-kart{border-radius:26px;border-bottom:1px solid var(--cizgi)}}

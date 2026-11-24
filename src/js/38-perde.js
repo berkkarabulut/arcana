@@ -257,7 +257,7 @@ function remoteInit(){
   // Hızlı açılış: bu cihazda hiç Kulis oturumu yoksa (yeni ziyaretçi) karşılama ekranını Firebase'i beklemeden göster
   try{if(!/[?&](oobCode|apiKey)=/.test(location.search)&&indexedDB.databases)indexedDB.databases().then(l=>{
     const lsOturum=Object.keys(localStorage).some(k=>k.startsWith("firebase:authUser"));
-    if(!R.started&&!R.onbErken&&!lsOturum&&!l.some(d=>d.name==="firebaseLocalStorageDb")){R.onbErken=true;remoteLoading(false);startOnb()}}).catch(()=>{})}catch(e){}
+    if(!R.started&&!R.onbErken&&!lsOturum&&!l.some(d=>d.name==="firebaseLocalStorageDb")){R.onbErken=true;remoteLoading(false);misafirBasla()}}).catch(()=>{})}catch(e){}
   const go=async()=>{
     if(KDB.isLink()){
       let mail=localStorage.getItem("kulis_mail");
@@ -266,7 +266,7 @@ function remoteInit(){
     }
     let first=true;
     KDB.onAuth(u=>{if(!first)return;first=false;
-      if(u)remoteAfterAuth(u);else{remoteLoading(false);if(!R.onbErken)startOnb();testLoginButton()}});
+      if(u)remoteAfterAuth(u);else{remoteLoading(false);if(!R.onbErken)misafirBasla();testLoginButton()}});
   };
   if(window.KDB)go();else addEventListener("kdb-ready",go,{once:true});
 }

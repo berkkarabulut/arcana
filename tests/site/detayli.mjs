@@ -38,36 +38,48 @@ const CIHAZLAR = [
 ];
 
 for (const cihaz of CIHAZLAR) {
-  // ---------- 1) Gerçek sunucu modu: yeni gelen ziyaretçi ----------
+  // ---------- 1) Gerçek sunucu modu: üye olmayan yeni ziyaretçi (misafir) ----------
   {
     const { ctx, page } = await yeniSayfa(cihaz, false);
+    if (YEREL) await ctx.route(/misafirAkis/, rt => rt.fulfill({ contentType: "application/json", body: JSON.stringify({ result: { list: Array.from({ length: 7 }, (_, i) => ({ id: "p" + i, k: "m" + i, anon: i === 2, t: "Yerel test itirafı numara " + i + ", sadece deneme amaçlı yazıldı.", cat: "ask", cm: i, r: { bende: i, saril: 2 * i, yok: 0 }, ts: Date.now() - i * 36e5, a: i === 2 ? { g: null } : { n: "kisi" + i, c: "#7CC4FF", s: "koc", g: "Kadın", age: "25-34", av: null } })) } }) }));
     const t0 = Date.now();
     await page.goto(URL + "?_=" + Date.now(), { waitUntil: "domcontentloaded" });
-    await page.waitForSelector("#onb:not([hidden])", { timeout: 8000 }).catch(() => {});
+    await page.waitForSelector("#msfSon", { timeout: 15000 }).catch(() => {});
     const sure = Date.now() - t0;
-    const onb = await page.evaluate(() => !!document.querySelector("#onb:not([hidden])"));
-    kaydet(cihaz.ad, "Yeni ziyaretçiye kayıt ekranı açılıyor", onb, onb ? `${sure} ms` : "kayıt ekranı görünmedi");
-    await page.waitForTimeout(5000);
-    const r = await page.evaluate(() => ({
-      ver: (document.querySelector('meta[name="kulis-ver"]') || {}).content || "",
-      kdb: typeof window.KDB === "object",
-      google: [...document.querySelectorAll("#onb button")].some(b => /Google/.test(b.innerText)),
-      cerez: !!document.querySelector("#ckYes")
+    await page.waitForSelector("#ckYes", { timeout: 5000 }).catch(() => {});
+    const m = await page.evaluate(() => ({
+      son: !!document.querySelector("#msfSon"), onbGizli: document.querySelector("#onb").hidden,
+      itiraf: document.querySelectorAll("#view article.it, main article.it, article.it").length,
+      ver: (document.querySelector('meta[name="kulis-ver"]') || {}).content || "", cerez: !!document.querySelector("#ckYes")
     }));
-    kaydet(cihaz.ad, "Sürüm kodu sayfada", /^[0-9a-f]{10}$/.test(r.ver), r.ver);
-    if (!YEREL) kaydet(cihaz.ad, "Sunucu bağlantısı (Firebase) yüklendi", r.kdb);
-    kaydet(cihaz.ad, "Google ile giriş düğmesi var", r.google);
-    kaydet(cihaz.ad, "Çerez onayı çıkıyor", r.cerez);
-    page._ust = await page.evaluate(() => { const b = document.querySelector("#ckNo"); if (!b) return "yok"; const r = b.getBoundingClientRect(); const e = document.elementFromPoint(r.x + r.width / 2, r.y + r.height / 2); return e === b || b.contains(e) ? "" : (e ? e.tagName + "#" + e.id + "." + e.className + " < " + (e.closest("[id]") || {}).id : "boş") + " | buton " + JSON.stringify([r.x, r.y, r.width, r.height]) + " ekran " + innerWidth + "x" + innerHeight });
+    kaydet(cihaz.ad, "Misafir: kayıt ekranı yerine itiraflar açılıyor", m.son && m.onbGizli, m.son ? `${sure} ms` : "misafir akışı gelmedi");
+    kaydet(cihaz.ad, "Misafir: en fazla 5 itiraf görünüyor", m.itiraf >= 1 && m.itiraf <= 5, m.itiraf + " itiraf");
+    kaydet(cihaz.ad, "Sürüm kodu sayfada", /^[0-9a-f]{10}$/.test(m.ver), m.ver);
+    kaydet(cihaz.ad, "Çerez onayı çıkıyor", m.cerez);
+    page._ust = await page.evaluate(() => { const b = document.querySelector("#ckNo"); if (!b) return "yok"; const r = b.getBoundingClientRect(); const e = document.elementFromPoint(r.x + r.width / 2, r.y + r.height / 2); return e === b || b.contains(e) ? "" : (e ? e.tagName + "#" + e.id + "." + e.className : "boş") });
     if (page._ust) kaydet(cihaz.ad, "Çerez butonunun üstünü kapatan bir şey yok", false, page._ust);
     await adim(page, cihaz, "Çerez: Sadece gerekli", () => page.click("#ckNo", { timeout: 5000 }), () => !document.querySelector("#ckb:not([hidden])") || "çerez bandı kapanmadı");
+    const duvar = async (ad, tikla, beklenen) => {
+      await adim(page, cihaz, "Misafir duvarı: " + ad, tikla, b => { const d = document.querySelector("#msfDuvar"); return (!!d && (!b || d.innerText.includes(b))) || "üyelik penceresi çıkmadı" }, beklenen);
+      await page.evaluate(() => { const d = document.querySelector("#msfDuvar"); d && d.remove() });
+    };
+    await duvar("tepki verince", () => page.locator("article.it [data-react]").first().click(), "Tepki");
+    await duvar("yorumlara basınca", () => page.locator("article.it button[data-open]").first().click(), "Yorum");
+    await duvar("Mesajlar sekmesi", () => page.locator('.nb[data-tab="mesajlar"]').click());
+    await duvar("Profilim sekmesi", () => page.locator('.nb[data-tab="ben"]').click());
+    await duvar("İtiraf et", () => page.click("#confessBtn"), "İtiraf");
+    await duvar("bildirim zili", () => page.click("#topBell"));
+    await adim(page, cihaz, "Misafir: sekmeye basınca ekran değişmedi", () => page.waitForTimeout(50), () => state.tab === "akis" || "sekme değişti: " + state.tab);
+    await adim(page, cihaz, "Misafir: 5. itirafın sonunda pencere kendiliğinden çıkıyor", async () => { await page.locator("#msfSon").scrollIntoViewIfNeeded(); await page.waitForTimeout(1200) }, () => !!document.querySelector("#msfDuvar") || "çıkmadı");
+    await adim(page, cihaz, "Misafir: pencereden kayıt ekranına geçiş", () => page.click('#msfDuvar [data-msf="kayit"]'), () => (!document.querySelector("#onb").hidden && [...document.querySelectorAll("#onb button")].some(b => /Google/.test(b.innerText))) || "kayıt ekranı açılmadı");
+    await adim(page, cihaz, "Misafir: kayıt ekranından çarpıyla geri dönme", () => page.click("#msfGeri"), () => (document.querySelector("#onb").hidden && !!document.querySelector("#msfSon")) || "akışa dönülmedi");
     for (const id of ["kosullar", "kvkk", "kurallar"])
       await adim(page, cihaz, `Yasal metin (sonradan yüklenen): ${id}`, async () => { await page.evaluate(i => showLegal(i), id); await page.waitForTimeout(1200) },
-        () => { const s = document.querySelector(".sheet.open,.sheet") ; const t = document.body.innerText; return (t.length > 1500 && /KVKK|Kulis/.test(t)) || "metin görünmedi" });
+        () => { const t = document.body.innerText; return (t.length > 1500 && /KVKK|Kulis/.test(t)) || "metin görünmedi" });
     await kapat(page);
-    if (page._dosya.length) kaydet(cihaz.ad, "Tüm dosyalar yüklendi", false, page._dosya.join(" | "));
-    else kaydet(cihaz.ad, "Tüm dosyalar yüklendi", true);
-    kaydet(cihaz.ad, "Sunucu modunda sayfa hatası yok", !page._hata.length, page._hata.join(" | "));
+    if (!YEREL) kaydet(cihaz.ad, "Sunucu bağlantısı (Firebase) yüklendi", await page.evaluate(() => typeof window.KDB === "object"));
+    kaydet(cihaz.ad, "Tüm dosyalar yüklendi", !page._dosya.length, page._dosya.join(" | "));
+    kaydet(cihaz.ad, "Misafir modunda sayfa hatası yok", !page._hata.length, page._hata.join(" | "));
     await ctx.close();
   }
 
