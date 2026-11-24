@@ -28,7 +28,7 @@ function misafirBitir(){
   document.body.classList.remove("misafir");
   R.mapped=[];
   ["#msfDuvar","#msfGeri"].forEach(s=>{const e=$(s);e&&e.remove()});
-  if(MSF.io){MSF.io.disconnect();MSF.io=null}
+  if(MSF.kaydirma){removeEventListener("scroll",MSF.kaydirma);MSF.kaydirma=null}
 }
 // kayıt / giriş ekranını aç; misafir isterse çarpıyla akışa geri dönebilir
 function misafirKayit(google){
@@ -69,9 +69,10 @@ if(REMOTE){
       <div class="msf-son-in"><b>Devamı üyelere açık</b><p>Bütün itirafları görmek, tepki vermek ve yorum yazmak için üye ol. 30 saniye sürer.</p>
       <button class="btn wide" data-msf-ac="google">Google ile devam et</button><button class="btn line wide" data-msf-ac="kayit">E-posta ile üye ol</button></div></div>`);
     view.querySelectorAll("[data-msf-ac]").forEach(b=>b.onclick=()=>misafirKayit(b.dataset.msfAc==="google"));
-    // 5. itirafın sonuna gelince üyelik penceresi bir kez kendiliğinden açılır
-    if(MSF.io)MSF.io.disconnect();
-    if("IntersectionObserver" in window&&!MSF.gozuktu){MSF.io=new IntersectionObserver(es=>{if(es.some(x=>x.isIntersecting)&&!MSF.gozuktu){MSF.gozuktu=true;MSF.io.disconnect();setTimeout(()=>misafirDuvar("kaydirma"),400)}},{threshold:.35});MSF.io.observe($("#msfSon"))}
+    // 5. itirafın sonuna kaydırarak gelince üyelik penceresi bir kez kendiliğinden açılır (sayfa açılır açılmaz değil)
+    if(!MSF.kaydirma){MSF.kaydirma=()=>{if(!MSF.on||MSF.gozuktu||scrollY<80)return;const s=$("#msfSon");if(!s)return;
+      if(s.getBoundingClientRect().top<innerHeight*.6){MSF.gozuktu=true;setTimeout(()=>misafirDuvar("kaydirma"),300)}};
+      addEventListener("scroll",MSF.kaydirma,{passive:true})}
   };
   // giriş yapılınca misafir modu biter
   const rea0=remoteEnterApp;remoteEnterApp=function(a,b){misafirBitir();const x=$("#msfGeri");x&&x.remove();return rea0(a,b)};

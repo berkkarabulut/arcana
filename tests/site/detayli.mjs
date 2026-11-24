@@ -63,6 +63,7 @@ for (const cihaz of CIHAZLAR) {
       await adim(page, cihaz, "Misafir duvarı: " + ad, tikla, b => { const d = document.querySelector("#msfDuvar"); return (!!d && (!b || d.innerText.includes(b))) || "üyelik penceresi çıkmadı" }, beklenen);
       await page.evaluate(() => { const d = document.querySelector("#msfDuvar"); d && d.remove() });
     };
+    await page.evaluate(() => { const d = document.querySelector("#msfDuvar"); d && d.remove(); scrollTo(0, 0) });
     await duvar("tepki verince", () => page.locator("article.it [data-react]").first().click(), "Tepki");
     await duvar("yorumlara basınca", () => page.locator("article.it button[data-open]").first().click(), "Yorum");
     await duvar("Mesajlar sekmesi", () => page.locator('.nb[data-tab="mesajlar"]').click());
@@ -70,7 +71,10 @@ for (const cihaz of CIHAZLAR) {
     await duvar("İtiraf et", () => page.click("#confessBtn"), "İtiraf");
     await duvar("bildirim zili", () => page.click("#topBell"));
     await adim(page, cihaz, "Misafir: sekmeye basınca ekran değişmedi", () => page.waitForTimeout(50), () => state.tab === "akis" || "sekme değişti: " + state.tab);
-    await adim(page, cihaz, "Misafir: 5. itirafın sonunda pencere kendiliğinden çıkıyor", async () => { await page.locator("#msfSon").scrollIntoViewIfNeeded(); await page.waitForTimeout(1200) }, () => !!document.querySelector("#msfDuvar") || "çıkmadı");
+    kaydet(cihaz.ad, "Misafir: sayfa açılınca pencere kendiliğinden fırlamıyor", !(await page.evaluate(() => !!document.querySelector("#msfDuvar"))));
+    const kayar = await page.evaluate(() => document.documentElement.scrollHeight - innerHeight > 120);
+    if (kayar) await adim(page, cihaz, "Misafir: sona kaydırınca pencere kendiliğinden çıkıyor", async () => { await page.evaluate(() => scrollTo(0, document.documentElement.scrollHeight)); await page.waitForTimeout(1200) }, () => !!document.querySelector("#msfDuvar") || "çıkmadı");
+    else await adim(page, cihaz, "Misafir: üyelik penceresi açılıyor", () => page.evaluate(() => misafirDuvar("kaydirma")), () => !!document.querySelector("#msfDuvar") || "çıkmadı");
     await adim(page, cihaz, "Misafir: pencereden kayıt ekranına geçiş", () => page.click('#msfDuvar [data-msf="kayit"]'), () => (!document.querySelector("#onb").hidden && [...document.querySelectorAll("#onb button")].some(b => /Google/.test(b.innerText))) || "kayıt ekranı açılmadı");
     await adim(page, cihaz, "Misafir: kayıt ekranından çarpıyla geri dönme", () => page.click("#msfGeri"), () => (document.querySelector("#onb").hidden && !!document.querySelector("#msfSon")) || "akışa dönülmedi");
     for (const id of ["kosullar", "kvkk", "kurallar"])
