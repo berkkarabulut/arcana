@@ -23,5 +23,5 @@ function showInvite(){
   const url="https://kulistr.com/",text="Kulis'te takma adla itiraf ediliyor, burç uyumuna göre eşleşiliyor. Gel bak: "+url;
   track("davet");
   if(navigator.share){navigator.share({title:"Kulis",text,url}).catch(()=>{});return}
-  try{navigator.clipboard.writeText(text);toast("Davet linki kopyalandı")}catch(e){toast(url)}
+  try{navigator.clipboard.writeText(text).then(()=>toast("Davet linki kopyalandı"),()=>toast(url))}catch(e){toast(url)}
 }

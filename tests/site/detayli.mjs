@@ -21,7 +21,7 @@ async function yeniSayfa(cihaz, demo) {
 async function adim(page, cihaz, ad, fn, kontrol, arg) {
   const once = page._hata.length;
   let not = "";
-  try { await fn(); await page.waitForTimeout(450); } catch (e) { not = "işlem hatası: " + String(e.message || e).slice(0, 200); }
+  try { await fn(); await page.waitForTimeout(450); } catch (e) { not = "işlem hatası: " + String(e.message || e).replace(/\s+/g, " ").slice(0, 600); }
   const yeni = page._hata.slice(once);
   if (yeni.length) not += " sayfa hatası: " + yeni.join(" | ");
   const tasma = await page.evaluate(() => document.documentElement.scrollWidth - innerWidth).catch(() => 0);
@@ -58,7 +58,9 @@ for (const cihaz of CIHAZLAR) {
     if (!YEREL) kaydet(cihaz.ad, "Sunucu bağlantısı (Firebase) yüklendi", r.kdb);
     kaydet(cihaz.ad, "Google ile giriş düğmesi var", r.google);
     kaydet(cihaz.ad, "Çerez onayı çıkıyor", r.cerez);
-    await adim(page, cihaz, "Çerez: Sadece gerekli", () => page.click("#ckNo"), () => !document.querySelector("#ckb:not([hidden])") || "çerez bandı kapanmadı");
+    page._ust = await page.evaluate(() => { const b = document.querySelector("#ckNo"); if (!b) return "yok"; const r = b.getBoundingClientRect(); const e = document.elementFromPoint(r.x + r.width / 2, r.y + r.height / 2); return e === b || b.contains(e) ? "" : (e ? e.tagName + "#" + e.id + "." + e.className + " < " + (e.closest("[id]") || {}).id : "boş") + " | buton " + JSON.stringify([r.x, r.y, r.width, r.height]) + " ekran " + innerWidth + "x" + innerHeight });
+    if (page._ust) kaydet(cihaz.ad, "Çerez butonunun üstünü kapatan bir şey yok", false, page._ust);
+    await adim(page, cihaz, "Çerez: Sadece gerekli", () => page.click("#ckNo", { timeout: 5000 }), () => !document.querySelector("#ckb:not([hidden])") || "çerez bandı kapanmadı");
     for (const id of ["kosullar", "kvkk", "kurallar"])
       await adim(page, cihaz, `Yasal metin (sonradan yüklenen): ${id}`, async () => { await page.evaluate(i => showLegal(i), id); await page.waitForTimeout(1200) },
         () => { const s = document.querySelector(".sheet.open,.sheet") ; const t = document.body.innerText; return (t.length > 1500 && /KVKK|Kulis/.test(t)) || "metin görünmedi" });

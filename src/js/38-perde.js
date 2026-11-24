@@ -189,7 +189,7 @@ function showWebviewHelp(){
     <div style="display:grid;gap:8px"><button class="btn wide" id="wvC">Linki kopyala</button><button class="btn line wide" id="wvX">Tamam</button></div></div>`;
   document.body.appendChild(g);
   g.querySelector("#wvX").onclick=()=>g.remove();
-  g.querySelector("#wvC").onclick=()=>{try{navigator.clipboard.writeText("https://kulistr.com/");toast("Link kopyalandı, tarayıcına yapıştır")}catch(e){toast("kulistr.com")}};
+  g.querySelector("#wvC").onclick=async()=>{try{await navigator.clipboard.writeText("https://kulistr.com/");toast("Link kopyalandı, tarayıcına yapıştır")}catch(e){toast("kulistr.com")}};
 }
 // sitede oluşan hataları (aynısını tekrar tekrar değil) yönetici paneline bildir
 const ERR_SEEN=new Set();let errLast=0;
