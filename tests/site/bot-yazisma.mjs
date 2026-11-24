@@ -7,7 +7,10 @@ const { chromium, devices } = pw;
 const SITE = process.env.SITE || "http://localhost:8765/";
 const VIDEO = process.env.VIDEO_DIR || "bot-video";
 
-admin.initializeApp({ projectId: "kulis-1647d", databaseURL: "http://localhost:9000/?ns=kulis-1647d-default-rtdb" });
+// emülatör "owner" anahtarını yönetici kabul eder; gerçek Google kimliği gerekmez
+const sahte = { getAccessToken: async () => ({ access_token: "owner", expires_in: 3600 }) };
+admin.initializeApp({ projectId: "kulis-1647d", credential: sahte, serviceAccountId: "bot@kulis-1647d.iam.gserviceaccount.com" });
+console.log("Emülatörler:", process.env.FIREBASE_AUTH_EMULATOR_HOST, process.env.FIRESTORE_EMULATOR_HOST, process.env.FIREBASE_DATABASE_EMULATOR_HOST);
 const fs = admin.firestore(), now = admin.firestore.FieldValue.serverTimestamp();
 const BOTLAR = [
   { uid: "botAyse000000000000000000001", n: "bot_ayse", g: "Kadın", s: "yengec", c: "#FF8A65", cihaz: devices["Pixel 7"] },
