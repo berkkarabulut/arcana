@@ -140,6 +140,7 @@ const KDB = {
     await wipe(query(collection(db, "chats"), where("members", "array-contains", uid)));
     await wipe(collection(db, "users", uid, "notifs"));
     await wipe(collection(db, "users", uid, "blocks"));
+    await wipe(collection(db, "users", uid, "kayit"));
     await deleteDoc(doc(db, "users", uid, "settings", "main")).catch(() => {});
     await deleteDoc(doc(db, "users", uid, "gizli", "foto")).catch(() => {});
     await wipe(query(collection(db, "perde"), where("members", "array-contains", uid)));
@@ -204,9 +205,10 @@ const KDB = {
       s => cb(s.docs.map(d => ({ id: d.id, ...d.data(), ts: ms(d.data().ts) }))), e => console.warn("cm", e));
   },
   stopComments() { stop("cm"); },
-  async addComment(pid, t, author) {
-    const b = writeBatch(db);
-    b.set(doc(collection(db, "posts", pid, "comments")), { uid: KDB.uid, t, ts: serverTimestamp(), a: author });
+  async addComment(pid, t, author, re) {
+    const b = writeBatch(db), c = { uid: KDB.uid, t, ts: serverTimestamp(), a: author };
+    if (re && re.id && re.n) c.re = { id: String(re.id).slice(0, 40), n: String(re.n).slice(0, 20) };
+    b.set(doc(collection(db, "posts", pid, "comments")), c);
     b.update(doc(db, "posts", pid), { cm: increment(1) });
     stamp(b, "cmAt");
     await b.commit();
@@ -258,6 +260,17 @@ const KDB = {
   async isAdmin() { try { const s = await getDoc(doc(db, "config", "admins")); return s.exists() && (s.data().uids || []).includes(KDB.uid); } catch (e) { return false; } },
   block(uid) { return setDoc(doc(db, "users", KDB.uid, "blocks", uid), { ts: serverTimestamp() }); },
   listenBlocks(cb) { stop("blocks"); unsubs.blocks = onSnapshot(collection(db, "users", KDB.uid, "blocks"), s => cb(s.docs.map(d => d.id)), e => console.warn("blocks", e)); },
+  unblock(uid) { return deleteDoc(doc(db, "users", KDB.uid, "blocks", uid)); },
+  async userPub(uid) { try { const s = await getDoc(doc(db, "users", uid)); return s.exists() ? { id: s.id, ...s.data() } : null; } catch (e) { return null; } },
+  // doğrulanmış profil rozeti: sadece moderatör/yönetici
+  setVerified(uid, on) { return updateDoc(doc(db, "users", uid), { dg: !!on }); },
+  // ---------- Kaydedilen itiraflar ----------
+  listenSaved(cb) { stop("kayit"); unsubs.kayit = onSnapshot(collection(db, "users", KDB.uid, "kayit"), s => cb(s.docs.map(d => ({ id: d.id, ts: ms(d.data().ts) }))), e => cb([])); },
+  save(pid, on) { const r = doc(db, "users", KDB.uid, "kayit", pid); return on ? setDoc(r, { ts: serverTimestamp() }) : deleteDoc(r); },
+  async getPost(pid) { try { const s = await getDoc(doc(db, "posts", pid)); return s.exists() ? { id: s.id, ...s.data(), ts: ms(s.data().ts) } : null; } catch (e) { return null; } },
+  // ---------- Yazıyor / görüldü ----------
+  typing(cid) { return updateDoc(doc(db, "chats", cid), { ["ty." + KDB.uid]: Date.now() }).catch(() => {}); },
+  seen(cid) { return updateDoc(doc(db, "chats", cid), { ["seen." + KDB.uid]: Date.now() }).catch(() => {}); },
 
   // ---------- Sohbet ----------
   chatId,

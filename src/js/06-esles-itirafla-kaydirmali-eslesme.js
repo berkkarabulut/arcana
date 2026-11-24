@@ -32,11 +32,11 @@ function vKesfet(){
 }
 function vUyumlu(){
   const me=state.me;
-  const people=(DEMO||REMOTE)?Object.keys(U).filter(k=>DEMO||genderOk(k)).map(k=>({k,p:uyum(me.s,U[k].s)})).sort((a,b)=>b.p-a.p):[];
+  const people=(DEMO||REMOTE)?Object.keys(U).filter(k=>(DEMO||genderOk(k))&&yasOk(k)).map(k=>({k,p:uyum(me.s,U[k].s)})).sort((a,b)=>b.p-a.p):[];
   if(!people.length){$("#ksBody").innerHTML=`<p class="empty">Henüz başka üye yok. Arkadaşlarını davet et, burcuna en uyumlu kişiler burada sıralansın.</p><button class="btn wide" id="invK" style="margin-top:12px">${IC.share}Arkadaşını davet et</button>`;$("#invK").onclick=()=>showInvite();return}
   const sameSign=Object.keys(U).filter(k=>U[k].s===me.s&&(DEMO||genderOk(k)));
   $("#ksBody").innerHTML=`<p class="muted" style="font-size:14px;margin-bottom:14px">Burcuna göre en uyumlu itirafçılar. Profiline girip itiraflarını okuyabilir, özelden yazabilirsin.</p>
-   ${people.map(({k,p})=>{const u=U[k];return `<button class="row" data-prof="${k}">${av(k,46)}<span class="t"><b>${esc(u.n)}${pb(k)}</b><div>${Z[u.s].n}, ${u.age}, ${u.bio}</div></span><span class="meta"><b style="color:var(--kagit);font-size:15px">%${p}</b><br>uyum</span></button>`}).join("")}
+   ${people.map(({k,p})=>{const u=U[k];return `<button class="row" data-prof="${k}">${av(k,46)}<span class="t"><b>${esc(u.n)}${pb(k)}${dgb(k)}</b><div>${Z[u.s].n}, ${u.age}, ${u.bio}</div></span><span class="meta"><b style="color:var(--kagit);font-size:15px">%${p}</b><br>uyum</span></button>`}).join("")}
    <p class="hint" style="margin-top:14px">${sameSign.length?`${Z[me.s].n} burcundan ${sameSign.length} kişi aktif.`:`Şu an ${Z[me.s].n} burcundan aktif kimse yok.`}</p>`;
 }
 function swCard(c,back){

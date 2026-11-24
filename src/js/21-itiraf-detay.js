@@ -4,17 +4,20 @@ function showPost(id){
   const cms=p.cm.map((c,i)=>({c,i})).filter(({i})=>!state.hidden.has("c:"+p.id+":"+i));
   openSheet(`<div class="sheet-head"><h2>Yorumlar <span class="muted" style="font-family:var(--body);font-size:15px">${cms.length}</span></h2><button class="x" id="ex" aria-label="Kapat">${IC.close}</button></div>
    ${postHTML(p,{full:true}).replace('<article class="it">','<article class="it" style="margin-bottom:6px">')}
-   <div>${cms.length?cms.map(({c,i})=>`<div class="cm"><div class="who" style="width:100%">${who(c.u,c.ago)}${c.u==="me"?"":`<button class="ib" style="margin-left:auto" data-report="c:${p.id}:${i}" aria-label="Yorumu şikâyet et">${IC.flag}</button>`}</div><p>${esc(c.t)}</p></div>`).join(""):`<p class="empty">İlk yorumu sen yaz. Yorumun takma adınla ve burcunla görünür.</p>`}</div>
+   <div>${cms.length?cms.map(({c,i})=>`<div class="cm${c.re?" cm-re":""}"><div class="who" style="width:100%">${who(c.u,c.ago)}${c.u==="me"?"":`<button class="ib" style="margin-left:auto" data-report="c:${p.id}:${i}" aria-label="Yorumu şikâyet et">${IC.flag}</button>`}</div>${c.re?`<small class="cm-to">↳ ${esc(c.re.n)} kişisine cevap</small>`:""}<p>${esc(c.t)}</p>${c.u==="me"||c.u==="anon"?"":`<button class="cm-yan" data-yan="${i}">Yanıtla</button>`}</div>`).join(""):`<p class="empty">İlk yorumu sen yaz. Yorumun takma adınla ve burcunla görünür.</p>`}</div>
+   <div id="cmReBox"></div>
    <div class="composer2">${av("me",36)}<div class="box"><textarea id="cmIn" rows="1" maxlength="300" placeholder="Yorum yaz"></textarea><button class="go" id="cmGo" disabled>Gönder</button></div></div>
    <div id="cmWarn"></div>`);
   $("#ex").onclick=closeSheet;
-  const t=$("#cmIn"),g=$("#cmGo");
+  const t=$("#cmIn"),g=$("#cmGo");let re=null;
+  const reCiz=()=>{$("#cmReBox").innerHTML=re?`<div class="cm-rechip"><span>↳ <b>${esc(re.n)}</b> kişisine cevap yazıyorsun</span><button class="ib" id="cmReX" aria-label="Cevabı iptal et">${IC.close}</button></div>`:"";const x=$("#cmReX");if(x)x.onclick=()=>{re=null;reCiz()}};
+  $("#sheet").querySelectorAll("[data-yan]").forEach(b=>b.onclick=()=>{const c=p.cm[+b.dataset.yan];if(!c)return;re={id:String(c.id||b.dataset.yan),n:(U[c.u]&&U[c.u].n||"kullanıcı").slice(0,20),uid:c.uid||c.u};reCiz();t.focus()});
   t.oninput=()=>{grow(t);g.disabled=t.value.trim().length<2};
   g.onclick=()=>{const v=t.value.trim();const mc=modCheck(v,"yorum");if(mc){$("#cmWarn").innerHTML=`<p class="warn">${mc}</p>`;return}const bad=contactBlock(v);if(bad){$("#cmWarn").innerHTML=`<p class="warn">Yorumlarda ${bad} paylaşılamaz. Tanışmak istersen “Özelden yaz”ı kullan.</p>`;return}
     if(!state.premium&&p.u!=="me"&&!state.replied.has(p.u)&&state.replied.size>=3){premiumGate("Bugün daha fazla kişiye cevap yazamazsın","Ücretsiz planda günde sınırlı sayıda kişinin itirafına cevap yazabilirsin. Herkese sınırsız cevap yazmak için Premium'a geç.",()=>g.click());return}
     if(p.u!=="me")state.replied.add(p.u);
-    if(REMOTE){g.disabled=true;KDB.addComment(p.id,v,authorSnap()).then(()=>{track("yorum");KDB.logAccess&&KDB.logAccess("yorum");state.myComments.push({on:p.t,t:v});t.value="";toast("Yorumun gönderildi");if(p.uid&&p.u!=="me"&&!p.anon)KDB.notify(p.uid,"cm",`itirafına yorum yaptı: “${v.slice(0,60)}”`,{post:p.id});showPost(id)}).catch(e=>{g.disabled=false;toast(writeErr(e,"yorum"))});return}
-    p.cm.push({u:"me",t:v,ago:"Şimdi",ts:Date.now()});track("yorum");state.myComments.push({on:p.t,t:v});toast("Yorumun gönderildi");showPost(id);render()};
+    if(REMOTE){g.disabled=true;const r0=re;KDB.addComment(p.id,v,authorSnap(),r0).then(()=>{track("yorum");if(r0&&r0.uid&&r0.uid!==R.uid&&r0.uid!==p.uid)setTimeout(()=>KDB.notify(r0.uid,"cm",`yorumuna cevap verdi: “${v.slice(0,60)}”`,{post:p.id}),2600);KDB.logAccess&&KDB.logAccess("yorum");state.myComments.push({on:p.t,t:v});t.value="";toast("Yorumun gönderildi");if(p.uid&&p.u!=="me"&&!p.anon)KDB.notify(p.uid,"cm",`itirafına yorum yaptı: “${v.slice(0,60)}”`,{post:p.id});showPost(id)}).catch(e=>{g.disabled=false;toast(writeErr(e,"yorum"))});return}
+    p.cm.push({u:"me",t:v,ago:"Şimdi",ts:Date.now(),re:re?{id:re.id,n:re.n}:null});track("yorum");state.myComments.push({on:p.t,t:v});toast("Yorumun gönderildi");showPost(id);render()};
 }
 function showMore(id){
   const p=allPosts().find(x=>x.id===id); if(!p)return; const mine=p.u==="me";state.lastMore=id;

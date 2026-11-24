@@ -15,7 +15,8 @@ function av(k,size=36,noZ){const u=userOf(k),ph=(k!=="me"&&u.realAv)||u.photo;re
 const isPrem=k=>k==="me"?state.premium:!!(U[k]&&U[k].prem);
 const PB='<svg class="pb" viewBox="0 0 24 24" aria-label="Premium üye" role="img"><title>Premium üye</title><path fill="#E9B96E" d="M4 8l4.5 4L12 5l3.5 7L20 8l-1.6 10H5.6z"/><rect x="5.5" y="19" width="13" height="2" rx="1" fill="#E9B96E"/></svg>';
 const pb=k=>isPrem(k)?PB:"";
-function who(k,sub){const u=userOf(k);return `<button class="who" data-prof="${k}">${av(k)}<span><b>${esc(u.n)}${pb(k)}</b><small>${Z[u.s].n}${sub?", "+sub:""}</small></span></button>`}
+const dgb=k=>k!=="me"&&U[k]&&U[k].dg?`<span class="dg" title="Doğrulanmış profil" aria-label="Doğrulanmış profil">✓</span>`:"";
+function who(k,sub){const u=userOf(k);return `<button class="who" data-prof="${k}">${av(k)}<span><b>${esc(u.n)}${pb(k)}${dgb(k)}</b><small>${Z[u.s].n}${sub?", "+sub:""}</small></span></button>`}
 const IC={
  share:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 15V3"/><path d="M8 7l4-4 4 4"/><path d="M5 12v7a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-7"/></svg>',
  meToo:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M8 11V6.5a1.5 1.5 0 0 1 3 0V11m0-1.5V5a1.5 1.5 0 0 1 3 0v4.5m0 0V6.5a1.5 1.5 0 0 1 3 0V14a6 6 0 0 1-6 6h-.5a6 6 0 0 1-5-2.7L3.8 14a1.5 1.5 0 0 1 2.4-1.8L8 14"/></svg>',

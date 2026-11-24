@@ -58,10 +58,11 @@ function showPremiumRemote(src){
    ${web?`<p class="prem-free">${IC.spark}<span>Premium, Google Play'deki <b>Kulis uygulamasından</b> alınır. Aldığın üyelik aynı hesapla web'de de geçerli olur.</span></p>`:""}
    <div class="tier-tabs" role="tablist">${TIERS.map(x=>`<button role="tab" data-tier="${x.k}" aria-selected="${tier===x.k}"><b>${x.n}</b><small>${x.d}</small></button>`).join("")}</div>
    <div class="perks">${T.perks.map(t=>`<div>${IC.chk}${t}</div>`).join("")}</div>
-   ${state.premUntil?`<p class="hint" style="margin:0 0 10px">Premium üyeliğin ${new Date(state.premUntil).toLocaleDateString("tr-TR")} tarihine kadar açık.</p>`:""}
+   ${state.premUntil?`<p class="hint" style="margin:0 0 10px">Premium üyeliğin ${new Date(state.premUntil).toLocaleDateString("tr-TR")} tarihine kadar açık. <a href="${ABONE_URL}" target="_blank" rel="noopener">Aboneliğimi yönet / iptal et</a></p>`:""}
    <div class="plans">${PERIODS.map(([k,n,sub])=>`<button class="plan" data-per="${k}" aria-pressed="${per===k}"><span><b>${n}</b><small>${sub}</small></span><span class="p">${playPrices[skuOf(tier,k)]||T.pr[k]}</span></button>`).join("")}</div>
    ${web?`<a class="btn gold wide" href="https://play.google.com/store/apps/details?id=com.kulistr.app" target="_blank" rel="noopener" style="display:flex;justify-content:center;align-items:center;text-decoration:none">Uygulamayı Google Play'den aç</a><button class="btn line wide" id="buyX" style="margin-top:8px">Kapat</button>`:`<button class="btn gold wide" id="buy">Google Play ile abone ol</button>
-   <p class="hint" style="text-align:center">Abonelik her dönem sonunda otomatik yenilenir. İstediğin zaman Google Play > Ödemeler ve abonelikler'den iptal edebilirsin.</p>`}`);
+   <p class="hint" style="text-align:center">Abonelik her dönem sonunda otomatik yenilenir. İstediğin zaman <a href="${ABONE_URL}" target="_blank" rel="noopener">Google Play > Abonelikler</a>'den iptal edebilirsin; dönem sonuna kadar premium kalırsın.</p>`}
+   ${web?`<p class="hint" style="text-align:center;margin-top:10px">Aboneliğin varsa <a href="${ABONE_URL}" target="_blank" rel="noopener">Google Play > Abonelikler</a>'den istediğin zaman iptal edebilirsin.</p>`:""}`);
    const x=$("#buyX");if(x)x.onclick=closeSheet;
    $("#sheet").querySelectorAll("[data-tier]").forEach(b=>b.onclick=()=>{tier=b.dataset.tier;draw()});
    $("#sheet").querySelectorAll("[data-per]").forEach(b=>b.onclick=()=>{per=b.dataset.per;draw()});

@@ -29,8 +29,10 @@ function vAkis(){
   let feat=null;
   const WK=7*864e5,score=p=>reactTotal(p)*2+cmN(p);let rank=false;
   if(state.sort==="hafta"){list=list.concat(boosted.splice(0)).filter(p=>!p.ts||Date.now()-p.ts<WK).sort((a,b)=>score(b)-score(a)).slice(0,10);rank=true}
-  if(state.sort==="populer"){list=[...list].sort((a,b)=>(b.u==="me")-(a.u==="me")||reactTotal(b)-reactTotal(a));
-    if(state.cat==="hepsi"&&list.length>2){const i=list.findIndex(p=>p.u!=="me");feat=list.splice(i,1)[0]}}
+  // Popüler: tepki sayısı + yeni itiraflara ilk 6 saatte azalan bir öncelik (yeni yazılan, 6 tepkili bir itiraf kadar öne çıkar)
+  const YENI=6*36e5,taze=p=>p.ts&&Date.now()-p.ts<YENI?6*(1-(Date.now()-p.ts)/YENI):0,pop=p=>reactTotal(p)+taze(p);
+  if(state.sort==="populer"){list=[...list].sort((a,b)=>(b.u==="me")-(a.u==="me")||pop(b)-pop(a));
+    if(state.cat==="hepsi"&&list.length>2){let i=-1;list.forEach((p,j)=>{if(p.u!=="me"&&(i<0||reactTotal(p)>reactTotal(list[i])))i=j});if(i>=0&&reactTotal(list[i])>0)feat=list.splice(i,1)[0]}}
   view.innerHTML=`${instBanner()}${dailyCard()}${qCard()}<div class="cats" role="toolbar" aria-label="Kategori">${CATS.map(([k,l])=>`<button class="c" data-cat="${k}" aria-pressed="${state.cat===k}">${l}</button>`).join("")}</div>
    <div class="feed-head"><div class="seg2" role="group" aria-label="Sıralama"><button data-sort="populer" aria-pressed="${state.sort==="populer"}">Popüler</button><button data-sort="yeni" aria-pressed="${state.sort==="yeni"}">Yeni</button><button data-sort="hafta" aria-pressed="${state.sort==="hafta"}">Haftanın</button></div><span class="feed-count">${list.length+boosted.length+(feat?1:0)} itiraf</span></div>
    ${boosted.map(p=>`<div class="boost-wrap"><div class="boost-tag">${IC.spark}Öne çıkarıldı</div>${postHTML(p)}</div>`).join("")}${feat?`<div class="feat"><div class="it" style="padding-top:12px"><div class="feat-tag">${IC.spark}Bugün en çok sarılan</div>${postHTML(feat).replace('<article class="it">','<article class="it" style="background:none;border:0;padding:0;margin:0">')}</div></div>`:""}

@@ -58,7 +58,8 @@
   "38-perde.js",
   "39-premium-google-play-odemesi.js",
   "40-yonetici-paneli-sunucu.js",
-  "41-misafir.js"
+  "41-misafir.js",
+  "42-guven-ve-sohbet.js"
  ],
  "gec": {
   "admin": [

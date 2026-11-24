@@ -20,7 +20,7 @@ if(REMOTE){
   // yorumlar canlı
   const showPost0=showPost;
   showPost=function(id){
-    if(R.cmPid!==id){R.cmPid=id;KDB.listenComments(id,list=>{R.cm[id]=list.map(c=>{if(c.uid!==R.uid&&c.a)putUser(c.uid,c.a);return {id:c.id,u:c.uid===R.uid?"me":c.uid,uid:c.uid,t:c.t,ts:c.ts,ago:agoOf(c.ts)}});
+    if(R.cmPid!==id){R.cmPid=id;KDB.listenComments(id,list=>{R.cm[id]=list.map(c=>{if(c.uid!==R.uid&&c.a)putUser(c.uid,c.a);return {id:c.id,u:c.uid===R.uid?"me":c.uid,uid:c.uid,t:c.t,ts:c.ts,ago:agoOf(c.ts),re:c.re||null}});
       const p=(R.mapped||[]).find(x=>x.id===id);if(p)p.cm=R.cm[id];
       const t=$("#cmIn");if(R.cmPid===id&&$("#scrim").classList.contains("open")&&(!t||!t.value))showPost0(id)})}
     const p=(R.mapped||[]).find(x=>x.id===id);if(p)p.cm=R.cm[id]||[];

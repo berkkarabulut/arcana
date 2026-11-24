@@ -75,14 +75,14 @@ function remoteStartListeners(){
   if(KDB.listenIncoming)KDB.listenIncoming(list=>{const d=list.sort((a,b)=>b.ts-a.ts)[0];if(d)showIncoming(d)});
   if(KDB.listenSettings)KDB.listenSettings(st=>{R.settings=st});
   KDB.listenNotifs(list=>{state.notifs=list.map(n=>({id:n.id,type:n.type,u:n.from,text:n.text,go:n.go,ts:n.ts,read:!!n.read}));render()});
-  KDB.listenBlocks(ids=>{ids.forEach(id=>{(R.mapped||[]).filter(p=>p.uid===id).forEach(p=>state.hidden.add("p:"+p.id));state.hidden.add("u:"+id)});rerender()});
+  KDB.listenBlocks(ids=>{R.blocks=ids;ids.forEach(id=>{(R.mapped||[]).filter(p=>p.uid===id).forEach(p=>state.hidden.add("p:"+p.id));state.hidden.add("u:"+id)});rerender()});
   KDB.listenLikesToMe(list=>{LIKED_ME.clear();list.forEach(l=>LIKED_ME.add(l.from));if(state.tab==="kesfet"&&sw.mode==="eslesme")vEsles()});
   KDB.listenChats(list=>{
     const me=R.uid,seen=LS("kulis_seen",{});const chats=[],reqs=[];
     list.sort((a,b)=>(b.lastAt||0)-(a.lastAt||0)).forEach(c=>{
       const other=c.members.find(x=>x!==me)||c.members[0];
       const o=R.chats[c.id]||(R.chats[c.id]={id:c.id,u:other,msgs:[]});
-      Object.assign(o,{u:other,from:c.from,status:c.status,match:!!c.match,reqBy:c.reqBy,lastBy:c.lastBy,lastAt:c.lastAt,last:c.last,srvN:c.n||0});
+      Object.assign(o,{u:other,from:c.from,status:c.status,match:!!c.match,reqBy:c.reqBy,lastBy:c.lastBy,lastAt:c.lastAt,last:c.last,srvN:c.n||0,ty:(c.ty||{})[other]||0,seenO:(c.seen||{})[other]||0});
       if(!o.msgs.length&&c.last)o.msgs=[{me:c.lastBy===me,t:c.last}];
       o.unread=c.lastBy&&c.lastBy!==me&&(c.lastAt||0)>(seen[c.id]||0);
       if(c.match)sw.matched.add(other);
@@ -91,7 +91,7 @@ function remoteStartListeners(){
     const openId=openIdx>=0&&state.chats[openIdx]?state.chats[openIdx].id:null;
     state.chats=chats;state.requests=reqs;
     if(openId){openIdx=state.chats.findIndex(c=>c.id===openId)}
-    render();
+    render();sohbetDurum();
   });
   setPremiumFrom(null);KDB.listenPremium(setPremiumFrom);playRestore();
   if(KDB.listenModeration)KDB.listenModeration(d=>{R.mod=d;if($("#adm.open")&&ADM.tab==="kelime")openAdminRemote()});

@@ -134,6 +134,7 @@ for (const cihaz of CIHAZLAR) {
     await kapat(page);
     await adim(page, cihaz, "Perde kartı çiziliyor", () => page.evaluate(() => { const h = perdeCard(); if (typeof h !== "string" && h !== undefined) throw new Error("perdeCard " + typeof h) }));
     await adim(page, cihaz, "Perde açılma animasyonu", async () => { await page.evaluate(() => { try { playPerde(state.chats[0].u) } catch (e) { if (!/KDB|REMOTE|uid/.test(e.message)) throw e } }); await page.waitForTimeout(1500) });
+    await adim(page, cihaz, "Sohbette ekran görüntüsü uyarısı var", () => page.waitForTimeout(50), () => !!document.querySelector("#sdUy") || "uyarı yok");
     await adim(page, cihaz, "Sohbetten çık", () => page.evaluate(() => closeChat()), () => !document.querySelector("#chat").classList.contains("open") || "sohbet kapanmadı");
 
     const ekranlar = [
@@ -143,6 +144,44 @@ for (const cihaz of CIHAZLAR) {
     ];
     for (const [ad, kod] of ekranlar) { await adim(page, cihaz, `Ekran: ${ad}`, () => page.evaluate(k => (0, eval)(k), kod), () => document.body.innerText.length > 100 || "boş"); await kapat(page); }
     for (const [t, a] of [["acik", "light"], ["koyu", undefined]]) await adim(page, cihaz, `Tema: ${t}`, () => page.evaluate(x => setTheme(x), t), x => document.documentElement.dataset.theme === (x || undefined) || "tema: " + document.documentElement.dataset.theme, a || "");
+
+    // ---- yeni özellikler ----
+    await adim(page, cihaz, "Yoruma cevap verme", async () => {
+      await page.evaluate(() => { state.premium = true; const p = allPosts().find(x => x.cm.some(c => c.u !== "me")); window.__cp = p.id; showPost(p.id) });
+      await page.click("[data-yan]");
+      await page.fill("#cmIn", "otomatik test cevabı");
+      await page.click("#cmGo");
+      await page.waitForTimeout(300);
+    }, () => { const p = allPosts().find(x => x.id === window.__cp); const c = p.cm[p.cm.length - 1]; return (c.re && c.re.n && !!document.querySelector(".cm-re .cm-to")) || "cevap bağlantısı yok" });
+    await kapat(page);
+    await adim(page, cihaz, "İtiraf kaydetme (… menüsü)", async () => { await page.evaluate(() => showMore(allPosts()[1].id)); await page.click("#mKy") }, () => R.kayit.has(allPosts()[1].id) || "kaydedilmedi");
+    await adim(page, cihaz, "Profilim > Kaydettiklerim listesi", async () => { await page.evaluate(() => { state.tab = "ben"; render() }); await page.click("#kyTab"); await page.waitForTimeout(300) },
+      () => { const t = allPosts()[1].t.slice(0, 20); return document.querySelector("#kyIc").innerText.includes(t) || "listede yok" });
+    await adim(page, cihaz, "Kaydı kaldırma", () => page.click("[data-kyx]"), () => !R.kayit.has(allPosts()[1].id) || "kaldırılmadı");
+    await kapat(page);
+    await adim(page, cihaz, "Yaş filtresi (Uyumlu kişiler)", async () => { await page.evaluate(() => { state.tab = "kesfet"; sw.mode = "uyum"; render() }); await page.click('[data-yas="18-24"]') },
+      () => { const r = [...document.querySelectorAll("#ksBody [data-prof]")].map(b => parseInt(U[b.dataset.prof].age)); return (r.every(n => n < 25)) || "yaş dışı kişi var: " + r.join(",") });
+    await adim(page, cihaz, "Yaş filtresi sıfırlama", () => page.click('[data-yas="hepsi"]'), () => state.yasF === "hepsi" || "sıfırlanmadı");
+    await adim(page, cihaz, "Doğrulanmış profil rozeti görünüyor", async () => { await page.evaluate(() => { const k = allPosts().find(p => p.u !== "me" && !p.anon).u; U[k].dg = true; state.tab = "akis"; render() }) }, () => !!document.querySelector(".who .dg") || "rozet yok");
+    await adim(page, cihaz, "Popüler: yeni itiraf ilk saatlerde öne çıkıyor", async () => {
+      await page.evaluate(() => { const k = allPosts().find(p => p.u !== "me" && !p.anon).u;
+        POSTS.push({ id: "tz1", u: k, cat: "ask", t: "Bu yepyeni bir test itirafı, daha kimse tepki vermedi.", r: { bende: 0, saril: 0, yok: 0 }, cm: [], ago: "Şimdi", ts: Date.now() });
+        POSTS.push({ id: "tz2", u: k, cat: "ask", t: "Bu eski bir test itirafı, üç gün önce yazılmış.", r: { bende: 1, saril: 2, yok: 0 }, cm: [], ago: "3 gün", ts: Date.now() - 3 * 864e5 });
+        state.sort = "populer"; state.cat = "hepsi"; render() });
+    }, () => { const ids = [...document.querySelectorAll("[data-more]")].map(b => b.dataset.more); const a = ids.indexOf("tz1"), b = ids.indexOf("tz2"); return (a >= 0 && b >= 0 && a < b) || `sıra: yeni ${a}, eski ${b}` });
+    await page.evaluate(() => { for (const id of ["tz1", "tz2"]) { const i = POSTS.findIndex(p => p.id === id); if (i >= 0) POSTS.splice(i, 1) } render() });
+    // Ayarlar sunucu modunda çalışır; burada sunucu bağlantısı taklit edilerek ekran denenir
+    await adim(page, cihaz, "Ayarlar: kimler bana yazabilir", async () => {
+      await page.evaluate(() => { window.__kayit = []; window.KDB = { saveSettings: d => { window.__kayit.push(d); return Promise.resolve() }, userPub: async () => null, unblock: () => Promise.resolve() };
+        R.settings = {}; R.blocks = [allPosts().find(p => p.u !== "me" && !p.anon).u]; showSettings() });
+      await page.click('[data-dm-set="eslesme"]');
+    }, () => (window.__kayit.some(d => d.dm === "eslesme") && document.querySelector('[data-dm-set="eslesme"]').getAttribute("aria-checked") === "true" && /Eşleş/.test(document.querySelector("#dmAc").textContent)) || "ayar kaydedilmedi");
+    await adim(page, cihaz, "Ayarlar: yazıyor ve okundu düğmeleri", async () => { await page.click('[data-set="yaziyor"]'); await page.click('[data-set="okundu"]') },
+      () => (window.__kayit.some(d => d.yaziyor === false) && window.__kayit.some(d => d.okundu === false)) || "kaydedilmedi");
+    await adim(page, cihaz, "Ayarlar: abonelik iptal bağlantısı", () => page.waitForTimeout(10), () => [...document.querySelectorAll("#sheet a")].some(a => a.href.includes("play.google.com/store/account/subscriptions")) || "bağlantı yok");
+    await adim(page, cihaz, "Engellediklerim: liste ve engeli kaldırma", async () => { await page.click("#engList"); await page.waitForSelector(".eng-row"); await page.click("[data-unb]"); await page.waitForTimeout(300) },
+      () => (!document.querySelector(".eng-row") && /kalmadı/.test(document.querySelector("#engIc").innerText)) || "engel kaldırılamadı");
+    await page.evaluate(() => { delete window.KDB; closeSheet() });
 
     await adim(page, cihaz, "Yönetici paneli (sonradan yüklenen)", async () => { await page.evaluate(() => openAdmin()); await page.waitForTimeout(1500) },
       () => /Yönetici|Şikâyet|Kullanıcı|İstatistik/.test(document.body.innerText) || "panel açılmadı");
