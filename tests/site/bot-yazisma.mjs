@@ -1,31 +1,41 @@
 // İki bot hesabıyla uçtan uca sohbet testi: yazıyor, durunca kaybolma, mesaj, görüldü, anlık çevrimiçi / çevrimdışı.
 // Firebase emülatörlerinde (gerçeğiyle aynı güvenlik kuralları) ve sitenin derlenmiş kopyasında çalışır; canlı veriye dokunmaz.
 // Kullanım (CI): firebase emulators:exec --only auth,firestore,database --project kulis-1647d "node tests/site/bot-yazisma.mjs"
-import admin from "firebase-admin";
 import pw from "playwright";
 const { chromium, devices } = pw;
 const SITE = process.env.SITE || "http://localhost:8765/";
 const VIDEO = process.env.VIDEO_DIR || "bot-video";
+const P = "kulis-1647d", AUTH = "http://127.0.0.1:9099", FS = "http://127.0.0.1:8080";
+const OWNER = { Authorization: "Bearer owner", "Content-Type": "application/json" }; // emülatör bu anahtarı yönetici sayar (kurallar atlanır)
 
-// emülatör "owner" anahtarını yönetici kabul eder; gerçek Google kimliği gerekmez
-const sahte = { getAccessToken: async () => ({ access_token: "owner", expires_in: 3600 }) };
-admin.initializeApp({ projectId: "kulis-1647d", credential: sahte, serviceAccountId: "bot@kulis-1647d.iam.gserviceaccount.com" });
-console.log("Emülatörler:", process.env.FIREBASE_AUTH_EMULATOR_HOST, process.env.FIRESTORE_EMULATOR_HOST, process.env.FIREBASE_DATABASE_EMULATOR_HOST);
-const fs = admin.firestore(), now = admin.firestore.FieldValue.serverTimestamp();
+// Firestore REST biçimine çevir
+const val = v => v === null ? { nullValue: null } : v instanceof Date ? { timestampValue: v.toISOString() } : typeof v === "boolean" ? { booleanValue: v }
+  : typeof v === "number" ? (Number.isInteger(v) ? { integerValue: String(v) } : { doubleValue: v }) : typeof v === "string" ? { stringValue: v }
+  : Array.isArray(v) ? { arrayValue: { values: v.map(val) } } : { mapValue: { fields: Object.fromEntries(Object.entries(v).map(([k, x]) => [k, val(x)])) } };
+async function yaz(yol, veri) {
+  const r = await fetch(`${FS}/v1/projects/${P}/databases/(default)/documents/${yol}`, { method: "PATCH", headers: OWNER, body: JSON.stringify({ fields: val(veri).mapValue.fields }) });
+  if (!r.ok) throw new Error(yol + " yazılamadı: " + r.status + " " + await r.text());
+}
+// emülatör imzasız giriş anahtarını kabul eder
+const b64 = o => Buffer.from(JSON.stringify(o)).toString("base64url");
+const anahtar = uid => { const t = Math.floor(Date.now() / 1000);
+  return b64({ alg: "none", typ: "JWT" }) + "." + b64({ iss: "bot@kulis.test", sub: "bot@kulis.test", aud: "https://identitytoolkit.googleapis.com/google.identity.identitytoolkit.v1.IdentityToolkit", iat: t, exp: t + 3600, uid }) + "."; };
+
 const BOTLAR = [
   { uid: "botAyse000000000000000000001", n: "bot_ayse", g: "Kadın", s: "yengec", c: "#FF8A65", cihaz: devices["Pixel 7"] },
   { uid: "botMert000000000000000000002", n: "bot_mert", g: "Erkek", s: "akrep", c: "#7CC4FF", cihaz: { viewport: { width: 412, height: 860 } } }
 ];
-const [A, B] = BOTLAR, CID = [A.uid, B.uid].sort().join("_");
+const [A, B] = BOTLAR, CID = [A.uid, B.uid].sort().join("_"), simdi = () => new Date();
 for (const b of BOTLAR) {
-  await admin.auth().createUser({ uid: b.uid, email: b.n + "@bot.kulis.test", emailVerified: true, displayName: b.n });
-  await fs.doc("users/" + b.uid).set({ n: b.n, c: b.c, s: b.s, g: b.g, age: "25-29", bio: "Ben bir test botuyum.", createdAt: now, lastSeen: now });
-  await fs.doc(`users/${b.uid}/private/info`).set({ ad: "Bot", soyad: b.n, email: b.n + "@bot.kulis.test", b: { d: 1, m: 7, y: 1998 }, provider: "google" });
-  await fs.doc("nicks/" + b.n).set({ uid: b.uid });
-  b.token = await admin.auth().createCustomToken(b.uid);
+  const r = await fetch(`${AUTH}/identitytoolkit.googleapis.com/v1/projects/${P}/accounts`, { method: "POST", headers: OWNER, body: JSON.stringify({ localId: b.uid, email: b.n + "@bot.kulis.test", emailVerified: true, displayName: b.n }) });
+  if (!r.ok) throw new Error("hesap açılamadı: " + await r.text());
+  await yaz("users/" + b.uid, { n: b.n, c: b.c, s: b.s, g: b.g, age: "25-29", bio: "Ben bir test botuyum.", createdAt: simdi(), lastSeen: simdi() });
+  await yaz(`users/${b.uid}/private/info`, { ad: "Bot", soyad: b.n, email: b.n + "@bot.kulis.test", b: { d: 1, m: 7, y: 1998 }, provider: "google" });
+  await yaz("nicks/" + b.n, { uid: b.uid });
+  b.token = anahtar(b.uid);
 }
-await fs.doc("chats/" + CID).set({ members: [A.uid, B.uid].sort(), reqBy: A.uid, status: "open", match: false, from: null, last: "selam", lastBy: A.uid, lastAt: now, n: 1 });
-await fs.collection(`chats/${CID}/m`).add({ by: A.uid, t: "selam", ts: now });
+await yaz("chats/" + CID, { members: [A.uid, B.uid].sort(), reqBy: A.uid, status: "open", match: false, from: null, last: "selam", lastBy: A.uid, lastAt: simdi(), n: 1 });
+await yaz(`chats/${CID}/messages/ilk`, { uid: A.uid, t: "selam", ts: simdi() });
 console.log("Botlar hazır:", A.n, B.n);
 
 const browser = await chromium.launch();

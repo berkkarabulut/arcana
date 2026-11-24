@@ -23,7 +23,7 @@ jobs:
       - name: Araçları kur
         working-directory: tests/site
         run: |
-          npm i --no-save --no-audit --no-fund playwright@1.49.1 firebase-admin@13
+          npm i --no-save --no-audit --no-fund playwright@1.49.1
           npx playwright install --with-deps chromium
           sudo apt-get install -y -qq ffmpeg >/dev/null
       - name: Botlar yazışsın
