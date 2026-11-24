@@ -1,0 +1,17 @@
+name: Font önizleme
+on: { workflow_dispatch: {} }
+jobs:
+  cek:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: 22 }
+      - working-directory: tests/site
+        env:
+          YENI_FONT: "https://fonts.googleapis.com/css2?family=Newsreader:ital,wght@0,400;0,600;1,400;1,500&family=Figtree:wght@400;500;600;700;800&display=swap"
+        run: |
+          npm i --no-audit --no-fund playwright@1.49.1 && npx playwright install --with-deps chromium
+          node font-onizleme.mjs
+      - uses: actions/upload-artifact@v4
+        with: { name: font-onizleme, path: tests/site/font-*.png }
