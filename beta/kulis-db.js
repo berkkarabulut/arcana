@@ -2,7 +2,7 @@
 // Site (index.html) bu dosyadaki window.KDB fonksiyonlarıyla gerçek veriye ulaşır.
 import { initializeApp } from "https://www.gstatic.com/firebasejs/12.8.0/firebase-app.js";
 import {
-  getAuth, onAuthStateChanged, signInAnonymously, GoogleAuthProvider, signInWithPopup,
+  initializeAuth, indexedDBLocalPersistence, browserLocalPersistence, browserPopupRedirectResolver, onAuthStateChanged, signInAnonymously, GoogleAuthProvider, signInWithPopup,
   sendSignInLinkToEmail, isSignInWithEmailLink, signInWithEmailLink, signOut, linkWithPopup,
   deleteUser, reauthenticateWithPopup
 } from "https://www.gstatic.com/firebasejs/12.8.0/firebase-auth.js";
@@ -32,7 +32,8 @@ const app = initializeApp(IS_TEST ? {
   messagingSenderId: "165708007413",
   appId: "1:165708007413:web:7dd69b4ef7c40f01fb82bc"
 });
-const auth = getAuth(app);
+// Google giriş penceresi altyapısı (~130 KB) açılışta değil, sadece "Google ile giriş"e basınca yüklensin
+const auth = initializeAuth(app, { persistence: [indexedDBLocalPersistence, browserLocalPersistence] });
 auth.languageCode = "tr";
 let db;
 // Reklam engelleyici, antivirüs ya da kurumsal ağ normal bağlantıyı bozarsa site "uzun sorgu" moduna geçer (kulis_lp)
@@ -63,9 +64,9 @@ const KDB = {
   async google() {
     const p = new GoogleAuthProvider(); p.setCustomParameters({ prompt: "select_account" });
     if (auth.currentUser && auth.currentUser.isAnonymous) {
-      try { return (await linkWithPopup(auth.currentUser, p)).user; } catch (e) { /* hesap zaten varsa normal giriş */ }
+      try { return (await linkWithPopup(auth.currentUser, p, browserPopupRedirectResolver)).user; } catch (e) { /* hesap zaten varsa normal giriş */ }
     }
-    return (await signInWithPopup(auth, p)).user;
+    return (await signInWithPopup(auth, p, browserPopupRedirectResolver)).user;
   },
   async anon() { return (await signInAnonymously(auth)).user; },
   get email() { return (auth.currentUser && auth.currentUser.email) || ""; },
@@ -143,7 +144,7 @@ const KDB = {
     try { await deleteUser(u); }
     catch (e) {
       if (e.code === "auth/requires-recent-login" && u.providerData.some(p => p.providerId === "google.com")) {
-        await reauthenticateWithPopup(u, new GoogleAuthProvider()); await deleteUser(u);
+        await reauthenticateWithPopup(u, new GoogleAuthProvider(), browserPopupRedirectResolver); await deleteUser(u);
       } else { await signOut(auth); }
     }
   },

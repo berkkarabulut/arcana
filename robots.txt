@@ -1,0 +1,7 @@
+User-agent: *
+Allow: /
+Disallow: /beta/
+Disallow: /tests/
+Disallow: /android/
+
+Sitemap: https://kulistr.com/sitemap.xml
