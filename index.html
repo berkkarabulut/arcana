@@ -2665,6 +2665,16 @@ function mapPost(p){
   return {id:p.id,feat:p.feat||0,u:mine?"me":p.uid,uid:p.uid,cat:p.cat,q:p.q||null,t:p.t,ts:p.ts,ago:agoOf(p.ts),r:p.r||{bende:0,saril:0,yok:0},cm:R.cm[p.id]||[],cmCount:p.cm||0,today:dayKeyOf(Date.now())===dayKeyOf(p.ts)}}
 const dayKeyOf=ts=>{const d=new Date(ts);return d.getFullYear()+"-"+(d.getMonth()+1)+"-"+d.getDate()};
 function refreshStats(){const by={};R.posts.forEach(p=>{const k=p.uid;by[k]=by[k]||[0,0,0];by[k][0]++;by[k][2]+=reactTotal(p)});Object.keys(U).forEach(k=>{U[k].stat=by[k]||[0,0,0]})}
+/* ---- Ekranı yenile: sadece bulunduğun ekran tazelenir; sitenin yeni sürümü varsa aynı ekrana dönülerek yüklenir ---- */
+const pageVer=()=>{try{return +([...document.scripts].map(x=>x.textContent).join("").match(/kulis-db\.js\?v=(\d+)/)||[])[1]||0}catch(e){return 0}};
+async function softRefresh(){
+  const t0=Date.now();
+  try{const h=await fetch(location.pathname+"?_="+t0,{cache:"no-store"}).then(r=>r.text());const v=+((h.match(/kulis-db\.js\?v=(\d+)/)||[])[1]||0);
+    const cur=pageVer();if(v>cur&&cur){try{sessionStorage.setItem("kulis_tab",JSON.stringify({tab:state.tab,y:scrollY}))}catch(e){}location.reload();return new Promise(()=>{})}}catch(e){}
+  if(state.tab==="kesfet"&&typeof sw!=="undefined"&&sw.mode==="eslesme"&&typeof vEsles==="function")vEsles();else render();
+  await new Promise(r=>setTimeout(r,Math.max(0,650-(Date.now()-t0))));
+  toast("Güncellendi");
+}
 /* ---- Aşağı çekip yenile: her sayfada, sayfa en üstteyken aşağı çekince yenilenir ---- */
 (function pullToRefresh(){
   const TH=78,MAX=130;let y0=null,x0=0,dy=0,active=false,busy=false;
@@ -2690,7 +2700,7 @@ function refreshStats(){const by={};R.posts.forEach(p=>{const k=p.uid;by[k]=by[k
   const end=()=>{if(y0==null||!active){y0=null;return}y0=null;active=false;
     if(dy>=TH){busy=true;ptr.style.transition="transform .25s";ptr.classList.remove("go");ptr.classList.add("spin");txt.textContent="Yenileniyor…";txt.style.opacity=1;
       try{navigator.vibrate&&navigator.vibrate(12)}catch(e){}
-      setTimeout(()=>location.reload(),550)}
+      softRefresh().then(()=>{busy=false;ptr.classList.remove("spin");hide();txt.textContent=""})}
     else hide()};
   addEventListener("touchend",end,{passive:true});addEventListener("touchcancel",()=>{y0=null;active=false;hide()},{passive:true});
 })();
@@ -2787,6 +2797,8 @@ function playPerde(uid){
 }
 function remoteStartListeners(){
   if(R.started)return;R.started=true;
+  // yeni sürüm yüklendiyse kullanıcı kaldığı ekrana döner
+  try{const k=sessionStorage.getItem("kulis_tab");if(k){sessionStorage.removeItem("kulis_tab");const o=JSON.parse(k);if(o&&o.tab){state.tab=o.tab;setTimeout(()=>{render();scrollTo(0,o.y||0)},50)}}}catch(e){}
   if(KDB.listenPerde)KDB.listenPerde(onPerde);
   if(KDB.listenEkipThread)KDB.listenEkipThread(onEkipThread);
   try{if(new URLSearchParams(location.search).get("ekip")==="1"){history.replaceState(null,"",location.pathname);setTimeout(()=>{state.tab="mesajlar";render();openEkip()},1200)}}catch(e){}
@@ -3255,6 +3267,6 @@ if(REMOTE){
 if(REMOTE)remoteInit();else
 try{const s=JSON.parse(localStorage.getItem("itiraf_me")||"null");if(s&&s.n&&s.s){state.me=s;loadData();render();seedDemo()}else startOnb()}catch(e){startOnb()}
 </script>
-<script type="module">if(REMOTE)import("./kulis-db.js?v=25")</script>
+<script type="module">if(REMOTE)import("./kulis-db.js?v=26")</script>
 </body>
 </html>
