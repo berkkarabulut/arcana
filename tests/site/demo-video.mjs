@@ -18,14 +18,16 @@ const dokun = async sel => { const el = p.locator(sel).first(); await el.scrollI
 await p.goto("https://kulistr.com/?_=" + Date.now());
 await p.waitForSelector("#msfSon"); await bekle(2200);
 if (await p.locator("#ckNo").count()) { await dokun("#ckNo"); await bekle(900) }
-await kaydir(380); await bekle(1500); await kaydir(-380); await bekle(900);
-await dokun("article.it [data-react]"); await bekle(2600);
-await dokun("#msfDuvar .msf-x"); await bekle(1000);
-await dokun('.nb[data-tab="mesajlar"]'); await bekle(2400);
-await dokun("#msfDuvar .msf-x"); await bekle(1000);
-await dokun("#confessBtn"); await bekle(2400);
-await dokun("#msfDuvar .msf-x"); await bekle(1000);
+const kapat = async () => { if (await p.locator("#msfDuvar").count()) { await dokun("#msfDuvar .msf-x"); await bekle(1000) } };
+await kaydir(140); await bekle(1400); await kaydir(-140); await bekle(700);
+await kapat();
+await dokun("article.it [data-react]"); await bekle(2600); await kapat();
+await dokun("article.it button[data-open]"); await bekle(2400); await kapat();
+await dokun('.nb[data-tab="mesajlar"]'); await bekle(2400); await kapat();
+await dokun("#confessBtn"); await bekle(2400); await kapat();
+await p.evaluate(() => { MSF.gozuktu = false });
 await kaydir(1600, 30); await bekle(2800);
+if (!(await p.locator("#msfDuvar").count())) { await p.evaluate(() => misafirDuvar("kaydirma")); await bekle(2000) }
 await dokun('#msfDuvar [data-msf="kayit"]'); await bekle(2800);
 await dokun("#msfGeri"); await bekle(2000);
 await ctx.close(); await b.close();
