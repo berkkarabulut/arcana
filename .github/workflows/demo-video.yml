@@ -1,0 +1,21 @@
+name: Demo videosu
+on: { workflow_dispatch: {} }
+permissions: { contents: write }
+jobs:
+  cek:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: 22 }
+      - working-directory: tests/site
+        run: |
+          npm i --no-audit --no-fund playwright@1.49.1 && npx playwright install --with-deps chromium
+          node demo-video.mjs
+          f=$(ls video/*.webm | head -1)
+          ffmpeg -y -loglevel error -i "$f" -vf "scale=824:-2:flags=lanczos,fps=30" -c:v libx264 -preset veryfast -crf 20 -pix_fmt yuv420p -movflags +faststart /tmp/kulis-misafir-demo.mp4
+          ls -la /tmp/kulis-misafir-demo.mp4
+      - run: |
+          mkdir /tmp/o && cp /tmp/kulis-misafir-demo.mp4 /tmp/o/ && cd /tmp/o && git init -q && git checkout -q -b demo-video
+          git -c user.name=bot -c user.email=bot@x add . && git -c user.name=bot -c user.email=bot@x commit -qm demo
+          git push -qf "https://x-access-token:${{ github.token }}@github.com/${{ github.repository }}.git" demo-video
