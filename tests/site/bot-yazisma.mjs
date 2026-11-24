@@ -53,9 +53,9 @@ async function botAc(b) {
   await p.waitForFunction(() => window.KDB && window.__emuGiris, null, { timeout: 20000 });
   // Google butonunun yaptığı gibi: giriş yap, sonra sitenin giriş sonrası akışını çalıştır
   await p.evaluate(async t => { const c = await window.__emuGiris(t); await remoteAfterAuth(c.user, "google"); }, b.token);
-  try { await p.waitForFunction(() => window.state && state.me && state.chats && state.chats.length > 0, null, { timeout: 25000 }); }
+  try { await p.waitForFunction(() => typeof state !== "undefined" && state.me && state.chats && state.chats.length > 0, null, { timeout: 25000 }); }
   catch (e) {
-    console.log("TEŞHİS " + b.n, JSON.stringify(await p.evaluate(() => ({ kdbUid: window.KDB && KDB.uid, rUid: window.R && R.uid, me: !!(window.state && state.me), chats: window.state && state.chats && state.chats.length,
+    console.log("TEŞHİS " + b.n, JSON.stringify(await p.evaluate(() => ({ kdbUid: window.KDB && KDB.uid, rUid: window.R && R.uid, me: typeof state !== "undefined" && !!state.me, chats: typeof state !== "undefined" && state.chats && state.chats.length,
       onb: document.querySelector("#onb") && !document.querySelector("#onb").hidden, metin: document.body.innerText.slice(0, 400) }))));
     console.log("KONSOL " + b.n + "\n" + p._log.slice(-40).join("\n")); throw e;
   }
