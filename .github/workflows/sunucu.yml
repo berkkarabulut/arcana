@@ -68,18 +68,3 @@ jobs:
           else
             gcloud firestore backups schedules create --project kulis-1647d --database='(default)' --recurrence=daily --retention=14d
           fi
-      - name: Aylık bütçe alarmı (harcama bu tutara yaklaşınca e-posta gelir, durdurmaz)
-        continue-on-error: true
-        run: |
-          gcloud services enable billingbudgets.googleapis.com --project kulis-1647d || true
-          BA=$(gcloud billing projects describe kulis-1647d --format='value(billingAccountName)' | sed 's#billingAccounts/##')
-          echo "Ödeme hesabı: $BA"
-          CUR=$(gcloud billing accounts describe "$BA" --format='value(currencyCode)' 2>/dev/null || echo USD)
-          echo "Para birimi: $CUR"
-          if [ "$CUR" = "TRY" ]; then AMT=250TRY; else AMT=5${CUR:-USD}; fi
-          if gcloud billing budgets list --billing-account="$BA" --format='value(displayName)' | grep -q "Kulis aylık bütçe"; then
-            echo "Bütçe alarmı zaten var"; gcloud billing budgets list --billing-account="$BA" --format='table(displayName,amount.specifiedAmount)'
-          else
-            gcloud billing budgets create --billing-account="$BA" --display-name="Kulis aylık bütçe" --budget-amount="$AMT" \
-              --filter-projects=projects/kulis-1647d --threshold-rule=percent=0.25 --threshold-rule=percent=0.5 --threshold-rule=percent=0.9 --threshold-rule=percent=1.0
-          fi

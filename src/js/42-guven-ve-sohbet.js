@@ -4,7 +4,7 @@ NIC.rapor="flag";
 
 // ---- Sohbet: ekran görüntüsü uyarısı, yazıyor, görüldü ----
 // Sohbet ekranı baştan çizilmez (yazdığın metin silinmesin); sadece göstergeler güncellenir.
-const SD={tyAt:0,seenAt:{},lsAt:{},st:{},iv:null};
+const SD={seenAt:{},lsAt:{},st:{},iv:null,pcOff:null,tyOff:null,pcFor:null,yaziyorum:null,tyT:null};
 const YAZIYOR_MS=7000;
 function sohbetDurum(){
   if(!REMOTE||openIdx<0)return;
@@ -13,7 +13,8 @@ function sohbetDurum(){
   // karşı tarafın son görülmesini dakikada bir tazele
   if(c.u&&Date.now()-(SD.lsAt[c.u]||0)>60e3){SD.lsAt[c.u]=Date.now();Promise.all([KDB.userPub(c.u),KDB.getSettings(c.u)]).then(([x,st])=>{SD.st[c.u]=st||{};if(x)putUser(c.u,x);if(state.chats[openIdx]===c)sohbetBaslik(c)})}
   // karşı taraf yazıyor mu
-  const yaz=c.status==="open"&&c.ty&&Date.now()-c.ty<YAZIYOR_MS;
+  // anlık kanal (yazmayı bırakınca hemen silinir) + eski sürümlerin sohbet kaydına yazdığı işaret
+  const yaz=c.status==="open"&&((c.tyRt&&Date.now()-c.tyRt<30e3)||(c.ty&&Date.now()-c.ty<YAZIYOR_MS));
   let ty=$("#sdTy");
   if(yaz&&!ty){ty=document.createElement("div");ty.id="sdTy";ty.className="typing";ty.setAttribute("aria-label",(U[c.u]?U[c.u].n:"Karşı taraf")+" yazıyor");ty.innerHTML="<i></i><i></i><i></i>";box.appendChild(ty);box.scrollTop=box.scrollHeight}
   else if(!yaz&&ty)ty.remove();
@@ -27,15 +28,20 @@ function sohbetDurum(){
   const sonO=[...c.msgs].reverse().find(m=>!m.me&&m.ts);
   if(sonO&&document.visibilityState==="visible"&&(R.settings||{}).okundu!==false&&(SD.seenAt[c.id]||0)<sonO.ts){SD.seenAt[c.id]=Date.now();KDB.seen(c.id)}
 }
-// Çevrimiçi / son görülme: açık cihazlar 2 dakikada bir "buradayım" sinyali gönderir (lastSeen)
+// Çevrimiçi / son görülme: anlık durum veritabanından (bağlantı kopunca kendiliğinden çevrimdışı olur).
+// Anlık kaydı olmayan (eski sürüm) kişilerde 2 dakikalık "buradayım" sinyaline (lastSeen) bakılır.
 const CEVRIMICI_MS=3.5*60e3;
 function durumYazi(k){
   if(!REMOTE)return "çevrimiçi";
   // karşılıklı: ben gizlediysem ya da karşı taraf gizlediyse gösterme
   if((R.settings||{}).songor===false||(SD.st[k]||{}).songor===false)return "";
-  const ls=U[k]&&U[k].ls;if(!ls)return "";
-  const f=Date.now()-ls;if(f<CEVRIMICI_MS)return "çevrimiçi";
-  if(f<60*60e3)return `${Math.max(4,Math.round(f/60e3))} dk önce görüldü`;
+  const u=U[k];if(!u)return "";
+  if(u.on===true)return "çevrimiçi";
+  const ls=Math.max(u.ls||0,u.rtTs||0);if(!ls)return "";
+  const f=Date.now()-ls;
+  if(u.on===undefined&&f<CEVRIMICI_MS)return "çevrimiçi";
+  if(f<60e3)return "az önce görüldü";
+  if(f<60*60e3)return `${Math.round(f/60e3)} dk önce görüldü`;
   const d=new Date(ls),bugun=new Date();bugun.setHours(0,0,0,0);
   if(ls>=bugun.getTime())return `bugün ${String(d.getHours()).padStart(2,"0")}:${String(d.getMinutes()).padStart(2,"0")}'de görüldü`;
   if(ls>=bugun.getTime()-864e5)return "dün görüldü";
@@ -58,12 +64,36 @@ function sohbetUyari(){
     dc0();sohbetUyari();
     if(!REMOTE)return;
     const c=state.chats[openIdx];if(!c)return;
+    // karşı tarafın anlık durumunu ve yazıyor bilgisini dinle (sohbet değişince eskisini bırak)
+    if(SD.pcFor!==c.id){durumBirak();SD.pcFor=c.id;
+      SD.pcOff=KDB.watchPresence(c.u,v=>{const u=U[c.u];if(!u)return;u.on=v?!!v.on:undefined;u.rtTs=v&&v.ts||0;if(state.chats[openIdx]===c)sohbetBaslik(c)});
+      SD.tyOff=KDB.watchTyping(c.id,c.u,v=>{c.tyRt=v||0;if(state.chats[openIdx]===c)sohbetDurum()})}
     sohbetDurum();
-    // yazıyor sinyali: en fazla 4 saniyede bir, ayarlardan kapatılmadıysa
-    const t=$("#mIn");if(t&&c.status==="open")t.addEventListener("input",()=>{if((R.settings||{}).yaziyor===false||!t.value.trim())return;if(Date.now()-SD.tyAt>4000){SD.tyAt=Date.now();KDB.typing(c.id)}});
+    // yazıyor: yazmaya başlayınca işaret konur, 3 saniye durunca ya da mesaj gidince hemen kalkar
+    const t=$("#mIn");
+    if(t&&c.status==="open"){
+      if(SD.yaziyorum&&!t.value.trim())yaziyorBitti();
+      t.addEventListener("input",()=>{if((R.settings||{}).yaziyor===false)return;
+        if(!t.value.trim()){yaziyorBitti();return}
+        if(SD.yaziyorum!==c.id){SD.yaziyorum=c.id;KDB.typingRt(c.id,true)}
+        clearTimeout(SD.tyT);SD.tyT=setTimeout(yaziyorBitti,3000)});
+    }
     if(!SD.iv)SD.iv=setInterval(()=>{if(openIdx<0){clearInterval(SD.iv);SD.iv=null;return}sohbetDurum()},2000);
   };
   document.addEventListener("visibilitychange",()=>{if(document.visibilityState==="visible")sohbetDurum()});
+  if(REMOTE){const cc0=closeChat;closeChat=function(){yaziyorBitti();durumBirak();return cc0()}}
+}
+function yaziyorBitti(){clearTimeout(SD.tyT);if(SD.yaziyorum){KDB.typingRt(SD.yaziyorum,false);SD.yaziyorum=null}}
+function durumBirak(){if(SD.pcOff)SD.pcOff();if(SD.tyOff)SD.tyOff();SD.pcOff=SD.tyOff=null;SD.pcFor=null}
+// kendi durumum: ekrandaysam çevrimiçi, arka plandaysam çevrimdışı, son görülmemi gizlediysem hiç kayıt yok
+function durumGonder(){
+  if(!REMOTE||!R.uid||!KDB.presence)return;
+  if(!R.settingsOk){setTimeout(durumGonder,1000);return}
+  KDB.presence((R.settings||{}).songor===false?"gizli":!document.hidden);
+}
+if(REMOTE){
+  document.addEventListener("visibilitychange",durumGonder);
+  addEventListener("pagehide",()=>{if(R.uid&&KDB.presence&&(R.settings||{}).songor!==false)KDB.presence(false)});
 }
 
 // ---- Kimler bana yazabilir: istek göndermeden önce karşı tarafın ayarına bak ----
@@ -125,7 +155,7 @@ async function showSaved(){
 }
 if(REMOTE){
   const rea1=remoteEnterApp;
-  remoteEnterApp=function(a,b){const r=rea1(a,b);if(KDB.listenSaved)KDB.listenSaved(l=>{R.kayit=new Set(l.map(x=>x.id));if(state.tab==="ben"){const t=$("#kyTab");if(t)t.textContent=`Kaydettiklerim${R.kayit.size?" ("+R.kayit.size+")":""}`}});return r};
+  remoteEnterApp=function(a,b){const r=rea1(a,b);durumGonder();if(KDB.listenSaved)KDB.listenSaved(l=>{R.kayit=new Set(l.map(x=>x.id));if(state.tab==="ben"){const t=$("#kyTab");if(t)t.textContent=`Kaydettiklerim${R.kayit.size?" ("+R.kayit.size+")":""}`}});return r};
 }
 
 // ---- Yaş filtresi (Keşfet: Eşleş ve Uyumlu kişiler) ----

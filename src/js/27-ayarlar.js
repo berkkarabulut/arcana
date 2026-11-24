@@ -34,7 +34,7 @@ function showSettings(){
     <button class="btn wide" style="margin-top:18px" onclick="closeSheet()">Tamam</button>`);
   // aynı anda tek grup açık kalsın, hangisinin açık olduğu hatırlansın
   $("#sheet").querySelectorAll(".ayar-grup").forEach(d=>d.addEventListener("toggle",()=>{if(!d.open)return;R.ayarGrup=d.dataset.grup;$("#sheet").querySelectorAll(".ayar-grup").forEach(x=>{if(x!==d)x.open=false})}));
-  const save=d=>{R.settings=Object.assign({},R.settings||{},d);KDB.saveSettings(d).catch(e=>toast("Kaydedilemedi: "+(e.code||e.message)))};
+  const save=d=>{R.settings=Object.assign({},R.settings||{},d);KDB.saveSettings(d).catch(e=>toast("Kaydedilemedi: "+(e.code||e.message)));if("songor" in d&&typeof durumGonder==="function")durumGonder()};
   $("#sheet").querySelectorAll("[data-set]").forEach(b=>b.onclick=()=>{const on=b.getAttribute("aria-checked")!=="true";b.setAttribute("aria-checked",on);const k=b.dataset.set;
     if(k.startsWith("n.")){const nn=Object.assign({},(R.settings||{}).n||{});nn[k.slice(2)]=on;save({n:nn})}
     else{save({[k]:on});if(k==="quiet"){const q=$(".set-q");if(q)q.hidden=!on;if(on)save({qFrom:+$("#qF").value,qTo:+$("#qT").value})}}});

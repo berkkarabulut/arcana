@@ -16,6 +16,11 @@ const gecYukle = u => { let p; return () => p || (p = import(u)); };
 const fbMsg = gecYukle("https://www.gstatic.com/firebasejs/12.8.0/firebase-messaging.js");
 const fbFns = gecYukle("https://www.gstatic.com/firebasejs/12.8.0/firebase-functions.js");
 const fbSt = gecYukle("https://www.gstatic.com/firebasejs/12.8.0/firebase-storage.js");
+// Anlık durum (çevrimiçi / yazıyor): Realtime Database, bağlantı kopunca kendiliğinden "çevrimdışı" yazar
+const fbRt = gecYukle("https://www.gstatic.com/firebasejs/12.8.0/firebase-database.js");
+const RTDB_URL = "https://kulis-1647d-default-rtdb.europe-west1.firebasedatabase.app";
+let rtInst = null;
+const rt = async () => { if (KDB.isTest || !KDB.uid) return null; const m = await fbRt(); if (!rtInst) rtInst = m.getDatabase(app, RTDB_URL); return { m, d: rtInst }; };
 let fnsInst = null;
 // sunucu fonksiyonunu çağır (europe-west1)
 const callFn = async (name, data) => { const m = await fbFns(); if (!fnsInst) fnsInst = m.getFunctions(app, "europe-west1"); return m.httpsCallable(fnsInst, name)(data); };
@@ -269,6 +274,42 @@ const KDB = {
   save(pid, on) { const r = doc(db, "users", KDB.uid, "kayit", pid); return on ? setDoc(r, { ts: serverTimestamp() }) : deleteDoc(r); },
   async getPost(pid) { try { const s = await getDoc(doc(db, "posts", pid)); return s.exists() ? { id: s.id, ...s.data(), ts: ms(s.data().ts) } : null; } catch (e) { return null; } },
   // ---------- Yazıyor / görüldü ----------
+  // ---------- Anlık durum ----------
+  // durum: true (açık ve ekranda) / false (arka planda) / "gizli" (son görülmesini gizlemiş: hiç kayıt tutulmaz)
+  async presence(durum) {
+    try {
+      const x = await rt(); if (!x) return; const { m, d } = x, r = m.ref(d, "durum/" + KDB.uid);
+      KDB._durum = durum;
+      if (!KDB._pres) {
+        KDB._pres = true;
+        m.onValue(m.ref(d, ".info/connected"), s => {
+          if (s.val() !== true || KDB._durum === "gizli") return;
+          m.onDisconnect(r).set({ on: false, ts: m.serverTimestamp() })
+            .then(() => m.set(r, { on: KDB._durum === true, ts: m.serverTimestamp() })).catch(() => {});
+        });
+      }
+      if (durum === "gizli") { await m.onDisconnect(r).cancel().catch(() => {}); await m.remove(r).catch(() => {}); return; }
+      await m.set(r, { on: durum === true, ts: m.serverTimestamp() });
+    } catch (e) { console.warn("durum", e); }
+  },
+  // karşı tarafın durumunu dinle; dönen fonksiyon dinlemeyi bırakır
+  watchPresence(uid, cb) {
+    let off = () => {}, dur = false;
+    rt().then(x => { if (!x || dur) return; off = x.m.onValue(x.m.ref(x.d, "durum/" + uid), s => cb(s.val()), () => cb(null)); }).catch(() => {});
+    return () => { dur = true; off(); };
+  },
+  async typingRt(cid, on) {
+    try {
+      const x = await rt(); if (!x) return; const { m, d } = x, r = m.ref(d, "yaz/" + cid + "/" + KDB.uid);
+      if (on) { await m.set(r, m.serverTimestamp()); m.onDisconnect(r).remove().catch(() => {}); }
+      else await m.remove(r);
+    } catch (e) {}
+  },
+  watchTyping(cid, uid, cb) {
+    let off = () => {}, dur = false;
+    rt().then(x => { if (!x || dur) return; off = x.m.onValue(x.m.ref(x.d, "yaz/" + cid + "/" + uid), s => cb(s.val()), () => cb(null)); }).catch(() => {});
+    return () => { dur = true; off(); };
+  },
   typing(cid) { return updateDoc(doc(db, "chats", cid), { ["ty." + KDB.uid]: Date.now() }).catch(() => {}); },
   seen(cid) { return updateDoc(doc(db, "chats", cid), { ["seen." + KDB.uid]: Date.now() }).catch(() => {}); },
 
