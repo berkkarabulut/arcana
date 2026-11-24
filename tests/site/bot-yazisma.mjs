@@ -49,13 +49,14 @@ async function botAc(b) {
   p.on("console", m => { if (m.type() === "error" && !/misafirAkis|ERR_|favicon|messaging|push/i.test(m.text())) p._hata.push("konsol: " + m.text().slice(0, 200)) });
   p._log = []; p.on("console", m => p._log.push(m.type() + ": " + m.text().slice(0, 300)));
   await p.goto(SITE + "?emu=1");
+  await p.evaluate(() => { try { localStorage.removeItem("kulis_lp") } catch (e) {} });
   await p.waitForFunction(() => window.KDB && window.__emuGiris, null, { timeout: 20000 });
   await p.evaluate(t => window.__emuGiris(t), b.token);
   try { await p.waitForFunction(() => window.state && state.me && state.chats && state.chats.length > 0, null, { timeout: 25000 }); }
   catch (e) {
     console.log("TEŞHİS " + b.n, JSON.stringify(await p.evaluate(() => ({ kdbUid: window.KDB && KDB.uid, rUid: window.R && R.uid, me: !!(window.state && state.me), chats: window.state && state.chats && state.chats.length,
       onb: document.querySelector("#onb") && !document.querySelector("#onb").hidden, metin: document.body.innerText.slice(0, 400) }))));
-    console.log("KONSOL " + b.n + "\n" + p._log.slice(-25).join("\n")); throw e;
+    console.log("KONSOL " + b.n + "\n" + p._log.slice(-40).join("\n")); throw e;
   }
   await p.evaluate(() => { const c = document.querySelector("#ckb"); c && c.remove(); state.tab = "mesajlar"; render(); openChat(0) });
   await p.waitForSelector("#chat.open #mIn", { timeout: 10000 });
