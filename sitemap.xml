@@ -1,9 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <url><loc>https://kulistr.com/</loc><changefreq>daily</changefreq><priority>1.0</priority></url>
+  <url><loc>https://kulistr.com/itiraf/</loc><changefreq>daily</changefreq><priority>0.8</priority></url>
   <url><loc>https://kulistr.com/kurallar.html</loc><changefreq>monthly</changefreq></url>
   <url><loc>https://kulistr.com/kosullar.html</loc><changefreq>monthly</changefreq></url>
   <url><loc>https://kulistr.com/gizlilik.html</loc><changefreq>monthly</changefreq></url>
   <url><loc>https://kulistr.com/cocuk-guvenligi.html</loc><changefreq>monthly</changefreq></url>
   <url><loc>https://kulistr.com/hesap-silme.html</loc><changefreq>monthly</changefreq></url>
+
 </urlset>
