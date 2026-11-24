@@ -57,5 +57,13 @@
   "38-perde.js",
   "39-premium-google-play-odemesi.js",
   "40-yonetici-paneli-sunucu.js"
- ]
+ ],
+ "gec": {
+  "admin": [
+   "gec/admin.js"
+  ],
+  "yasal": [
+   "gec/yasal.js"
+  ]
+ }
 }

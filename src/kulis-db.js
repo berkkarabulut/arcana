@@ -11,9 +11,14 @@ import {
   doc, getDoc, setDoc, addDoc, updateDoc, deleteDoc, collection, query, where, orderBy, limit,
   onSnapshot, serverTimestamp, increment, writeBatch, getDocs, deleteField
 } from "https://www.gstatic.com/firebasejs/12.8.0/firebase-firestore.js";
-import { getMessaging, getToken, deleteToken, isSupported as msgSupported } from "https://www.gstatic.com/firebasejs/12.8.0/firebase-messaging.js";
-import { getFunctions, httpsCallable } from "https://www.gstatic.com/firebasejs/12.8.0/firebase-functions.js";
-import { getStorage, ref as sRef, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/12.8.0/firebase-storage.js";
+// Açılışta gerekmeyen Firebase parçaları (bildirim, sunucu fonksiyonları, dosya yükleme) ilk kullanıldıklarında indirilir
+const gecYukle = u => { let p; return () => p || (p = import(u)); };
+const fbMsg = gecYukle("https://www.gstatic.com/firebasejs/12.8.0/firebase-messaging.js");
+const fbFns = gecYukle("https://www.gstatic.com/firebasejs/12.8.0/firebase-functions.js");
+const fbSt = gecYukle("https://www.gstatic.com/firebasejs/12.8.0/firebase-storage.js");
+let fnsInst = null;
+// sunucu fonksiyonunu çağır (europe-west1)
+const callFn = async (name, data) => { const m = await fbFns(); if (!fnsInst) fnsInst = m.getFunctions(app, "europe-west1"); return m.httpsCallable(fnsInst, name)(data); };
 
 // /beta/ adresi ayrı test veritabanını kullanır; canlı kullanıcıların verisine dokunmaz
 const IS_TEST = /\/beta\//.test(location.pathname);
@@ -42,7 +47,6 @@ const fsOpts = LP ? { experimentalForceLongPolling: true } : {};
 try { db = initializeFirestore(app, { ...fsOpts, localCache: persistentLocalCache({ tabManager: persistentMultipleTabManager() }) }); }
 catch (e) { db = initializeFirestore(app, fsOpts); }
 
-const fns = getFunctions(app, "europe-west1");
 const VAPID = "BPuLRxoQfvz2-ml5JWzJFQd9qrKd-q7bXD-gtYbJOeg0gqxuoVL7MyQbZrEaXHOnaN9N_kK7d10PE4NDakgDcdo";
 const ms = t => (t && t.toMillis) ? t.toMillis() : (typeof t === "number" ? t : Date.now());
 const chatId = (a, b) => a < b ? a + "_" + b : b + "_" + a;
@@ -247,8 +251,8 @@ const KDB = {
     mids.forEach(id => b.update(doc(db, "chats", cid, "messages", id), { t: "", mod: true, img: deleteField(), aud: deleteField(), dur: deleteField() }));
     await b.commit();
   },
-  async ban(uid, reason) { const r = await httpsCallable(fns, "banla")({ uid, reason }); return r.data; },
-  async unban(uid) { const r = await httpsCallable(fns, "banKaldir")({ uid }); return r.data; },
+  async ban(uid, reason) { const r = await callFn("banla", { uid, reason }); return r.data; },
+  async unban(uid) { const r = await callFn("banKaldir", { uid }); return r.data; },
   listenBans(cb) { stop("bans"); unsubs.bans = onSnapshot(collection(db, "bans"), s => cb(s.docs.map(d => ({ id: d.id, ...d.data() }))), e => cb([])); },
   async myBan() { try { const s = await getDoc(doc(db, "bans", KDB.uid)); return s.exists() ? s.data() : null; } catch (e) { return null; } },
   async isAdmin() { try { const s = await getDoc(doc(db, "config", "admins")); return s.exists() && (s.data().uids || []).includes(KDB.uid); } catch (e) { return false; } },
@@ -303,14 +307,14 @@ const KDB = {
   },
   perdeKabul(other) { return updateDoc(doc(db, "perde", chatId(KDB.uid, other)), { status: "acik", ts: serverTimestamp() }); },
   perdeKapat(other) { return deleteDoc(doc(db, "perde", chatId(KDB.uid, other))); },
-  async perdeFoto(uid) { const r = await httpsCallable(fns, "perdeFoto")({ uid }); return r.data || {}; },
+  async perdeFoto(uid) { const r = await callFn("perdeFoto", { uid }); return r.data || {}; },
   async getReal() { const s = await getDoc(doc(db, "users", KDB.uid, "gizli", "foto")); return s.exists() ? s.data() : null; },
   saveReal(av, banner) { return setDoc(doc(db, "users", KDB.uid, "gizli", "foto"), { av: av || null, banner: banner || null, ts: serverTimestamp() }); },
   adminDelReal(uid) { return deleteDoc(doc(db, "users", uid, "gizli", "foto")); },
   async getTurn() { const s = await getDoc(doc(db, "config", "turn")); return s.exists() ? s.data() : null; },
   // Dosya yükle: dir "p" (profil görselleri) ya da "m" (mesaj ekleri). İndirme bağlantısını döndürür.
   async upload(dir, blob, ext) {
-    const st = getStorage(app);
+    const { getStorage, ref: sRef, uploadBytes, getDownloadURL } = await fbSt(); const st = getStorage(app);
     const name = Date.now().toString(36) + Math.random().toString(36).slice(2, 10) + "." + ext;
     const r = sRef(st, `${dir}/${KDB.uid}/${name}`);
     await uploadBytes(r, blob, { contentType: blob.type, cacheControl: "public,max-age=31536000" });
@@ -318,7 +322,7 @@ const KDB = {
   },
   // Perde arkası görsel: herkese açık bağlantı OLUŞTURULMAZ, sadece depodaki yol döner
   async uploadReal(blob) {
-    const st = getStorage(app);
+    const { getStorage, ref: sRef, uploadBytes, getDownloadURL } = await fbSt(); const st = getStorage(app);
     const path = `r/${KDB.uid}/${Date.now().toString(36)}${Math.random().toString(36).slice(2, 10)}.jpg`;
     await uploadBytes(sRef(st, path), blob, { contentType: "image/jpeg" });
     return path;
@@ -349,10 +353,11 @@ const KDB = {
   stopMsgs() { stop("msgs"); },
 
   // ---------- Telefona bildirim ----------
-  async pushSupported() { try { return !IS_TEST && "Notification" in window && "serviceWorker" in navigator && await msgSupported(); } catch (e) { return false; } },
+  async pushSupported() { try { return !IS_TEST && "Notification" in window && "serviceWorker" in navigator && await (await fbMsg()).isSupported(); } catch (e) { return false; } },
   async enablePush() {
     const reg = await navigator.serviceWorker.register("sw.js");
     await navigator.serviceWorker.ready;
+    const { getMessaging, getToken } = await fbMsg();
     const token = await getToken(getMessaging(app), { vapidKey: VAPID, serviceWorkerRegistration: reg });
     if (!token) throw new Error("anahtar alınamadı");
     await setDoc(doc(db, "users", KDB.uid, "push", token), { ts: serverTimestamp(), ua: navigator.userAgent.slice(0, 160) });
@@ -362,7 +367,7 @@ const KDB = {
   async disablePush() {
     let t = null; try { t = localStorage.getItem("kulis_push"); localStorage.removeItem("kulis_push"); } catch (e) {}
     if (t) await deleteDoc(doc(db, "users", KDB.uid, "push", t)).catch(() => {});
-    await deleteToken(getMessaging(app)).catch(() => {});
+    try { const { getMessaging, deleteToken } = await fbMsg(); await deleteToken(getMessaging(app)); } catch (e) {}
   },
   // her açılışta anahtarı tazele (Google zamanla yeniler)
   async refreshPush() {
@@ -370,7 +375,7 @@ const KDB = {
   },
 
   // ---------- Anonim itiraf (sunucu yazar) ----------
-  async anonPost(t, cat) { const r = await httpsCallable(fns, "anonimItiraf")({ t, cat }); return r.data.id; },
+  async anonPost(t, cat) { const r = await callFn("anonimItiraf", { t, cat }); return r.data.id; },
   listenMyAnon(cb) { stop("anon"); unsubs.anon = onSnapshot(collection(db, "users", KDB.uid, "anon"), s => cb(s.docs.map(d => d.id)), e => cb([])); },
 
   // ---------- Davet ----------
@@ -426,7 +431,7 @@ const KDB = {
   },
 
   // ---------- 5651 erişim kaydı (IP sunucuda tutulur) ----------
-  logAccess(act) { if (IS_TEST || !auth.currentUser) return Promise.resolve(); return httpsCallable(fns, "erisimKaydi")({ act }).catch(() => {}); },
+  logAccess(act) { if (IS_TEST || !auth.currentUser) return Promise.resolve(); return callFn("erisimKaydi", { act }).catch(() => {}); },
 
   // ---------- Premium (Google Play) ----------
   listenPremium(cb) {
