@@ -1,6 +1,6 @@
 // Herkese açık itiraf sayfaları: her gün GitHub Actions'ta çalışır, kulistr.com/itiraf/ altını baştan üretir.
 // Yayınlanan: en az 3 tepki almış, anonim OLMAYAN, yazarı "Google'da çıkabilsin" ayarını kapatmamış, banlı olmayan itirafların
-// yalnızca metni, kategorisi, tepki sayıları ve ayı. Takma ad, burç, fotoğraf, yorum, hesap kimliği ASLA yazılmaz.
+// yalnızca metni, kategorisi, tepki sayıları ve ayı. (Ayarlarda kapatma seçeneği yok; eski "seo:false" kaydı varsa yine uyulur.) Takma ad, burç, fotoğraf, yorum, hesap kimliği ASLA yazılmaz.
 // Kullanım: node build/itiraf-sayfalari.mjs [--deneme veri.json]   (çıktı: itiraf/ klasörü ve sitemap.xml)
 import fs from "node:fs";
 import path from "node:path";
@@ -61,7 +61,7 @@ function sayfa({ baslik: b, aciklama, yol, govde, jsonld }) {
 <link rel="icon" href="/icons/icon-192.png">${jsonld ? `<script type="application/ld+json">${JSON.stringify(jsonld).replace(/</g, "\\u003c")}</script>` : ""}<style>${CSS}</style></head>
 <body><main class="k"><a class="ust" href="/?utm_source=itiraf&utm_medium=seo"><img src="/icons/icon-192.png" alt="" width="40" height="40"><span><b>Kulis.</b><br><span>İtiraf &amp; Sohbet</span></span></a>
 ${govde}
-<p class="alt">Kulis'te herkes takma adla yazar. Bu sayfada yazarın takma adı ya da başka bir bilgisi gösterilmez. Yazarı, itirafının burada görünmesini Ayarlar'dan kapatabilir. <a href="/kurallar.html">Topluluk kuralları</a> · <a href="/gizlilik.html">Gizlilik</a></p></main></body></html>`;
+<p class="alt">Kulis'te herkes takma adla yazar. Bu sayfada yazarın takma adı ya da başka bir bilgisi gösterilmez. Yazarı itirafını sildiğinde bu sayfa da kaldırılır. <a href="/kurallar.html">Topluluk kuralları</a> · <a href="/gizlilik.html">Gizlilik</a></p></main></body></html>`;
 }
 
 const liste = await veriAl();

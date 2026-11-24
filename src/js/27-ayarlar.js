@@ -18,7 +18,6 @@ function showSettings(){
       ${swHTML("songor",S.songor!==false,"Son görülmemi göster","Kapatırsan kimse ne zaman çevrimiçi olduğunu göremez; sen de başkalarınınkini göremezsin")}
       ${swHTML("yaziyor",S.yaziyor!==false,"Yazarken karşı taraf görsün","Kapatırsan \"yazıyor…\" göstergesi karşıya gitmez")}
       ${swHTML("okundu",S.okundu!==false,"Okundu bilgisi gönder","Kapatırsan mesajını okuduğunu karşı taraf göremez")}
-      ${swHTML("seo",S.seo!==false,"İtiraflarım Google'da çıkabilsin","3+ tepki alan itiraflarının sadece metni herkese açık sayfada yayınlanabilir; takma adın, fotoğrafın ve yorumlar asla gösterilmez. Anonim itiraflar hiç yayınlanmaz.")}
       <button class="set-row" id="engList"><span><b>Engellediklerim</b><small>${nb?nb+" kişi":"Kimseyi engellemedin"}</small></span></button>
       <button class="set-row" id="dgIste"><span><b>Doğrulanmış profil rozeti <span class="dg">✓</span></b><small>${(U[R.uid]||{}).dg?"Profilin doğrulanmış.":"Gerçek kişi olduğunu gösteren mavi rozet. İstemek için dokun."}</small></span></button>`,acikGrup==="gizlilik")}
     ${grup("arama",IC.phone,"Aramalar",S.callVoice===false&&S.callVideo===false?"Kimse arayamaz":S.callVideo===false?"Sadece sesli arama açık":S.callVoice===false?"Sadece görüntülü arama açık":"Sesli ve görüntülü arama açık",`
