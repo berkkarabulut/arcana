@@ -61,6 +61,8 @@ async function botAc(b) {
   }
   await p.evaluate(() => { const c = document.querySelector("#ckb"); c && c.remove(); state.tab = "mesajlar"; render(); openChat(0) });
   await p.waitForSelector("#chat.open #mIn", { timeout: 10000 });
+  // gerçek kullanıcı gibi çerez bandını kapat
+  await p.waitForSelector("#ckNo", { timeout: 4000 }).then(() => p.click("#ckNo")).catch(() => {});
   return { ctx, p };
 }
 const bekleKosul = async (p, fn, ms) => { const t0 = Date.now(); try { await p.waitForFunction(fn, null, { timeout: ms, polling: 100 }); return Date.now() - t0 } catch (e) { return -1 } };
