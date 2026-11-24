@@ -1,5 +1,6 @@
 name: Font önizleme
 on: { workflow_dispatch: {} }
+permissions: { contents: write }
 jobs:
   cek:
     runs-on: ubuntu-latest
@@ -13,5 +14,7 @@ jobs:
         run: |
           npm i --no-audit --no-fund playwright@1.49.1 && npx playwright install --with-deps chromium
           node font-onizleme.mjs
-      - uses: actions/upload-artifact@v4
-        with: { name: font-onizleme, path: tests/site/font-*.png }
+      - run: |
+          mkdir /tmp/o && cp tests/site/font-*.png /tmp/o/ && cd /tmp/o && git init -q && git checkout -q -b onizleme
+          git -c user.name=bot -c user.email=bot@x add . && git -c user.name=bot -c user.email=bot@x commit -qm onizleme
+          git push -qf "https://x-access-token:${{ github.token }}@github.com/${{ github.repository }}.git" onizleme
