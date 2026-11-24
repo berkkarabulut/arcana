@@ -7,7 +7,7 @@ function drawChat(){
   const c=state.chats[openIdx]; if(!c)return; const u=U[c.u];
   const used=Math.max(c.msgs.length,REMOTE?(c.srvN||0):0), left=Math.max(0,FREE_LIMIT-used), full=!state.premium&&used>=FREE_LIMIT;
   const hidden=c.msgs.filter((m,i)=>!m.me&&isLockedIdx(c,i)).length;
-  $("#chatIn").innerHTML=`<div class="chat-h"><button class="back" id="cBack" aria-label="Geri">${IC.back}</button>${who(c.u,c.status==="wait"?"istek bekliyor":"çevrimiçi")}
+  $("#chatIn").innerHTML=`<div class="chat-h"><button class="back" id="cBack" aria-label="Geri">${IC.back}</button>${who(c.u,c.status==="wait"?"istek bekliyor":durumYazi(c.u))}
     ${perdeBtnHTML(c)}<button class="hb" id="cRep" aria-label="Konuşmayı bildir" title="Konuşmayı bildir">${IC.flag}</button><button class="hb" data-media="call" aria-label="Sesli ara">${IC.phone}${REMOTE?(hasFeat("voice")?"":lockIc()):lockBadge()}</button><button class="hb" data-media="video" aria-label="Görüntülü ara">${IC.video}${REMOTE?(hasFeat("video")?"":lockIc()):lockBadge()}</button></div>
    <div class="msgs" id="msgs">
      ${c.from?`<div class="origin"><small>${c.match?"Eşleştiniz. Bu itirafını beğenmiştin":"Bu itiraf üzerinden tanıştınız"}</small><q>“${esc(c.from)}”</q></div>`:`<div class="origin"><small>Profil üzerinden tanıştınız</small></div>`}

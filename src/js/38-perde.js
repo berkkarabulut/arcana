@@ -73,7 +73,7 @@ function remoteStartListeners(){
   KDB.listenPosts(list=>{R.posts=list;const mapped=list.map(mapPost);state.myPosts=mapped.filter(p=>p.u==="me");R.mapped=mapped;refreshStats();
     if(!$("#scrim").classList.contains("open")||!R.cmPid)rerender()});
   if(KDB.listenIncoming)KDB.listenIncoming(list=>{const d=list.sort((a,b)=>b.ts-a.ts)[0];if(d)showIncoming(d)});
-  if(KDB.listenSettings)KDB.listenSettings(st=>{R.settings=st});
+  if(KDB.listenSettings)KDB.listenSettings(st=>{R.settings=st;R.settingsOk=true});
   KDB.listenNotifs(list=>{state.notifs=list.map(n=>({id:n.id,type:n.type,u:n.from,text:n.text,go:n.go,ts:n.ts,read:!!n.read}));render()});
   KDB.listenBlocks(ids=>{R.blocks=ids;ids.forEach(id=>{(R.mapped||[]).filter(p=>p.uid===id).forEach(p=>state.hidden.add("p:"+p.id));state.hidden.add("u:"+id)});rerender()});
   KDB.listenLikesToMe(list=>{LIKED_ME.clear();list.forEach(l=>LIKED_ME.add(l.from));if(state.tab==="kesfet"&&sw.mode==="eslesme")vEsles()});
@@ -121,7 +121,8 @@ function remoteEnterApp(pub,priv){
   if(KDB.logAccess)KDB.logAccess("giris");
   try{const cq=new URLSearchParams(location.search).get("call");if(cq&&KDB.getCall){history.replaceState(null,"",location.pathname);KDB.getCall(cq).then(d=>{if(d&&d.status==="ring"&&d.to===R.uid)showIncoming(d)}).catch(()=>{})}}catch(e){}
   if(KDB.pushSupported)KDB.pushSupported().then(ok=>{R.pushOk=ok;if(ok&&LS("kulis_push_on",false))KDB.refreshPush();if(state.tab==="ben")render()});
-  const tch=()=>{if(KDB.touch)KDB.touch()};tch();if(!R.hb){R.hb=setInterval(()=>{if(!document.hidden)tch()},120e3);document.addEventListener("visibilitychange",()=>{if(!document.hidden)tch()})}
+  // son görülmesini gizleyen kişi "buradayım" sinyali göndermez; ayarlar yüklensin diye ilk sinyal birkaç saniye bekler
+  const tch=()=>{if(KDB.touch&&R.settingsOk&&(R.settings||{}).songor!==false)KDB.touch()};setTimeout(tch,4000);if(!R.hb){R.hb=setInterval(()=>{if(!document.hidden)tch()},120e3);document.addEventListener("visibilitychange",()=>{if(!document.hidden)tch()})}
 }
 // profil değişikliklerini sunucuya yaz (takma ad, renk, profil cümlesi, hazır görseller, cinsiyet seçimi)
 const ST_URL="https://firebasestorage.googleapis.com/v0/b/kulis-1647d.firebasestorage.app/o/";

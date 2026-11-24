@@ -178,8 +178,12 @@ for (const cihaz of CIHAZLAR) {
     }, () => (window.__kayit.some(d => d.dm === "eslesme") && document.querySelector('[data-dm-set="eslesme"]').getAttribute("aria-checked") === "true" && /Eşleş/.test(document.querySelector("#dmAc").textContent)) || "ayar kaydedilmedi");
     await adim(page, cihaz, "Ayarlar: yazıyor ve okundu düğmeleri", async () => { await page.click('[data-set="yaziyor"]'); await page.click('[data-set="okundu"]') },
       () => (window.__kayit.some(d => d.yaziyor === false) && window.__kayit.some(d => d.okundu === false)) || "kaydedilmedi");
+    await adim(page, cihaz, "Ayarlar: son görülmeyi gizleme", () => page.click('[data-set="songor"]'), () => window.__kayit.some(d => d.songor === false) || "kaydedilmedi");
+    await adim(page, cihaz, "Ayarlar: gruplar açılıp kapanıyor (tek grup açık)", async () => { await page.click('[data-grup="arama"] > summary'); await page.waitForTimeout(200) },
+      () => (document.querySelector('[data-grup="arama"]').open && !document.querySelector('[data-grup="gizlilik"]').open) || "gruplar düzgün açılmadı");
+    await page.evaluate(() => { const d = document.querySelector('[data-grup="premium"]'); d.open = true });
     await adim(page, cihaz, "Ayarlar: abonelik iptal bağlantısı", () => page.waitForTimeout(10), () => [...document.querySelectorAll("#sheet a")].some(a => a.href.includes("play.google.com/store/account/subscriptions")) || "bağlantı yok");
-    await adim(page, cihaz, "Engellediklerim: liste ve engeli kaldırma", async () => { await page.click("#engList"); await page.waitForSelector(".eng-row"); await page.click("[data-unb]"); await page.waitForTimeout(300) },
+    await adim(page, cihaz, "Engellediklerim: liste ve engeli kaldırma", async () => { await page.evaluate(() => { document.querySelector('[data-grup="gizlilik"]').open = true }); await page.click("#engList"); await page.waitForSelector(".eng-row"); await page.click("[data-unb]"); await page.waitForTimeout(300) },
       () => (!document.querySelector(".eng-row") && /kalmadı/.test(document.querySelector("#engIc").innerText)) || "engel kaldırılamadı");
     await page.evaluate(() => { delete window.KDB; closeSheet() });
 

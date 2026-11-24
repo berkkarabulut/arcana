@@ -47,3 +47,17 @@ body.misafir .cats,body.misafir .feed-head,body.misafir .acts2 .ib.dm{display:no
 .sd-uyari{display:flex;gap:8px;align-items:flex-start;margin:4px auto 10px;max-width:440px;padding:9px 12px;border-radius:14px;background:var(--yuzey);font-size:12.5px;line-height:1.4;opacity:.85}
 .sd-uyari svg{flex:none;width:15px;height:15px;margin-top:1px}
 :root[data-theme="light"] .it-cat{color:#4E625C}
+/* ============ AYARLAR: GRUPLAR ============ */
+.ayar-grup{margin:0 0 10px;border:1px solid var(--cizgi,rgba(128,128,128,.18));border-radius:18px;background:var(--yuzey);overflow:hidden}
+.ayar-grup>summary{display:flex;align-items:center;gap:12px;padding:14px 14px;cursor:pointer;list-style:none}
+.ayar-grup>summary::-webkit-details-marker{display:none}
+.ag-ic{flex:none;display:grid;place-items:center;width:38px;height:38px;border-radius:12px;background:var(--sheet,var(--zemin))}
+.ag-ic svg{width:20px;height:20px}
+.ag-t{flex:1;min-width:0}
+.ag-t b{display:block;font-size:15.5px}
+.ag-t small{display:block;font-size:12.5px;opacity:.65;margin-top:2px;line-height:1.35}
+.ayar-grup>summary .chev{flex:none;opacity:.6;transition:transform .2s}
+.ayar-grup[open]>summary .chev{transform:rotate(180deg)}
+.ag-ic2{padding:0 14px 8px;border-top:1px solid var(--cizgi,rgba(128,128,128,.18))}
+.ag-ic2 .set-row:last-child{border-bottom:0}
+.ag-ic2 .ayar-h{margin-top:14px}

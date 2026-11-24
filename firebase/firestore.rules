@@ -123,7 +123,8 @@ service cloud.firestore {
       match /settings/{d} {
         allow read: if signedIn();
         allow create, update: if isMe(uid) && d == 'main'
-          && request.resource.data.keys().hasOnly(['n','quiet','qFrom','qTo','callVoice','callVideo','dm','okundu','yaziyor','updatedAt'])
+          && request.resource.data.keys().hasOnly(['n','quiet','qFrom','qTo','callVoice','callVideo','dm','okundu','yaziyor','songor','updatedAt'])
+          && (!('songor' in request.resource.data) || request.resource.data.songor is bool)
           && (!('dm' in request.resource.data) || request.resource.data.dm in ['herkes','eslesme','kimse'])
           && (!('okundu' in request.resource.data) || request.resource.data.okundu is bool)
           && (!('yaziyor' in request.resource.data) || request.resource.data.yaziyor is bool)

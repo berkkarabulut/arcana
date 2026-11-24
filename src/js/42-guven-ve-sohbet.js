@@ -4,11 +4,14 @@ NIC.rapor="flag";
 
 // ---- Sohbet: ekran görüntüsü uyarısı, yazıyor, görüldü ----
 // Sohbet ekranı baştan çizilmez (yazdığın metin silinmesin); sadece göstergeler güncellenir.
-const SD={tyAt:0,seenAt:{},iv:null};
+const SD={tyAt:0,seenAt:{},lsAt:{},st:{},iv:null};
 const YAZIYOR_MS=7000;
 function sohbetDurum(){
   if(!REMOTE||openIdx<0)return;
   const c=state.chats[openIdx],box=$("#msgs");if(!c||!box)return;
+  sohbetBaslik(c);
+  // karşı tarafın son görülmesini dakikada bir tazele
+  if(c.u&&Date.now()-(SD.lsAt[c.u]||0)>60e3){SD.lsAt[c.u]=Date.now();Promise.all([KDB.userPub(c.u),KDB.getSettings(c.u)]).then(([x,st])=>{SD.st[c.u]=st||{};if(x)putUser(c.u,x);if(state.chats[openIdx]===c)sohbetBaslik(c)})}
   // karşı taraf yazıyor mu
   const yaz=c.status==="open"&&c.ty&&Date.now()-c.ty<YAZIYOR_MS;
   let ty=$("#sdTy");
@@ -23,6 +26,25 @@ function sohbetDurum(){
   // ben gördüm: karşıdan yeni mesaj geldiyse (okundu bilgisi kapalı değilse)
   const sonO=[...c.msgs].reverse().find(m=>!m.me&&m.ts);
   if(sonO&&document.visibilityState==="visible"&&(R.settings||{}).okundu!==false&&(SD.seenAt[c.id]||0)<sonO.ts){SD.seenAt[c.id]=Date.now();KDB.seen(c.id)}
+}
+// Çevrimiçi / son görülme: açık cihazlar 2 dakikada bir "buradayım" sinyali gönderir (lastSeen)
+const CEVRIMICI_MS=3.5*60e3;
+function durumYazi(k){
+  if(!REMOTE)return "çevrimiçi";
+  // karşılıklı: ben gizlediysem ya da karşı taraf gizlediyse gösterme
+  if((R.settings||{}).songor===false||(SD.st[k]||{}).songor===false)return "";
+  const ls=U[k]&&U[k].ls;if(!ls)return "";
+  const f=Date.now()-ls;if(f<CEVRIMICI_MS)return "çevrimiçi";
+  if(f<60*60e3)return `${Math.max(4,Math.round(f/60e3))} dk önce görüldü`;
+  const d=new Date(ls),bugun=new Date();bugun.setHours(0,0,0,0);
+  if(ls>=bugun.getTime())return `bugün ${String(d.getHours()).padStart(2,"0")}:${String(d.getMinutes()).padStart(2,"0")}'de görüldü`;
+  if(ls>=bugun.getTime()-864e5)return "dün görüldü";
+  const g=Math.floor((bugun.getTime()-ls)/864e5)+1;return g<30?`${g} gün önce görüldü`:"uzun süredir görülmedi";
+}
+function sohbetBaslik(c){
+  const sm=$("#chatIn .chat-h .who small"),u=U[c.u];if(!sm||!u||c.status==="wait")return;
+  const dy=durumYazi(c.u),t=`${Z[u.s].n}${dy?", "+dy:""}`;if(sm.textContent!==t)sm.textContent=t;
+  sm.classList.toggle("on",dy==="çevrimiçi");
 }
 function sohbetUyari(){
   const box=$("#msgs");if(!box||$("#sdUy"))return;
