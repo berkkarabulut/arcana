@@ -185,6 +185,30 @@ exports.anonimItiraf = onCall({ enforceAppCheck: false }, async (req) => {
   return { id: postRef.id };
 });
 
+// ---------------- Misafir vitrini ----------------
+// Üye olmayan ziyaretçiye en çok tepki alan 5 itiraf. Yazarın hesap kimliği (uid) asla gönderilmez.
+let VITRIN = { at: 0, list: [] };
+exports.misafirAkis = onCall({ enforceAppCheck: false, maxInstances: 5 }, async () => {
+  if (Date.now() - VITRIN.at < 5 * 60e3 && VITRIN.list.length) return { list: VITRIN.list };
+  const s = await db.collection("posts").orderBy("ts", "desc").limit(150).get();
+  const sum = r => Object.values(r || {}).reduce((a, b) => a + (+b || 0), 0);
+  const list = s.docs.map(d => ({ id: d.id, ...d.data() }))
+    .filter(p => typeof p.t === "string" && p.t.length >= 15 && p.cat !== "soru")
+    .sort((a, b) => (sum(b.r) * 2 + (b.cm || 0)) - (sum(a.r) * 2 + (a.cm || 0)) || ((b.ts && b.ts.toMillis()) || 0) - ((a.ts && a.ts.toMillis()) || 0))
+    .slice(0, 5)
+    .map((p, i) => {
+      const a = p.a || {};
+      return {
+        id: p.id, k: p.anon ? "anon" : "m" + (i + 1), anon: !!p.anon, t: p.t, cat: p.cat, cm: p.cm || 0,
+        r: { bende: (p.r && p.r.bende) || 0, saril: (p.r && p.r.saril) || 0, yok: (p.r && p.r.yok) || 0 },
+        ts: (p.ts && p.ts.toMillis && p.ts.toMillis()) || Date.now(),
+        a: p.anon ? { g: a.g || null } : { n: a.n || "", c: a.c || "#FF8A65", s: a.s || "koc", g: a.g || null, age: a.age || "", av: (a.av && String(a.av).startsWith("preset:")) ? a.av : null }
+      };
+    });
+  VITRIN = { at: Date.now(), list };
+  return { list };
+});
+
 // ---------------- Davet ödülü ----------------
 const DAVET_ESIK = 3, ODUL_GUN = 7;
 exports.davetOdulu = onDocumentCreated("users/{uid}/private/info", async (event) => {
