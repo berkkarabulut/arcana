@@ -1,6 +1,7 @@
 // Kulis veritabanı katmanı: Firebase Auth + Firestore
 // Site (index.html) bu dosyadaki window.KDB fonksiyonlarıyla gerçek veriye ulaşır.
 import { initializeApp } from "https://www.gstatic.com/firebasejs/12.8.0/firebase-app.js";
+import { initializeAppCheck, ReCaptchaEnterpriseProvider } from "https://www.gstatic.com/firebasejs/12.8.0/firebase-app-check.js";
 import {
   initializeAuth, indexedDBLocalPersistence, browserLocalPersistence, browserPopupRedirectResolver, onAuthStateChanged, signInAnonymously, GoogleAuthProvider, signInWithPopup,
   sendSignInLinkToEmail, isSignInWithEmailLink, signInWithEmailLink, signOut, linkWithPopup,
@@ -42,6 +43,10 @@ const app = initializeApp(IS_TEST ? {
   messagingSenderId: "165708007413",
   appId: "1:165708007413:web:7dd69b4ef7c40f01fb82bc"
 });
+// App Check: istekler gerçekten kulistr.com'daki uygulamadan mı geliyor (görünmez reCAPTCHA, kullanıcıya soru sormaz).
+// Beta ve yerel bot testinde kapalı. Jeton 7 gün geçerli (Firebase konsolunda ayarlı), yarısında yenilenir.
+const EMU0 = location.hostname === "localhost";
+if (!IS_TEST && !EMU0) { try { initializeAppCheck(app, { provider: new ReCaptchaEnterpriseProvider("6LdbqzAuAAAAAL2UI2Z7pSpmg8n7wsr7Uj83LYHD"), isTokenAutoRefreshEnabled: true }); } catch (e) { console.warn("appcheck", e); } }
 // Google giriş penceresi altyapısı (~130 KB) açılışta değil, sadece "Google ile giriş"e basınca yüklensin
 const auth = initializeAuth(app, { persistence: [indexedDBLocalPersistence, browserLocalPersistence] });
 auth.languageCode = "tr";
