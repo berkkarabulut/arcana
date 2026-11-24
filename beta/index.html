@@ -302,6 +302,17 @@ button.pl{border:0;color:inherit;cursor:pointer;padding:0}
 .nb .pip{position:absolute;top:7px;left:calc(50% + 6px);min-width:17px;height:17px;padding:0 4px;border-radius:99px;background:var(--nar);color:var(--on-nar);font-size:10.5px;display:grid;place-items:center}
 .confess{height:50px;margin:0 4px;border-radius:16px;background:var(--nar);color:var(--on-nar);font-weight:800;font-size:14px;line-height:1.1;box-shadow:0 8px 22px rgba(var(--nar-rgb),.35)}
 
+html,body{overscroll-behavior-y:contain}
+#ptr{position:fixed;left:50%;top:0;z-index:95;width:46px;height:46px;margin-left:-23px;border-radius:50%;display:grid;place-items:center;pointer-events:none;
+  background:var(--yuzey2,#2A2233);box-shadow:0 8px 24px rgba(0,0,0,.35),0 0 0 1px rgba(212,175,90,.35);transform:translateY(-60px);opacity:0;will-change:transform}
+#ptr svg{width:24px;height:24px;color:#E9C77A;transition:transform .2s}
+#ptr .ptr-k{font-family:var(--display);font-size:20px;font-weight:700;color:#E9C77A;line-height:1}
+#ptr.go svg{transform:rotate(180deg)}
+#ptr.spin{animation:ptrSpin 1s linear infinite}
+#ptr.spin svg{display:none}
+#ptr:not(.spin) .ptr-k{display:none}
+@keyframes ptrSpin{to{transform:translateY(64px) rotate(360deg)}}
+#ptrTxt{position:fixed;left:0;right:0;top:0;z-index:95;text-align:center;font-size:12.5px;font-weight:700;color:var(--soluk);pointer-events:none;opacity:0;transform:translateY(-30px)}
 .toast{position:fixed;left:50%;bottom:96px;z-index:100;pointer-events:none;transform:translate(-50%,12px);opacity:0;transition:.25s;background:var(--kagit);color:var(--murekkep);padding:11px 16px;border-radius:14px;font-size:13.5px;font-weight:700;max-width:88%;text-align:center;box-shadow:0 12px 30px rgba(0,0,0,.45)}
 .toast.show{opacity:1;transform:translate(-50%,0)}
 .empty{color:var(--soluk);padding:20px 4px;font-size:14px;line-height:1.55}
@@ -877,6 +888,7 @@ a.btn{display:inline-flex;align-items:center;justify-content:center;text-decorat
   <button class="nb" data-tab="ben"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><circle cx="12" cy="8.5" r="3.8"/><path d="M4.5 20c1.2-3.8 4-5.5 7.5-5.5s6.3 1.7 7.5 5.5"/></svg>Profilim</button>
 </div></nav>
 
+<div id="ptr" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M6 13l6 6 6-6"/></svg><span class="ptr-k">K</span></div><div id="ptrTxt" aria-live="polite"></div>
 <div class="scrim" id="scrim"><div class="sheet" id="sheet" role="dialog" aria-modal="true"></div></div>
 <div class="chat" id="chat" role="dialog" aria-modal="true"><div class="chat-in" id="chatIn"></div></div>
 <div class="toast" id="toast" role="status"></div>
@@ -2038,7 +2050,7 @@ function openChat(i){openIdx=i;state.chats[i].unread=false;closeSheet();$("#chat
 function closeChat(){openIdx=-1;$("#chat").classList.remove("open");render()}
 function drawChat(){
   const c=state.chats[openIdx]; if(!c)return; const u=U[c.u];
-  const used=c.msgs.length, left=Math.max(0,FREE_LIMIT-used), full=!state.premium&&used>=FREE_LIMIT;
+  const used=Math.max(c.msgs.length,REMOTE?(c.srvN||0):0), left=Math.max(0,FREE_LIMIT-used), full=!state.premium&&used>=FREE_LIMIT;
   const hidden=c.msgs.filter((m,i)=>!m.me&&isLockedIdx(c,i)).length;
   $("#chatIn").innerHTML=`<div class="chat-h"><button class="back" id="cBack" aria-label="Geri">${IC.back}</button>${who(c.u,c.status==="wait"?"istek bekliyor":"çevrimiçi")}
     ${perdeBtnHTML(c)}<button class="hb" id="cRep" aria-label="Konuşmayı bildir" title="Konuşmayı bildir">${IC.flag}</button><button class="hb" data-media="call" aria-label="Sesli ara">${IC.phone}${REMOTE?(hasFeat("voice")?"":lockIc()):lockBadge()}</button><button class="hb" data-media="video" aria-label="Görüntülü ara">${IC.video}${REMOTE?(hasFeat("video")?"":lockIc()):lockBadge()}</button></div>
@@ -2068,7 +2080,10 @@ function drawChat(){
   t.onkeydown=e=>{if(e.key==="Enter"&&!e.shiftKey){e.preventDefault();$("#mGo").click()}};
   $("#mGo").onclick=()=>{const v=t.value.trim();if(!v)return;track("mesaj");const mc=modCheck(v,"mesaj");if(mc){$("#mWarn").innerHTML=`<p class="warn">${mc}</p>`;return}const bad=contactBlock(v);
     if(bad){$("#mWarn").innerHTML=`<p class="warn">Bu mesaj gönderilmedi: ${bad} paylaşılamaz. Sohbetler sitede kalır, böylece iki taraf da güvende olur.</p>`;return}
-    if(REMOTE){if(c.status==="wait"){toast("Karşı taraf isteğini kabul edince yazabilirsin");return}t.value="";$("#mGo").disabled=true;const wasMine=c.lastBy===R.uid;KDB.sendMsg(c.id,v).then(()=>{askPushOnce("mesaj");if(!R.loggedMsg){R.loggedMsg=1;KDB.logAccess&&KDB.logAccess("mesaj")}if(!wasMine)KDB.notify(c.u,"dm","sana yeni mesaj gönderdi",{chat:c.u})}).catch(e=>toast(writeErr(e,"mesaj")));c.msgs.push({me:true,t:v});drawChat();setTimeout(()=>{const x=$("#mIn");x&&x.focus()},30);return}
+    if(REMOTE){if(c.status==="wait"){toast("Karşı taraf isteğini kabul edince yazabilirsin");return}t.value="";$("#mGo").disabled=true;const wasMine=c.lastBy===R.uid;KDB.sendMsg(c.id,v).then(()=>{askPushOnce("mesaj");if(!R.loggedMsg){R.loggedMsg=1;KDB.logAccess&&KDB.logAccess("mesaj")}if(!wasMine)KDB.notify(c.u,"dm","sana yeni mesaj gönderdi",{chat:c.u})}).catch(e=>{
+      // sunucu ücretsiz sınırı uyguladıysa premium ekranını göster
+      if(e&&e.code==="permission-denied"&&!state.premium&&(c.srvN||0)>=FREE_LIMIT){c.msgs=c.msgs.filter(x=>x!==om);drawChat();const mi=$("#mIn");if(mi)mi.value=v;showPremium("sohbet");return}
+      toast(writeErr(e,"mesaj"))});const om={me:true,t:v};c.msgs.push(om);drawChat();setTimeout(()=>{const x=$("#mIn");x&&x.focus()},30);return}
     c.msgs.push({me:true,t:v});drawChat();
     const ci=c;setTimeout(()=>{ci.typing=true;if(state.chats[openIdx]===ci)drawChat()},700);
     setTimeout(()=>{ci.typing=false;ci.msgs.push({me:false,t:replyFor(ci)});if(state.chats[openIdx]===ci)drawChat();else{ci.unread=true;notify("dm",ci.u,"sana yeni mesaj gönderdi",{chat:ci.u});render()}
@@ -2651,6 +2666,35 @@ function mapPost(p){
   return {id:p.id,feat:p.feat||0,u:mine?"me":p.uid,uid:p.uid,cat:p.cat,q:p.q||null,t:p.t,ts:p.ts,ago:agoOf(p.ts),r:p.r||{bende:0,saril:0,yok:0},cm:R.cm[p.id]||[],cmCount:p.cm||0,today:dayKeyOf(Date.now())===dayKeyOf(p.ts)}}
 const dayKeyOf=ts=>{const d=new Date(ts);return d.getFullYear()+"-"+(d.getMonth()+1)+"-"+d.getDate()};
 function refreshStats(){const by={};R.posts.forEach(p=>{const k=p.uid;by[k]=by[k]||[0,0,0];by[k][0]++;by[k][2]+=reactTotal(p)});Object.keys(U).forEach(k=>{U[k].stat=by[k]||[0,0,0]})}
+/* ---- Aşağı çekip yenile: her sayfada, sayfa en üstteyken aşağı çekince yenilenir ---- */
+(function pullToRefresh(){
+  const TH=78,MAX=130;let y0=null,x0=0,dy=0,active=false,busy=false;
+  const ptr=document.getElementById("ptr"),txt=document.getElementById("ptrTxt");
+  const blocked=t=>{
+    if(busy)return true;
+    if(document.querySelector("#scrim.open,#chat.open,#adm.open,#perdeOv,.cf-scrim,#callscr.open"))return true;
+    const onb=document.getElementById("onb");if(onb&&!onb.hidden)return true;
+    if(t&&t.closest&&t.closest("#swTop,textarea,input,select,[contenteditable],.no-ptr"))return true;
+    // içi kaydırılabilen bir kutunun ortasındaysa dokunma
+    for(let e=t;e&&e!==document.body;e=e.parentElement){if(e.scrollTop>0)return true}
+    return (window.scrollY||document.documentElement.scrollTop)>2;
+  };
+  const show=d=>{const p=Math.min(1,d/TH);ptr.style.transition="none";txt.style.transition="none";
+    ptr.style.transform=`translateY(${Math.min(d,MAX)*.6-40}px) rotate(${p*220}deg)`;ptr.style.opacity=Math.min(1,p*1.4);
+    ptr.classList.toggle("go",d>=TH);txt.textContent=d>=TH?"Bırak, yenilensin":"Yenilemek için çek";
+    txt.style.opacity=Math.max(0,p-.35);txt.style.transform=`translateY(${Math.min(d,MAX)*.6+18}px)`};
+  const hide=()=>{ptr.style.transition="transform .3s,opacity .3s";txt.style.transition="opacity .2s";ptr.style.transform="translateY(-60px)";ptr.style.opacity=0;txt.style.opacity=0;ptr.classList.remove("go")};
+  addEventListener("touchstart",e=>{if(e.touches.length!==1||blocked(e.target)){y0=null;return}y0=e.touches[0].clientY;x0=e.touches[0].clientX;dy=0;active=false},{passive:true});
+  addEventListener("touchmove",e=>{if(y0==null)return;const t=e.touches[0],d=t.clientY-y0,dx=Math.abs(t.clientX-x0);
+    if(!active){if(d<8)return;if(dx>d||(window.scrollY||0)>2){y0=null;return}active=true}
+    dy=Math.max(0,d*.55);show(dy)},{passive:true});
+  const end=()=>{if(y0==null||!active){y0=null;return}y0=null;active=false;
+    if(dy>=TH){busy=true;ptr.style.transition="transform .25s";ptr.classList.remove("go");ptr.classList.add("spin");txt.textContent="Yenileniyor…";txt.style.opacity=1;
+      try{navigator.vibrate&&navigator.vibrate(12)}catch(e){}
+      setTimeout(()=>location.reload(),550)}
+    else hide()};
+  addEventListener("touchend",end,{passive:true});addEventListener("touchcancel",()=>{y0=null;active=false;hide()},{passive:true});
+})();
 function rerender(){if(!state.me)return;if($("#chat").classList.contains("open"))return void render();render()}
 
 /* ============ KULİS EKİBİ YAZIŞMASI ============ */
@@ -2761,7 +2805,7 @@ function remoteStartListeners(){
     list.sort((a,b)=>(b.lastAt||0)-(a.lastAt||0)).forEach(c=>{
       const other=c.members.find(x=>x!==me)||c.members[0];
       const o=R.chats[c.id]||(R.chats[c.id]={id:c.id,u:other,msgs:[]});
-      Object.assign(o,{u:other,from:c.from,status:c.status,match:!!c.match,reqBy:c.reqBy,lastBy:c.lastBy,lastAt:c.lastAt,last:c.last});
+      Object.assign(o,{u:other,from:c.from,status:c.status,match:!!c.match,reqBy:c.reqBy,lastBy:c.lastBy,lastAt:c.lastAt,last:c.last,srvN:c.n||0});
       if(!o.msgs.length&&c.last)o.msgs=[{me:c.lastBy===me,t:c.last}];
       o.unread=c.lastBy&&c.lastBy!==me&&(c.lastAt||0)>(seen[c.id]||0);
       if(c.match)sw.matched.add(other);
@@ -3212,6 +3256,6 @@ if(REMOTE){
 if(REMOTE)remoteInit();else
 try{const s=JSON.parse(localStorage.getItem("itiraf_me")||"null");if(s&&s.n&&s.s){state.me=s;loadData();render();seedDemo()}else startOnb()}catch(e){startOnb()}
 </script>
-<script type="module">if(REMOTE)import("./kulis-db.js?v=24")</script>
+<script type="module">if(REMOTE)import("./kulis-db.js?v=25")</script>
 </body>
 </html>

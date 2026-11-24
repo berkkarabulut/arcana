@@ -328,16 +328,17 @@ const KDB = {
     if (m.img) d.img = m.img;
     if (m.aud) { d.aud = m.aud; d.dur = Math.max(1, Math.min(120, Math.round(m.dur || 1))); }
     b.set(doc(collection(db, "chats", cid, "messages")), d);
+    b.update(doc(db, "chats", cid), { last: m.img ? "📷 Fotoğraf" : "🎤 Sesli mesaj", lastBy: KDB.uid, lastAt: serverTimestamp(), n: increment(1) });
     stamp(b, "msgAt");
     await b.commit();
-    await updateDoc(doc(db, "chats", cid), { last: m.img ? "📷 Fotoğraf" : "🎤 Sesli mesaj", lastBy: KDB.uid, lastAt: serverTimestamp() }).catch(() => {});
   },
   async sendMsg(cid, t) {
     const b = writeBatch(db);
     b.set(doc(collection(db, "chats", cid, "messages")), { uid: KDB.uid, t, ts: serverTimestamp() });
+    // sohbet sayacı: sunucu, ücretsiz üyelikte sohbet başına mesaj sınırını buna göre uygular
+    b.update(doc(db, "chats", cid), { last: t.slice(0, 120), lastBy: KDB.uid, lastAt: serverTimestamp(), n: increment(1) });
     stamp(b, "msgAt");
     await b.commit();
-    await updateDoc(doc(db, "chats", cid), { last: t.slice(0, 120), lastBy: KDB.uid, lastAt: serverTimestamp() }).catch(() => {});
   },
   listenMsgs(cid, cb) {
     stop("msgs");
