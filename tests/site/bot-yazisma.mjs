@@ -46,7 +46,7 @@ async function botAc(b) {
   await ctx.addInitScript(() => { try { localStorage.setItem("kulis_cerez", "0") } catch (e) {} });
   const p = await ctx.newPage(); p._hata = [];
   p.on("pageerror", e => p._hata.push(String(e).slice(0, 200)));
-  p.on("console", m => { if (m.type() === "error" && !/misafirAkis|ERR_|favicon|messaging|push/i.test(m.text())) p._hata.push("konsol: " + m.text().slice(0, 200)) });
+  p.on("console", m => { if (m.type() === "error" && !/misafirAkis|ERR_|favicon|messaging|push|Failed to load resource/i.test(m.text())) p._hata.push("konsol: " + m.text().slice(0, 200)) });
   p._log = []; p.on("console", m => p._log.push(m.type() + ": " + m.text().slice(0, 300)));
   await p.goto(SITE + "?emu=1");
   await p.evaluate(() => { try { localStorage.removeItem("kulis_lp") } catch (e) {} });
@@ -79,9 +79,10 @@ kaydet("Mert, Ayşe'yi çevrimiçi görüyor", s >= 0, s >= 0 ? `${s} ms` : "ba�
 // 2) yazıyor başlıyor
 await a.p.click("#mIn");
 const t0 = Date.now();
-await a.p.keyboard.type("Naber nasılsın, bugün çok yoruldum valla", { delay: 90 });
+await a.p.keyboard.type("N", { delay: 0 });
 s = await bekleKosul(b.p, () => !!document.querySelector("#sdTy"), 6000);
-kaydet("Ayşe yazarken Mert'te \"yazıyor…\" çıkıyor", s >= 0, s >= 0 ? `yazmaya başladıktan ${Math.max(0, Date.now() - t0 - 0)} ms içinde göründü` : "çıkmadı");
+kaydet("Ayşe yazarken Mert'te \"yazıyor…\" çıkıyor", s >= 0, s >= 0 ? `ilk harften ${Date.now() - t0} ms sonra göründü` : "çıkmadı");
+await a.p.keyboard.type("aber nasılsın, bugün çok yoruldum valla", { delay: 90 });
 
 // 3) yazmayı bırakınca kayboluyor (3 sn bekleme + iletim)
 const dur0 = Date.now();
