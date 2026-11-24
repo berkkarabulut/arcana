@@ -53,16 +53,22 @@ async function playBuy(sku,btn){
 }
 function showPremiumRemote(src){
   let tier="ses",per="aylik";const web=!IN_APP;
-  const draw=()=>{const T=TIERS.find(x=>x.k===tier);
+  // her paket sadece bir öncekine göre neyi eklediğini söyler
+  const FARK={sohbet:["Sınırsız mesaj ve sohbet","İtiraflara sınırsız cevap"],ses:["Sohbet paketindeki her şey","Sesli arama"],tam:["Sohbet + Ses'teki her şey","Görüntülü arama","Eşleş'te sınırsız kaydırma ve geri alma","Seni beğenenleri gör"]};
+  const draw=()=>{const T=TIERS.find(x=>x.k===tier),PER=PERIODS.find(x=>x[0]===per),fiyat=k=>playPrices[skuOf(k,per)]||TIERS.find(x=>x.k===k).pr[per];
    openSheet(`<h2>Kulis Premium</h2>
-   ${web?`<p class="prem-free">${IC.spark}<span>Premium, Google Play'deki <b>Kulis uygulamasından</b> alınır. Aldığın üyelik aynı hesapla web'de de geçerli olur.</span></p>`:""}
-   <div class="tier-tabs" role="tablist">${TIERS.map(x=>`<button role="tab" data-tier="${x.k}" aria-selected="${tier===x.k}"><b>${x.n}</b><small>${x.d}</small></button>`).join("")}</div>
-   <div class="perks">${T.perks.map(t=>`<div>${IC.chk}${t}</div>`).join("")}</div>
+   <p class="prem-free">${IC.spark}<span><b>Ücretsiz olanlar:</b> itiraf yazmak ve okumak, her sohbette 20 mesaj, profil fotoğrafı ve Perde, görüldü ve yazıyor bilgisi. Premium sadece sınırları kaldırır.</span></p>
    ${state.premUntil?`<p class="hint" style="margin:0 0 10px">Premium üyeliğin ${new Date(state.premUntil).toLocaleDateString("tr-TR")} tarihine kadar açık. <a href="${ABONE_URL}" target="_blank" rel="noopener">Aboneliğimi yönet / iptal et</a></p>`:""}
-   <div class="plans">${PERIODS.map(([k,n,sub])=>`<button class="plan" data-per="${k}" aria-pressed="${per===k}"><span><b>${n}</b><small>${sub}</small></span><span class="p">${playPrices[skuOf(tier,k)]||T.pr[k]}</span></button>`).join("")}</div>
-   ${web?`<a class="btn gold wide" href="https://play.google.com/store/apps/details?id=com.kulistr.app" target="_blank" rel="noopener" style="display:flex;justify-content:center;align-items:center;text-decoration:none">Uygulamayı Google Play'den aç</a><button class="btn line wide" id="buyX" style="margin-top:8px">Kapat</button>`:`<button class="btn gold wide" id="buy">Google Play ile abone ol</button>
-   <p class="hint" style="text-align:center">Abonelik her dönem sonunda otomatik yenilenir. İstediğin zaman <a href="${ABONE_URL}" target="_blank" rel="noopener">Google Play > Abonelikler</a>'den iptal edebilirsin; dönem sonuna kadar premium kalırsın.</p>`}
-   ${web?`<p class="hint" style="text-align:center;margin-top:10px">Aboneliğin varsa <a href="${ABONE_URL}" target="_blank" rel="noopener">Google Play > Abonelikler</a>'den istediğin zaman iptal edebilirsin.</p>`:""}`);
+   <div class="seg3 pr-per" role="radiogroup" aria-label="Süre">${PERIODS.map(([k,n])=>`<button role="radio" aria-checked="${per===k}" data-per="${k}">${n}</button>`).join("")}</div>
+   <small class="pr-per-a">${PER[2]}</small>
+   <div class="pr-kart" role="radiogroup" aria-label="Paket">${TIERS.map(x=>`<button class="pr-k" role="radio" aria-checked="${tier===x.k}" data-tier="${x.k}">
+      <span class="pr-k-u"><b>${x.n}</b>${x.k==="ses"?`<i>Önerilen</i>`:""}<span class="pr-f">${fiyat(x.k)}</span></span>
+      <span class="pr-k-l">${FARK[x.k].map(t=>`<span>${IC.chk}${t}</span>`).join("")}</span></button>`).join("")}</div>
+   ${web?`<p class="prem-free" style="margin-top:12px">${IC.spark}<span>Premium, Google Play'deki <b>Kulis uygulamasından</b> alınır. Aldığın üyelik aynı hesapla web'de de geçerli olur.</span></p>
+     <a class="btn gold wide" href="https://play.google.com/store/apps/details?id=com.kulistr.app" target="_blank" rel="noopener" style="display:flex;justify-content:center;align-items:center;text-decoration:none">Uygulamayı Google Play'den aç</a><button class="btn line wide" id="buyX" style="margin-top:8px">Kapat</button>
+     <p class="hint" style="text-align:center;margin-top:10px">Aboneliğin varsa <a href="${ABONE_URL}" target="_blank" rel="noopener">Google Play > Abonelikler</a>'den istediğin zaman iptal edebilirsin.</p>`
+    :`<button class="btn gold wide" id="buy" style="margin-top:12px">${T.n}, ${PER[1].toLocaleLowerCase("tr")} ${fiyat(tier)} ile abone ol</button>
+     <p class="hint" style="text-align:center">Her dönem sonunda otomatik yenilenir. İstediğin zaman <a href="${ABONE_URL}" target="_blank" rel="noopener">Google Play > Abonelikler</a>'den iptal edersin; dönem sonuna kadar premium kalırsın.</p>`}`);
    const x=$("#buyX");if(x)x.onclick=closeSheet;
    $("#sheet").querySelectorAll("[data-tier]").forEach(b=>b.onclick=()=>{tier=b.dataset.tier;draw()});
    $("#sheet").querySelectorAll("[data-per]").forEach(b=>b.onclick=()=>{per=b.dataset.per;draw()});

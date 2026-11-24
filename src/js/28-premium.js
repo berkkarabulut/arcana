@@ -1,6 +1,6 @@
 /* ============ PREMIUM ============ */
 function showPremium(src){
-  if(REMOTE)return showPremiumRemote(src);
+  return showPremiumRemote(src); // tek, güncel premium ekranı (demo modunda da)
   let plan="aylik";
   const draw=()=>openSheet(`<h2>Kulis Premium</h2><p class="muted" style="margin:6px 0 2px;font-size:14px">${src==="medya"?"Fotoğraf, ses kaydı, sesli ve görüntülü arama Premium'a özel.":src==="mesaj"?"Sohbetin yarıda kalmasın.":src==="esles"?"Sınırsız kaydır, seni beğenenleri gör.":src==="sohbet"?"Yeni sohbet başlatmak için Premium'a geç.":"Sınırsız konuş."}</p>
    <div class="perks"><div>${IC.chk}Sınırsız mesaj, sınırsız sohbet</div><div>${IC.chk}Sınırsız kaydır, seni beğenenleri gör</div><div>${IC.chk}İtirafını 24 saat akışın en üstüne taşı</div><div>${IC.chk}İtiraflara sınırsız cevap yaz</div><div>${IC.chk}Kendi profil fotoğrafını ve kapağını yükle</div><div>${IC.chk}Fotoğraf, video ve ses kaydı gönder</div><div>${IC.chk}Sesli ve görüntülü arama</div><div>${IC.chk}Biriken mesajları hemen oku</div><div>${IC.chk}Mesajının okunduğunu gör</div></div>
