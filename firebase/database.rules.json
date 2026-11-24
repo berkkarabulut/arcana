@@ -1,0 +1,25 @@
+{
+  "rules": {
+    ".read": false,
+    ".write": false,
+    "durum": {
+      "$uid": {
+        ".read": "auth != null && auth.token.email_verified == true",
+        ".write": "auth != null && auth.token.email_verified == true && auth.uid === $uid",
+        ".validate": "newData.hasChildren(['on', 'ts'])",
+        "on": { ".validate": "newData.isBoolean()" },
+        "ts": { ".validate": "newData.isNumber() && newData.val() <= now + 5000" },
+        "$diger": { ".validate": false }
+      }
+    },
+    "yaz": {
+      "$cid": {
+        ".read": "auth != null && auth.token.email_verified == true && $cid.contains(auth.uid)",
+        "$uid": {
+          ".write": "auth != null && auth.token.email_verified == true && auth.uid === $uid && $cid.contains(auth.uid)",
+          ".validate": "newData.isNumber() && newData.val() <= now + 5000"
+        }
+      }
+    }
+  }
+}

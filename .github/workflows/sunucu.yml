@@ -6,6 +6,7 @@ on:
     paths:
       - "firebase/firestore.rules"
       - "firebase/storage.rules"
+      - "firebase/database.rules.json"
       - "functions/**"
       - "firebase.json"
       - "firebase/test/**"
@@ -35,7 +36,7 @@ jobs:
       - name: Güvenlik kurallarını test et (emülatörde)
         run: |
           npm install --prefix firebase/test --no-audit --no-fund --legacy-peer-deps
-          npx -y firebase-tools@latest emulators:exec --only firestore --project demo-kulis "node firebase/test/kurallar.test.mjs"
+          npx -y firebase-tools@latest emulators:exec --only firestore,database --project demo-kulis "node firebase/test/kurallar.test.mjs && node firebase/test/durum.test.mjs"
       - uses: google-github-actions/auth@v2
         with:
           workload_identity_provider: projects/165708007413/locations/global/workloadIdentityPools/github/providers/github
@@ -44,6 +45,17 @@ jobs:
         run: npm install --prefix functions --no-audit --no-fund
       - name: Firebase'e yükle
         run: npx -y firebase-tools@latest deploy --only firestore:rules,functions --project kulis-1647d --non-interactive --force
+      - name: Anlık durum veritabanını (Realtime Database) oluştur, yoksa
+        run: |
+          T=$(gcloud auth print-access-token)
+          L=$(curl -s -H "Authorization: Bearer $T" "https://firebasedatabase.googleapis.com/v1beta/projects/kulis-1647d/locations/-/instances")
+          echo "$L" | head -c 600; echo
+          if echo "$L" | grep -q "kulis-1647d-default-rtdb"; then echo "Veritabanı zaten var"; else
+            curl -s -X POST -H "Authorization: Bearer $T" -H "Content-Type: application/json" -d '{"type":"DEFAULT_DATABASE"}' \
+              "https://firebasedatabase.googleapis.com/v1beta/projects/kulis-1647d/locations/europe-west1/instances?databaseId=kulis-1647d-default-rtdb" | head -c 800; echo
+          fi
+      - name: Anlık durum kurallarını yükle
+        run: npx -y firebase-tools@latest deploy --only database --project kulis-1647d --non-interactive --force
       - name: Dosya (Storage) kurallarını yükle
         run: npx -y firebase-tools@latest deploy --only storage --project kulis-1647d --non-interactive --force
       - name: Günlük otomatik yedek (Firestore, 14 gün saklanır)
@@ -53,4 +65,19 @@ jobs:
             echo "Yedek planı zaten var:"; gcloud firestore backups schedules list --project kulis-1647d --database='(default)'
           else
             gcloud firestore backups schedules create --project kulis-1647d --database='(default)' --recurrence=daily --retention=14d
+          fi
+      - name: Aylık bütçe alarmı (harcama bu tutara yaklaşınca e-posta gelir, durdurmaz)
+        continue-on-error: true
+        run: |
+          gcloud services enable billingbudgets.googleapis.com --project kulis-1647d || true
+          BA=$(gcloud billing projects describe kulis-1647d --format='value(billingAccountName)' | sed 's#billingAccounts/##')
+          echo "Ödeme hesabı: $BA"
+          CUR=$(gcloud billing accounts describe "$BA" --format='value(currencyCode)' 2>/dev/null || echo USD)
+          echo "Para birimi: $CUR"
+          if [ "$CUR" = "TRY" ]; then AMT=250TRY; else AMT=5${CUR:-USD}; fi
+          if gcloud billing budgets list --billing-account="$BA" --format='value(displayName)' | grep -q "Kulis aylık bütçe"; then
+            echo "Bütçe alarmı zaten var"; gcloud billing budgets list --billing-account="$BA" --format='table(displayName,amount.specifiedAmount)'
+          else
+            gcloud billing budgets create --billing-account="$BA" --display-name="Kulis aylık bütçe" --budget-amount="$AMT" \
+              --filter-projects=projects/kulis-1647d --threshold-rule=percent=0.25 --threshold-rule=percent=0.5 --threshold-rule=percent=0.9 --threshold-rule=percent=1.0
           fi
