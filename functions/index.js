@@ -16,7 +16,7 @@ const FV = admin.firestore.FieldValue;
 setGlobalOptions({ region: "europe-west1", maxInstances: 10 });
 
 const SITE = "https://kulistr.com/";
-const TITLES = { cm: "Yeni yorum", react: "İtirafına tepki", req: "Mesaj isteği", dm: "Yeni mesaj", match: "Eşleştiniz", like: "Biri seni beğendi", call: "Cevapsız arama", perde: "Perde" };
+const TITLES = { cm: "Yeni yorum", react: "İtirafına tepki", req: "Mesaj isteği", dm: "Yeni mesaj", match: "Eşleştiniz", like: "Biri seni beğendi", call: "Cevapsız arama", perde: "Perde", rapor: "Şikâyetin sonuçlandı" };
 
 // ---------------- Kullanıcı ayarları ----------------
 // users/{uid}/settings/main: n (bildirim türü -> açık/kapalı), quiet + qFrom/qTo (Türkiye saatiyle sessiz saatler)
@@ -56,6 +56,7 @@ exports.bildirimTelefona = onDocumentCreated("users/{uid}/notifs/{nid}", async (
   const st = await settingsOf(uid);
   if (st.n && st.n[n.type] === false) return; // bu türü kapatmış
   if (inQuiet(st)) return;                     // sessiz saatler
+  if (n.type === "rapor") { await sendPush(uid, { title: TITLES.rapor, body: String(n.text || "").slice(0, 180), link: SITE, tag: "rapor" }); return; }
   let who = "Biri";
   if (n.from) {
     const f = await db.doc(`users/${n.from}`).get().catch(() => null);
@@ -183,6 +184,20 @@ exports.anonimItiraf = onCall({ enforceAppCheck: false }, async (req) => {
     tx.set(db.doc(`users/${uid}/anon/${postRef.id}`), { ts: FV.serverTimestamp() });
   });
   return { id: postRef.id };
+});
+
+// ---------------- Şikâyet sonucu ----------------
+// Yönetici/moderatör bir şikâyeti sonuçlandırınca şikâyet eden kişiye kısa bir bildirim gider (kimin ne yaptığı söylenmez).
+exports.sikayetSonucu = onDocumentUpdated("reports/{rid}", async (event) => {
+  const a = event.data.before.data() || {}, b = event.data.after.data() || {};
+  if (a.status !== "bekliyor" || !b.status || b.status === "bekliyor" || !b.by) return;
+  const text = {
+    kaldirildi: "Şikâyetini inceledik, içerik kaldırıldı. Kulis'i güvenli tuttuğun için teşekkürler.",
+    banlandi: "Şikâyetini inceledik, ilgili hesap uzaklaştırıldı. Teşekkürler.",
+    yoksayildi: "Şikâyetini inceledik, kurallara aykırı bir şey bulamadık. Yine de bildirdiğin için teşekkürler."
+  }[b.status];
+  if (!text) return;
+  await db.collection(`users/${b.by}/notifs`).add({ type: "rapor", text, go: null, ts: admin.firestore.FieldValue.serverTimestamp(), read: false });
 });
 
 // ---------------- Misafir vitrini ----------------

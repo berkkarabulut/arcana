@@ -84,6 +84,8 @@ service cloud.firestore {
         && (!('bio' in changed()) || (str(request.resource.data.bio, 0, 120) && clean(request.resource.data.bio)))
         && (!('av' in changed()) || img(request.resource.data.av))
         && (!('banner' in changed()) || img(request.resource.data.banner));
+      // doğrulanmış profil rozeti (dg): sadece moderatör/yönetici verir ya da kaldırır
+      allow update: if isMod() && changed().hasOnly(['dg']) && request.resource.data.dg is bool;
       allow delete: if isMe(uid) || isAdmin();
 
       // Gizli bilgiler: gerçek ad, e-posta, doğum tarihi. Sahibi ve yönetici görür.
@@ -121,7 +123,10 @@ service cloud.firestore {
       match /settings/{d} {
         allow read: if signedIn();
         allow create, update: if isMe(uid) && d == 'main'
-          && request.resource.data.keys().hasOnly(['n','quiet','qFrom','qTo','callVoice','callVideo','updatedAt'])
+          && request.resource.data.keys().hasOnly(['n','quiet','qFrom','qTo','callVoice','callVideo','dm','okundu','yaziyor','updatedAt'])
+          && (!('dm' in request.resource.data) || request.resource.data.dm in ['herkes','eslesme','kimse'])
+          && (!('okundu' in request.resource.data) || request.resource.data.okundu is bool)
+          && (!('yaziyor' in request.resource.data) || request.resource.data.yaziyor is bool)
           && (!('n' in request.resource.data) || request.resource.data.n is map)
           && (!('qFrom' in request.resource.data) || (request.resource.data.qFrom is int && request.resource.data.qFrom >= 0 && request.resource.data.qFrom < 24))
           && (!('qTo' in request.resource.data) || (request.resource.data.qTo is int && request.resource.data.qTo >= 0 && request.resource.data.qTo < 24));
@@ -134,6 +139,11 @@ service cloud.firestore {
       match /anon/{pid} {
         allow read: if isMe(uid);
         allow delete: if isMe(uid);
+      }
+      // Kaydedilen itiraflar: sadece sahibi
+      match /kayit/{pid} {
+        allow read, delete: if isMe(uid);
+        allow create: if isMe(uid) && request.resource.data.keys().hasOnly(['ts']) && request.resource.data.ts == request.time;
       }
       // Engellenenler: sadece sahibi
       match /blocks/{other} {
@@ -257,6 +267,8 @@ service cloud.firestore {
         allow read: if signedIn();
         allow create: if signedIn() && request.resource.data.uid == request.auth.uid
           && str(request.resource.data.t, 1, 300) && clean(request.resource.data.t)
+          && (!('re' in request.resource.data) || (request.resource.data.re is map
+                && request.resource.data.re.keys().hasOnly(['id','n']) && str(request.resource.data.re.id, 1, 40) && str(request.resource.data.re.n, 1, 20)))
           && request.resource.data.ts == request.time && stamped('cmAt');
         allow delete: if signedIn() && (resource.data.uid == request.auth.uid || isMod());
         allow update: if false;
@@ -335,6 +347,14 @@ service cloud.firestore {
     match /chats/{cid} {
       function member() { return signedIn() && request.auth.uid in resource.data.members; }
       function other(m) { return m[0] == request.auth.uid ? m[1] : m[0]; }
+      // karşı tarafın "kimler bana yazabilir" ayarı: herkes (varsayılan) / eslesme / kimse
+      function dmMode(u) { return exists(/databases/$(database)/documents/users/$(u)/settings/main)
+        ? get(/databases/$(database)/documents/users/$(u)/settings/main).data.get('dm', 'herkes') : 'herkes'; }
+      // yazıyor / görüldü: herkes sadece kendi alanını değiştirebilir, değer sayı (ms)
+      function ownMap(k) { return !(k in changed())
+        || (request.resource.data[k] is map
+            && request.resource.data[k].diff(resource.data.get(k, {})).affectedKeys().hasOnly([request.auth.uid])
+            && request.resource.data[k][request.auth.uid] is int); }
       allow read: if member();
       allow create: if signedIn()
         && request.resource.data.members is list && request.resource.data.members.size() == 2
@@ -344,14 +364,16 @@ service cloud.firestore {
               : request.resource.data.members[1] + '_' + request.resource.data.members[0])
         && request.resource.data.reqBy == request.auth.uid
         && !blockedBy(other(request.resource.data.members))
-        && ((request.resource.data.status == 'wait' && stamped('chAt'))
+        && ((request.resource.data.status == 'wait' && stamped('chAt') && dmMode(other(request.resource.data.members)) == 'herkes')
             // eşleşme: iki taraf da birbirini beğendiyse sohbet direkt açık başlar
             || (request.resource.data.status == 'open' && request.resource.data.match == true
+                && dmMode(other(request.resource.data.members)) != 'kimse'
                 && exists(/databases/$(database)/documents/likes/$(request.auth.uid + '_' + other(request.resource.data.members)))
                 && exists(/databases/$(database)/documents/likes/$(other(request.resource.data.members) + '_' + request.auth.uid))));
       // isteği sadece karşı taraf kabul edebilir
       allow update: if member()
-        && changed().hasOnly(['status','last','lastAt','lastBy','seen','n'])
+        && changed().hasOnly(['status','last','lastAt','lastBy','seen','ty','n'])
+        && ownMap('seen') && ownMap('ty')
         && (!('n' in changed()) || request.resource.data.n == resource.data.get('n', 0) + 1)
         && (!('status' in changed()) || (request.resource.data.status == 'open' && resource.data.reqBy != request.auth.uid));
       allow delete: if member();

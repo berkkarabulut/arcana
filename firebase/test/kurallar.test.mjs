@@ -238,6 +238,48 @@ await env.withSecurityRulesDisabled(async c => { await setDoc(doc(c.firestore(),
 await t("Süresi dolmuş premium arama başlatamaz", () => callAs(F, "uf", "ue"), false);
 await t("Kullanıcı kendine premium yazamaz", () => setDoc(doc(F, "users/uf/private/premium"), { active: true, until: Date.now() + 864e5, tier: "tam" }), false);
 
+// ---- Yeni: kimler yazabilir, yazıyor/görüldü, yoruma cevap, kaydetme, doğrulama rozeti ----
+const G = ctx("ug"), H = ctx("uh"), I = ctx("ui");
+await env.withSecurityRulesDisabled(async c => { const d = c.firestore();
+  for (const u of ["ug", "uh", "ui"]) await setDoc(doc(d, "users", u), { n: "test" + u, g: "Erkek" });
+  await setDoc(doc(d, "users/uh/settings/main"), { dm: "kimse" });
+  await setDoc(doc(d, "users/ui/settings/main"), { dm: "eslesme" });
+  await setDoc(doc(d, "chats/ug_ui"), { members: ["ug", "ui"], status: "open", reqBy: "ug" });
+  await setDoc(doc(d, "posts/pz"), { uid: "ug", t: "deneme itirafı uzun uzun", cat: "ask", r: { bende: 0, saril: 0, yok: 0 }, cm: 0 });
+});
+async function istek(d, from, to) {
+  const cid = [from, to].sort().join("_"), b = writeBatch(d);
+  b.set(doc(d, "chats", cid), { members: [from, to].sort(), reqBy: from, status: "wait", match: false, from: null, last: "selam", lastBy: from, lastAt: serverTimestamp() });
+  b.set(rl(d, from), { chAt: serverTimestamp(), msgAt: serverTimestamp() }, { merge: true });
+  return b.commit();
+}
+await t("Mesaj kabul etmeyen (kimse) kişiye istek reddedilir", () => istek(G, "ug", "uh"), false);
+await env.withSecurityRulesDisabled(async c => { await setDoc(doc(c.firestore(), "users/ug/meta/rl"), {}); });
+await t("Sadece eşleşmelere açık kişiye istek reddedilir", () => istek(H, "uh", "ui"), false);
+await t("Ayar: dm değeri sadece herkes/eslesme/kimse olabilir", () => setDoc(doc(G, "users/ug/settings/main"), { dm: "bazen" }, { merge: true }), false);
+await t("Ayar: kimler yazabilir kaydedilir", () => setDoc(doc(G, "users/ug/settings/main"), { dm: "eslesme", okundu: false, yaziyor: true }, { merge: true }), true);
+await t("Ayar: okundu sadece doğru/yanlış olabilir", () => setDoc(doc(G, "users/ug/settings/main"), { okundu: "evet" }, { merge: true }), false);
+await t("Yazıyor: kendi alanını yazar", () => updateDoc(doc(G, "chats/ug_ui"), { "ty.ug": Date.now() }), true);
+await t("Görüldü: kendi alanını yazar", () => updateDoc(doc(I, "chats/ug_ui"), { "seen.ui": Date.now() }), true);
+await t("Görüldü: karşı tarafın alanını yazamaz", () => updateDoc(doc(G, "chats/ug_ui"), { "seen.ui": Date.now() }), false);
+await t("Yazıyor: sayı olmayan değer reddedilir", () => updateDoc(doc(G, "chats/ug_ui"), { "ty.ug": "x" }), false);
+await t("Sohbet dışından yazıyor yazılamaz", () => updateDoc(doc(H, "chats/ug_ui"), { "ty.uh": Date.now() }), false);
+async function yorumAs(d, uid, extra) {
+  const b = writeBatch(d);
+  b.set(doc(collection(d, "posts/pz/comments")), { uid, t: "cevap yorumu", ts: serverTimestamp(), ...extra });
+  b.set(rl(d, uid), { cmAt: serverTimestamp() }, { merge: true });
+  return b.commit();
+}
+await t("Yoruma cevap verilir", () => yorumAs(H, "uh", { re: { id: "c1", n: "testug" } }), true);
+await t("Cevapta fazladan alan reddedilir", () => yorumAs(I, "ui", { re: { id: "c1", n: "testug", uid: "ug" } }), false);
+await t("İtiraf kaydedilir", () => setDoc(doc(G, "users/ug/kayit/pz"), { ts: serverTimestamp() }), true);
+await t("Kayıtlı itiraflar okunur", () => getDoc(doc(G, "users/ug/kayit/pz")), true);
+await t("Başkasının kayıtlarını okuyamaz", () => getDoc(doc(H, "users/ug/kayit/pz")), false);
+await t("Başkası adına kayıt eklenemez", () => setDoc(doc(H, "users/ug/kayit/pz"), { ts: serverTimestamp() }), false);
+await t("Kullanıcı kendine doğrulama rozeti veremez", () => updateDoc(doc(G, "users/ug"), { dg: true }), false);
+await t("Moderatör doğrulama rozeti verir", () => updateDoc(doc(ctx("umod"), "users/ug"), { dg: true }), true);
+await t("Moderatör rozetle birlikte başka alan değiştiremez", () => updateDoc(doc(ctx("umod"), "users/ug"), { dg: false, n: "hacklendi" }), false);
+
 await env.cleanup();
 console.log(fail ? `\n${fail} senaryo TUTMADI, yükleme durduruldu.` : "\nTüm senaryolar tamam.");
 process.exit(fail ? 1 : 0);
