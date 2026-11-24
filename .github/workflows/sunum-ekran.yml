@@ -1,0 +1,35 @@
+name: Sunum ekranları (emülatörde demo botlar)
+# Demo botlar ve itiraflar Firebase emülatörlerinde kurulur, telefon boyutunda ekran görüntüleri çekilir; canlı veriye dokunmaz.
+on: { workflow_dispatch: {} }
+permissions: { contents: write }
+jobs:
+  ekran:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: 22 }
+      - uses: actions/setup-java@v4
+        with: { distribution: temurin, java-version: 21 }
+      - name: Siteyi derle
+        run: |
+          npm i --no-save --no-audit --no-fund typescript@5.7.3
+          node build/derle.mjs --out dist
+      - name: Araçları kur
+        working-directory: tests/site
+        run: |
+          npm i --no-save --no-audit --no-fund playwright@1.49.1
+          npx playwright install --with-deps chromium
+      - name: Ekranları çek
+        run: |
+          (cd dist && python3 -m http.server 8765 >/dev/null 2>&1 &)
+          sleep 1
+          cp tests/site/sunum-ekranlari.mjs tests/site/_ekran.mjs
+          npx -y firebase-tools@latest emulators:exec --only auth,firestore,database --project kulis-1647d "node tests/site/_ekran.mjs"
+        env: { OUT_DIR: /tmp/ekran }
+      - name: Dala yaz
+        if: always()
+        run: |
+          cd /tmp/ekran && git init -q && git checkout -q -b sunum-ekran
+          git -c user.name=bot -c user.email=bot@x add . && git -c user.name=bot -c user.email=bot@x commit -qm ekranlar
+          git push -qf "https://x-access-token:${{ github.token }}@github.com/${{ github.repository }}.git" sunum-ekran
