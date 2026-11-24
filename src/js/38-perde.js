@@ -199,7 +199,7 @@ addEventListener("unhandledrejection",e=>{const r=e.reason;reportError((r&&(r.co
 function testLoginButton(){
   if(!window.KDB||!KDB.isTest||$("#tstBtn"))return;
   const b=document.createElement("button");b.id="tstBtn";b.className="btn line";b.textContent="TEST GİRİŞİ (sadece beta)";
-  b.style.cssText="position:fixed;left:50%;transform:translateX(-50%);bottom:14px;z-index:95;height:42px;background:var(--yuzey)";
+  b.style.cssText="position:fixed;left:50%;transform:translateX(-50%);top:calc(10px + env(safe-area-inset-top));z-index:95;height:42px;background:var(--yuzey)";
   b.onclick=()=>KDB.anon().then(u=>{b.remove();ob.provider="google";ob.ad="Test";ob.soyad="Kullanıcı";ob.email="test@kulistr.com";remoteAfterAuth(u,"google")}).catch(e=>toast("Test girişi olmadı: "+(e.code||e.message)));
   document.body.appendChild(b);
 }
