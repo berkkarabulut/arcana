@@ -1,7 +1,7 @@
 // Kulis güvenlik kuralları testi: yükleme öncesi Firestore emülatöründe çalışır; bir senaryo bile tutmazsa yükleme durur.
 import { initializeTestEnvironment, assertSucceeds, assertFails } from "@firebase/rules-unit-testing";
 import { readFileSync } from "node:fs";
-import { doc, setDoc, getDoc, updateDoc, addDoc, collection, writeBatch, serverTimestamp, query, where, getDocs } from "firebase/firestore";
+import { doc, setDoc, getDoc, updateDoc, addDoc, collection, writeBatch, serverTimestamp, query, where, getDocs, increment } from "firebase/firestore";
 
 const env = await initializeTestEnvironment({ projectId: "demo-kulis", firestore: { rules: readFileSync("firebase/firestore.rules", "utf8") } });
 const ctx = uid => env.authenticatedContext(uid, { email_verified: true }).firestore();
@@ -18,6 +18,8 @@ await env.withSecurityRulesDisabled(async c => {
   await setDoc(doc(d, "users/ub/settings/main"), { callVideo: false });
   await setDoc(doc(d, "accessLogs/x"), { uid: "ua", ip: "1.2.3.4" });
   await setDoc(doc(d, "config/admins"), { uids: ["uadmin"] });
+  // ua: Kulis Tam (her şey açık); diğerleri ücretsiz
+  await setDoc(doc(d, "users/ua/private/premium"), { active: true, until: Date.now() + 864e5 * 30, tier: "tam" });
 });
 
 const rl = (d, uid) => doc(d, "users", uid, "meta", "rl");
@@ -96,9 +98,10 @@ await t("Öne çıkarma sıradan üyede reddedilir", async () => {
 const ST = "https://firebasestorage.googleapis.com/v0/b/kulis-1647d.firebasestorage.app/o/";
 const stu = (dir, uid) => `${ST}${dir}%2F${uid}%2Fabc123.jpg?alt=media&token=0f3a9c1e-1111-4a2b-9c3d-abcdef012345`;
 const wait = ms => new Promise(r => setTimeout(r, ms));
-async function msgAs(d, uid, cid, data) {
+async function msgAs(d, uid, cid, data, noCount) {
   const b = writeBatch(d);
   b.set(doc(collection(d, "chats", cid, "messages")), { uid, ts: serverTimestamp(), ...data });
+  if (!noCount) b.update(doc(d, "chats", cid), { last: "x", lastBy: uid, lastAt: serverTimestamp(), n: increment(1) });
   b.set(rl(d, uid), { msgAt: serverTimestamp() }, { merge: true });
   await b.commit();
 }
@@ -207,6 +210,33 @@ await t("Ekip mesajı sonradan değiştirilemez", async () => { const l = await 
 await t("Moderatör bütün yazışmaları listeler", () => getDocs(collection(MOD, "ekip")), true);
 await t("Sıradan üye yazışma listesini göremez", () => getDocs(collection(A, "ekip")), false);
 await t("Kullanıcı okundu işaretler", () => updateDoc(doc(B, "ekip/ub"), { userUnread: false }), true);
+
+// ---- Premium sunucuda: mesaj sınırı ve arama paketleri ----
+const E = ctx("ue"), F = ctx("uf");
+await env.withSecurityRulesDisabled(async c => {
+  const d = c.firestore();
+  await setDoc(doc(d, "users/ue"), { n: "teste", g: "Erkek" }); await setDoc(doc(d, "users/uf"), { n: "testf", g: "Kadın" });
+  await setDoc(doc(d, "chats/ue_uf"), { members: ["ue", "uf"], status: "open", reqBy: "ue", n: 19 });
+  await setDoc(doc(d, "chats/ua_ue"), { members: ["ua", "ue"], status: "open", reqBy: "ua", n: 40 });
+});
+await t("Ücretsiz üye 20. mesajını gönderir", () => msgAs(E, "ue", "ue_uf", { t: "20. mesaj" }), true);
+await wait(1200);
+await t("Ücretsiz üye 21. mesajı gönderemez (premium gerekir)", () => msgAs(E, "ue", "ue_uf", { t: "21. mesaj" }), false);
+await t("Sayaç artırmadan mesaj atılamaz (sınırı atlatma denemesi)", () => msgAs(E, "ue", "ue_uf", { t: "hile" }, true), false);
+await t("Sayaç geri alınamaz", () => updateDoc(doc(E, "chats/ue_uf"), { n: 0 }), false);
+await wait(1200);
+await t("Premium üye 41. mesajı da gönderir", () => msgAs(A, "ua", "ua_ue", { t: "premium mesaj" }), true);
+await t("Ücretsiz üye sesli arama başlatamaz", () => callAs(E, "ue", "uf"), false);
+await env.withSecurityRulesDisabled(async c => { await setDoc(doc(c.firestore(), "users/ue/private/premium"), { active: true, until: Date.now() + 864e5, tier: "sohbet" }); });
+await t("Sohbet paketi sesli arama başlatamaz", () => callAs(E, "ue", "uf"), false);
+await wait(1200);
+await t("Sohbet paketi 21. mesajı gönderir", () => msgAs(E, "ue", "ue_uf", { t: "artık premium" }), true);
+await env.withSecurityRulesDisabled(async c => { await setDoc(doc(c.firestore(), "users/ue/private/premium"), { active: true, until: Date.now() + 864e5, tier: "ses" }); });
+await t("Ses paketi görüntülü arama başlatamaz", () => callAs(E, "ue", "uf", "video"), false);
+await t("Ses paketi sesli arama başlatır", () => callAs(E, "ue", "uf"), true);
+await env.withSecurityRulesDisabled(async c => { await setDoc(doc(c.firestore(), "users/uf/private/premium"), { active: true, until: Date.now() - 1000, tier: "tam" }); });
+await t("Süresi dolmuş premium arama başlatamaz", () => callAs(F, "uf", "ue"), false);
+await t("Kullanıcı kendine premium yazamaz", () => setDoc(doc(F, "users/uf/private/premium"), { active: true, until: Date.now() + 864e5, tier: "tam" }), false);
 
 await env.cleanup();
 console.log(fail ? `\n${fail} senaryo TUTMADI, yükleme durduruldu.` : "\nTüm senaryolar tamam.");

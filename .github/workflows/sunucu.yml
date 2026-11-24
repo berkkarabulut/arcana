@@ -46,3 +46,11 @@ jobs:
         run: npx -y firebase-tools@latest deploy --only firestore:rules,functions --project kulis-1647d --non-interactive --force
       - name: Dosya (Storage) kurallarını yükle
         run: npx -y firebase-tools@latest deploy --only storage --project kulis-1647d --non-interactive --force
+      - name: Günlük otomatik yedek (Firestore, 14 gün saklanır)
+        continue-on-error: true
+        run: |
+          if gcloud firestore backups schedules list --project kulis-1647d --database='(default)' --format='value(name)' | grep -q .; then
+            echo "Yedek planı zaten var:"; gcloud firestore backups schedules list --project kulis-1647d --database='(default)'
+          else
+            gcloud firestore backups schedules create --project kulis-1647d --database='(default)' --recurrence=daily --retention=14d
+          fi

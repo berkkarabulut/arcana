@@ -20,6 +20,20 @@ service cloud.firestore {
         && request.auth.uid in get(/databases/$(database)/documents/config/mods).data.uids);
     }
     function changed() { return request.resource.data.diff(resource.data).affectedKeys(); }
+    // Premium: satın alma doğrulamasının yazdığı users/{uid}/private/premium belgesi (sunucu yazar, kullanıcı yazamaz).
+    // Yönetici/moderatör ve Google Play inceleme hesabında her şey açık.
+    function premPath() { return /databases/$(database)/documents/users/$(request.auth.uid)/private/premium; }
+    function staffOrReviewer() { return request.auth.token.email == 'kulistrinfo@gmail.com' || isMod(); }
+    function premOk() {
+      return (exists(premPath()) && get(premPath()).data.get('active', false) == true
+              && get(premPath()).data.get('until', 0) > request.time.toMillis())
+        || staffOrReviewer();
+    }
+    // paket: sohbet < ses (sesli arama) < tam (görüntülü arama dahil)
+    function tierOk(need) {
+      return staffOrReviewer() || (premOk() && (need == 'sohbet'
+        || get(premPath()).data.get('tier', 'tam') in (need == 'ses' ? ['ses','tam'] : ['tam'])));
+    }
     function str(v, lo, hi) { return v is string && v.size() >= lo && v.size() <= hi; }
     // Yüklenen dosyalar sadece Kulis'in kendi depolama alanından gelebilir
     function stUrl(v, dir) {
@@ -294,6 +308,7 @@ service cloud.firestore {
         && request.resource.data.members == [request.auth.uid, request.resource.data.to]
         && request.resource.data.type in ['voice','video'] && request.resource.data.status == 'ring'
         && request.resource.data.offer is map && request.resource.data.ts == request.time
+        && tierOk(request.resource.data.type == 'video' ? 'tam' : 'ses')
         && exists(chatPath(request.auth.uid, request.resource.data.to))
         && get(chatPath(request.auth.uid, request.resource.data.to)).data.status == 'open'
         && !blockedBy(request.resource.data.to)
@@ -334,7 +349,8 @@ service cloud.firestore {
                 && exists(/databases/$(database)/documents/likes/$(other(request.resource.data.members) + '_' + request.auth.uid))));
       // isteği sadece karşı taraf kabul edebilir
       allow update: if member()
-        && changed().hasOnly(['status','last','lastAt','lastBy','seen'])
+        && changed().hasOnly(['status','last','lastAt','lastBy','seen','n'])
+        && (!('n' in changed()) || request.resource.data.n == resource.data.get('n', 0) + 1)
         && (!('status' in changed()) || (request.resource.data.status == 'open' && resource.data.reqBy != request.auth.uid));
       allow delete: if member();
 
@@ -351,7 +367,10 @@ service cloud.firestore {
           && (!('aud' in request.resource.data) || (stUrl(request.resource.data.aud, 'm')
                 && request.resource.data.dur is number && request.resource.data.dur > 0 && request.resource.data.dur <= 120))
           && (!('dur' in request.resource.data) || 'aud' in request.resource.data)
-          && request.resource.data.ts == request.time && stamped('msgAt');
+          && request.resource.data.ts == request.time && stamped('msgAt')
+          // ücretsiz üyelikte sohbet başına 20 mesaj; sonrası premium
+          && chatAfter().get('n', 0) == get(/databases/$(database)/documents/chats/$(cid)).data.get('n', 0) + 1
+          && (chatAfter().get('n', 0) <= 20 || premOk());
         // moderatör bildirilen mesajı silebilir: içerik boşaltılır, "moderatör tarafından silindi" işareti kalır
         allow update: if isMod()
           && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['t','img','aud','dur','mod'])

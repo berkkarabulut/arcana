@@ -5,7 +5,7 @@
 // - aramaBildirimi: gelen sesli/görüntülü aramayı telefona bildirir
 // - erisimKaydi: 5651 için IP + zaman kaydı (2 yıl)
 // - verifyPurchase: Google Play abonelik doğrulaması
-const { onDocumentCreated } = require("firebase-functions/v2/firestore");
+const { onDocumentCreated, onDocumentUpdated, onDocumentDeleted, onDocumentWritten } = require("firebase-functions/v2/firestore");
 const { onCall, onRequest, HttpsError } = require("firebase-functions/v2/https");
 const { setGlobalOptions, logger } = require("firebase-functions/v2");
 const admin = require("firebase-admin");
@@ -289,4 +289,37 @@ exports.ekipMesaji = onDocumentCreated("ekip/{uid}/m/{mid}", async (event) => {
   if (!m || !m.staff) return;
   const uid = event.params.uid;
   await sendPush(uid, { title: "Kulis Ekibi", body: String(m.t || "").slice(0, 160), link: SITE + "?ekip=1", tag: "ekip" });
+});
+
+// ---------------- Dosya temizliği ----------------
+// Silinen ya da kaldırılan içeriğin dosyaları depoda kalmasın (KVKK: "silinir" dediğimiz şey gerçekten silinsin)
+const pathOfUrl = (u) => {
+  const m = String(u || "").match(/\/o\/([^?]+)/);
+  return m ? decodeURIComponent(m[1]) : null;
+};
+async function delPath(p) {
+  if (!p || !/^(m|p|r)\/[A-Za-z0-9]+\/[A-Za-z0-9._-]+$/.test(p)) return;
+  try { await admin.storage().bucket(BUCKET).file(p).delete({ ignoreNotFound: true }); } catch (e) { logger.warn("delPath", { p, err: String(e && e.message) }); }
+}
+// moderatör bildirilen fotoğraflı/sesli mesajı kaldırınca dosyası da silinir
+exports.mesajDosyaTemizle = onDocumentUpdated("chats/{cid}/messages/{mid}", async (event) => {
+  const b = event.data.before.data() || {}, a = event.data.after.data() || {};
+  if (!a.mod) return;
+  await Promise.all([b.img, b.aud].filter(Boolean).map(u => delPath(pathOfUrl(u))));
+});
+// perde fotoğrafı değişince ya da kaldırılınca eskisi silinir
+exports.perdeDosyaTemizle = onDocumentWritten("users/{uid}/gizli/foto", async (event) => {
+  const b = (event.data.before && event.data.before.data()) || {}, a = (event.data.after && event.data.after.data()) || {};
+  const keep = new Set([a.av, a.banner].filter(Boolean));
+  await Promise.all([b.av, b.banner].filter(p => p && !keep.has(p)).map(delPath));
+});
+// hesap silinince kullanıcının bütün dosyaları silinir
+exports.hesapDosyaTemizle = onDocumentDeleted("users/{uid}", async (event) => {
+  const uid = event.params.uid;
+  if (!/^[A-Za-z0-9]{10,40}$/.test(uid)) return;
+  const bucket = admin.storage().bucket(BUCKET);
+  for (const dir of ["m", "p", "r"]) {
+    try { await bucket.deleteFiles({ prefix: `${dir}/${uid}/`, force: true }); } catch (e) { logger.warn("hesapDosyaTemizle", { uid, dir, err: String(e && e.message) }); }
+  }
+  logger.info("hesapDosyaTemizle", { uid });
 });
