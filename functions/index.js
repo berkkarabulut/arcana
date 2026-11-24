@@ -7,6 +7,7 @@
 // - verifyPurchase: Google Play abonelik doğrulaması
 const { onDocumentCreated, onDocumentUpdated, onDocumentDeleted, onDocumentWritten } = require("firebase-functions/v2/firestore");
 const { onCall, onRequest, HttpsError } = require("firebase-functions/v2/https");
+const { onSchedule } = require("firebase-functions/v2/scheduler");
 const { setGlobalOptions, logger } = require("firebase-functions/v2");
 const admin = require("firebase-admin");
 
@@ -16,7 +17,9 @@ const FV = admin.firestore.FieldValue;
 setGlobalOptions({ region: "europe-west1", maxInstances: 10 });
 
 const SITE = "https://kulistr.com/";
-const TITLES = { cm: "Yeni yorum", react: "İtirafına tepki", req: "Mesaj isteği", dm: "Yeni mesaj", match: "Eşleştiniz", like: "Biri seni beğendi", call: "Cevapsız arama", perde: "Perde", rapor: "Şikâyetin sonuçlandı" };
+const TITLES = { cm: "Yeni yorum", react: "İtirafına tepki", req: "Mesaj isteği", dm: "Yeni mesaj", match: "Eşleştiniz", like: "Biri seni beğendi", call: "Cevapsız arama", perde: "Perde", rapor: "Şikâyetin sonuçlandı", kilometre: "İtirafın ilgi görüyor", hatirla: "Kulis'te seni bekleyenler var" };
+// bazı bildirim türleri ayarlarda başka bir anahtarla açılıp kapanır
+const TUR_AYAR = { kilometre: "react" };
 
 // ---------------- Kullanıcı ayarları ----------------
 // users/{uid}/settings/main: n (bildirim türü -> açık/kapalı), quiet + qFrom/qTo (Türkiye saatiyle sessiz saatler)
@@ -54,9 +57,10 @@ exports.bildirimTelefona = onDocumentCreated("users/{uid}/notifs/{nid}", async (
   if (!n) return;
   const uid = event.params.uid;
   const st = await settingsOf(uid);
-  if (st.n && st.n[n.type] === false) return; // bu türü kapatmış
+  if (st.n && st.n[TUR_AYAR[n.type] || n.type] === false) return; // bu türü kapatmış
   if (inQuiet(st)) return;                     // sessiz saatler
-  if (n.type === "rapor") { await sendPush(uid, { title: TITLES.rapor, body: String(n.text || "").slice(0, 180), link: SITE, tag: "rapor" }); return; }
+  // sistem bildirimleri (kimden geldiği olmayan): metin olduğu gibi gider
+  if (!n.from) { await sendPush(uid, { title: TITLES[n.type] || "Kulis", body: String(n.text || "").slice(0, 180), link: SITE, tag: n.type || "kulis" }); return; }
   let who = "Biri";
   if (n.from) {
     const f = await db.doc(`users/${n.from}`).get().catch(() => null);
@@ -198,6 +202,53 @@ exports.sikayetSonucu = onDocumentUpdated("reports/{rid}", async (event) => {
   }[b.status];
   if (!text) return;
   await db.collection(`users/${b.by}/notifs`).add({ type: "rapor", text, go: null, ts: admin.firestore.FieldValue.serverTimestamp(), read: false });
+});
+
+// ---------------- Tepki rekorları ----------------
+// Bir itirafın toplam tepkisi 5, 10, 25, 50, 100, 250'yi geçince yazara bir kez haber verilir (anonim itiraflarda da).
+const ESIKLER = [5, 10, 25, 50, 100, 250];
+exports.tepkiRekoru = onDocumentUpdated("posts/{pid}", async (event) => {
+  const a = event.data.before.data() || {}, b = event.data.after.data() || {};
+  const top = r => Object.values(r || {}).reduce((x, y) => x + (+y || 0), 0);
+  const once = top(a.r), simdi = top(b.r);
+  const esik = ESIKLER.filter(e => once < e && simdi >= e).pop();
+  if (!esik) return;
+  let uid = b.uid;
+  if (b.anon) { const o = await db.doc(`anonOwners/${event.params.pid}`).get().catch(() => null); uid = o && o.exists ? o.data().uid : null; }
+  if (!uid || uid === "anon") return;
+  await db.collection(`users/${uid}/notifs`).add({ type: "kilometre", text: `İtirafına ${esik} kişi tepki verdi 🎉 Yorumlara bir bak.`, go: { post: event.params.pid }, ts: FV.serverTimestamp(), read: false });
+});
+
+// ---------------- Sen yokken: geri çağırma ----------------
+// Her akşam 19:40 (Türkiye): 2-6 gündür girmeyen ve okumadığı bildirimi olan ya da akışta yeni itiraf birikmiş kişilere
+// tek bir hatırlatma gider. Aynı kişiye en fazla 5 günde bir. Ayarlardan "Hatırlatmalar" kapatılabilir; sessiz saatlere uyar.
+exports.senYokken = onSchedule({ schedule: "40 19 * * *", timeZone: "Europe/Istanbul", region: "europe-west1", timeoutSeconds: 300 }, async () => {
+  const simdi = Date.now(), G = 864e5;
+  const us = await db.collection("users")
+    .where("lastSeen", "<=", admin.firestore.Timestamp.fromMillis(simdi - 2 * G))
+    .where("lastSeen", ">=", admin.firestore.Timestamp.fromMillis(simdi - 6 * G)).limit(500).get();
+  const yeniItiraf = (await db.collection("posts").where("ts", ">=", admin.firestore.Timestamp.fromMillis(simdi - 2 * G)).count().get()).data().count;
+  let gitti = 0;
+  for (const u of us.docs) {
+    const uid = u.id;
+    const st = await settingsOf(uid);
+    if (st.songor === false) continue;                 // son görülmesini gizleyenin "girmedi" bilgisi güvenilmez
+    if (st.n && st.n.hatirla === false) continue;
+    if (inQuiet(st)) continue;
+    const m = await db.doc(`users/${uid}/meta/hatirla`).get();
+    if (m.exists && m.data().at && simdi - m.data().at.toMillis() < 5 * G) continue;
+    const ok = (await db.collection(`users/${uid}/notifs`).where("read", "==", false).count().get()).data().count;
+    let body;
+    if (ok > 0) body = `Sen yokken ${ok} yeni bildirimin oldu. Kim ne demiş, gel bir bak 👀`;
+    else if (yeniItiraf >= 3) body = `Son iki günde ${yeniItiraf} yeni itiraf yazıldı. Kim neler anlatmış, gel bak.`;
+    else continue;
+    const toks = await db.collection(`users/${uid}/push`).limit(1).get();
+    if (toks.empty) continue;
+    await sendPush(uid, { title: TITLES.hatirla, body, link: SITE, tag: "hatirla" }, 6 * 3600);
+    await db.doc(`users/${uid}/meta/hatirla`).set({ at: FV.serverTimestamp() });
+    gitti++;
+  }
+  logger.info("senYokken", { aday: us.size, gitti });
 });
 
 // ---------------- Misafir vitrini ----------------

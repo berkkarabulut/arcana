@@ -1,5 +1,5 @@
 /* ============ AYARLAR ============ */
-const NOTIF_KINDS=[["dm","Mesajlar"],["req","Mesaj istekleri"],["call","Aramalar"],["cm","Yorumlar"],["react","Tepkiler"],["match","Eşleşmeler"],["like","Beğeniler"]];
+const NOTIF_KINDS=[["dm","Mesajlar"],["req","Mesaj istekleri"],["call","Aramalar"],["cm","Yorumlar"],["react","Tepkiler"],["match","Eşleşmeler"],["like","Beğeniler"],["hatirla","Hatırlatmalar (birkaç gün girmeyince, sen yokken olanlar)"]];
 const DM_ACIK={herkes:"Herkes sana mesaj isteği gönderebilir. İsteği sen kabul edince sohbet açılır.",eslesme:"Sadece Eşleş'te karşılıklı beğendiğin kişiler sana yazabilir.",kimse:"Kimse yeni sohbet başlatamaz. Açık sohbetlerin aynen devam eder."};
 const AY_IC={zil:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9a6 6 0 0 1 12 0c0 6 2.5 7.5 2.5 7.5h-17S6 15 6 9z"/><path d="M10 20a2 2 0 0 0 4 0"/></svg>',tac:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M3 8l4.5 4L12 5l4.5 7L21 8l-2 11H5z"/></svg>'};
 const ABONE_URL="https://play.google.com/store/account/subscriptions?package=com.kulistr.app";
