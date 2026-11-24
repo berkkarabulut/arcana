@@ -1,5 +1,5 @@
 // Bir JS dosyasının en üst seviyedeki ifadelerini (fonksiyon, sabit, kod) listeler
-const ts = require("/opt/node22/lib/node_modules/typescript");
+let ts; try { ts = require("typescript"); } catch (e) { ts = require("/opt/node22/lib/node_modules/typescript"); }
 const fs = require("fs");
 module.exports = function ust(file) {
   const text = fs.readFileSync(file, "utf8");
