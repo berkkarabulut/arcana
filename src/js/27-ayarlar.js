@@ -1,5 +1,5 @@
 /* ============ AYARLAR ============ */
-const NOTIF_KINDS=[["dm","Mesajlar"],["req","Mesaj istekleri"],["call","Aramalar"],["cm","Yorumlar"],["react","Tepkiler"],["match","Eşleşmeler"],["like","Beğeniler"],["hatirla","Hatırlatmalar (birkaç gün girmeyince, sen yokken olanlar)"]];
+const NOTIF_KINDS=[["dm","Mesajlar"],["req","Mesaj istekleri"],["call","Aramalar"],["cm","Yorumlar"],["react","Tepkiler"],["match","Eşleşmeler"],["like","Beğeniler"],["hatirla","Hatırlatmalar (birkaç gün girmeyince, sen yokken olanlar)"],["duyuru","Kulis duyuruları"]];
 const DM_ACIK={herkes:"Herkes sana mesaj isteği gönderebilir. İsteği sen kabul edince sohbet açılır.",eslesme:"Sadece Eşleş'te karşılıklı beğendiğin kişiler sana yazabilir.",kimse:"Kimse yeni sohbet başlatamaz. Açık sohbetlerin aynen devam eder."};
 const AY_IC={zil:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9a6 6 0 0 1 12 0c0 6 2.5 7.5 2.5 7.5h-17S6 15 6 9z"/><path d="M10 20a2 2 0 0 0 4 0"/></svg>',tac:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M3 8l4.5 4L12 5l4.5 7L21 8l-2 11H5z"/></svg>'};
 const ABONE_URL="https://play.google.com/store/account/subscriptions?package=com.kulistr.app";
@@ -18,7 +18,8 @@ function showSettings(){
       ${swHTML("songor",S.songor!==false,"Son görülmemi göster","Kapatırsan kimse ne zaman çevrimiçi olduğunu göremez; sen de başkalarınınkini göremezsin")}
       ${swHTML("yaziyor",S.yaziyor!==false,"Yazarken karşı taraf görsün","Kapatırsan \"yazıyor…\" göstergesi karşıya gitmez")}
       ${swHTML("okundu",S.okundu!==false,"Okundu bilgisi gönder","Kapatırsan mesajını okuduğunu karşı taraf göremez")}
-      <button class="set-row" id="engList"><span><b>Engellediklerim</b><small>${nb?nb+" kişi":"Kimseyi engellemedin"}</small></span></button>`,acikGrup==="gizlilik")}
+      <button class="set-row" id="engList"><span><b>Engellediklerim</b><small>${nb?nb+" kişi":"Kimseyi engellemedin"}</small></span></button>
+      <button class="set-row" id="dgIste"><span><b>Doğrulanmış profil rozeti <span class="dg">✓</span></b><small>${(U[R.uid]||{}).dg?"Profilin doğrulanmış.":"Gerçek kişi olduğunu gösteren mavi rozet. İstemek için dokun."}</small></span></button>`,acikGrup==="gizlilik")}
     ${grup("arama",IC.phone,"Aramalar",S.callVoice===false&&S.callVideo===false?"Kimse arayamaz":S.callVideo===false?"Sadece sesli arama açık":S.callVoice===false?"Sadece görüntülü arama açık":"Sesli ve görüntülü arama açık",`
       ${swHTML("callVoice",S.callVoice!==false,"Beni sesli arayabilirler","Sadece sohbetin açık olduğu kişiler arayabilir")}
       ${swHTML("callVideo",S.callVideo!==false,"Beni görüntülü arayabilirler","")}`,acikGrup==="arama")}
@@ -41,6 +42,10 @@ function showSettings(){
   $("#qF").onchange=e=>save({qFrom:+e.target.value});$("#qT").onchange=e=>save({qTo:+e.target.value});
   $("#sheet").querySelectorAll("[data-dm-set]").forEach(b=>b.onclick=()=>{const v=b.dataset.dmSet;$("#sheet").querySelectorAll("[data-dm-set]").forEach(x=>x.setAttribute("aria-checked",x===b));$("#dmAc").textContent=DM_ACIK[v];save({dm:v})});
   $("#engList").onclick=showBlocked;
+  $("#dgIste").onclick=()=>{if((U[R.uid]||{}).dg){toast("Profilin zaten doğrulanmış");return}
+    openSheet(`<h2>Doğrulanmış profil rozeti</h2><p class="muted" style="margin:8px 0 14px">Mavi ✓ rozeti, profilin arkasında gerçek bir kişi olduğunu gösterir. İsteğin Kulis ekibine gider; ekip seninle bu yazışmadan iletişime geçip kısa bir doğrulama ister (örneğin o an çekilmiş bir selfie). Doğrulama fotoğrafı profilinde yayınlanmaz.</p>
+      <button class="btn wide" id="dgGo">Rozet iste</button><button class="btn line wide" style="margin-top:8px" onclick="closeSheet()">Vazgeç</button>`);
+    $("#dgGo").onclick=()=>{const b=$("#dgGo");b.disabled=true;KDB.ekipSend(R.uid,"Merhaba, doğrulanmış profil rozeti istiyorum.").then(()=>{toast("İsteğin Kulis ekibine gitti");closeSheet();if(typeof openEkip==="function")openEkip()}).catch(e=>{b.disabled=false;toast("Gönderilemedi: "+(e.code||e.message))})}};
 }
 // ilk itiraf / ilk mesajdan sonra bir kere "bildirim açılsın mı" sorusu
 function askPushOnce(why){

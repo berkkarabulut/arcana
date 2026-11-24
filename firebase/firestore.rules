@@ -346,6 +346,11 @@ service cloud.firestore {
     }
 
     // Günlük huni sayaçları (sadece sayı): sunucu yazar, yönetici okur
+    // Gönderilen duyuruların geçmişi: sunucu yazar, yönetici okur
+    match /duyurular/{id} {
+      allow read: if isAdmin();
+      allow write: if false;
+    }
     match /istatistik/{gun} {
       allow read: if isAdmin();
       allow write: if false;

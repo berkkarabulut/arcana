@@ -17,7 +17,7 @@ const FV = admin.firestore.FieldValue;
 setGlobalOptions({ region: "europe-west1", maxInstances: 10 });
 
 const SITE = "https://kulistr.com/";
-const TITLES = { cm: "Yeni yorum", react: "İtirafına tepki", req: "Mesaj isteği", dm: "Yeni mesaj", match: "Eşleştiniz", like: "Biri seni beğendi", call: "Cevapsız arama", perde: "Perde", rapor: "Şikâyetin sonuçlandı", kilometre: "İtirafın ilgi görüyor", hatirla: "Kulis'te seni bekleyenler var" };
+const TITLES = { cm: "Yeni yorum", react: "İtirafına tepki", req: "Mesaj isteği", dm: "Yeni mesaj", match: "Eşleştiniz", like: "Biri seni beğendi", call: "Cevapsız arama", perde: "Perde", rapor: "Şikâyetin sonuçlandı", kilometre: "İtirafın ilgi görüyor", duyuru: "Kulis", hatirla: "Kulis'te seni bekleyenler var" };
 // bazı bildirim türleri ayarlarda başka bir anahtarla açılıp kapanır
 const TUR_AYAR = { kilometre: "react" };
 
@@ -424,3 +424,29 @@ exports.hesapDosyaTemizle = onDocumentDeleted("users/{uid}", async (event) => {
   }
   logger.info("hesapDosyaTemizle", { uid });
 });
+
+// ---------------- Yöneticiden duyuru (toplu bildirim) ----------------
+// Sadece yönetici. "deneme": yalnızca gönderene; "herkes": bütün üyelere. Her kişiye bir bildirim kaydı yazılır,
+// telefona gönderimi bildirimTelefona yapar (kişinin "Kulis duyuruları" ayarına ve sessiz saatlerine uyar).
+exports.duyuruGonder = onCall({ enforceAppCheck: false, timeoutSeconds: 300 }, async (req) => {
+  const me = req.auth && req.auth.uid;
+  if (!me) throw new HttpsError("unauthenticated", "giris");
+  if (!(await rolesOf(me)).admin) throw new HttpsError("permission-denied", "yetki");
+  const metin = String((req.data && req.data.metin) || "").trim().slice(0, 180), hedef = req.data && req.data.hedef;
+  if (metin.length < 3) throw new HttpsError("invalid-argument", "metin");
+  const kayit = { type: "duyuru", text: metin, go: null, ts: FV.serverTimestamp(), read: false };
+  if (hedef === "deneme") { await db.collection(`users/${me}/notifs`).add(kayit); return { gitti: 1 }; }
+  if (hedef !== "herkes") throw new HttpsError("invalid-argument", "hedef");
+  const us = await db.collection("users").select().get();
+  let b = db.batch(), n = 0, top = 0;
+  for (const u of us.docs) {
+    if (await db.doc(`bans/${u.id}`).get().then(x => x.exists)) continue;
+    b.set(db.collection(`users/${u.id}/notifs`).doc(), kayit); n++; top++;
+    if (n >= 400) { await b.commit(); b = db.batch(); n = 0; }
+  }
+  if (n) await b.commit();
+  await db.collection("duyurular").add({ metin, by: me, kisi: top, ts: FV.serverTimestamp() });
+  logger.info("duyuru", { kisi: top });
+  return { gitti: top };
+});
+

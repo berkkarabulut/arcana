@@ -1,6 +1,6 @@
 /* ============ GÜVEN VE SOHBET EKLERİ ============ */
 // Yazıyor / görüldü, ekran görüntüsü uyarısı, "kimler bana yazabilir" kontrolü, itiraf kaydetme, şikâyet sonucu bildirimi.
-NIC.rapor="flag";NIC.kilometre="spark";NIC.hatirla="spark";
+NIC.rapor="flag";NIC.kilometre="spark";NIC.hatirla="spark";NIC.duyuru="spark";
 
 // ---- Sohbet: ekran görüntüsü uyarısı, yazıyor, görüldü ----
 // Sohbet ekranı baştan çizilmez (yazdığın metin silinmesin); sadece göstergeler güncellenir.
