@@ -9,7 +9,7 @@ import {
 import {
   initializeFirestore, persistentLocalCache, persistentMultipleTabManager,
   doc, getDoc, setDoc, addDoc, updateDoc, deleteDoc, collection, query, where, orderBy, limit,
-  onSnapshot, serverTimestamp, increment, writeBatch, getDocs, deleteField, connectFirestoreEmulator
+  onSnapshot, serverTimestamp, increment, writeBatch, getDocs, deleteField, connectFirestoreEmulator, documentId
 } from "https://www.gstatic.com/firebasejs/12.8.0/firebase-firestore.js";
 // Açılışta gerekmeyen Firebase parçaları (bildirim, sunucu fonksiyonları, dosya yükleme) ilk kullanıldıklarında indirilir
 const gecYukle = u => { let p; return () => p || (p = import(u)); };
@@ -269,6 +269,8 @@ const KDB = {
   async isAdmin() { try { const s = await getDoc(doc(db, "config", "admins")); return s.exists() && (s.data().uids || []).includes(KDB.uid); } catch (e) { return false; } },
   block(uid) { return setDoc(doc(db, "users", KDB.uid, "blocks", uid), { ts: serverTimestamp() }); },
   listenBlocks(cb) { stop("blocks"); unsubs.blocks = onSnapshot(collection(db, "users", KDB.uid, "blocks"), s => cb(s.docs.map(d => d.id)), e => console.warn("blocks", e)); },
+  // yönetici: son N günün huni sayaçları (istatistik/YYYY-AA-GG)
+  async istatistik(n = 60) { const s = await getDocs(query(collection(db, "istatistik"), orderBy(documentId(), "desc"), limit(n))); return s.docs.map(d => ({ gun: d.id, ...d.data() })); },
   unblock(uid) { return deleteDoc(doc(db, "users", KDB.uid, "blocks", uid)); },
   async userPub(uid) { try { const s = await getDoc(doc(db, "users", uid)); return s.exists() ? { id: s.id, ...s.data() } : null; } catch (e) { return null; } },
   // doğrulanmış profil rozeti: sadece moderatör/yönetici

@@ -3,7 +3,9 @@
 // 5'ten fazlasını göremez; tepki, yorum, mesaj, itiraf yazma, diğer sekmeler gibi her etkileşimde üyelik istenir.
 // İtirafları sunucudaki misafirAkis fonksiyonu verir: en fazla 5 tane, yazarın hesap kimliği olmadan.
 const MSF_URL="https://europe-west1-kulis-1647d.cloudfunctions.net/misafirAkis";
-const MSF={on:false,hazir:false,gozuktu:false};
+const MSF={on:false,hazir:false,gozuktu:false,sayildi:{}};
+// huni sayacı: sadece "kaç kez" bilgisi gider (kişisel bilgi yok); her olay sayfa başına bir kez sayılır
+function msfSay(olay){if(MSF.sayildi[olay])return;MSF.sayildi[olay]=1;try{fetch(MSF_URL.replace("misafirAkis","misafirOlay"),{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({data:{olay}}),keepalive:true}).catch(()=>{})}catch(e){}}
 function misafirBasla(){
   if(MSF.on||state.me||R.started)return;
   MSF.on=true;MSF.hazir=false;
@@ -33,6 +35,7 @@ function misafirBitir(){
 // kayıt / giriş ekranını aç; misafir isterse çarpıyla akışa geri dönebilir
 function misafirKayit(google){
   const d=$("#msfDuvar");d&&d.remove();
+  msfSay("kayitAc");
   startOnb();
   if(!$("#msfGeri")){const b=document.createElement("button");b.id="msfGeri";b.className="ib";b.setAttribute("aria-label","Kapat, itiraflara dön");b.innerHTML=IC.close;
     b.onclick=()=>{$("#onb").hidden=true;b.remove();render()};$("#onb").appendChild(b)}
@@ -41,7 +44,7 @@ function misafirKayit(google){
 // Instagram tarzı alttan açılan üyelik penceresi
 function misafirDuvar(neden){
   if($("#msfDuvar")||!MSF.on)return;
-  track("misafir_duvar",{neden:neden||"kaydirma"});
+  track("misafir_duvar",{neden:neden||"kaydirma"});msfSay("duvar");
   const baslik={tepki:"Tepki vermek için üye ol",yorum:"Yorumları okumak için üye ol",mesaj:"Mesaj atmak için üye ol",itiraf:"İtiraf etmek için üye ol",sekme:"Devam etmek için üye ol",profil:"Profilleri görmek için üye ol"}[neden]||"Devamını görmek için üye ol";
   const g=document.createElement("div");g.id="msfDuvar";g.setAttribute("role","dialog");g.setAttribute("aria-modal","true");g.setAttribute("aria-labelledby","msfB");
   g.innerHTML=`<div class="msf-kart"><button class="ib msf-x" aria-label="Kapat">${IC.close}</button>

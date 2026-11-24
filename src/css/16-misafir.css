@@ -62,3 +62,16 @@ body.misafir .cats,body.misafir .feed-head,body.misafir .acts2 .ib.dm{display:no
 .ag-ic2 .set-row:last-child{border-bottom:0}
 .ag-ic2 .ayar-h{margin-top:14px}
 .sheet-head .nf-all{margin-left:auto;font-size:13.5px;font-weight:600;white-space:nowrap}
+/* ============ YÖNETİCİ: KAYIT HUNİSİ ============ */
+.hn-ust{display:flex;align-items:center;gap:12px;margin:2px 0 14px;flex-wrap:wrap}
+.hn{display:grid;gap:10px}
+.hn-s{display:grid;grid-template-columns:minmax(0,1.2fr) minmax(0,1fr) auto;gap:12px;align-items:center;padding:10px 12px;border-radius:14px;background:var(--yuzey)}
+.hn-t b{display:block;font-size:14px}.hn-t small{display:block;font-size:12px;opacity:.65;line-height:1.3}
+.hn-bar{height:10px;border-radius:6px;background:rgba(128,128,128,.18);overflow:hidden}
+.hn-bar i{display:block;height:100%;border-radius:6px;background:currentColor;opacity:.75}
+.hn-n{text-align:right;min-width:78px}.hn-n b{display:block;font-size:17px}.hn-n small{display:block;font-size:11.5px;opacity:.65}
+.hn-don{margin-top:6px;border:1px dashed rgba(128,128,128,.35)}
+.hn-tab{width:100%;border-collapse:collapse;font-size:13px;margin-top:6px}
+.hn-tab th,.hn-tab td{text-align:right;padding:6px 8px;border-bottom:1px solid rgba(128,128,128,.18)}
+.hn-tab th:first-child,.hn-tab td:first-child{text-align:left}
+@media (max-width:520px){.hn-s{grid-template-columns:1fr auto}.hn-bar{grid-column:1/-1;order:3}}

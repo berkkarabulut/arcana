@@ -204,6 +204,13 @@ exports.sikayetSonucu = onDocumentUpdated("reports/{rid}", async (event) => {
   await db.collection(`users/${b.by}/notifs`).add({ type: "rapor", text, go: null, ts: admin.firestore.FieldValue.serverTimestamp(), read: false });
 });
 
+// Misafirin huni adımları: üyelik penceresini gördü (duvar), kayıt ekranını açtı (kayitAc). Sadece bu iki sayı artırılabilir.
+exports.misafirOlay = onCall({ enforceAppCheck: false, maxInstances: 5 }, async (req) => {
+  const o = req.data && req.data.olay;
+  if (o === "duvar" || o === "kayitAc") await say(o);
+  return { ok: true };
+});
+
 // ---------------- Tepki rekorları ----------------
 // Bir itirafın toplam tepkisi 5, 10, 25, 50, 100, 250'yi geçince yazara bir kez haber verilir (anonim itiraflarda da).
 const ESIKLER = [5, 10, 25, 50, 100, 250];
@@ -254,7 +261,11 @@ exports.senYokken = onSchedule({ schedule: "40 19 * * *", timeZone: "Europe/Ista
 // ---------------- Misafir vitrini ----------------
 // Üye olmayan ziyaretçiye en çok tepki alan 5 itiraf. Yazarın hesap kimliği (uid) asla gönderilmez.
 let VITRIN = { at: 0, list: [] };
+// günlük sayaç (kişisel bilgi yok, sadece sayı): istatistik/YYYY-AA-GG
+const gunId = () => new Date(Date.now() + 3 * 36e5).toISOString().slice(0, 10); // Türkiye günü
+const say = (alan) => db.doc(`istatistik/${gunId()}`).set({ [alan]: FV.increment(1) }, { merge: true }).catch(() => {});
 exports.misafirAkis = onCall({ enforceAppCheck: false, maxInstances: 5 }, async () => {
+  say("misafir");
   if (Date.now() - VITRIN.at < 5 * 60e3 && VITRIN.list.length) return { list: VITRIN.list };
   const s = await db.collection("posts").orderBy("ts", "desc").limit(150).get();
   const sum = r => Object.values(r || {}).reduce((a, b) => a + (+b || 0), 0);

@@ -345,6 +345,11 @@ service cloud.firestore {
       }
     }
 
+    // Günlük huni sayaçları (sadece sayı): sunucu yazar, yönetici okur
+    match /istatistik/{gun} {
+      allow read: if isAdmin();
+      allow write: if false;
+    }
     match /chats/{cid} {
       function member() { return signedIn() && request.auth.uid in resource.data.members; }
       function other(m) { return m[0] == request.auth.uid ? m[1] : m[0]; }

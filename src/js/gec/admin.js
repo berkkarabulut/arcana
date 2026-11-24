@@ -68,7 +68,7 @@ function openAdminRemote(){
   const online=all.filter(u=>now-u.seen<ONLINE_MS),activeToday=all.filter(u=>u.seen>=today),newToday=all.filter(u=>u.created>=today),newWeek=all.filter(u=>now-u.created<7*864e5);
   const reps=(R.reports||[]).map(r=>Object.assign({},r,{status:r.status||"bekliyor"})),openReps=reps.filter(r=>r.status==="bekliyor");
   const errs=R.errors||[];
-  const tabs=R.admin?[["uye","Kullanıcılar",all.length],["sikayet","Şikâyetler",openReps.length],["mod","Moderatörler",(R.mods||[]).length||null],["destek","Destek",(R.ekipList||[]).filter(x=>x.staffUnread).length||null],["kelime","Kelimeler",null],["hata","Hatalar",errs.length]]:[["sikayet","Şikâyetler",openReps.length],["destek","Destek",(R.ekipList||[]).filter(x=>x.staffUnread).length||null]];
+  const tabs=R.admin?[["uye","Kullanıcılar",all.length],["sikayet","Şikâyetler",openReps.length],["mod","Moderatörler",(R.mods||[]).length||null],["destek","Destek",(R.ekipList||[]).filter(x=>x.staffUnread).length||null],["huni","Huni",null],["kelime","Kelimeler",null],["hata","Hatalar",errs.length]]:[["sikayet","Şikâyetler",openReps.length],["destek","Destek",(R.ekipList||[]).filter(x=>x.staffUnread).length||null]];
   let body="";
   if(ADM.tab==="uye"){
     const q=lowTR(ADM.q.trim());
@@ -126,6 +126,8 @@ function openAdminRemote(){
     body=`<p class="hint" style="margin:0 0 10px">Moderatörler itirafları 24 saat öne çıkarabilir, şikâyetleri görüp sonuçlandırabilir, itiraf ve yorum silebilir. Kullanıcıların gizli bilgilerini göremezler. Paneli açmak için onlar da logoya 5 kez dokunur.</p>
     ${mods.length?mods.map(id=>`<div class="adm-rep" style="display:flex;align-items:center;gap:10px"><b style="flex:1">${esc(nm(id))}</b><button class="btn line" data-modx="${id}" style="height:36px;font-size:13.5px">Çıkar</button></div>`).join(""):`<p class="muted" style="font-size:14px;padding:8px 4px">Henüz moderatör yok.</p>`}
     <div class="adm-add"><input class="city-search" id="modN" placeholder="Takma ad" maxlength="20" autocomplete="off"><button class="btn" id="modAdd">Moderatör yap</button></div>`;
+  } else if(ADM.tab==="huni"){
+    body=huniHTML(all);
   } else if(ADM.tab==="hata"){
     body=errs.length?`<div style="display:flex;justify-content:flex-end;margin-bottom:8px"><button class="dice" id="errClr">Hepsini temizle</button></div>${errs.map(e=>{const u=(R.usersRaw||[]).find(x=>x.id===e.uid);return `<div class="adm-rep"><div class="adm-rh"><span class="adm-k">${esc(e.where||"site")}</span><b>${esc(u?u.n:"?")}</b><small>${relTime(e.ts)}</small></div><p style="font-family:inherit;font-size:13.5px;overflow-wrap:anywhere">${esc(e.msg)}</p><small class="adm-st" style="overflow-wrap:anywhere">${esc(e.ua||"")}</small></div>`}).join("")}`
       :`<p class="muted" style="font-size:14px;padding:18px 4px">Hata kaydı yok. Kullanıcıların tarayıcısında bir şey bozulursa burada görünür.</p>`;
@@ -199,4 +201,27 @@ function openAdminRemote(){
     const l=[...new Set([...(R.mods||[]),u.id])];KDB.setMods(l).then(()=>toast(`${u.n} artık moderatör`)).catch(e=>toast("Olmadı: "+(e.code||e.message)))};
   el.querySelectorAll("[data-modx]").forEach(b=>b.onclick=()=>{const l=(R.mods||[]).filter(x=>x!==b.dataset.modx);KDB.setMods(l).then(()=>toast("Moderatörlükten çıkarıldı")).catch(e=>toast("Olmadı: "+(e.code||e.message)))});
   const ec=$("#errClr");if(ec)ec.onclick=async()=>{ec.disabled=true;for(const e of errs)await KDB.deleteError(e.id).catch(()=>{});toast("Hata kayıtları temizlendi")};
+}
+// ---- Kayıt hunisi: misafir → üyelik penceresi → kayıt ekranı → üye → itiraf → ertesi gün dönüş ----
+function huniHTML(all){
+  if(!R.ist&&!R.istYuk){R.istYuk=true;KDB.istatistik(90).then(l=>{R.ist=l;R.istYuk=false;if($("#adm.open")&&ADM.tab==="huni")openAdminRemote()}).catch(e=>{R.istYuk=false;R.ist=[];toast("İstatistik okunamadı: "+(e.code||e.message))})}
+  const gun=ADM.hg||7,now=Date.now(),bas=new Date(now-(gun-1)*864e5);bas.setHours(0,0,0,0);
+  const gunKey=t=>new Date(t+3*36e5).toISOString().slice(0,10),basKey=gunKey(bas.getTime());
+  const ist=(R.ist||[]).filter(x=>x.gun>=basKey),top=k=>ist.reduce((a,x)=>a+(x[k]||0),0);
+  const yeni=all.filter(u=>u.created>=bas.getTime());
+  const itiraf=yeni.filter(u=>u.posts>0);
+  const uygun=yeni.filter(u=>now-u.created>=24*36e5),dondu=uygun.filter(u=>u.seen-u.created>=20*36e5);
+  const adim=[["Üye olmadan siteye girdi",top("misafir"),"Misafir vitrini açıldı"],["Üyelik penceresini gördü",top("duvar"),"Bir yere dokundu ya da sona kaydırdı"],["Kayıt ekranını açtı",top("kayitAc"),"Google / e-posta düğmesine bastı"],
+    ["Üye oldu",yeni.length,"Bu dönemde açılan hesap"],["İtiraf yazdı",itiraf.length,"Yeni üyelerden (anonimler hariç)"]];
+  const enCok=Math.max(1,...adim.map(a=>a[1]));
+  const yuz=(a,b)=>b?Math.round(a*100/b)+"%":"—";
+  const satir=adim.map((a,i)=>`<div class="hn-s"><div class="hn-t"><b>${a[0]}</b><small>${a[2]}</small></div><div class="hn-bar"><i style="width:${Math.max(2,a[1]*100/enCok)}%"></i></div><div class="hn-n"><b>${a[1]}</b>${i?`<small>${yuz(a[1],adim[i-1][1])} önceki adımdan</small>`:""}</div></div>`).join("");
+  const gunler=[];for(let i=gun-1;i>=0;i--){const t=now-i*864e5,k=gunKey(t),x=(R.ist||[]).find(z=>z.gun===k)||{},d0=new Date(t);d0.setHours(0,0,0,0);
+    gunler.push({k,m:x.misafir||0,d:x.duvar||0,ka:x.kayitAc||0,u:all.filter(u=>u.created>=d0.getTime()&&u.created<d0.getTime()+864e5).length})}
+  return `<div class="hn-ust"><div class="seg3" style="max-width:260px">${[[7,"7 gün"],[30,"30 gün"],[90,"90 gün"]].map(([g,l])=>`<button aria-checked="${gun===g}" onclick="ADM.hg=${g};R.ist=null;openAdminRemote()">${l}</button>`).join("")}</div>
+    ${R.ist?"":`<small class="muted">Sayaçlar yükleniyor…</small>`}</div>
+    <div class="hn">${satir}
+      <div class="hn-s hn-don"><div class="hn-t"><b>Ertesi gün geri döndü</b><small>Üye olduktan 20+ saat sonra tekrar girdi (24 saati dolanlar arasından)</small></div><div class="hn-bar"><i style="width:${uygun.length?dondu.length*100/uygun.length:0}%"></i></div><div class="hn-n"><b>${dondu.length}/${uygun.length}</b><small>${yuz(dondu.length,uygun.length)}</small></div></div></div>
+    <p class="hint" style="margin:10px 2px">Misafir sayaçları 24 Kasım 2026'dan itibaren tutuluyor. Son görülmesini gizleyenler "geri döndü" hesabında eksik kalabilir. Üye sayısı son 200 üyeden hesaplanır.</p>
+    <table class="hn-tab"><thead><tr><th>Gün</th><th>Misafir</th><th>Pencere</th><th>Kayıt ekranı</th><th>Üye</th></tr></thead><tbody>${gunler.reverse().slice(0,30).map(g=>`<tr><td>${new Date(g.k+"T12:00:00").toLocaleDateString("tr-TR",{day:"numeric",month:"short"})}</td><td>${g.m}</td><td>${g.d}</td><td>${g.ka}</td><td>${g.u}</td></tr>`).join("")}</tbody></table>`;
 }
