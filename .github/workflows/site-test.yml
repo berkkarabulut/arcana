@@ -2,6 +2,10 @@ name: Site testi (canlı)
 
 on:
   workflow_dispatch:
+    inputs:
+      adres:
+        description: "Test edilecek adres"
+        default: "https://kulistr.com/"
 
 permissions:
   contents: read
@@ -27,11 +31,12 @@ jobs:
       - name: Lighthouse (mobil ve masaüstü)
         run: |
           CH=$(node -e "console.log(require('playwright').chromium.executablePath())")
-          for u in "https://kulistr.com/" "https://kulistr.com/gizlilik.html"; do
-            n=$(echo "$u" | sed 's#https://kulistr.com/##; s#\.html##; s#^$#anasayfa#')
+          A="${{ github.event.inputs.adres || 'https://kulistr.com/' }}"
+          for u in "$A" "https://kulistr.com/gizlilik.html"; do
+            n=$(echo "$u" | sed 's#https://kulistr.com/##; s#\.html##; s#/##g; s#^$#anasayfa#')
             CHROME_PATH=$CH npx lighthouse "$u" --quiet --chrome-flags="--headless=new --no-sandbox" --output=json --output-path="lh-$n-mobil.json" || true
           done
-          CHROME_PATH=$CH npx lighthouse "https://kulistr.com/" --quiet --preset=desktop --chrome-flags="--headless=new --no-sandbox" --output=json --output-path="lh-anasayfa-masaustu.json" || true
+          CHROME_PATH=$CH npx lighthouse --quiet --preset=desktop --chrome-flags="--headless=new --no-sandbox" --output=json --output-path="lh-anasayfa-masaustu.json" "$A" || true
           node lh-ozet.mjs
       - name: Kırık link taraması
         run: npx linkinator https://kulistr.com --recurse --skip "play.google.com|groups.google.com|firebasestorage|googleapis|gstatic|google-analytics|googletagmanager|wa.me|t.me|x.com|twitter.com|instagram.com|facebook.com|mailto:" --format json > linkler.json || true; node -e "const j=require('./linkler.json');const b=j.links.filter(l=>l.state==='BROKEN');console.log('Taranan:',j.links.length,'Kırık:',b.length);b.forEach(l=>console.log('KIRIK',l.status,l.url,'<-',l.parent))"
