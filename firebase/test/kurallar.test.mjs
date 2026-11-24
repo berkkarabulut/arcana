@@ -258,6 +258,7 @@ await env.withSecurityRulesDisabled(async c => { await setDoc(doc(c.firestore(),
 await t("Sadece eşleşmelere açık kişiye istek reddedilir", () => istek(H, "uh", "ui"), false);
 await t("Ayar: dm değeri sadece herkes/eslesme/kimse olabilir", () => setDoc(doc(G, "users/ug/settings/main"), { dm: "bazen" }, { merge: true }), false);
 await t("Ayar: kimler yazabilir kaydedilir", () => setDoc(doc(G, "users/ug/settings/main"), { dm: "eslesme", okundu: false, yaziyor: true }, { merge: true }), true);
+await t("Ayar: itiraflar Google'da çıkmasın seçilebilir", () => setDoc(doc(G, "users/ug/settings/main"), { seo: false }, { merge: true }), true);
 await t("Ayar: son görülme gizlenebilir", () => setDoc(doc(G, "users/ug/settings/main"), { songor: false }, { merge: true }), true);
 await t("Ayar: son görülme sadece doğru/yanlış olabilir", () => setDoc(doc(G, "users/ug/settings/main"), { songor: "gizli" }, { merge: true }), false);
 await t("Ayar: okundu sadece doğru/yanlış olabilir", () => setDoc(doc(G, "users/ug/settings/main"), { okundu: "evet" }, { merge: true }), false);

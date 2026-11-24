@@ -1,0 +1,28 @@
+name: Herkese açık itiraf sayfaları
+# Her gece kulistr.com/itiraf/ altını ve sitemap.xml'i baştan üretir (sadece 3+ tepkili, anonim olmayan,
+# yazarı kapatmamış itirafların metni; takma ad ve kişisel bilgi yok). Silinen/kapatılan itiraflar bu sırada kalkar.
+on:
+  schedule: [{ cron: "23 0 * * *" }]   # Türkiye saatiyle 03:23
+  workflow_dispatch: {}
+permissions: { contents: write, id-token: write }
+concurrency: { group: itiraf-sayfalari, cancel-in-progress: false }
+jobs:
+  uret:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: 22 }
+      - uses: google-github-actions/auth@v2
+        with:
+          workload_identity_provider: projects/165708007413/locations/global/workloadIdentityPools/github/providers/github
+          service_account: github-deploy@kulis-1647d.iam.gserviceaccount.com
+      - run: npm i --no-save --no-audit --no-fund firebase-admin@13
+      - run: node build/itiraf-sayfalari.mjs
+      - name: Yayınla
+        run: |
+          git config user.name "kulis-bot"; git config user.email "bot@kulistr.com"
+          git add -A itiraf sitemap.xml
+          if git diff --cached --quiet; then echo "Değişiklik yok"; exit 0; fi
+          git commit -qm "İtiraf sayfaları: $(ls itiraf | grep -vc index.html) sayfa"
+          for i in 1 2 3; do git pull -q --rebase origin main && git push -q && break; sleep 5; done
