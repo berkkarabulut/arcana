@@ -1,0 +1,2 @@
+{ "name": "kulis-site-test", "private": true, "type": "module",
+  "dependencies": { "playwright": "1.49.1", "lighthouse": "12.3.0", "linkinator": "6.1.2" } }
