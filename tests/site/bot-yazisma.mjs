@@ -51,7 +51,8 @@ async function botAc(b) {
   await p.goto(SITE + "?emu=1");
   await p.evaluate(() => { try { localStorage.removeItem("kulis_lp") } catch (e) {} });
   await p.waitForFunction(() => window.KDB && window.__emuGiris, null, { timeout: 20000 });
-  await p.evaluate(t => window.__emuGiris(t), b.token);
+  // Google butonunun yaptığı gibi: giriş yap, sonra sitenin giriş sonrası akışını çalıştır
+  await p.evaluate(async t => { const c = await window.__emuGiris(t); await remoteAfterAuth(c.user, "google"); }, b.token);
   try { await p.waitForFunction(() => window.state && state.me && state.chats && state.chats.length > 0, null, { timeout: 25000 }); }
   catch (e) {
     console.log("TEŞHİS " + b.n, JSON.stringify(await p.evaluate(() => ({ kdbUid: window.KDB && KDB.uid, rUid: window.R && R.uid, me: !!(window.state && state.me), chats: window.state && state.chats && state.chats.length,
