@@ -4,12 +4,12 @@ import { initializeApp } from "https://www.gstatic.com/firebasejs/12.8.0/firebas
 import {
   initializeAuth, indexedDBLocalPersistence, browserLocalPersistence, browserPopupRedirectResolver, onAuthStateChanged, signInAnonymously, GoogleAuthProvider, signInWithPopup,
   sendSignInLinkToEmail, isSignInWithEmailLink, signInWithEmailLink, signOut, linkWithPopup,
-  deleteUser, reauthenticateWithPopup
+  deleteUser, reauthenticateWithPopup, connectAuthEmulator, signInWithCustomToken
 } from "https://www.gstatic.com/firebasejs/12.8.0/firebase-auth.js";
 import {
   initializeFirestore, persistentLocalCache, persistentMultipleTabManager,
   doc, getDoc, setDoc, addDoc, updateDoc, deleteDoc, collection, query, where, orderBy, limit,
-  onSnapshot, serverTimestamp, increment, writeBatch, getDocs, deleteField
+  onSnapshot, serverTimestamp, increment, writeBatch, getDocs, deleteField, connectFirestoreEmulator
 } from "https://www.gstatic.com/firebasejs/12.8.0/firebase-firestore.js";
 // Açılışta gerekmeyen Firebase parçaları (bildirim, sunucu fonksiyonları, dosya yükleme) ilk kullanıldıklarında indirilir
 const gecYukle = u => { let p; return () => p || (p = import(u)); };
@@ -20,7 +20,7 @@ const fbSt = gecYukle("https://www.gstatic.com/firebasejs/12.8.0/firebase-storag
 const fbRt = gecYukle("https://www.gstatic.com/firebasejs/12.8.0/firebase-database.js");
 const RTDB_URL = "https://kulis-1647d-default-rtdb.europe-west1.firebasedatabase.app";
 let rtInst = null;
-const rt = async () => { if (KDB.isTest || !KDB.uid) return null; const m = await fbRt(); if (!rtInst) rtInst = m.getDatabase(app, RTDB_URL); return { m, d: rtInst }; };
+const rt = async () => { if (KDB.isTest || !KDB.uid) return null; const m = await fbRt(); if (!rtInst) { rtInst = m.getDatabase(app, RTDB_URL); if (EMU) m.connectDatabaseEmulator(rtInst, "localhost", 9000); } return { m, d: rtInst }; };
 let fnsInst = null;
 // sunucu fonksiyonunu çağır (europe-west1)
 const callFn = async (name, data) => { const m = await fbFns(); if (!fnsInst) fnsInst = m.getFunctions(app, "europe-west1"); return m.httpsCallable(fnsInst, name)(data); };
@@ -51,6 +51,10 @@ const LP = (() => { try { return localStorage.getItem("kulis_lp") === "1"; } cat
 const fsOpts = LP ? { experimentalForceLongPolling: true } : {};
 try { db = initializeFirestore(app, { ...fsOpts, localCache: persistentLocalCache({ tabManager: persistentMultipleTabManager() }) }); }
 catch (e) { db = initializeFirestore(app, fsOpts); }
+// Otomatik bot testi: sadece kendi bilgisayarda (localhost) ve ?emu ile açılınca Firebase'in yerel test ortamına bağlanır.
+// Canlı sitede (kulistr.com) bu satırlar hiçbir şey yapmaz.
+const EMU = location.hostname === "localhost" && new URLSearchParams(location.search).has("emu");
+if (EMU) { connectAuthEmulator(auth, "http://localhost:9099", { disableWarnings: true }); connectFirestoreEmulator(db, "localhost", 8080); window.__emuGiris = t => signInWithCustomToken(auth, t); }
 
 const VAPID = "BPuLRxoQfvz2-ml5JWzJFQd9qrKd-q7bXD-gtYbJOeg0gqxuoVL7MyQbZrEaXHOnaN9N_kK7d10PE4NDakgDcdo";
 const ms = t => (t && t.toMillis) ? t.toMillis() : (typeof t === "number" ? t : Date.now());

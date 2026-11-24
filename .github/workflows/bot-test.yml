@@ -1,0 +1,43 @@
+name: Bot sohbet testi (emülatörde)
+# İki bot hesabı Firebase emülatörlerinde (gerçek güvenlik kurallarıyla) birbirine yazar; canlı veriye dokunmaz.
+on:
+  workflow_dispatch: {}
+  push:
+    branches: [main]
+    paths: ["src/js/24-sohbet.js", "src/js/42-guven-ve-sohbet.js", "src/kulis-db.js", "firebase/database.rules.json", "tests/site/bot-yazisma.mjs", ".github/workflows/bot-test.yml"]
+permissions: { contents: write }
+concurrency: { group: bot-test, cancel-in-progress: true }
+jobs:
+  bot:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: 22 }
+      - uses: actions/setup-java@v4
+        with: { distribution: temurin, java-version: 21 }
+      - name: Siteyi derle
+        run: |
+          npm i --no-save --no-audit --no-fund typescript@5.7.3
+          node build/derle.mjs --out dist
+      - name: Araçları kur
+        working-directory: tests/site
+        run: |
+          npm i --no-save --no-audit --no-fund playwright@1.49.1 firebase-admin@13
+          npx playwright install --with-deps chromium
+          sudo apt-get install -y -qq ffmpeg >/dev/null
+      - name: Botlar yazışsın
+        run: |
+          (cd dist && python3 -m http.server 8765 >/dev/null 2>&1 &)
+          sleep 1
+          cp tests/site/bot-yazisma.mjs tests/site/_bot.mjs
+          npx -y firebase-tools@latest emulators:exec --only auth,firestore,database --project kulis-1647d "node tests/site/_bot.mjs"
+        env: { VIDEO_DIR: /tmp/bv }
+      - name: Videoyu birleştir
+        if: always()
+        run: |
+          a=$(ls /tmp/bv/bot_ayse/*.webm | head -1); b=$(ls /tmp/bv/bot_mert/*.webm | head -1)
+          ffmpeg -y -loglevel error -i "$a" -i "$b" -filter_complex "[0:v]pad=iw+16:ih:0:0:color=0x0B1220[l];[l][1:v]hstack=inputs=2,fps=30,scale=1680:-2:flags=lanczos" -c:v libx264 -preset veryfast -crf 21 -pix_fmt yuv420p -movflags +faststart /tmp/bot-sohbet-testi.mp4
+          mkdir /tmp/o && cp /tmp/bot-sohbet-testi.mp4 /tmp/o/ && cd /tmp/o && git init -q && git checkout -q -b bot-video
+          git -c user.name=bot -c user.email=bot@x add . && git -c user.name=bot -c user.email=bot@x commit -qm video
+          git push -qf "https://x-access-token:${{ github.token }}@github.com/${{ github.repository }}.git" bot-video
