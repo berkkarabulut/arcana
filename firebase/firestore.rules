@@ -23,7 +23,7 @@ service cloud.firestore {
     // Premium: satın alma doğrulamasının yazdığı users/{uid}/private/premium belgesi (sunucu yazar, kullanıcı yazamaz).
     // Yönetici/moderatör ve Google Play inceleme hesabında her şey açık.
     function premPath() { return /databases/$(database)/documents/users/$(request.auth.uid)/private/premium; }
-    function staffOrReviewer() { return request.auth.token.email == 'kulistrinfo@gmail.com' || isMod(); }
+    function staffOrReviewer() { return request.auth.token.get('email', '') == 'kulistrinfo@gmail.com' || isMod(); }
     function premOk() {
       return (exists(premPath()) && get(premPath()).data.get('active', false) == true
               && get(premPath()).data.get('until', 0) > request.time.toMillis())
@@ -31,8 +31,10 @@ service cloud.firestore {
     }
     // paket: sohbet < ses (sesli arama) < tam (görüntülü arama dahil)
     function tierOk(need) {
-      return staffOrReviewer() || (premOk() && (need == 'sohbet'
-        || get(premPath()).data.get('tier', 'tam') in (need == 'ses' ? ['ses','tam'] : ['tam'])));
+      return (exists(premPath()) && get(premPath()).data.get('active', false) == true
+              && get(premPath()).data.get('until', 0) > request.time.toMillis()
+              && (need == 'sohbet' || get(premPath()).data.get('tier', 'tam') in (need == 'ses' ? ['ses','tam'] : ['tam'])))
+        || staffOrReviewer();
     }
     function str(v, lo, hi) { return v is string && v.size() >= lo && v.size() <= hi; }
     // Yüklenen dosyalar sadece Kulis'in kendi depolama alanından gelebilir
