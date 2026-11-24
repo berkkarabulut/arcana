@@ -1,0 +1,15 @@
+/* ===== Hikâyede paylaş ===== */
+.sh-prev{display:grid;place-items:center;background:var(--murekkep);border-radius:18px;padding:12px;min-height:200px}
+.sh-prev img{width:min(100%,250px);aspect-ratio:9/16;border-radius:14px;box-shadow:0 14px 30px rgba(0,0,0,.4)}
+.sh-load{color:var(--soluk);font-size:14px}
+a.btn{display:inline-flex;align-items:center;justify-content:center;text-decoration:none}
+.btn svg{width:18px;height:18px}
+.mini-sh{display:inline-flex;align-items:center;gap:6px;margin-left:10px;font-size:12.5px;font-weight:700;color:var(--altin)}
+.mini-sh svg{width:15px;height:15px}
+
+/* paylaş butonu eklenince alt satır sığsın */
+.it-foot .r{padding:0 8px 0 7px;gap:4px}
+.it-foot .reacts{gap:4px}
+.acts2 .ib{min-width:30px;padding:0 5px}
+@media (max-width:390px){.it-foot{gap:3px}.it-foot .reacts{gap:3px}.it-foot .r{padding:0 6px 0 5px;gap:3px;font-size:12px}.it-foot .r svg{width:15px;height:15px}.acts2{gap:0}.acts2 .ib{padding:0 3px;min-width:27px;gap:3px}.acts2 .ib svg{width:16px;height:16px}}
+@media (max-width:350px){.it-foot .r{padding:0 4px;gap:2px}.it-foot .r svg{width:14px;height:14px}.acts2 .ib{min-width:24px;padding:0 2px}}

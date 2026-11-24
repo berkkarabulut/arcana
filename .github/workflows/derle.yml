@@ -1,0 +1,61 @@
+name: Derle ve yayınla
+
+# src/ değişince: kodu kontrol et, sıkıştır, önce BETA'ya yayınla ve beta'yı gerçek tarayıcıyla test et.
+# Canlıya alma (kök dizin) ayrı ve elle tetiklenir: "hedef: canli".
+on:
+  push:
+    branches: [main]
+    paths: ["src/**", "build/**", ".github/workflows/derle.yml"]
+  workflow_dispatch:
+    inputs:
+      hedef:
+        description: "beta ya da canli"
+        default: "beta"
+
+permissions:
+  contents: write
+
+concurrency:
+  group: derle
+  cancel-in-progress: false
+
+jobs:
+  derle:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Derleyiciyi kur
+        run: npm i --no-save --no-audit --no-fund esbuild@0.24.2
+      - name: Kontrol et ve derle (bekçiler + sıkıştırma)
+        run: node build/derle.mjs --out dist --min
+      - name: Yayınla
+        id: yay
+        run: |
+          HEDEF="${{ github.event.inputs.hedef || 'beta' }}"
+          VER=$(grep -o 'name="kulis-ver" content="[^"]*"' dist/index.html | sed 's/.*content="//; s/"//')
+          echo "ver=$VER" >> $GITHUB_OUTPUT; echo "hedef=$HEDEF" >> $GITHUB_OUTPUT
+          if [ "$HEDEF" = "canli" ]; then D="."; else D="beta"; fi
+          rm -rf "$D/assets"; mkdir -p "$D/assets"; cp dist/assets/* "$D/assets/"; cp dist/sw.js "$D/sw.js"
+          if [ "$HEDEF" = "canli" ]; then cp dist/index.html index.html; rm -f kulis-db.js
+          else sed 's#<meta charset="utf-8">#<meta charset="utf-8">\n<meta name="robots" content="noindex">#' dist/index.html > beta/index.html; rm -f beta/kulis-db.js; fi
+          git config user.name "kulis-derleyici"; git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A "$D/assets" "$D/sw.js" "$D/index.html" kulis-db.js beta/kulis-db.js 2>/dev/null || true
+          git add -A "$D"
+          if git diff --cached --quiet; then echo "Değişiklik yok"; else git commit -m "Derleme: $HEDEF sürüm $VER" && git push; fi
+      - name: Yayının açılmasını bekle
+        run: |
+          U="https://kulistr.com/"; [ "${{ steps.yay.outputs.hedef }}" = "canli" ] || U="https://kulistr.com/beta/"
+          for i in $(seq 1 40); do if curl -s "$U?_=$RANDOM" | grep -q "${{ steps.yay.outputs.ver }}"; then echo "Yayında: ${{ steps.yay.outputs.ver }}"; exit 0; fi; sleep 10; done
+          echo "Yayın 400 sn içinde görünmedi"; exit 1
+      - name: Gerçek tarayıcı testi
+        working-directory: tests/site
+        env:
+          HEDEF_URL: ${{ steps.yay.outputs.hedef == 'canli' && 'https://kulistr.com/' || 'https://kulistr.com/beta/' }}
+        run: |
+          npm i --no-audit --no-fund playwright@1.49.1
+          npx playwright install --with-deps chromium
+          node duman.mjs

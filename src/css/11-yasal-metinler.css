@@ -1,0 +1,14 @@
+/* ===== Yasal metinler ===== */
+#legal{position:fixed;inset:0;z-index:95;background:var(--murekkep);overflow-y:auto;display:none}
+#legal.open{display:block}
+.lg-in{max-width:680px;margin:0 auto;padding:16px 22px 70px}
+.lg-tabs{display:flex;gap:6px;flex-wrap:wrap;margin:12px 0 20px}
+.lg-tabs button{height:34px;padding:0 14px;border-radius:99px;border:1px solid var(--cizgi);font-size:13px;font-weight:700;color:var(--soluk)}
+.lg-tabs button[aria-selected="true"]{background:var(--kagit);color:var(--murekkep);border-color:var(--kagit)}
+#legal h1{font-size:32px;line-height:1.1}
+.lg-meta{color:var(--soluk);font-size:13px;margin:6px 0 10px}
+#legal h2{font-family:Figtree,sans-serif;font-size:16px;font-weight:800;margin:22px 0 6px}
+#legal p{font-size:15px;line-height:1.6;color:rgba(var(--kagit-rgb),.86);max-width:65ch}
+#legal a,.hint a,.check a{color:var(--altin);text-decoration:underline;text-underline-offset:2px}
+.lg-links{display:flex;flex-wrap:wrap;justify-content:center;gap:6px 16px;margin-top:22px;font-size:13px}
+.lg-links a{color:var(--soluk);text-decoration:underline;text-underline-offset:2px}

@@ -1,0 +1,24 @@
+/* ===== Günlük burç ===== */
+.dh{width:100%;display:flex;align-items:center;gap:12px;padding:12px 12px 12px 12px;margin-bottom:12px;border-radius:18px;text-align:left;background:radial-gradient(120% 140% at 0% 0%,color-mix(in srgb,var(--acc) 22%,transparent),transparent 60%),var(--yuzey);border:1px solid var(--cizgi)}
+.dh-z{width:44px;height:44px;flex:none;border-radius:14px;display:grid;place-items:center;font-size:22px;color:#fff;background:var(--acc)}
+.dh-t{flex:1;min-width:0;display:flex;flex-direction:column;gap:2px}
+.dh-t small{font-size:12px;font-weight:800;color:var(--altin)}
+.dh-t span{font-family:var(--display);font-size:15.5px;line-height:1.35;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.dh-go{color:var(--soluk);flex:none;transform:rotate(-90deg);display:grid}
+.dh-pick{display:grid;grid-template-columns:repeat(6,1fr);gap:6px;margin-bottom:16px}
+.dh-pick button{height:40px;border-radius:12px;font-size:19px;background:var(--yuzey);border:1px solid var(--cizgi);color:var(--soluk)}
+.dh-pick button[aria-pressed="true"]{background:rgba(var(--altin-rgb),.16);border-color:rgba(var(--altin-rgb),.5);color:var(--altin)}
+.dh-hero{display:flex;align-items:center;gap:14px;margin-bottom:10px}
+.dh-big{width:60px;height:60px;border-radius:18px;display:grid;place-items:center;font-size:30px;background:rgba(var(--altin-rgb),.14);color:var(--altin)}
+.dh-hero h3{font-size:26px;line-height:1}.dh-hero small{color:var(--soluk);font-size:13px}
+.dh-genel{font-family:var(--display);font-size:19px;line-height:1.4;margin:6px 0 14px}
+.dh-sec{padding:12px 0;border-top:1px solid var(--cizgi)}
+.dh-st{display:flex;align-items:center;justify-content:space-between;margin-bottom:4px}
+.dh-st b{font-size:14px}
+.dh-sec p{font-size:14.5px;line-height:1.45;color:rgba(var(--kagit-rgb),.85)}
+.dh-dots{display:inline-flex;gap:4px}
+.dh-dots i{width:8px;height:8px;border-radius:50%;background:rgba(var(--kagit-rgb),.14)}
+.dh-dots i.on{background:var(--nar)}
+.dh-chips{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:8px}
+.dh-chips div{padding:10px;border-radius:14px;background:var(--yuzey);display:flex;flex-direction:column;gap:2px}
+.dh-chips small{font-size:11.5px;color:var(--soluk)}.dh-chips b{font-size:14px}

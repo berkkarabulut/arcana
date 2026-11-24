@@ -1,0 +1,7 @@
+/* ===== Açık mod ince ayarları ===== */
+:root[data-theme="light"] .it,:root[data-theme="light"] .swc,:root[data-theme="light"] .dh,:root[data-theme="light"] .wq,:root[data-theme="light"] .nav-in{box-shadow:0 1px 2px rgba(15,31,27,.06),0 8px 24px rgba(15,31,27,.06)}
+:root[data-theme="light"] .scrim{background:rgba(15,31,27,.35)}
+:root[data-theme="light"] [data-legal],:root[data-theme="light"] #ckb a{color:#A8331A}
+:root[data-theme="light"] .feat .it{box-shadow:none;background:none}
+:root[data-theme="light"] .brand-ic,:root[data-theme="light"] .wel-ic{box-shadow:0 6px 16px rgba(15,31,27,.18)}
+:root[data-theme="light"] .wel-hero::before{opacity:.6}

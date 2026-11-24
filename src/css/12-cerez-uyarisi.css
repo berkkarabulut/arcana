@@ -1,0 +1,8 @@
+/* ===== Çerez uyarısı ===== */
+#ckb{position:fixed;left:12px;right:12px;bottom:calc(12px + env(safe-area-inset-bottom));z-index:94;max-width:520px;margin:0 auto;padding:14px 14px 12px;border-radius:20px;background:var(--yuzey2);border:1px solid rgba(var(--kagit-rgb),.14);box-shadow:0 18px 40px rgba(0,0,0,.5);animation:up .3s cubic-bezier(.2,.8,.2,1)}
+#ckb p{font-size:13.5px;line-height:1.45;color:rgba(var(--kagit-rgb),.86)}
+#ckb p b{display:block;font-size:15px;color:var(--kagit);margin-bottom:2px}
+#ckb a{color:var(--altin);text-decoration:underline;text-underline-offset:2px}
+#ckb div{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:12px}
+#ckb .btn{height:42px;font-size:14px;padding:0 10px}
+@media (prefers-reduced-motion:reduce){#ckb{animation:none}}

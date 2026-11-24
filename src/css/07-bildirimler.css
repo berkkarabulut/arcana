@@ -1,0 +1,16 @@
+/* ===== Bildirimler ===== */
+.bell-pip{position:absolute;top:-5px;right:-5px;min-width:18px;height:18px;padding:0 5px;border-radius:99px;background:var(--nar);color:var(--on-nar);font-size:10.5px;font-weight:800;display:grid;place-items:center;box-shadow:0 0 0 2px var(--murekkep)}
+.bell-pip[hidden]{display:none}
+.nf-h{font-size:13px;font-family:Figtree,sans-serif;font-weight:800;color:var(--soluk);margin:14px 0 6px}
+.nf{width:100%;display:flex;align-items:center;gap:12px;padding:10px 10px;border-radius:14px;text-align:left}
+.nf.new{background:rgba(var(--nar-rgb),.08)}
+.nf+.nf{margin-top:2px}
+.nf-av{position:relative;flex:none;display:inline-flex}
+.nf-sys{width:42px;height:42px;border-radius:50%;display:grid;place-items:center;background:rgba(var(--altin-rgb),.14);color:var(--altin)}
+.nf-sys svg{width:20px;height:20px}
+.nf-ic{position:absolute;right:-3px;bottom:-3px;width:20px;height:20px;border-radius:50%;display:grid;place-items:center;color:var(--on-nar);background:var(--nar);box-shadow:0 0 0 2px var(--yuzey)}
+.nf-ic svg{width:11px;height:11px}
+.nf-ic.t-cm{background:#4E7BD8}.nf-ic.t-match{background:var(--altin);color:var(--on-altin)}
+.nf-t{flex:1;min-width:0;font-size:14px;line-height:1.38;color:rgba(var(--kagit-rgb),.9)}
+.nf-t b{color:var(--kagit)}
+.nf-t small{display:block;color:var(--soluk);font-size:12px;margin-top:2px}

@@ -3,5 +3,7 @@ Allow: /
 Disallow: /beta/
 Disallow: /tests/
 Disallow: /android/
+Disallow: /src/
+Disallow: /build/
 
 Sitemap: https://kulistr.com/sitemap.xml
