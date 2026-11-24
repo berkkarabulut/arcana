@@ -35,7 +35,7 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="preconnect" href="https://www.gstatic.com" crossorigin>
 <link rel="preconnect" href="https://firestore.googleapis.com" crossorigin>
-<link rel="modulepreload" href="kulis-db.js?v=27">
+<link rel="modulepreload" href="kulis-db.js?v=28">
 <link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,600;1,6..72,400;1,6..72,500&family=Figtree:wght@400;500;600;700;800&display=swap" onload="this.onload=null;this.rel='stylesheet'">
 <noscript><link href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,600;1,6..72,400;1,6..72,500&family=Figtree:wght@400;500;600;700;800&display=swap" rel="stylesheet"></noscript>
 <style>
@@ -803,7 +803,7 @@ a.btn{display:inline-flex;align-items:center;justify-content:center;text-decorat
 /* ===== Açık mod ince ayarları ===== */
 :root[data-theme="light"] .it,:root[data-theme="light"] .swc,:root[data-theme="light"] .dh,:root[data-theme="light"] .wq,:root[data-theme="light"] .nav-in{box-shadow:0 1px 2px rgba(15,31,27,.06),0 8px 24px rgba(15,31,27,.06)}
 :root[data-theme="light"] .scrim{background:rgba(15,31,27,.35)}
-:root[data-theme="light"] [data-legal]{color:#A8331A}
+:root[data-theme="light"] [data-legal],:root[data-theme="light"] #ckb a{color:#A8331A}
 :root[data-theme="light"] .feat .it{box-shadow:none;background:none}
 :root[data-theme="light"] .brand-ic,:root[data-theme="light"] .wel-ic{box-shadow:0 6px 16px rgba(15,31,27,.18)}
 :root[data-theme="light"] .wel-hero::before{opacity:.6}
@@ -3275,6 +3275,6 @@ if(REMOTE){
 if(REMOTE)remoteInit();else
 try{const s=JSON.parse(localStorage.getItem("itiraf_me")||"null");if(s&&s.n&&s.s){state.me=s;loadData();render();seedDemo()}else startOnb()}catch(e){startOnb()}
 </script>
-<script type="module">if(REMOTE)import("./kulis-db.js?v=27")</script>
+<script type="module">if(REMOTE)import("./kulis-db.js?v=28")</script>
 </body>
 </html>
