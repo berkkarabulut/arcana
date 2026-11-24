@@ -35,7 +35,6 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="preconnect" href="https://www.gstatic.com" crossorigin>
 <link rel="preconnect" href="https://firestore.googleapis.com" crossorigin>
-<link rel="modulepreload" href="{{DB_JS}}">
 <link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Newsreader:ital,wght@0,400;0,600;1,400;1,500&family=Figtree:wght@400;500;600;700;800&display=swap" onload="this.onload=null;this.rel='stylesheet'">
 <noscript><link href="https://fonts.googleapis.com/css2?family=Newsreader:ital,wght@0,400;0,600;1,400;1,500&family=Figtree:wght@400;500;600;700;800&display=swap" rel="stylesheet"></noscript>
 <style>{{CSS}}</style>
@@ -64,6 +63,13 @@
 <div class="onb" id="onb" hidden><div class="onb-in" id="onbIn"></div></div>
 
 <script src="{{APP_JS}}"></script>
-<script type="module">if(REMOTE)import("{{DB_JS}}")</script>
+<script type="module">
+// Sunucu bağlantısı (Firebase, ~180 KB): oturumu olan hemen yükler; yeni gelen misafir için sayfa açıldıktan sonra
+// (ilk dokunuşta ya da 5 saniye sonra) yüklenir, böylece ilk açılış hızlanır.
+if(REMOTE){const y=window.__kdbYukle=()=>{if(!window.__kdbYuklendi){window.__kdbYuklendi=1;import("{{DB_JS}}")}};
+  let o=false;try{o=Object.keys(localStorage).some(k=>k.startsWith("firebase:authUser"))||/[?&](oobCode|apiKey|emu)\b/.test(location.search)}catch(e){o=true}
+  const bekle=()=>{["pointerdown","keydown"].forEach(t=>addEventListener(t,y,{once:true,capture:true}));setTimeout(y,5000)};
+  if(o)y();else if(indexedDB.databases)indexedDB.databases().then(l=>l.some(d=>d.name==="firebaseLocalStorageDb")?y():bekle()).catch(y);else y()}
+</script>
 </body>
 </html>
