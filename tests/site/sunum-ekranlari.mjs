@@ -87,7 +87,7 @@ console.log("Demo veri hazır");
 
 const browser = await chromium.launch();
 const ctx = await browser.newContext({ viewport: { width: 412, height: 860 }, deviceScaleFactor: 3, isMobile: true, hasTouch: true, locale: "tr-TR", colorScheme: "dark", serviceWorkers: "block" });
-await ctx.addInitScript(() => { try { localStorage.setItem("kulis_cerez", "0") } catch (e) {} });
+await ctx.addInitScript(u => { try { localStorage.setItem("kulis_cerez", "0"); if (!localStorage.getItem("kulis_ilk_" + u)) localStorage.setItem("kulis_ilk_" + u, JSON.stringify({ t: Date.now(), d: {} })) } catch (e) {} }, ben.uid);
 const p = await ctx.newPage();
 const log = []; p.on("console", m => log.push(m.type() + ": " + m.text().slice(0, 200))); p.on("pageerror", e => log.push("HATA " + e));
 await p.goto(SITE + "?emu=1");
@@ -107,6 +107,9 @@ async function cek(ad, hazirla, bekle = 1500) {
 const kapat = () => p.evaluate(() => { try { closeSheet && closeSheet() } catch (e) {} try { closeChat && closeChat() } catch (e) {} document.querySelectorAll(".sheet.open,.ov.open").forEach(e => e.classList.remove("open")); });
 
 await cek("01-akis", () => { state.tab = "akis"; state.sort = "populer"; render(); scrollTo(0, 0); });
+console.log("İLK KART", await p.evaluate(() => !!document.querySelector("#ilkKart")));
+await cek("01b-ilk-tepki", () => { document.querySelector("#view .it [data-react]").click(); scrollTo(0, 0); }, 1500);
+console.log("İLK DURUM", await p.evaluate(() => JSON.stringify(ilkOku())));
 await cek("02-itiraf-detay", () => { showPost("p1"); }, 2500); await kapat();
 await cek("03-kesfet", () => { state.tab = "kesfet"; render(); scrollTo(0, 0); }, 2500);
 await cek("04-mesajlar", () => { state.tab = "mesajlar"; render(); scrollTo(0, 0); });

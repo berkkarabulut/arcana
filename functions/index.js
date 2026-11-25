@@ -207,7 +207,7 @@ exports.sikayetSonucu = onDocumentUpdated("reports/{rid}", async (event) => {
 // Misafirin huni adımları: üyelik penceresini gördü (duvar), kayıt ekranını açtı (kayitAc). Sadece bu iki sayı artırılabilir.
 exports.misafirOlay = onCall({ enforceAppCheck: false, maxInstances: 5 }, async (req) => {
   const o = req.data && req.data.olay;
-  if (o === "duvar" || o === "kayitAc") await say(o);
+  if (["duvar", "kayitAc", "ilkTepki", "ilkItiraf", "ilkBegeni", "ilkBitti"].includes(o)) await say(o);
   return { ok: true };
 });
 

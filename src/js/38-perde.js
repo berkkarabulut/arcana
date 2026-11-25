@@ -180,7 +180,7 @@ async function remoteFinishOnb(){
   const priv={ad:ob.ad.trim(),soyad:ob.soyad.trim(),email:ob.email.trim(),b:{d:ob.d,m:ob.m,y:ob.y},provider:ob.provider};
   try{const rf=localStorage.getItem("kulis_ref");if(rf&&rf!==KDB.uid)priv.ref=rf}catch(e){}
   remoteLoading(true);
-  try{await KDB.createProfile(pub,priv);track("kayit",{yontem:ob.provider});remoteEnterApp(pub,priv);toast(`Hoş geldin ${n}`)}
+  try{await KDB.createProfile(pub,priv);track("kayit",{yontem:ob.provider});ilkBasla();remoteEnterApp(pub,priv);toast(`Hoş geldin ${n}`)}
   catch(e){remoteLoading(false);toast("Kayıt tamamlanamadı: "+(e.code||e.message))}
 }
 const IN_WEBVIEW=/Instagram|FBAN|FBAV|FB_IAB|WhatsApp|TikTok|musical_ly|BytedanceWebview|Snapchat|Line\/|Twitter|; wv\)/i.test(navigator.userAgent);
