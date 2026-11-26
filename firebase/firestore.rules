@@ -436,11 +436,12 @@ service cloud.firestore {
         allow create: if signedIn() && request.auth.uid in chatAfter().members
           && !blockedBy(other(chatAfter().members))
           && request.resource.data.uid == request.auth.uid
-          && request.resource.data.keys().hasOnly(['uid','t','ts','img','aud','dur','re'])
+          && request.resource.data.keys().hasOnly(['uid','t','ts','img','aud','dur','re','g'])
+          && (!('g' in request.resource.data) || (request.resource.data.g is string && request.resource.data.g.matches('^[A-Za-z0-9]{4,40}$')))
           && (!('re' in request.resource.data) || (request.resource.data.re is map && request.resource.data.re.keys().hasOnly(['id','t','u'])
                 && str(request.resource.data.re.id, 1, 40) && str(request.resource.data.re.t, 0, 120) && request.resource.data.re.u is string))
           && str(request.resource.data.t, 0, 1000) && clean(request.resource.data.t)
-          && (request.resource.data.t.size() > 0 || 'img' in request.resource.data || 'aud' in request.resource.data)
+          && (request.resource.data.t.size() > 0 || 'img' in request.resource.data || 'aud' in request.resource.data || 'g' in request.resource.data)
           && (!('img' in request.resource.data) || stUrl(request.resource.data.img, 'm'))
           && (!('aud' in request.resource.data) || (stUrl(request.resource.data.aud, 'm')
                 && request.resource.data.dur is number && request.resource.data.dur > 0 && request.resource.data.dur <= 120))
@@ -451,9 +452,9 @@ service cloud.firestore {
           && (chatAfter().get('n', 0) <= 20 || premOk());
         // moderatör bildirilen mesajı silebilir: içerik boşaltılır, "moderatör tarafından silindi" işareti kalır
         allow update: if isMod()
-          && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['t','img','aud','dur','mod'])
+          && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['t','img','aud','dur','mod','g'])
           && request.resource.data.mod == true && request.resource.data.t == ''
-          && !('img' in request.resource.data) && !('aud' in request.resource.data);
+          && !('img' in request.resource.data) && !('aud' in request.resource.data) && !('g' in request.resource.data);
         // emoji tepkisi: sohbetin üyesi, sadece kendi tepkisini (tp.<uid>) koyar ya da kaldırır
         allow update: if signedIn() && request.auth.uid in get(/databases/$(database)/documents/chats/$(cid)).data.members
           && changed().hasOnly(['tp'])

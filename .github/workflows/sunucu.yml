@@ -43,6 +43,11 @@ jobs:
           service_account: github-deploy@kulis-1647d.iam.gserviceaccount.com
       - name: Fonksiyon paketlerini kur
         run: npm install --prefix functions --no-audit --no-fund
+      - name: Fonksiyon ortam değişkenleri (GIF anahtarı)
+        env:
+          GIPHY_KEY: ${{ secrets.GIPHY_KEY }}
+        run: |
+          if [ -n "$GIPHY_KEY" ]; then printf 'GIPHY_KEY=%s\n' "$GIPHY_KEY" > functions/.env; echo "GIPHY anahtarı eklendi"; else echo "GIPHY_KEY secret'ı yok, GIF araması kapalı kalacak"; fi
       - name: Firebase'e yükle
         run: npx -y firebase-tools@latest deploy --only firestore:rules,functions --project kulis-1647d --non-interactive --force
       - name: Anlık durum veritabanını (Realtime Database) oluştur, yoksa

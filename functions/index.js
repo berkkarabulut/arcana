@@ -619,3 +619,44 @@ exports.dogrulamaSonuc = onDocumentUpdated("dogrulama/{uid}", async (event) => {
   await db.collection(`users/${uid}/notifs`).add({ type: "dogrula", text, go: { tab: "ben" }, ts: FV.serverTimestamp(), read: false });
   if (typeof sonra.path === "string" && sonra.path.startsWith(`v/${uid}/`)) await admin.storage().bucket(BUCKET).file(sonra.path).delete().catch(() => {});
 });
+
+// ---------------- GIF arama (GIPHY) ----------------
+// Anahtar GitHub secret'ından (GIPHY_KEY) yüklemede functions/.env'e yazılır.
+// Beta anahtar saatte 100 istekle sınırlı: sonuçlar Firestore'da önbelleğe alınır (arama 6 saat, popüler 1 saat),
+// kişi başı saatte 60 arama. İstemciye yalnızca GIF kimlikleri gider, adres istemcide kurulur.
+exports.gifAra = onCall({ enforceAppCheck: false, maxInstances: 5 }, async (req) => {
+  if (!req.auth) throw new HttpsError("unauthenticated", "giris");
+  const KEY = process.env.GIPHY_KEY;
+  if (!KEY) throw new HttpsError("failed-precondition", "anahtar");
+  const q = String((req.data && req.data.q) || "").trim().toLocaleLowerCase("tr").replace(/\s+/g, " ").slice(0, 50);
+  const saat = new Date().toISOString().slice(0, 13);
+  const rl = db.doc(`hiz/gif_${req.auth.uid}_${saat}`);
+  await db.runTransaction(async tx => {
+    const s = await tx.get(rl), v = s.exists ? s.data().n : 0;
+    if (v >= 60) throw new HttpsError("resource-exhausted", "hiz");
+    tx.set(rl, { n: FV.increment(1), sil: admin.firestore.Timestamp.fromMillis(Date.now() + 864e5) }, { merge: true });
+  });
+  const anahtar = q ? "q_" + require("crypto").createHash("sha1").update(q).digest("hex").slice(0, 24) : "populer";
+  const ref = db.doc(`gifOnbellek/${anahtar}`), omur = q ? 6 * 36e5 : 36e5;
+  const eski = await ref.get();
+  if (eski.exists && Date.now() - eski.data().ts < omur) return { r: eski.data().r };
+  const u = q
+    ? `https://api.giphy.com/v1/gifs/search?api_key=${KEY}&q=${encodeURIComponent(q)}&limit=24&rating=pg-13&lang=tr`
+    : `https://api.giphy.com/v1/gifs/trending?api_key=${KEY}&limit=24&rating=pg-13`;
+  let r;
+  try {
+    const res = await fetch(u);
+    if (!res.ok) throw new Error("giphy " + res.status);
+    const j = await res.json();
+    r = (j.data || []).map(g => {
+      const f = (g.images && g.images.fixed_width) || {};
+      return { id: g.id, w: +f.width || 200, h: +f.height || 200 };
+    }).filter(g => /^[A-Za-z0-9]{4,40}$/.test(g.id));
+  } catch (e) {
+    logger.warn("gifAra", e.message);
+    if (eski.exists) return { r: eski.data().r }; // kota dolduysa eski sonuç
+    throw new HttpsError("unavailable", "giphy");
+  }
+  await ref.set({ r, ts: Date.now(), q }).catch(() => {});
+  return { r };
+});

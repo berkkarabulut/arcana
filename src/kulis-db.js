@@ -405,11 +405,11 @@ const KDB = {
     stamp(b, "msgAt");
     await b.commit();
   },
-  async sendMsg(cid, t, re) {
+  async sendMsg(cid, t, re, g) {
     const b = writeBatch(db);
-    b.set(doc(collection(db, "chats", cid, "messages")), { uid: KDB.uid, t, ts: serverTimestamp(), ...(re ? { re } : {}) });
+    b.set(doc(collection(db, "chats", cid, "messages")), { uid: KDB.uid, t, ts: serverTimestamp(), ...(re ? { re } : {}), ...(g ? { g } : {}) });
     // sohbet sayacı: sunucu, ücretsiz üyelikte sohbet başına mesaj sınırını buna göre uygular
-    b.update(doc(db, "chats", cid), { last: t.slice(0, 120), lastBy: KDB.uid, lastAt: serverTimestamp(), n: increment(1) });
+    b.update(doc(db, "chats", cid), { last: g ? "🎞️ GIF" : t.slice(0, 120), lastBy: KDB.uid, lastAt: serverTimestamp(), n: increment(1) });
     stamp(b, "msgAt");
     await b.commit();
   },
@@ -525,6 +525,7 @@ const KDB = {
       s => cb(s.docs.map(d => ({ uid: d.id, ts: d.data().ts && d.data().ts.toMillis ? d.data().ts.toMillis() : Date.now() }))), e => console.warn("ziyaret", e.code));
   },
   // ---------- Anonim sorular ----------
+  gifAra(q) { return callFn("gifAra", { q: q || "" }).then(r => (r.data && r.data.r) || []); },
   anonimSoru(n, t) { return callFn("anonimSoru", { n, t }).then(r => r.data); },
   listenSorular(cb) {
     stop("sorular");
