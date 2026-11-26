@@ -8,7 +8,7 @@
 .bg-m{flex:1;min-width:0}
 .bg-m b{display:block;font-size:15.5px}
 .bg-m small{display:block;color:var(--soluk);font-size:13px;margin-top:1px}
-.bg-m q{display:block;font-family:var(--display);font-size:14.5px;line-height:1.35;margin-top:4px;color:var(--murekkep);opacity:.9;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.bg-m q{display:block;font-family:var(--display);font-size:14.5px;line-height:1.35;margin-top:4px;color:var(--kagit);opacity:.9;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .btn.sm{height:36px;padding:0 14px;font-size:14px}
 
 /* Profilim kısayolları */
@@ -64,7 +64,7 @@
 .ara-e .etiket{padding:5px 10px;border-radius:999px;background:var(--yuzey);border:1px solid var(--cizgi);font-size:13px}
 
 /* Anonim soru: link sayfası ve sahibinin listesi */
-.soru-s{position:fixed;inset:0;z-index:300;display:grid;place-items:center;padding:20px;overflow:auto;background:radial-gradient(90% 60% at 85% 10%,rgba(255,138,101,.28),transparent 60%),radial-gradient(80% 60% at 10% 95%,rgba(124,196,255,.18),transparent 60%),var(--kagit)}
+.soru-s{position:fixed;inset:0;z-index:300;display:grid;place-items:center;padding:20px;overflow:auto;background:radial-gradient(90% 60% at 85% 10%,rgba(255,138,101,.28),transparent 60%),radial-gradient(80% 60% at 10% 95%,rgba(124,196,255,.18),transparent 60%),var(--murekkep);color:var(--kagit)}
 .soru-k{width:100%;max-width:440px;text-align:center}
 .soru-logo{font-family:var(--display);font-style:italic;font-size:44px;line-height:1;margin-bottom:22px}
 .soru-logo span{color:var(--nar)}
