@@ -33,6 +33,15 @@ service firebase.storage {
       allow delete: if ok() && request.auth.uid == uid;
     }
 
+    // v/{uid}/... : doğrulama selfie'si. Sadece sahibi yükler; kimse doğrudan okuyamaz (moderatöre sunucu gösterir).
+    match /v/{uid}/{file} {
+      allow read: if false;
+      allow create: if ok() && request.auth.uid == uid
+        && request.resource.size < 4 * 1024 * 1024
+        && request.resource.contentType.matches('image/(jpeg|png|webp)');
+      allow delete: if ok() && request.auth.uid == uid;
+    }
+
     match /{all=**} {
       allow read, write: if false;
     }

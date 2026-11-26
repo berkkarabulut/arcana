@@ -17,9 +17,9 @@ const FV = admin.firestore.FieldValue;
 setGlobalOptions({ region: "europe-west1", maxInstances: 10 });
 
 const SITE = "https://kulistr.com/";
-const TITLES = { cm: "Yeni yorum", react: "İtirafına tepki", req: "Mesaj isteği", dm: "Yeni mesaj", match: "Eşleştiniz", like: "Biri seni beğendi", call: "Cevapsız arama", perde: "Perde", rapor: "Şikâyetin sonuçlandı", kilometre: "İtirafın ilgi görüyor", duyuru: "Kulis", hatirla: "Kulis'te seni bekleyenler var" };
+const TITLES = { soru: "Yeni anonim soru", super: "Süper beğeni", dogrula: "Profil doğrulama", seri: "Serin bozulmasın", cm: "Yeni yorum", react: "İtirafına tepki", req: "Mesaj isteği", dm: "Yeni mesaj", match: "Eşleştiniz", like: "Biri seni beğendi", call: "Cevapsız arama", perde: "Perde", rapor: "Şikâyetin sonuçlandı", kilometre: "İtirafın ilgi görüyor", duyuru: "Kulis", hatirla: "Kulis'te seni bekleyenler var" };
 // bazı bildirim türleri ayarlarda başka bir anahtarla açılıp kapanır
-const TUR_AYAR = { kilometre: "react" };
+const TUR_AYAR = { kilometre: "react", super: "like", seri: "hatirla" };
 
 // ---------------- Kullanıcı ayarları ----------------
 // users/{uid}/settings/main: n (bildirim türü -> açık/kapalı), quiet + qFrom/qTo (Türkiye saatiyle sessiz saatler)
@@ -255,7 +255,24 @@ exports.senYokken = onSchedule({ schedule: "40 19 * * *", timeZone: "Europe/Ista
     await db.doc(`users/${uid}/meta/hatirla`).set({ at: FV.serverTimestamp() });
     gitti++;
   }
-  logger.info("senYokken", { aday: us.size, gitti });
+  // Günlük seri: dün de bir şey yapmış ama bugün henüz yapmamış, serisi en az 3 gün olanlara akşam hatırlatma
+  let seriGitti = 0;
+  try {
+    const dun = new Date(simdi + 3 * 36e5 - G).toISOString().slice(0, 10);
+    const ss = await db.collection("seriler").where("gun", "==", dun).limit(500).get();
+    for (const d of ss.docs) {
+      const n = d.data().n || 0;
+      if (n < 3) continue;
+      const st = await settingsOf(d.id);
+      if (st.n && st.n.hatirla === false) continue;
+      if (inQuiet(st)) continue;
+      const toks = await db.collection(`users/${d.id}/push`).limit(1).get();
+      if (toks.empty) continue;
+      await sendPush(d.id, { title: TITLES.seri, body: `${n} günlük serin bu gece bitiyor 🔥 Bir itirafa tepki bırakman yeter.`, link: SITE, tag: "seri" }, 5 * 3600);
+      seriGitti++;
+    }
+  } catch (e) { logger.warn("seri", String(e && e.message)); }
+  logger.info("senYokken", { aday: us.size, gitti, seriGitti });
 });
 
 // ---------------- Misafir vitrini ----------------
@@ -450,3 +467,155 @@ exports.duyuruGonder = onCall({ enforceAppCheck: false, timeoutSeconds: 300 }, a
   return { gitti: top };
 });
 
+
+
+// ---------------- Anonim soru linki ----------------
+// kulistr.com/?soru=takmaad: üye olmayan biri de o kişiye anonim soru sorabilir. Soran kişinin kimliği tutulmaz;
+// kötüye kullanıma karşı IP'nin tek yönlü özeti ile saatlik sınır uygulanır (IP'nin kendisi saklanmaz).
+exports.anonimSoru = onCall({ enforceAppCheck: false, maxInstances: 5 }, async (req) => {
+  const nick = String((req.data && req.data.n) || "").trim().slice(0, 20);
+  const t = String((req.data && req.data.t) || "").trim().replace(/\s+/g, " ");
+  if (t.length < 3 || t.length > 300) throw new HttpsError("invalid-argument", "uzunluk");
+  if (/https?:\/\/|www\./i.test(t)) throw new HttpsError("invalid-argument", "baglanti");
+  const nk = await db.doc(`nicks/${nick}`).get();
+  if (!nk.exists || !nk.data().uid) throw new HttpsError("not-found", "kisi");
+  const uid = nk.data().uid;
+  if (await db.doc(`bans/${uid}`).get().then(x => x.exists)) throw new HttpsError("not-found", "kisi");
+  const st = await settingsOf(uid);
+  if (st.soru === false) throw new HttpsError("failed-precondition", "kapali");
+  const mod = await db.doc("config/moderation").get();
+  const re = mod.exists ? mod.data().re : "";
+  if (re && new RegExp(re, "s").test(t.toLocaleLowerCase("tr"))) throw new HttpsError("permission-denied", "kelime");
+  const ip = String((req.rawRequest && (req.rawRequest.headers["x-forwarded-for"] || req.rawRequest.ip)) || "").split(",")[0].trim();
+  const h = require("crypto").createHash("sha256").update("kulis-soru:" + ip).digest("hex").slice(0, 32);
+  const saat = new Date().toISOString().slice(0, 13);
+  const rl = db.doc(`hiz/soru_${h}_${saat}`), hedef = db.doc(`hiz/soruHedef_${uid}_${gunId()}`);
+  await db.runTransaction(async tx => {
+    const [a, b] = await Promise.all([tx.get(rl), tx.get(hedef)]);
+    if ((a.exists ? a.data().n : 0) >= 8) throw new HttpsError("resource-exhausted", "hiz");
+    if ((b.exists ? b.data().n : 0) >= 200) throw new HttpsError("resource-exhausted", "hedef");
+    tx.set(rl, { n: FV.increment(1), sil: admin.firestore.Timestamp.fromMillis(Date.now() + 2 * 864e5) }, { merge: true });
+    tx.set(hedef, { n: FV.increment(1), sil: admin.firestore.Timestamp.fromMillis(Date.now() + 2 * 864e5) }, { merge: true });
+    tx.set(db.collection(`users/${uid}/sorular`).doc(), { t, ts: FV.serverTimestamp() });
+    tx.set(db.collection(`users/${uid}/notifs`).doc(), { type: "soru", text: "Biri sana anonim bir soru sordu. Cevapla, istersen hikâyende paylaş.", go: { tab: "ben", soru: 1 }, ts: FV.serverTimestamp(), read: false });
+  });
+  await say("soru");
+  return { ok: true };
+});
+
+// ---------------- Krediler: öne çıkarma ve süper beğeni ----------------
+// users/{uid}/private/kredi: { oneCikar, superBegeni, sonBoost, sonSuper } — sadece sunucu yazar.
+// Premium üyeye her 24 saatte 1 öne çıkarma ve 1 süper beğeni ücretsiz; fazlası satın alınan krediden düşer.
+async function premiumMu(uid) {
+  const p = await db.doc(`users/${uid}/private/premium`).get();
+  return p.exists && p.data().active === true && (p.data().until || 0) > Date.now();
+}
+async function krediHarca(uid, alan, sonAlan) {
+  const ref = db.doc(`users/${uid}/private/kredi`), prem = await premiumMu(uid);
+  return db.runTransaction(async tx => {
+    const k = await tx.get(ref), d = k.exists ? k.data() : {};
+    const son = d[sonAlan] ? d[sonAlan].toMillis() : 0;
+    if (prem && Date.now() - son > 864e5) { tx.set(ref, { [sonAlan]: FV.serverTimestamp() }, { merge: true }); return "premium"; }
+    if ((d[alan] || 0) < 1) throw new HttpsError("failed-precondition", "kredi");
+    tx.set(ref, { [alan]: FV.increment(-1) }, { merge: true });
+    return "kredi";
+  });
+}
+exports.oneCikar = onCall({ enforceAppCheck: false }, async (req) => {
+  const me = req.auth && req.auth.uid;
+  if (!me || !req.auth.token.email_verified) throw new HttpsError("unauthenticated", "giris");
+  const pid = String((req.data && req.data.pid) || "");
+  if (!/^[A-Za-z0-9]{10,40}$/.test(pid)) throw new HttpsError("invalid-argument", "pid");
+  const p = await db.doc(`posts/${pid}`).get();
+  if (!p.exists) throw new HttpsError("not-found", "itiraf");
+  let sahip = p.data().uid === me;
+  if (!sahip && p.data().anon) { const o = await db.doc(`anonOwners/${pid}`).get(); sahip = o.exists && o.data().uid === me; }
+  if (!sahip) throw new HttpsError("permission-denied", "sahip");
+  if ((p.data().feat || 0) > Date.now()) return { feat: p.data().feat, zaten: true };
+  const kaynak = await krediHarca(me, "oneCikar", "sonBoost");
+  const feat = Date.now() + 864e5;
+  await p.ref.update({ feat });
+  await say("oneCikar_" + kaynak);
+  return { feat, kaynak };
+});
+exports.superBegen = onCall({ enforceAppCheck: false }, async (req) => {
+  const me = req.auth && req.auth.uid;
+  if (!me || !req.auth.token.email_verified) throw new HttpsError("unauthenticated", "giris");
+  const to = String((req.data && req.data.to) || ""), pid = req.data && req.data.pid ? String(req.data.pid).slice(0, 40) : null;
+  if (!/^[A-Za-z0-9]{10,40}$/.test(to) || to === me) throw new HttpsError("invalid-argument", "kisi");
+  if (await db.doc(`users/${to}/blocks/${me}`).get().then(x => x.exists)) throw new HttpsError("permission-denied", "engel");
+  const kaynak = await krediHarca(me, "superBegeni", "sonSuper");
+  await db.doc(`likes/${me}_${to}`).set({ from: me, to, pid, super: true, ts: FV.serverTimestamp() });
+  await db.collection(`users/${to}/notifs`).add({ type: "super", from: me, text: "sana süper beğeni gönderdi ⭐ İtirafın ona çok dokunmuş.", go: { tab: "kesfet" }, ts: FV.serverTimestamp(), read: false });
+  let cid = null;
+  const back = await db.doc(`likes/${to}_${me}`).get();
+  if (back.exists) {
+    cid = me < to ? me + "_" + to : to + "_" + me;
+    const c = db.doc(`chats/${cid}`);
+    if (!(await c.get()).exists) await c.set({ members: [me, to].sort(), reqBy: me, status: "open", match: true, from: null, last: null, lastBy: me, lastAt: FV.serverTimestamp() });
+  }
+  await say("super_" + kaynak);
+  return { cid, kaynak };
+});
+// Tek seferlik ürünler (Google Play): satın alma doğrulanır, kredi eklenir, ürün tüketilir (tekrar alınabilsin diye)
+const KREDI_URUN = { kulis_one_cikar_1: { oneCikar: 1 }, kulis_one_cikar_3: { oneCikar: 3 }, kulis_super_begeni_5: { superBegeni: 5 } };
+exports.verifyProduct = onRequest({ cors: ["https://kulistr.com", "https://www.kulistr.com"] }, async (req, res) => {
+  if (req.method !== "POST") return res.status(405).json({ error: "method" });
+  try {
+    const m = (req.get("authorization") || "").match(/^Bearer (.+)$/);
+    if (!m) return res.status(401).json({ error: "giris" });
+    const user = await admin.auth().verifyIdToken(m[1]);
+    if (!user.email_verified) return res.status(403).json({ error: "dogrulanmamis" });
+    const uid = user.uid, { productId, purchaseToken } = req.body || {};
+    if (!KREDI_URUN[productId] || typeof purchaseToken !== "string" || purchaseToken.length < 10 || purchaseToken.length > 4096) return res.status(400).json({ error: "gecersiz" });
+    const api = playApi();
+    const { data: p } = await api.purchases.products.get({ packageName: PACKAGE, productId, token: purchaseToken });
+    if (p.purchaseState !== 0) return res.status(402).json({ error: "odenmedi" });
+    const tokenRef = db.collection("purchases").doc(require("crypto").createHash("sha256").update(purchaseToken).digest("hex"));
+    const eklendi = await db.runTransaction(async tx => {
+      const t = await tx.get(tokenRef);
+      if (t.exists && t.data().credited) { if (t.data().uid !== uid) throw Object.assign(new Error("baska_hesap"), { kod: 409 }); return false; }
+      const inc = {}; for (const [k, v] of Object.entries(KREDI_URUN[productId])) inc[k] = FV.increment(v);
+      tx.set(db.doc(`users/${uid}/private/kredi`), inc, { merge: true });
+      tx.set(tokenRef, { uid, productId, credited: true, orderId: p.orderId || null, updatedAt: FV.serverTimestamp() }, { merge: true });
+      return true;
+    });
+    if (p.consumptionState === 0) await api.purchases.products.consume({ packageName: PACKAGE, productId, token: purchaseToken }).catch(e => logger.warn("consume", String(e && e.message)));
+    if (eklendi) await say("urun_" + productId);
+    const k = await db.doc(`users/${uid}/private/kredi`).get();
+    return res.json({ eklendi, kredi: k.exists ? { oneCikar: k.data().oneCikar || 0, superBegeni: k.data().superBegeni || 0 } : {} });
+  } catch (e) {
+    if (e && e.kod === 409) return res.status(409).json({ error: "baska_hesap" });
+    logger.error("verifyProduct", e);
+    return res.status(e && e.code === 404 ? 404 : 500).json({ error: "sunucu" });
+  }
+});
+
+// ---------------- Selfie ile profil doğrulama ----------------
+// Kullanıcı uygulama içinden o an çekilmiş bir selfie gönderir (v/{uid}/...). Selfie herkese açık olmaz;
+// moderatör, selfie ile kişinin perde arkasındaki fotoğrafını yan yana görüp onaylar ya da reddeder.
+exports.dogrulamaFoto = onCall({ enforceAppCheck: false, memory: "256MiB" }, async (req) => {
+  const me = req.auth && req.auth.uid;
+  if (!me || !(await rolesOf(me)).mod) throw new HttpsError("permission-denied", "yetki");
+  const uid = String((req.data && req.data.uid) || "");
+  if (!/^[A-Za-z0-9]{10,40}$/.test(uid)) throw new HttpsError("invalid-argument", "uid");
+  const d = await db.doc(`dogrulama/${uid}`).get();
+  if (!d.exists) return {};
+  const bucket = admin.storage().bucket(BUCKET), out = { poz: d.data().poz || null };
+  const oku = async (path, k) => {
+    if (typeof path !== "string") return;
+    try { const f = bucket.file(path); const [[buf], [md]] = await Promise.all([f.download(), f.getMetadata()]);
+      if (buf.length <= 3 * 1024 * 1024) out[k] = `data:${md.contentType || "image/jpeg"};base64,${buf.toString("base64")}`; } catch (e) { logger.warn("dogrulamaFoto", { uid, k }); }
+  };
+  const g = await db.doc(`users/${uid}/gizli/foto`).get();
+  await Promise.all([oku(d.data().path && d.data().path.startsWith(`v/${uid}/`) ? d.data().path : null, "selfie"), oku(g.exists && String(g.data().av || "").startsWith(`r/${uid}/`) ? g.data().av : null, "profil")]);
+  return out;
+});
+exports.dogrulamaSonuc = onDocumentUpdated("dogrulama/{uid}", async (event) => {
+  const once = event.data.before.data() || {}, sonra = event.data.after.data() || {};
+  if (once.durum === sonra.durum || !["onay", "ret"].includes(sonra.durum)) return;
+  const uid = event.params.uid;
+  const text = sonra.durum === "onay" ? "Profilin doğrulandı ✔ Artık adının yanında doğrulanmış rozeti var." : "Selfie'n doğrulanamadı. Yüzünün net göründüğü, istenen pozu verdiğin yeni bir selfie ile tekrar deneyebilirsin.";
+  await db.collection(`users/${uid}/notifs`).add({ type: "dogrula", text, go: { tab: "ben" }, ts: FV.serverTimestamp(), read: false });
+  if (typeof sonra.path === "string" && sonra.path.startsWith(`v/${uid}/`)) await admin.storage().bucket(BUCKET).file(sonra.path).delete().catch(() => {});
+});

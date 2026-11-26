@@ -285,6 +285,48 @@ await t("Kullanıcı kendine doğrulama rozeti veremez", () => updateDoc(doc(G, 
 await t("Moderatör doğrulama rozeti verir", () => updateDoc(doc(ctx("umod"), "users/ug"), { dg: true }), true);
 await t("Moderatör rozetle birlikte başka alan değiştiremez", () => updateDoc(doc(ctx("umod"), "users/ug"), { dg: false, n: "hacklendi" }), false);
 
+// ---- Yeni özellikler: ziyaret, anonim soru, seri, doğrulama, mesaj tepkisi/alıntısı, kredi ----
+await env.withSecurityRulesDisabled(async c => {
+  const d = c.firestore();
+  await setDoc(doc(d, "users/ub/sorular/s1"), { t: "en sevdiğin şarkı?", ts: 1 });
+  await setDoc(doc(d, "chats/ua_ub/messages/mt"), { uid: "ub", t: "tepki bekleyen", ts: 3 });
+  await setDoc(doc(d, "dogrulama/uc"), { path: "v/uc/a.jpg", poz: "iki parmak", ts: 1, durum: "bekliyor" });
+});
+await t("Profil ziyareti iz bırakır", () => setDoc(doc(A, "users/ub/ziyaret/ua"), { ts: serverTimestamp() }), true);
+await t("Profil sahibi ziyaretçilerini okur", () => getDoc(doc(B, "users/ub/ziyaret/ua")), true);
+await t("Başkasının ziyaretçileri okunamaz", () => getDoc(doc(C, "users/ub/ziyaret/ua")), false);
+await t("Başkası adına ziyaret yazılamaz", () => setDoc(doc(C, "users/ub/ziyaret/ua"), { ts: serverTimestamp() }), false);
+await t("Ziyarete fazladan bilgi eklenemez", () => setDoc(doc(C, "users/ub/ziyaret/uc"), { ts: serverTimestamp(), n: "sahte" }), false);
+await t("Engelleyenin profiline iz bırakılamaz", () => setDoc(doc(A, "users/ud/ziyaret/ua"), { ts: serverTimestamp() }), false);
+await t("Ziyaret ayarı (iz) kaydedilir", () => setDoc(doc(A, "users/ua/settings/main"), { iz: false, soru: true }, { merge: true }), true);
+await t("Kimse başkasına elle anonim soru yazamaz", () => setDoc(doc(A, "users/ub/sorular/s2"), { t: "sahte", ts: 1 }), false);
+await t("Soru sahibi sorularını okur", () => getDoc(doc(B, "users/ub/sorular/s1")), true);
+await t("Başkası soruları okuyamaz", () => getDoc(doc(A, "users/ub/sorular/s1")), false);
+await t("Soru sahibi cevaplandı işaretler", () => updateDoc(doc(B, "users/ub/sorular/s1"), { cevap: true, pid: "abcdefghij12" }), true);
+await t("Soru metni sonradan değiştirilemez", () => updateDoc(doc(B, "users/ub/sorular/s1"), { t: "değişti" }), false);
+const bugun = new Date().toISOString().slice(0, 10);
+await t("Seri kaydedilir", () => setDoc(doc(A, "seriler/ua"), { gun: bugun, n: 3, en: 5, ts: serverTimestamp() }), true);
+await t("Başkasının serisi yazılamaz", () => setDoc(doc(C, "seriler/ua"), { gun: bugun, n: 99, en: 99, ts: serverTimestamp() }), false);
+await t("Seri en uzun seriden büyük olamaz", () => setDoc(doc(A, "seriler/ua"), { gun: bugun, n: 9, en: 5, ts: serverTimestamp() }), false);
+await t("Doğrulama başvurusu açılır", () => setDoc(doc(A, "dogrulama/ua"), { path: "v/ua/s.jpg", poz: "başparmak yukarı", ts: serverTimestamp(), durum: "bekliyor" }), true);
+await t("Kişi kendi başvurusunu onaylayamaz", () => updateDoc(doc(A, "dogrulama/ua"), { durum: "onay", by: "ua", sts: serverTimestamp() }), false);
+await t("Başkasının selfie yolu reddedilir", () => setDoc(doc(B, "dogrulama/ub"), { path: "v/ua/s.jpg", poz: "x yap", ts: serverTimestamp(), durum: "bekliyor" }), false);
+await t("Moderatör başvuruları okur", () => getDoc(doc(MOD, "dogrulama/uc")), true);
+await t("Başkası başvuruyu okuyamaz", () => getDoc(doc(B, "dogrulama/uc")), false);
+await t("Moderatör başvuruyu onaylar", () => updateDoc(doc(MOD, "dogrulama/uc"), { durum: "onay", by: "umod", sts: serverTimestamp() }), true);
+await t("Mesaja emoji tepkisi konur", () => updateDoc(doc(A, "chats/ua_ub/messages/mt"), { "tp.ua": "❤️" }), true);
+await t("Listede olmayan tepki reddedilir", () => updateDoc(doc(A, "chats/ua_ub/messages/mt"), { "tp.ua": "💩" }), false);
+await t("Başkası adına tepki konamaz", () => updateDoc(doc(A, "chats/ua_ub/messages/mt"), { "tp.ub": "😂" }), false);
+await t("Tepkiyle birlikte metin değiştirilemez", () => updateDoc(doc(A, "chats/ua_ub/messages/mt"), { "tp.ua": "😂", t: "değişti" }), false);
+await t("Sohbet dışındaki kişi tepki koyamaz", () => updateDoc(doc(C, "chats/ua_ub/messages/mt"), { "tp.uc": "😂" }), false);
+await wait(1300);
+await t("Alıntılı cevap gönderilir", () => msgAs(B, "ub", "ua_ub", { t: "aynen", re: { id: "mt", t: "tepki bekleyen", u: "ub" } }), true);
+await wait(1300);
+await t("Alıntıda fazladan alan reddedilir", () => msgAs(B, "ub", "ua_ub", { t: "x", re: { id: "mt", t: "y", u: "ub", hack: 1 } }), false);
+await t("Kişi kendine kredi yazamaz", () => setDoc(doc(A, "users/ua/private/kredi"), { oneCikar: 99 }), false);
+await t("Kişi kendi kredisini okur", () => getDoc(doc(A, "users/ua/private/kredi")), true);
+await t("Üye itirafını kendisi öne çıkaramaz (sunucu yapar)", () => updateDoc(doc(A, "posts/pz"), { feat: Date.now() + 864e5 }), false);
+
 await env.cleanup();
 console.log(fail ? `\n${fail} senaryo TUTMADI, yükleme durduruldu.` : "\nTüm senaryolar tamam.");
 process.exit(fail ? 1 : 0);
