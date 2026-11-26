@@ -1,0 +1,111 @@
+/* Seni beğenenler, profiline bakanlar (liste ve bulanık kilit) */
+.bg-kilit{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin:0 0 16px}
+.bg-bulanik{aspect-ratio:3/4;border-radius:16px;background:radial-gradient(60% 50% at 50% 38%,hsl(var(--h) 55% 70% / .75),transparent 70%),linear-gradient(160deg,hsl(var(--h) 35% 30%),var(--yuzey2));filter:blur(6px);opacity:.9}
+.bg-liste{list-style:none;margin:0;padding:0;display:grid;gap:4px}
+.bg-s{display:flex;align-items:center;gap:12px;padding:10px 4px;border-bottom:1px solid var(--cizgi)}
+.bg-s:last-child{border-bottom:0}
+.bg-av{flex:none;border-radius:50%}
+.bg-m{flex:1;min-width:0}
+.bg-m b{display:block;font-size:15.5px}
+.bg-m small{display:block;color:var(--soluk);font-size:13px;margin-top:1px}
+.bg-m q{display:block;font-family:var(--display);font-size:14.5px;line-height:1.35;margin-top:4px;color:var(--murekkep);opacity:.9;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.btn.sm{height:36px;padding:0 14px;font-size:14px}
+
+/* Profilim kısayolları */
+.pk-row{display:grid;grid-template-columns:repeat(auto-fit,minmax(0,1fr));gap:8px;margin:4px 0 14px}
+.pk{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;padding:10px 4px;border-radius:14px;background:var(--yuzey);border:1px solid var(--cizgi);min-height:66px;position:relative}
+.pk b{font-size:19px;font-weight:800;line-height:1.1}
+.pk span{font-size:11.5px;color:var(--soluk);text-align:center;line-height:1.2}
+.pk.yeni::after{content:"";position:absolute;top:8px;right:8px;width:8px;height:8px;border-radius:50%;background:var(--nar)}
+.pk:hover{background:var(--yuzey2)}
+
+/* Günlük seri */
+.seri-b{display:flex;align-items:center;gap:14px;padding:16px;border-radius:16px;background:var(--yuzey2)}
+.seri-b b{font-size:34px;font-weight:800;line-height:1}
+.seri-b span{font-size:15px;line-height:1.4}
+.seri-r{display:flex;flex-wrap:wrap;gap:6px}
+.seri-r span{padding:6px 10px;border-radius:999px;border:1px solid var(--cizgi);font-size:13px;color:var(--soluk)}
+.seri-r span.on{background:var(--nar);border-color:var(--nar);color:var(--on-nar);font-weight:700}
+
+/* Buz kırıcı */
+.buz{display:flex;gap:8px;overflow-x:auto;padding:0 2px 8px;scrollbar-width:none;-webkit-overflow-scrolling:touch}
+.buz::-webkit-scrollbar{display:none}
+.buz-c{flex:none;max-width:78%;text-align:left;padding:9px 12px;border-radius:14px;border:1px solid var(--cizgi);background:var(--yuzey);font-size:13.5px;line-height:1.35;white-space:normal}
+.buz-c:hover{border-color:var(--nar)}
+
+/* Mesaj tepkisi ve alıntı */
+.m .m-re{display:block;margin:-2px -4px 6px;padding:6px 9px;border-left:3px solid var(--nar);border-radius:8px;background:rgba(0,0,0,.14);font-size:12.5px;line-height:1.35;opacity:.92;max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.m .m-re b{display:block;font-size:11.5px;font-weight:700;opacity:.85}
+.m-tp{display:flex;margin:-6px 0 4px}
+.m-tp.me{justify-content:flex-end;margin-right:6px}
+.m-tp.them{justify-content:flex-start;margin-left:6px}
+.m-tp span{padding:2px 7px;border-radius:999px;background:var(--yuzey2);border:1px solid var(--cizgi);font-size:13px;line-height:1.5}
+.m-tp span.ben{border-color:var(--nar)}
+.m[data-mid]{-webkit-touch-callout:none;user-select:none;-webkit-user-select:none}
+.mm-e{display:flex;justify-content:space-between;gap:6px;margin:4px 0 14px}
+.mm-eb{flex:1;font-size:26px;height:52px;border-radius:14px;background:var(--yuzey2)}
+.mm-eb.on{outline:2px solid var(--nar)}
+.cv-bar{display:flex;align-items:center;gap:10px;padding:8px 10px;margin:0 0 8px;border-radius:12px;background:var(--yuzey2);border-left:3px solid var(--nar)}
+.cv-bar div{flex:1;min-width:0}
+.cv-bar b{display:block;font-size:12px}
+.cv-bar span{display:block;font-size:13px;color:var(--soluk);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.cv-bar button{width:30px;height:30px;display:grid;place-items:center;border-radius:50%;flex:none}
+
+/* Arama ve etiket */
+.ara{margin:0 0 12px}
+.ara-k{display:flex;align-items:center;gap:8px;height:44px;padding:0 14px;border-radius:14px;background:var(--yuzey);border:1px solid var(--cizgi)}
+.ara-k:focus-within{border-color:var(--nar)}
+.ara-ic{color:var(--soluk);display:flex}
+.ara-k input{flex:1;min-width:0;background:none;border:0;outline:0;font:inherit;font-size:15px;color:inherit}
+.ara-s{display:flex;align-items:center;justify-content:space-between;gap:10px;margin:8px 2px 0;font-size:13.5px;color:var(--soluk)}
+.ara-s button{color:var(--nar);font-weight:700;font-size:13.5px}
+.ara-e{display:flex;flex-wrap:wrap;gap:6px;margin:8px 0 0}
+.etiket{display:inline;padding:0;color:var(--nar);font:inherit;font-weight:600}
+.ara-e .etiket{padding:5px 10px;border-radius:999px;background:var(--yuzey);border:1px solid var(--cizgi);font-size:13px}
+
+/* Anonim soru: link sayfası ve sahibinin listesi */
+.soru-s{position:fixed;inset:0;z-index:300;display:grid;place-items:center;padding:20px;overflow:auto;background:radial-gradient(90% 60% at 85% 10%,rgba(255,138,101,.28),transparent 60%),radial-gradient(80% 60% at 10% 95%,rgba(124,196,255,.18),transparent 60%),var(--kagit)}
+.soru-k{width:100%;max-width:440px;text-align:center}
+.soru-logo{font-family:var(--display);font-style:italic;font-size:44px;line-height:1;margin-bottom:22px}
+.soru-logo span{color:var(--nar)}
+.soru-k h1{font-family:var(--display);font-weight:400;font-size:30px;line-height:1.2;margin:0 0 10px}
+.soru-k h1 b{font-weight:600;color:var(--nar)}
+.soru-k textarea{width:100%;margin-top:18px;padding:14px;border-radius:16px;border:1px solid var(--cizgi);background:var(--yuzey);color:inherit;font:inherit;font-size:16px;resize:none}
+.soru-k textarea:focus{outline:0;border-color:var(--nar)}
+.soru-alt{display:flex;align-items:center;justify-content:space-between;margin-top:10px;font-size:13px;color:var(--soluk)}
+.soru-link{display:flex;align-items:center;gap:12px;padding:12px 14px;border-radius:16px;background:var(--yuzey2);margin-bottom:12px}
+.soru-link div{flex:1;min-width:0}
+.soru-link b{display:block;font-size:14.5px}
+.soru-link small{display:block;color:var(--soluk);font-size:12.5px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.soru-l{list-style:none;margin:0;padding:0;display:grid;gap:10px}
+.soru-l li{padding:14px;border-radius:16px;background:var(--yuzey);border:1px solid var(--cizgi)}
+.soru-l q{display:block;font-family:var(--display);font-size:17px;line-height:1.4}
+.soru-l small{display:block;color:var(--soluk);font-size:12.5px;margin:4px 0 10px}
+.soru-l li div{display:flex;align-items:center;gap:10px}
+
+/* Kredi paketleri */
+.kr-l{display:grid;gap:8px}
+.kr-p{display:flex;align-items:center;gap:12px;padding:14px;border-radius:16px;border:1px solid var(--cizgi);background:var(--yuzey);text-align:left;position:relative}
+.kr-p.on{border-color:var(--nar)}
+.kr-p span{flex:1}
+.kr-p b{display:block;font-size:15.5px}
+.kr-p small{display:block;color:var(--soluk);font-size:13px;margin-top:2px}
+.kr-p em{font-style:normal;font-weight:800;font-size:16px}
+.kr-on{position:absolute;top:-9px;right:14px;font-style:normal;font-size:11px;font-weight:800;padding:2px 8px;border-radius:999px;background:var(--nar);color:var(--on-nar)}
+.swb.super{color:#7CC4FF}
+
+/* Selfie doğrulama */
+.dg-adim{margin:12px 0 0;padding-left:20px;display:grid;gap:8px;font-size:14.5px;line-height:1.45}
+.dg-kam{position:relative;border-radius:20px;overflow:hidden;background:#000;aspect-ratio:3/4;max-height:58vh;margin:0 auto}
+.dg-kam video,.dg-kam img{width:100%;height:100%;object-fit:cover;display:block}
+.dg-kam video{transform:scaleX(-1)}
+.dg-cerceve{position:absolute;inset:12% 18% 22%;border:3px dashed rgba(255,255,255,.65);border-radius:50%}
+.dg-fotolar{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:10px 0}
+.dg-fotolar figure{margin:0}
+.dg-f{aspect-ratio:3/4;border-radius:12px;background:var(--yuzey2);display:grid;place-items:center;overflow:hidden;font-size:12.5px;color:var(--soluk);text-align:center;padding:6px}
+.dg-f img{width:100%;height:100%;object-fit:cover}
+.dg-fotolar figcaption{font-size:12px;color:var(--soluk);margin-top:4px;text-align:center}
+.dg-ust b{display:block}
+.dg-ust small{color:var(--soluk);font-size:12.5px}
+.dg-b{display:flex;flex-wrap:wrap;gap:8px}
+@media (prefers-reduced-motion:reduce){.buz{scroll-behavior:auto}}

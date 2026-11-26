@@ -31,6 +31,7 @@ function showMore(id){
   const mf=$("#mF");if(mf)mf.onclick=()=>{const on=isBoosted(p);closeSheet();KDB.setFeature(p.id,on?null:Date.now()+864e5).then(()=>toast(on?"Öne çıkarma kaldırıldı":"İtiraf 24 saat akışın en üstünde")).catch(e=>toast("Olmadı: "+(e.code||e.message)))};
   if(mine){
     if($("#mB"))$("#mB").onclick=()=>{if(isBoosted(p)){closeSheet();return}
+      if(REMOTE){oneCikarAkisi(p);return}
       if(!state.premium){premiumGate("İtirafını öne çıkar","Premium üyeler itiraflarını 24 saat boyunca akışın en üstüne taşıyabilir. Daha çok kişi okur, daha çok tepki ve mesaj gelir.",()=>showMore(id));return}
       p.boost=Date.now();closeSheet();state.tab="akis";render();scrollTo(0,0);toast("İtirafın 24 saat akışın en üstünde");track("one_cikar")};
     $("#mD").onclick=()=>openSheet(`<h2>İtiraf silinsin mi?</h2><p class="muted" style="margin:8px 0 16px">İtirafın, altındaki yorumlar ve tepkiler kalıcı olarak silinir. Bu işlem geri alınamaz.</p><div style="display:grid;gap:8px"><button class="btn wide" id="mDy" style="background:var(--nar)">Sil</button><button class="btn line wide" id="mDn">Vazgeç</button></div>`);

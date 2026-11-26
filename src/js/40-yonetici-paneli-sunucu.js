@@ -31,7 +31,7 @@ if(REMOTE){
   const open0=openChat;
   openChat=function(i){const c=state.chats[i];if(!c)return;open0(i);
     const seen=LS("kulis_seen",{});seen[c.id]=Date.now();LSset("kulis_seen",seen);
-    KDB.listenMsgs(c.id,list=>{c.msgs=list.map(m=>({id:m.id,me:m.uid===R.uid,t:m.t,ts:m.ts,mod:!!m.mod,kind:m.img?"img":m.aud?"voice":undefined,src:m.img||m.aud,dur:m.dur}));const s=LS("kulis_seen",{});s[c.id]=Date.now();LSset("kulis_seen",s);if(state.chats[openIdx]===c)drawChat()})};
+    KDB.listenMsgs(c.id,list=>{c.msgs=list.map(m=>({id:m.id,me:m.uid===R.uid,t:m.t,ts:m.ts,mod:!!m.mod,tp:m.tp||null,re:m.re||null,kind:m.img?"img":m.aud?"voice":undefined,src:m.img||m.aud,dur:m.dur}));const s=LS("kulis_seen",{});s[c.id]=Date.now();LSset("kulis_seen",s);if(state.chats[openIdx]===c)drawChat()})};
   const closeC0=closeChat;closeChat=function(){KDB.stopMsgs();closeC0()};
   // bildirimleri okundu say
   const notifs0=showNotifs;showNotifs=function(){const ids=state.notifs.filter(n=>!n.read).map(n=>n.id);notifs0();if(ids.length)KDB.markNotifsRead(ids).catch(()=>{})};

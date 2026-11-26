@@ -35,10 +35,10 @@ function drawChat(){
   t.onkeydown=e=>{if(e.key==="Enter"&&!e.shiftKey){e.preventDefault();$("#mGo").click()}};
   $("#mGo").onclick=()=>{const v=t.value.trim();if(!v)return;track("mesaj");const mc=modCheck(v,"mesaj");if(mc){$("#mWarn").innerHTML=`<p class="warn">${mc}</p>`;return}const bad=contactBlock(v);
     if(bad){$("#mWarn").innerHTML=`<p class="warn">Bu mesaj gönderilmedi: ${bad} paylaşılamaz. Sohbetler sitede kalır, böylece iki taraf da güvende olur.</p>`;return}
-    if(REMOTE){if(c.status==="wait"){toast("Karşı taraf isteğini kabul edince yazabilirsin");return}t.value="";$("#mGo").disabled=true;const wasMine=c.lastBy===R.uid;KDB.sendMsg(c.id,v).then(()=>{askPushOnce("mesaj");if(!R.loggedMsg){R.loggedMsg=1;KDB.logAccess&&KDB.logAccess("mesaj")}if(!wasMine)KDB.notify(c.u,"dm","sana yeni mesaj gönderdi",{chat:c.u})}).catch(e=>{
+    if(REMOTE){if(c.status==="wait"){toast("Karşı taraf isteğini kabul edince yazabilirsin");return}t.value="";$("#mGo").disabled=true;const wasMine=c.lastBy===R.uid,omRe=cevapAl();KDB.sendMsg(c.id,v,omRe).then(()=>{askPushOnce("mesaj");if(!R.loggedMsg){R.loggedMsg=1;KDB.logAccess&&KDB.logAccess("mesaj")}if(!wasMine)KDB.notify(c.u,"dm","sana yeni mesaj gönderdi",{chat:c.u})}).catch(e=>{
       // sunucu ücretsiz sınırı uyguladıysa premium ekranını göster
       if(e&&e.code==="permission-denied"&&!state.premium&&(c.srvN||0)>=FREE_LIMIT){c.msgs=c.msgs.filter(x=>x!==om);drawChat();const mi=$("#mIn");if(mi)mi.value=v;showPremium("sohbet");return}
-      toast(writeErr(e,"mesaj"))});const om={me:true,t:v};c.msgs.push(om);drawChat();setTimeout(()=>{const x=$("#mIn");x&&x.focus()},30);return}
+      toast(writeErr(e,"mesaj"))});const om={me:true,t:v,re:omRe};c.msgs.push(om);drawChat();setTimeout(()=>{const x=$("#mIn");x&&x.focus()},30);return}
     c.msgs.push({me:true,t:v});drawChat();
     const ci=c;setTimeout(()=>{ci.typing=true;if(state.chats[openIdx]===ci)drawChat()},700);
     setTimeout(()=>{ci.typing=false;ci.msgs.push({me:false,t:replyFor(ci)});if(state.chats[openIdx]===ci)drawChat();else{ci.unread=true;notify("dm",ci.u,"sana yeni mesaj gönderdi",{chat:ci.u});render()}

@@ -68,7 +68,7 @@ function openAdminRemote(){
   const online=all.filter(u=>now-u.seen<ONLINE_MS),activeToday=all.filter(u=>u.seen>=today),newToday=all.filter(u=>u.created>=today),newWeek=all.filter(u=>now-u.created<7*864e5);
   const reps=(R.reports||[]).map(r=>Object.assign({},r,{status:r.status||"bekliyor"})),openReps=reps.filter(r=>r.status==="bekliyor");
   const errs=R.errors||[];
-  const tabs=R.admin?[["uye","Kullanıcılar",all.length],["sikayet","Şikâyetler",openReps.length],["mod","Moderatörler",(R.mods||[]).length||null],["destek","Destek",(R.ekipList||[]).filter(x=>x.staffUnread).length||null],["huni","Huni",null],["duyuru","Bildirim gönder",null],["kelime","Kelimeler",null],["hata","Hatalar",errs.length]]:[["sikayet","Şikâyetler",openReps.length],["destek","Destek",(R.ekipList||[]).filter(x=>x.staffUnread).length||null]];
+  const tabs=R.admin?[["uye","Kullanıcılar",all.length],["sikayet","Şikâyetler",openReps.length],["mod","Moderatörler",(R.mods||[]).length||null],["destek","Destek",(R.ekipList||[]).filter(x=>x.staffUnread).length||null],["dogru","Doğrulama",(R.dgBek||[]).length||null],["huni","Huni",null],["duyuru","Bildirim gönder",null],["kelime","Kelimeler",null],["hata","Hatalar",errs.length]]:[["sikayet","Şikâyetler",openReps.length],["destek","Destek",(R.ekipList||[]).filter(x=>x.staffUnread).length||null],["dogru","Doğrulama",(R.dgBek||[]).length||null]];
   let body="";
   if(ADM.tab==="uye"){
     const q=lowTR(ADM.q.trim());
@@ -128,6 +128,8 @@ function openAdminRemote(){
     <div class="adm-add"><input class="city-search" id="modN" placeholder="Takma ad" maxlength="20" autocomplete="off"><button class="btn" id="modAdd">Moderatör yap</button></div>`;
   } else if(ADM.tab==="duyuru"){
     body=duyuruHTML(all);
+  } else if(ADM.tab==="dogru"){
+    body=dogrulamaHTML();
   } else if(ADM.tab==="huni"){
     body=huniHTML(all);
   } else if(ADM.tab==="hata"){
@@ -252,4 +254,31 @@ function duyuruBagla(){
     btn.disabled=true;try{const r=await KDB.duyuru(m,hedef);toast(hedef==="deneme"?"Sana gönderildi, telefonuna bak":`${r.gitti} kişiye gönderildi`);if(hedef==="herkes"){t.value="";R.duyG=null;openAdminRemote()}}
     catch(e){toast("Gönderilemedi: "+(e.code||e.message))}finally{btn.disabled=false}};
   $("#duyDene").onclick=e=>gonder("deneme",e.currentTarget);$("#duyHerkes").onclick=e=>gonder("herkes",e.currentTarget);
+}
+
+// ---- Selfie doğrulama: bekleyen başvurular, selfie ve perde arkasındaki profil fotoğrafı yan yana ----
+function dogrulamaHTML(){
+  if(!R.dgBek&&!R.dgYuk){R.dgYuk=true;KDB.dogrulamaBekleyen().then(l=>{R.dgBek=l;R.dgYuk=false;if($("#adm.open")&&ADM.tab==="dogru")openAdminRemote()}).catch(e=>{R.dgYuk=false;R.dgBek=[];toast("Başvurular okunamadı: "+(e.code||e.message))})}
+  setTimeout(dogrulamaBagla,0);
+  const l=R.dgBek||[];
+  if(!R.dgBek)return `<p class="hint">Yükleniyor…</p>`;
+  return `<p class="hint" style="margin:0 0 10px">Selfie'deki kişi profil fotoğrafıyla aynı mı ve istenen pozu veriyor mu? İkisi de uyuyorsa onayla; mavi rozet verilir, kişiye bildirim gider ve selfie silinir.</p>
+    ${l.length?l.map(d=>`<div class="adm-rep dg-k" data-dgk="${d.uid}"><div class="dg-ust"><b>${esc((U[d.uid]||{}).n||d.uid.slice(0,8))}</b><small>İstenen poz: ${esc(d.poz||"")} · ${agoOf(d.ts)}</small></div>
+      <div class="dg-fotolar"><figure><div class="dg-f" data-dgf="selfie">Yükle</div><figcaption>Selfie</figcaption></figure><figure><div class="dg-f" data-dgf="profil"></div><figcaption>Perde arkası profil fotoğrafı</figcaption></figure></div>
+      <div class="dg-b"><button class="btn line" onclick="dogrulamaGoster('${d.uid}',this)">Fotoğrafları göster</button><button class="btn" onclick="dogrulamaKararVer('${d.uid}',true,this)">Onayla</button><button class="btn line" onclick="dogrulamaKararVer('${d.uid}',false,this)">Reddet</button></div></div>`).join("")
+      :`<p class="empty">Bekleyen doğrulama başvurusu yok.</p>`}
+    <button class="dice" onclick="R.dgBek=null;openAdminRemote()" style="margin:10px auto 0;display:flex">Yenile</button>`;
+}
+function dogrulamaBagla(){}
+async function dogrulamaGoster(uid,b){
+  b.disabled=true;b.textContent="Yükleniyor…";
+  try{const r=await KDB.dogrulamaFoto(uid),k=document.querySelector(`[data-dgk="${uid}"]`);if(!k)return;
+    ["selfie","profil"].forEach(t=>{const f=k.querySelector(`[data-dgf="${t}"]`);f.innerHTML=r[t]?`<img src="${r[t]}" alt="${t==="selfie"?"Doğrulama selfie'si":"Profil fotoğrafı"}">`:`<span>${t==="selfie"?"Selfie okunamadı":"Gerçek fotoğraf yüklememiş"}</span>`});
+    b.remove()}
+  catch(e){b.disabled=false;b.textContent="Fotoğrafları göster";toast("Açılamadı: "+(e.code||e.message))}
+}
+async function dogrulamaKararVer(uid,onay,b){
+  b.disabled=true;
+  try{await KDB.dogrulamaKarar(uid,onay);R.dgBek=(R.dgBek||[]).filter(x=>x.uid!==uid);toast(onay?"Onaylandı, rozet verildi":"Reddedildi, kişiye bildirim gitti");openAdminRemote()}
+  catch(e){b.disabled=false;toast("Olmadı: "+(e.code||e.message))}
 }

@@ -72,8 +72,9 @@ function vEsles(){
     </div>`}
     <p class="hint" style="text-align:center;max-width:340px;margin:12px auto 0">Sağa kaydır: bana dokundu. Sola kaydır: geç. Sen ${tg==="Erkek"?"erkeklerin":"kadınların"} itiraflarını görürsün. Birbirinizi beğenirseniz eşleşirsiniz, sohbet açılır.</p>
     ${state.myPosts.length?"":`<button class="pnote" id="swNudge" style="max-width:none;margin:14px 0 0">${IC.spark}<span>Kendi itirafını yazanlar daha çok eşleşiyor. İnsanlar seni yazdıklarınla tanır.</span></button>`}`;
-  const L=$("#likers");if(L)L.onclick=e=>{if(REMOTE?!hasFeat("tam"):!state.premium){premiumGate("Seni kimler beğendi?","Seni beğenen kişileri görmek ve onların itirafını hemen önüne getirmek Premium ile açılır.",()=>vKesfet());return}
-    const a=e.target.closest("[data-lk]");if(a){sw.front=a.dataset.lk;vEsles()}};
+  const L=$("#likers");if(L)L.onclick=e=>{const a=e.target.closest("[data-lk]");
+    if(a&&(REMOTE?hasFeat("tam"):state.premium)){sw.front=a.dataset.lk;vEsles();return}
+    showBegenenler()};
   const P=$("#swPrem");if(P)P.onclick=()=>showPremium("esles");
   const SI=$("#swInv");if(SI)SI.onclick=()=>showInvite();
   const R=$("#swReset");if(R)R.onclick=()=>{sw.hist.filter(h=>!h.like).forEach(h=>sw.done.delete(h.id));sw.hist=sw.hist.filter(h=>h.like);vEsles()};

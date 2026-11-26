@@ -15,7 +15,8 @@
   "13-logo-ikonu.css",
   "14-acik-mod-ince-ayarlari.css",
   "15-gorunum-secici.css",
-  "16-misafir.css"
+  "16-misafir.css",
+  "17-yeni-ozellikler.css"
  ],
  "js": [
   "01-giris.js",
@@ -60,7 +61,17 @@
   "40-yonetici-paneli-sunucu.js",
   "41-misafir.js",
   "42-guven-ve-sohbet.js",
-  "43-ilk-adimlar.js"
+  "43-ilk-adimlar.js",
+  "44-begenenler.js",
+  "45-ziyaret.js",
+  "46-buz-kirici.js",
+  "47-mesaj-tepki.js",
+  "48-arama-etiket.js",
+  "49-seri.js",
+  "50-anonim-soru.js",
+  "51-kredi.js",
+  "52-selfie.js",
+  "53-profil-kisayol.js"
  ],
  "gec": {
   "admin": [

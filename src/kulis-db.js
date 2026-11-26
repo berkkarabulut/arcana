@@ -405,9 +405,9 @@ const KDB = {
     stamp(b, "msgAt");
     await b.commit();
   },
-  async sendMsg(cid, t) {
+  async sendMsg(cid, t, re) {
     const b = writeBatch(db);
-    b.set(doc(collection(db, "chats", cid, "messages")), { uid: KDB.uid, t, ts: serverTimestamp() });
+    b.set(doc(collection(db, "chats", cid, "messages")), { uid: KDB.uid, t, ts: serverTimestamp(), ...(re ? { re } : {}) });
     // sohbet sayacı: sunucu, ücretsiz üyelikte sohbet başına mesaj sınırını buna göre uygular
     b.update(doc(db, "chats", cid), { last: t.slice(0, 120), lastBy: KDB.uid, lastAt: serverTimestamp(), n: increment(1) });
     stamp(b, "msgAt");
@@ -515,6 +515,59 @@ const KDB = {
     const j = await r.json().catch(() => ({}));
     if (!r.ok) throw Object.assign(new Error(j.error || "sunucu"), { code: j.error || r.status });
     return j;
+  },
+
+  // ---------- Profil ziyaretleri ----------
+  ziyaret(to) { return setDoc(doc(db, "users", to, "ziyaret", KDB.uid), { ts: serverTimestamp() }); },
+  listenZiyaret(cb) {
+    stop("ziyaret");
+    unsubs.ziyaret = onSnapshot(query(collection(db, "users", KDB.uid, "ziyaret"), orderBy("ts", "desc"), limit(60)),
+      s => cb(s.docs.map(d => ({ uid: d.id, ts: d.data().ts && d.data().ts.toMillis ? d.data().ts.toMillis() : Date.now() }))), e => console.warn("ziyaret", e.code));
+  },
+  // ---------- Anonim sorular ----------
+  anonimSoru(n, t) { return callFn("anonimSoru", { n, t }).then(r => r.data); },
+  listenSorular(cb) {
+    stop("sorular");
+    unsubs.sorular = onSnapshot(query(collection(db, "users", KDB.uid, "sorular"), orderBy("ts", "desc"), limit(60)),
+      s => cb(s.docs.map(d => ({ id: d.id, t: d.data().t, cevap: !!d.data().cevap, pid: d.data().pid || null, ts: d.data().ts && d.data().ts.toMillis ? d.data().ts.toMillis() : Date.now() }))), e => console.warn("sorular", e.code));
+  },
+  soruCevaplandi(id, pid) { return updateDoc(doc(db, "users", KDB.uid, "sorular", id), { cevap: true, pid }); },
+  soruSil(id) { return deleteDoc(doc(db, "users", KDB.uid, "sorular", id)); },
+  // ---------- Günlük seri ----------
+  async seriOku() { try { const s = await getDoc(doc(db, "seriler", KDB.uid)); return s.exists() ? s.data() : null; } catch (e) { return null; } },
+  seriYaz(d) { return setDoc(doc(db, "seriler", KDB.uid), { gun: d.gun, n: d.n, en: d.en, ts: serverTimestamp() }); },
+  // ---------- Krediler (öne çıkarma, süper beğeni) ----------
+  listenKredi(cb) {
+    stop("kredi");
+    unsubs.kredi = onSnapshot(doc(db, "users", KDB.uid, "private", "kredi"), s => cb(s.exists() ? s.data() : {}), () => cb({}));
+  },
+  oneCikar(pid) { return callFn("oneCikar", { pid }).then(r => r.data); },
+  superBegen(to, pid) { return callFn("superBegen", { to, pid: pid || null }).then(r => r.data); },
+  async verifyProduct(productId, purchaseToken) {
+    const tok = await auth.currentUser.getIdToken();
+    const r = await fetch("https://europe-west1-kulis-1647d.cloudfunctions.net/verifyProduct", { method: "POST", headers: { "Content-Type": "application/json", Authorization: "Bearer " + tok }, body: JSON.stringify({ productId, purchaseToken }) });
+    const j = await r.json().catch(() => ({}));
+    if (!r.ok) throw Object.assign(new Error(j.error || "sunucu"), { code: j.error || r.status });
+    return j;
+  },
+  // ---------- Mesaj tepkisi ----------
+  mesajTepki(cid, mid, e) { return updateDoc(doc(db, "chats", cid, "messages", mid), { ["tp." + KDB.uid]: e || deleteField() }); },
+  // ---------- Selfie doğrulama ----------
+  async dogrulamaGonder(blob, poz) {
+    const { getStorage, ref: sRef, uploadBytes } = await fbSt(); const st = getStorage(app);
+    const path = `v/${KDB.uid}/${Date.now().toString(36)}${Math.random().toString(36).slice(2, 8)}.jpg`;
+    await uploadBytes(sRef(st, path), blob, { contentType: "image/jpeg" });
+    await setDoc(doc(db, "dogrulama", KDB.uid), { path, poz, ts: serverTimestamp(), durum: "bekliyor" });
+  },
+  async dogrulamaDurum() { try { const s = await getDoc(doc(db, "dogrulama", KDB.uid)); return s.exists() ? s.data() : null; } catch (e) { return null; } },
+  async dogrulamaBekleyen() {
+    const s = await getDocs(query(collection(db, "dogrulama"), where("durum", "==", "bekliyor"), limit(50)));
+    return s.docs.map(d => ({ uid: d.id, ...d.data(), ts: d.data().ts && d.data().ts.toMillis ? d.data().ts.toMillis() : 0 }));
+  },
+  dogrulamaFoto(uid) { return callFn("dogrulamaFoto", { uid }).then(r => r.data); },
+  async dogrulamaKarar(uid, onay) {
+    await updateDoc(doc(db, "dogrulama", uid), { durum: onay ? "onay" : "ret", by: KDB.uid, sts: serverTimestamp() });
+    if (onay) await updateDoc(doc(db, "users", uid), { dg: true });
   },
 
   // ---------- Eşleş ----------

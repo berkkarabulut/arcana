@@ -38,14 +38,14 @@ const uidOf = k => ("demo_" + k + "_000000000000000000").slice(0, 28);
 const yazar = k => { const u = K[k]; return { n: u.n, c: u.c, s: u.s, g: u.g, age: u.age, av: u.av || null }; };
 
 const ITIRAFLAR = [
-  { id: "p1", u: "gecekusu", cat: "ask", dk: 18, t: "Üç yıldır en yakın arkadaşımın sevgilisine aşığım. İkisinin düğününde nedime olacağım. Kimse bilmiyor, o bile.", r: { bende: 214, saril: 388, yok: 96 },
+  { id: "p1", u: "gecekusu", cat: "ask", dk: 18, t: "Üç yıldır en yakın arkadaşımın sevgilisine aşığım. İkisinin düğününde nedime olacağım. Kimse bilmiyor, o bile. #aşk", r: { bende: 214, saril: 388, yok: 96 },
     cm: [["eskiplak", "Bunu taşımak çok ağır. Düğünden sonra biraz uzaklaşmak sana iyi gelebilir.", 12], ["sessizlimon", "Ben de benzerini yaşadım. Zaman gerçekten geçiriyor, söz.", 9], ["dumanli", "Nedimeliği bırakmak bir seçenek mi? Kendini korumak bencillik değil.", 4]] },
   { id: "p3", u: "kumsaati", cat: "aile", dk: 60, t: "Annemin aradığını görünce telefonu sessize alıyorum. Sonra bütün gece suçluluk duyuyorum.", r: { bende: 640, saril: 410, yok: 12 },
     cm: [["yorgunkaptan", "Bu itirafı okuyan herkes kendini gördü.", 50]] },
   { id: "p4", u: "kirmiziceket", cat: "arkadas", dk: 120, t: "Arkadaş grubunda doğum günümü kimse hatırlamadı. Ben de söylemedim. Hâlâ söylemedim.", r: { bende: 188, saril: 502, yok: 73 },
     cm: [["gecekusu", "Söyle. Unutmaları senin değersiz olduğun anlamına gelmiyor.", 70], ["dumanli", "Geç kalmış doğum günü kutlaması da kutlamadır.", 65]] },
   { id: "p7", u: "sessizlimon", cat: "ask", dk: 360, t: "Sevgilim beni Terazi diye kararsız sanıyor. Aslında üç aydır ayrılmaya karar vermiş durumdayım, sadece söyleyemiyorum.", r: { bende: 233, saril: 301, yok: 140 }, cm: [] },
-  { id: "p8", u: "kedikahve", cat: "kimse", dk: 1500, t: "Annemlere iş gezisi dedim, tek başıma Mardin'e gittim. Hayatımın en iyi üç günüydü.", r: { bende: 310, saril: 84, yok: 52 },
+  { id: "p8", u: "kedikahve", cat: "kimse", dk: 1500, t: "Annemlere iş gezisi dedim, tek başıma Mardin'e gittim. Hayatımın en iyi üç günüydü. #tekbaşına #mardin", r: { bende: 310, saril: 84, yok: 52 },
     cm: [["mavimerdiven", "Yalan ama güzel yalan.", 1400]] },
   { id: "p2", u: "yorgunkaptan", cat: "is", dk: 42, t: "İşyerinde herkes beni çok çalışkan sanıyor. Aslında iki aydır her gün öğle arasında arabada uyuyorum.", r: { bende: 520, saril: 61, yok: 44 }, cm: [] },
   { id: "p6", u: "eskiplak", cat: "ask", dk: 300, t: "Eski sevgilimin Spotify çalma listesini hâlâ takip ediyorum. Yeni şarkı ekleyince kime eklediğini düşünüyorum.", r: { bende: 702, saril: 120, yok: 88 }, cm: [] },
@@ -83,6 +83,15 @@ const son = SOHBET[SOHBET.length - 1];
 await yaz("chats/" + CID, { members: [ben.uid, o].sort(), reqBy: o, status: "open", match: true, from: "Annemlere iş gezisi dedim, tek başıma Mardin'e gittim.", last: son[1], lastBy: o, lastAt: once(son[2]), n: SOHBET.length });
 let i = 0;
 for (const [kim, t, dk] of SOHBET) await yaz(`chats/${CID}/messages/m${String(i++).padStart(2, "0")}`, { uid: kim === "ben" ? ben.uid : o, t, ts: once(dk) });
+// yeni özellikler için ek veri: beğenenler, ziyaretçiler, anonim sorular, seri, yeni eşleşme (buz kırıcı), tepkili mesaj
+for (const [k, dk] of [["gecekusu", 30], ["sessizlimon", 90], ["kumsaati", 300]]) await yaz(`likes/${uidOf(k)}_${ben.uid}`, { from: uidOf(k), to: ben.uid, pid: null, ts: once(dk) });
+for (const [k, dk] of [["kirmiziceket", 12], ["gecekusu", 70], ["kumsaati", 200], ["sessizlimon", 900]]) await yaz(`users/${ben.uid}/ziyaret/${uidOf(k)}`, { ts: once(dk) });
+for (const [t, dk] of [["En son ne zaman ağladın?", 8], ["Beni fark ettin mi hiç? 👀", 40], ["Kova burcu olarak en büyük kusurun ne?", 180]]) await yaz(`users/${ben.uid}/sorular/s${dk}`, { t, ts: once(dk) });
+await yaz(`seriler/${ben.uid}`, { gun: new Date(Date.now() + 3 * 36e5 - 864e5).toISOString().slice(0, 10), n: 6, en: 9, ts: once(60 * 20) });
+{ const g = uidOf("gecekusu"), cid2 = [ben.uid, g].sort().join("_");
+  await yaz("chats/" + cid2, { members: [ben.uid, g].sort(), reqBy: g, status: "open", match: true, from: "Üç yıldır en yakın arkadaşımın sevgilisine aşığım. İkisinin düğününde nedime olacağım.", last: null, lastBy: g, lastAt: once(2), n: 0 }); }
+await yaz(`chats/${CID}/messages/m02`, { uid: o, t: "Gittim! Gün batımında bütün kalıntılar turuncuya dönüyor.", ts: once(24), tp: { [ben.uid]: "❤️" } });
+await yaz(`chats/${CID}/messages/m05`, { uid: ben.uid, t: "Sır bende kalır. Bir dahaki plansız bilet nereye?", ts: once(18), re: { id: "m04", t: "Annemler hâlâ iş gezisi sanıyor bu arada.", u: o } });
 console.log("Demo veri hazır");
 
 const browser = await chromium.launch();
@@ -97,7 +106,7 @@ try { await p.waitForFunction(() => typeof state !== "undefined" && state.me && 
 catch (e) { console.log(log.slice(-40).join("\n")); throw e; }
 await p.waitForTimeout(3000);
 console.log("TEŞHİS", JSON.stringify(await p.evaluate(() => ({ posts: R.posts && R.posts.length, mapped: R.mapped && R.mapped.length, all: allPosts().length, me: state.me.g, cat: state.cat, sort: state.sort, U: Object.keys(U).length, ornek: R.mapped && R.mapped[0] && { u: R.mapped[0].u, g: U[R.mapped[0].u] && U[R.mapped[0].u].g } }))));
-const temizle = () => p.evaluate(() => { document.querySelectorAll("#ckb,.toast,#toast").forEach(e => e.remove()); });
+const temizle = () => p.evaluate(() => { document.querySelectorAll("#ckb").forEach(e => e.remove()); const t = document.querySelector("#toast"); if (t) t.classList.remove("show"); });
 async function cek(ad, hazirla, bekle = 1500) {
   try {
     await p.evaluate(hazirla); await p.waitForTimeout(bekle); await temizle();
@@ -117,5 +126,26 @@ await cek("05-sohbet", () => { openChat(0); }, 2500); await kapat();
 await cek("06-profil", () => { state.tab = "ben"; render(); scrollTo(0, 0); }, 2000);
 await cek("07-premium", () => { showPremiumRemote("sunum"); }, 2000); await kapat();
 await cek("08-ayarlar", () => { showSettings(); }, 2000); await kapat();
+// yeni özellikler
+await cek("09-profil-kisayol", () => { state.tab = "ben"; render(); const r = document.querySelector("#pkRow"); if (r) r.scrollIntoView({ block: "center" }); }, 2500);
+await cek("10-begenenler", () => { showBegenenler(); }, 3000); await kapat();
+await cek("11-ziyaretciler", () => { showZiyaretciler(); }, 3000); await kapat();
+await cek("12-sorular", () => { showSorular(); }, 1500); await kapat();
+await cek("13-seri", () => { showSeri(); }, 1200); await kapat();
+await cek("14-buz-kirici", () => { state.tab = "mesajlar"; render(); const i = state.chats.findIndex(c => c.msgs.every(m => !m.me) && c.match); openChat(i >= 0 ? i : 0); }, 3000); await kapat();
+await cek("15-tepki-alinti", () => { openChat(state.chats.findIndex(c => c.u && U[c.u] && U[c.u].n === "kedikahve")); }, 3000);
+await cek("16-mesaj-menu", () => { const m = document.querySelector(".m[data-mid]"); if (m) m.dispatchEvent(new MouseEvent("contextmenu", { bubbles: true })); }, 1200); await kapat();
+await cek("17-arama-etiket", () => { state.tab = "akis"; ARA = "#mardin"; render(); scrollTo(0, 0); }, 1500);
+await p.evaluate(() => { ARA = ""; });
+await cek("18-kredi-magaza", () => { KREDI = {}; krediMagaza("oneCikar", "İtirafını öne çıkar", "İtirafın 24 saat boyunca akışın en üstünde durur."); }, 1200); await kapat();
+await cek("19-selfie", () => { selfieDogrula(); }, 2500); await kapat();
+// linke gelen kişi: üye olmayan, ayrı oturum
+{ const c2 = await browser.newContext({ viewport: { width: 412, height: 860 }, deviceScaleFactor: 3, isMobile: true, hasTouch: true, locale: "tr-TR", colorScheme: "dark", serviceWorkers: "block" });
+  await c2.addInitScript(() => { try { localStorage.setItem("kulis_cerez", "0") } catch (e) {} });
+  const p2 = await c2.newPage(); p2.on("pageerror", e => log.push("HATA(soru) " + e));
+  await p2.goto(SITE + "?emu=1&soru=kedikahve"); await p2.waitForTimeout(3000);
+  await p2.screenshot({ path: `${OUT}/20-soru-sayfasi.png` }); console.log("📸 20-soru-sayfasi");
+  await c2.close(); }
+
 await browser.close();
 console.log(log.filter(l => /HATA|error/i.test(l)).slice(0, 15).join("\n"));

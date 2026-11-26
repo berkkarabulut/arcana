@@ -76,7 +76,7 @@ function remoteStartListeners(){
   if(KDB.listenSettings)KDB.listenSettings(st=>{R.settings=st;R.settingsOk=true});
   KDB.listenNotifs(list=>{state.notifs=list.map(n=>({id:n.id,type:n.type,u:n.from,text:n.text,go:n.go,ts:n.ts,read:!!n.read}));render()});
   KDB.listenBlocks(ids=>{R.blocks=ids;ids.forEach(id=>{(R.mapped||[]).filter(p=>p.uid===id).forEach(p=>state.hidden.add("p:"+p.id));state.hidden.add("u:"+id)});rerender()});
-  KDB.listenLikesToMe(list=>{LIKED_ME.clear();list.forEach(l=>LIKED_ME.add(l.from));if(state.tab==="kesfet"&&sw.mode==="eslesme")vEsles()});
+  KDB.listenLikesToMe(list=>{LIKED_ME.clear();list.forEach(l=>LIKED_ME.add(l.from));BEGENENLER=list.map(l=>({from:l.from,pid:l.pid||null,ts:l.ts&&l.ts.toMillis?l.ts.toMillis():(+l.ts||0)}));if(state.tab==="kesfet"&&sw.mode==="eslesme")vEsles()});
   KDB.listenChats(list=>{
     const me=R.uid,seen=LS("kulis_seen",{});const chats=[],reqs=[];
     list.sort((a,b)=>(b.lastAt||0)-(a.lastAt||0)).forEach(c=>{
