@@ -93,4 +93,4 @@ function showSorular(){
 {const reaSoru=remoteEnterApp;remoteEnterApp=function(a,b){const r=reaSoru(a,b);
   if(window.KDB&&KDB.listenSorular)KDB.listenSorular(l=>{SORULAR=l;const t=$("#soruTile");if(t)t.outerHTML=soruTileHTML()});
   return r}}
-function soruTileHTML(){const n=SORULAR.filter(s=>!s.cevap).length;return `<button class="pk${n?" yeni":""}" id="soruTile" data-pk="soru"><b>${n?n:"?"}</b><span>anonim soru</span></button>`}
+function soruTileHTML(){const n=SORULAR.filter(s=>!s.cevap).length;return pkHTML("soru",n,"anonim soru",!!n).replace("<button",'<button id="soruTile"')}

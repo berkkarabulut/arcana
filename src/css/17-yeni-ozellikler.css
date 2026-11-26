@@ -11,13 +11,19 @@
 .bg-m q{display:block;font-family:var(--display);font-size:14.5px;line-height:1.35;margin-top:4px;color:var(--kagit);opacity:.9;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .btn.sm{height:36px;padding:0 14px;font-size:14px}
 
-/* Profilim kısayolları */
-.pk-row{display:grid;grid-template-columns:repeat(auto-fit,minmax(0,1fr));gap:8px;margin:4px 0 14px}
-.pk{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;padding:10px 4px;border-radius:14px;background:var(--yuzey);border:1px solid var(--cizgi);min-height:66px;position:relative}
-.pk b{font-size:19px;font-weight:800;line-height:1.1}
-.pk span{font-size:11.5px;color:var(--soluk);text-align:center;line-height:1.2}
-.pk.yeni::after{content:"";position:absolute;top:8px;right:8px;width:8px;height:8px;border-radius:50%;background:var(--nar)}
-.pk:hover{background:var(--yuzey2)}
+/* Profilim kısayolları: istatistik kartının altında, aynı dilde tek kart */
+#pkRow{display:grid;grid-auto-flow:column;grid-auto-columns:minmax(0,1fr);border:1px solid var(--cizgi);border-radius:16px;background:var(--yuzey);margin:-4px 0 16px;overflow:hidden}
+.ks{display:flex;flex-direction:column;align-items:center;gap:5px;padding:14px 4px 12px;position:relative;color:var(--kagit);background:none;border:0;min-width:0;--pkc:var(--acc,var(--nar))}
+.ks+.ks{border-left:1px solid var(--cizgi)}
+.ks-seri{--pkc:#ff9a3c}.ks-begenen{--pkc:var(--nar)}
+.ks-i{flex:0 0 auto;display:grid;place-items:center;width:34px;height:34px;border-radius:11px;color:var(--pkc);background:color-mix(in srgb,var(--pkc) 15%,transparent);position:relative}
+.ks-i svg{width:19px;height:19px}
+.ks b{font-size:17px;font-weight:800;line-height:1;font-variant-numeric:tabular-nums;margin-top:2px}
+.ks span{font-size:11.5px;color:var(--soluk);text-align:center;line-height:1.2;padding:0 2px}
+.ks.yeni .ks-i::after{content:"";position:absolute;top:-3px;right:-3px;width:10px;height:10px;border-radius:50%;background:var(--nar);box-shadow:0 0 0 2px var(--yuzey)}
+.ks:hover{background:var(--yuzey2)}
+.ks:focus-visible{outline:2px solid var(--pkc);outline-offset:-2px;border-radius:12px}
+.ks:active .ks-i{transform:scale(.94)}
 
 /* Günlük seri */
 .seri-b{display:flex;align-items:center;gap:14px;padding:16px;border-radius:16px;background:var(--yuzey2)}

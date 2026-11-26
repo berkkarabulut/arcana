@@ -17,7 +17,14 @@ function seriIsaretle(){
   else if(n>1)setTimeout(()=>toast(`🔥 Serin ${n} gün`),500);
   const t=$("#seriTile");if(t)t.outerHTML=seriTileHTML();
 }
-function seriTileHTML(){const n=seriSimdi();return `<button class="pk" id="seriTile" data-pk="seri"><b>🔥 ${n}</b><span>günlük seri</span></button>`}
+/* Profilim kısayol kutucuğu: simge, sayı, etiket. Dört kutucuk tek kartta yan yana durur. */
+const PK_IC={
+  seri:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21c-3.9 0-7-2.8-7-6.6 0-2.6 1.4-4.6 3-6.2.3 1.6 1.1 2.7 2.3 3.2C10 7.6 11.6 5 14.5 3c-.3 2.6.6 4.4 2 6.1 1.4 1.6 2.5 3.2 2.5 5.4C19 18.3 15.9 21 12 21z"/><path d="M12 21c-1.7 0-3-1.2-3-2.9 0-1.8 1.4-2.7 2.3-4.1.9 1.4 3.7 2.4 3.7 4.2 0 1.6-1.3 2.8-3 2.8z"/></svg>',
+  soru:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M20 12a8 8 0 0 1-11.6 7.1L4 20l1-4.1A8 8 0 1 1 20 12z"/><path d="M10 9.6a2.1 2.1 0 1 1 3 1.9c-.6.3-1 .8-1 1.5"/><path d="M12 15.6h.01"/></svg>',
+  ziyaret:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M2.5 12S6 5.5 12 5.5 21.5 12 21.5 12 18 18.5 12 18.5 2.5 12 2.5 12z"/><circle cx="12" cy="12" r="3"/></svg>',
+  begenen:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20s-7-4.4-7-10a4 4 0 0 1 7-2.6A4 4 0 0 1 19 10c0 5.6-7 10-7 10z"/></svg>'};
+function pkHTML(k,n,etiket,yeni){return `<button class="ks ks-${k}${yeni?" yeni":""}" data-pk="${k}" aria-label="${esc(etiket)}: ${n}"><i class="ks-i" aria-hidden="true">${PK_IC[k]}</i><b>${n}</b><span>${etiket}</span></button>`}
+function seriTileHTML(){const n=seriSimdi();return pkHTML("seri",n,"günlük seri",false).replace("<button",'<button id="seriTile"')}
 function showSeri(){
   const n=seriSimdi(),en=SERI&&SERI.en||0,bugun=SERI&&SERI.gun===trGun();
   openSheet(`<div class="sheet-head"><h2>Günlük seri</h2></div>
