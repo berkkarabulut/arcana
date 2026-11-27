@@ -48,3 +48,15 @@ jobs:
               --data-urlencode "aggregation.alignmentPeriod=86400s" --data-urlencode "aggregation.perSeriesAligner=ALIGN_SUM" \
               | python3 -c 'import json,sys;d=json.load(sys.stdin);[print(s.get("metric",{}).get("labels"),s.get("resource",{}).get("labels",{}),[(p["interval"]["endTime"][5:10],p["value"]["int64Value"]) for p in s.get("points",[])]) for s in d.get("timeSeries",[])] or print(d if "error" in d else "veri yok")'
           done
+  dene:
+    needs: appcheck
+    if: inputs.islem != 'gevset'
+    runs-on: ubuntu-latest
+    defaults: { run: { working-directory: tests/site } }
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: 22 }
+      - run: npm install --no-audit --no-fund && npx playwright install --with-deps chromium
+      - name: Canlı sitede veri geliyor mu
+        run: node appcheck-canli.mjs
