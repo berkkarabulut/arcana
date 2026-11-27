@@ -48,7 +48,8 @@ document.addEventListener("pointerdown",e=>{if(e.target.closest&&e.target.closes
 {const vv=window.visualViewport;
   if(vv){const ayarla=()=>{const ch=$("#chat");if(!ch)return;
       if(!ch.classList.contains("open")){ch.style.height="";ch.style.transform="";return}
-      ch.style.height=vv.height+"px";ch.style.transform=vv.offsetTop?`translateY(${vv.offsetTop}px)`:"";
+      ch.style.height=vv.height+"px";if(vv.scale<=1.01&&vv.offsetLeft)scrollTo(0,scrollY);// yana kaymışsa geri al
+      ch.style.transform=(vv.offsetTop||vv.offsetLeft)?`translate(${vv.offsetLeft}px,${vv.offsetTop}px)`:"";
       const m=$("#msgs");if(m&&document.activeElement&&document.activeElement.id==="mIn"&&m.scrollHeight-m.scrollTop-m.clientHeight<200)m.scrollTop=m.scrollHeight};
     vv.addEventListener("resize",ayarla);vv.addEventListener("scroll",ayarla);
     {const oc=openChat,cc=closeChat;openChat=function(){const k=$("#chatIn");if(k)k.dataset.cid="";const r=oc.apply(this,arguments);document.documentElement.classList.add("sohbet-acik");ayarla();return r};

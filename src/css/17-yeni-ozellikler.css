@@ -297,3 +297,28 @@ html.sohbet-acik,html.sohbet-acik body{overflow:hidden;overscroll-behavior:none}
 #admYenile.donuyor svg{animation:admDon .8s linear infinite}
 @keyframes admDon{to{transform:rotate(-360deg)}}
 @media (prefers-reduced-motion:reduce){#admYenile svg,#admYenile:hover svg{transition:none;transform:none}#admYenile.donuyor svg{animation:none}}
+
+/* ---- Kenar süsü (bilgisayarda sitenin iki yanı) ---- */
+#kenarSus{position:fixed;inset:0;z-index:0;pointer-events:none;
+  -webkit-mask-image:linear-gradient(90deg,#000 0,#000 calc(50% - 320px),transparent calc(50% - 250px),transparent calc(50% + 250px),#000 calc(50% + 320px));
+  mask-image:linear-gradient(90deg,#000 0,#000 calc(50% - 320px),transparent calc(50% - 250px),transparent calc(50% + 250px),#000 calc(50% + 320px))}
+#kenarSus svg{display:block}
+#kenarSus~.shell,body>.shell{position:relative;z-index:1}
+@media (max-width:899px){#kenarSus{display:none}}
+#chat.dz-var .msgs{background-image:var(--sohbet-dz);background-size:cover;background-position:center;background-repeat:no-repeat}
+@media (prefers-reduced-motion:no-preference){#kenarSus{animation:ksGel .6s ease-out}}
+@keyframes ksGel{from{opacity:0}to{opacity:1}}
+.kenar-pick{margin:14px 0 4px}
+.kenar-pick .kp-b{font-weight:600;font-size:14px;margin:0 2px 8px}
+.kenar-pick .kp-b small{display:block;font-weight:400;font-size:12px;opacity:.65;margin-top:2px}
+.kenar-pick .kp-l{display:grid;grid-template-columns:repeat(auto-fill,minmax(78px,1fr));gap:8px}
+.kenar-pick button{display:flex;flex-direction:column;align-items:stretch;gap:5px;padding:5px;border-radius:12px;border:1.5px solid rgba(var(--kagit-rgb,238,243,255),.12);background:transparent;color:inherit;font:inherit;cursor:pointer}
+.kenar-pick button[aria-pressed="true"]{border-color:#FF8A65;box-shadow:0 0 0 3px rgba(255,138,101,.18)}
+.kenar-pick .kp-o{display:block;height:64px;border-radius:8px;overflow:hidden;background:var(--murekkep)}
+.kenar-pick .kp-o svg{width:100%;height:100%}
+.kenar-pick button[data-kenar="yok"] .kp-o{background:repeating-linear-gradient(135deg,transparent 0 8px,rgba(127,127,127,.12) 8px 9px),var(--murekkep)}
+.kenar-pick .kp-a{font-size:11.5px;text-align:center;line-height:1.2;opacity:.85;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+
+/* iPhone 16px altındaki yazı kutusuna dokununca ekranı yakınlaştırıp sayfayı yana kaydırıyor: dokunmatikte tüm kutular 16px */
+@media (pointer:coarse){input:not([type=checkbox]):not([type=radio]):not([type=range]),textarea,select{font-size:16px!important}}
+html.sohbet-acik,html.sohbet-acik body{overflow-x:hidden}
