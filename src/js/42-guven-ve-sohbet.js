@@ -71,8 +71,8 @@ function sohbetUyari(){
     sohbetDurum();
     // yazıyor: yazmaya başlayınca işaret konur, 3 saniye durunca ya da mesaj gidince hemen kalkar
     const t=$("#mIn");
+    if(t&&c.status==="open"&&SD.yaziyorum&&!t.value.trim())yaziyorBitti();
     if(t&&c.status==="open"&&t._yzBagli!==c.id){t._yzBagli=c.id;
-      if(SD.yaziyorum&&!t.value.trim())yaziyorBitti();
       t.addEventListener("input",()=>{if((R.settings||{}).yaziyor===false)return;
         if(!t.value.trim()){yaziyorBitti();return}
         if(SD.yaziyorum!==c.id){SD.yaziyorum=c.id;KDB.typingRt(c.id,true)}
