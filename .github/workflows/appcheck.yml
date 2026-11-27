@@ -1,0 +1,50 @@
+name: App Check
+# durum: zorunluluk ayarını ve son 48 saatin doğrulama sayılarını gösterir.
+# zorla: Firestore, Realtime Database ve Storage için App Check'i zorunlu yapar.
+# gevset: zorunluluğu kaldırır (sorun çıkarsa geri dönüş).
+on:
+  workflow_dispatch:
+    inputs:
+      islem:
+        description: "durum / zorla / gevset"
+        required: true
+        default: durum
+        type: choice
+        options: [durum, zorla, gevset]
+permissions: { contents: read, id-token: write }
+jobs:
+  appcheck:
+    runs-on: ubuntu-latest
+    env:
+      P: kulis-1647d
+    steps:
+      - uses: google-github-actions/auth@v2
+        with:
+          workload_identity_provider: projects/165708007413/locations/global/workloadIdentityPools/github/providers/github
+          service_account: github-deploy@kulis-1647d.iam.gserviceaccount.com
+      - uses: google-github-actions/setup-gcloud@v2
+      - name: Ayar ve metrikler
+        run: |
+          T=$(gcloud auth print-access-token)
+          H=(-H "Authorization: Bearer $T" -H "X-Goog-User-Project: $P" -H "Content-Type: application/json")
+          SERV="firestore.googleapis.com firebasedatabase.googleapis.com firebasestorage.googleapis.com"
+          if [ "${{ inputs.islem }}" != "durum" ]; then
+            MOD=$([ "${{ inputs.islem }}" = "zorla" ] && echo ENFORCED || echo UNENFORCED)
+            for s in $SERV; do
+              echo "== $s -> $MOD"
+              curl -s -X PATCH "${H[@]}" "https://firebaseappcheck.googleapis.com/v1/projects/$P/services/$s?updateMask=enforcementMode" -d "{\"enforcementMode\":\"$MOD\"}"; echo
+            done
+          fi
+          echo "== Mevcut ayarlar"
+          curl -s "${H[@]}" "https://firebaseappcheck.googleapis.com/v1/projects/$P/services"; echo
+          echo "== App Check metrik türleri"
+          curl -s -G "${H[@]}" "https://monitoring.googleapis.com/v3/projects/$P/metricDescriptors" --data-urlencode 'filter=metric.type = starts_with("firebaseappcheck.googleapis.com")' | grep -o '"type": "[^"]*"' | sort -u
+          BAS=$(date -u -d '-48 hours' +%Y-%m-%dT%H:%M:%SZ); SON=$(date -u +%Y-%m-%dT%H:%M:%SZ)
+          for m in $(curl -s -G "${H[@]}" "https://monitoring.googleapis.com/v3/projects/$P/metricDescriptors" --data-urlencode 'filter=metric.type = starts_with("firebaseappcheck.googleapis.com")' | grep -o '"type": "firebaseappcheck[^"]*"' | cut -d'"' -f4 | sort -u); do
+            echo "== $m (son 48 saat, etikete göre toplam)"
+            curl -s -G "${H[@]}" "https://monitoring.googleapis.com/v3/projects/$P/timeSeries" \
+              --data-urlencode "filter=metric.type=\"$m\"" \
+              --data-urlencode "interval.startTime=$BAS" --data-urlencode "interval.endTime=$SON" \
+              --data-urlencode "aggregation.alignmentPeriod=172800s" --data-urlencode "aggregation.perSeriesAligner=ALIGN_SUM" \
+              | python3 -c 'import json,sys;d=json.load(sys.stdin);[print(s.get("metric",{}).get("labels"),s.get("resource",{}).get("labels",{}).get("service",""),[p["value"] for p in s.get("points",[])]) for s in d.get("timeSeries",[])] or print(d if "error" in d else "veri yok")'
+          done
