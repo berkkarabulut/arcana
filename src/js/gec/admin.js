@@ -153,10 +153,15 @@ function openAdminRemote(){
       <h3 style="margin:0 0 2px">${esc(admName(uid))}</h3><p class="hint" style="margin:0 0 10px">Kullanıcı seni "Kulis Ekibi · ${R.admin?"Yönetici":"Moderatör"}" olarak görür.</p>
       <div class="ek-box" id="admEkBox">${ekipMsgsHTML(ADM.dmMsgs||[],true,uid)}</div>
       <div class="box ek-in"><textarea id="admEkIn" rows="2" maxlength="1000" placeholder="Kulis Ekibi olarak yaz" aria-label="Mesaj">${esc(ADM.dmDraft||"")}</textarea><button class="go" id="admEkGo">Gönder</button></div></div>`}
+  const admY=el.dataset.tab===ADM.tab&&el.classList.contains("open")?el.scrollTop:0;el.dataset.tab=ADM.tab;
   el.innerHTML=`<div class="adm-in"><div class="adm-top"><h2>Yönetici paneli</h2><button class="icon-btn" id="admX" aria-label="Kapat">${IC.close}</button></div>
+    ${R.admin?`<div class="ac-adm"><span><b>Açılış dönemi: herkese ücretsiz Premium</b><small>${R.acilis?"Açık: herkes her şeyi ücretsiz kullanıyor":"Kapalı: ücretsiz sınırlar ve Premium satışı geçerli"}</small></span><button class="btn ${R.acilis?"line":""} sm" id="acAnahtar">${R.acilis?"Kapat":"Aç"}</button></div>`:""}
     <div class="adm-tabs" role="tablist">${tabs.map(([k,n,c])=>`<button role="tab" data-admt="${k}" aria-selected="${ADM.tab===k}">${n}${c?` <span>${c}</span>`:""}</button>`).join("")}</div>${body}</div>`;
-  el.classList.add("open");document.body.style.overflow="hidden";
+  el.classList.add("open");document.body.style.overflow="hidden";if(admY)el.scrollTop=admY;
   $("#admX").onclick=closeAdmin;
+  setTimeout(()=>{const a=$("#acAnahtar");if(a&&!a.dataset.b){a.dataset.b=1;a.onclick=async()=>{const yeni=!R.acilis;
+    if(!confirm(yeni?"Açılış dönemi açılsın mı?\n\nHerkes Kulis Tam gibi kullanır: sınırsız mesaj, arama, Eşleş. Premium satış ekranları gizlenir.":"Açılış dönemi kapansın mı?\n\nÜcretsiz sınırlar geri gelir, Premium satışı yeniden görünür."))return;
+    a.disabled=true;try{await KDB.setAcilis(yeni);toast(yeni?"Açılış dönemi açık":"Açılış dönemi kapandı")}catch(e){toast("Değiştirilemedi: "+(e.code||e.message))}finally{a.disabled=false}}}},0);
   const openDm=uid=>{ADM.dm=uid;ADM.dmMsgs=[];ADM.dmDraft="";ADM.dmFocus=true;el.scrollTop=0;KDB.listenEkipMsgs(uid,l=>{if(ADM.dm!==uid)return;ADM.dmMsgs=l;const box=$("#admEkBox");if(box){box.innerHTML=ekipMsgsHTML(l,true,uid);box.scrollTop=box.scrollHeight}
     const th=(R.ekipList||[]).find(x=>x.id===uid);if(th&&th.staffUnread)KDB.ekipRead(uid,true)});openAdminRemote()};
   el.querySelectorAll("[data-admdm]").forEach(b=>b.onclick=()=>openDm(b.dataset.admdm));
@@ -244,11 +249,7 @@ const ilkA=[["Üye oldu",yeni.length,"Bu dönemde açılan hesap"],["İlk tepkis
 function duyuruHTML(all){
   if(!R.duyG&&!R.duyY){R.duyY=true;KDB.duyuruGecmis().then(l=>{R.duyG=l;R.duyY=false;if($("#adm.open")&&ADM.tab==="duyuru")duyuruGecmisCiz()}).catch(()=>{R.duyG=[];R.duyY=false})}
   setTimeout(duyuruBagla,0);
-  setTimeout(()=>{const a=$("#acAnahtar");if(a&&!a.dataset.b){a.dataset.b=1;a.onclick=async()=>{const yeni=!R.acilis;
-    if(!confirm(yeni?"Açılış dönemi açılsın mı?\n\nHerkes Kulis Tam gibi kullanır: sınırsız mesaj, arama, Eşleş. Premium satış ekranları gizlenir.":"Açılış dönemi kapansın mı?\n\nÜcretsiz sınırlar geri gelir, Premium satışı yeniden görünür."))return;
-    a.disabled=true;try{await KDB.setAcilis(yeni);toast(yeni?"Açılış dönemi açık":"Açılış dönemi kapandı")}catch(e){toast("Değiştirilemedi: "+(e.code||e.message))}finally{a.disabled=false}}}},0);
-  return `<div class="ac-adm"><span><b>Açılış dönemi</b><small>${R.acilis?"Açık: herkes her şeyi ücretsiz kullanıyor":"Kapalı: ücretsiz sınırlar ve Premium satışı geçerli"}</small></span><button class="btn ${R.acilis?"line":""} sm" id="acAnahtar">${R.acilis?"Kapat":"Aç"}</button></div>
-  <p class="hint" style="margin:0 0 10px">Yazdığın metin üyelerin bildirimlerine düşer ve bildirime izin verenlerin telefonuna gider. "Kulis duyurularını" kapatanlara ve sessiz saatindeki kişilere telefon bildirimi gitmez. Kısa ve net yaz.</p>
+  return `<p class="hint" style="margin:0 0 10px">Yazdığın metin üyelerin bildirimlerine düşer ve bildirime izin verenlerin telefonuna gider. "Kulis duyurularını" kapatanlara ve sessiz saatindeki kişilere telefon bildirimi gitmez. Kısa ve net yaz.</p>
     <textarea id="duyMetin" class="city-search" rows="3" maxlength="180" placeholder="Örnek: Bu akşamın sorusu geldi: En son ne zaman ağladın? Gel cevapla 👀" style="width:100%;resize:vertical;padding:12px;font:inherit"></textarea>
     <div style="display:flex;justify-content:space-between;font-size:12px;opacity:.65;margin:4px 2px 12px"><span>Başlık: "Kulis"</span><span id="duySay">0/180</span></div>
     <div class="seg duy-kime" role="tablist" aria-label="Kime gidecek"><button role="tab" data-kime="herkes" class="${ADM.kime!=="kisi"?"on":""}">Herkese</button><button role="tab" data-kime="kisi" class="${ADM.kime==="kisi"?"on":""}">Bir kişiye</button></div>
