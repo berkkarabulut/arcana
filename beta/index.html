@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="robots" content="noindex">
-<meta name="kulis-ver" content="d0f256e505">
+<meta name="kulis-ver" content="6ff2fdcaf0">
 <meta name="viewport" content="width=device-width, initial-scale=1, interactive-widget=resizes-content">
 <title>Kulis: İtiraf & Sohbet</title>
 <meta name="description" content="Aramızda. Takma adınla itiraf et, burcunla tanış, seni anlayanla sohbete başla.">
@@ -64,11 +64,11 @@
 <div class="toast" id="toast" role="status"></div>
 <div class="onb" id="onb" hidden><div class="onb-in" id="onbIn"></div></div>
 
-<script src="assets/app.d0f256e505.js"></script>
+<script src="assets/app.6ff2fdcaf0.js"></script>
 <script type="module">
 // Sunucu bağlantısı (Firebase, ~180 KB): oturumu olan hemen yükler; yeni gelen misafir için sayfa açıldıktan sonra
 // (ilk dokunuşta ya da 5 saniye sonra) yüklenir, böylece ilk açılış hızlanır.
-if(REMOTE){const y=window.__kdbYukle=()=>{if(!window.__kdbYuklendi){window.__kdbYuklendi=1;import("./assets/kulis-db.d0f256e505.js")}};
+if(REMOTE){const y=window.__kdbYukle=()=>{if(!window.__kdbYuklendi){window.__kdbYuklendi=1;import("./assets/kulis-db.6ff2fdcaf0.js")}};
   let o=false;try{o=Object.keys(localStorage).some(k=>k.startsWith("firebase:authUser"))||/[?&](oobCode|apiKey|emu)\b/.test(location.search)}catch(e){o=true}
   const bekle=()=>{["pointerdown","keydown"].forEach(t=>addEventListener(t,y,{once:true,capture:true}));setTimeout(y,5000)};
   if(o)y();else if(indexedDB.databases)indexedDB.databases().then(l=>l.some(d=>d.name==="firebaseLocalStorageDb")?y():bekle()).catch(y);else y()}
