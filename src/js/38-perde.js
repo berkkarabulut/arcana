@@ -2,7 +2,7 @@
 // Herkes hazır avatarını görür; gerçek fotoğraf ve kapak "perde arkasında" durur.
 // İki kişi sohbette perdeyi birlikte açınca birbirinin gerçek görsellerini görür.
 function perdeCard(){const r=state.me.real||{},has=r.av||r.banner;
-  return `<button class="perde-card" id="perdeCard"><span class="pc-ic">🎭</span><span class="pc-tx"><b>Perde arkası</b><small>${has?"Gerçek fotoğrafını sadece perdeyi birlikte açtığın kişiler görür.":"Gerçek fotoğrafını ve kapağını ekle. Sadece perdeyi birlikte açtığın kişiler görür."}</small></span>${r.av?`<img src="${r.av}" alt="">`:`<span class="pc-add">Ekle</span>`}</button>`}
+  return `<button class="perde-card" id="perdeCard"><span class="pc-ic" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3h18"/><path d="M5 3v15c2.5 0 4-2 4-5V3"/><path d="M19 3v15c-2.5 0-4-2-4-5V3"/><path d="M9.5 21h5"/></svg></span><span class="pc-tx"><b>Perde arkası</b><small>${has?"Gerçek fotoğrafını sadece perdeyi birlikte açtığın kişiler görür.":"Gerçek fotoğrafını ve kapağını ekle. Sadece perdeyi birlikte açtığın kişiler görür."}</small></span>${r.av?`<img src="${r.av}" alt="">`:`<span class="pc-add">Ekle</span>`}</button>`}
 function loadMyReal(){if(!KDB.getReal)return;KDB.getReal().then(g=>{R.realPaths=g||{};if(g&&(g.av||g.banner))return KDB.perdeFoto(R.uid).then(d=>{state.me.real={av:d.av||null,banner:d.banner||null};if(state.tab==="ben")render()})}).catch(()=>{})}
 async function saveMyReal(av,bn){
   const old=state.me.real||{},g=R.realPaths||{};let pa=g.av||null,pbn=g.banner||null;
@@ -33,10 +33,11 @@ function perdeAction(c){
     $("#pdN").onclick=closeSheet;$("#pdX").onclick=()=>{closeSheet();KDB.perdeKapat(c.u).then(()=>toast("Perde kapandı")).catch(e=>toast(writeErr(e,"perde")))};return}
 }
 function perdeReqHTML(c){if(!REMOTE||c.status!=="open"||perdeState(c.u)!=="onda")return "";const u=U[c.u]||{n:"Biri"};
-  return `<div class="perde-req"><div class="pr-t">🎭 Perde isteği</div><div><b>${esc(u.n)}</b> seninle perdeyi açmak istiyor</div><small>Kabul edersen birbirinizin gerçek fotoğrafını görürsünüz.</small><div class="pr-b"><button class="btn line sm" id="prNo">Şimdi değil</button><button class="btn gold sm" id="prOk">Kabul et</button></div></div>`}
+  return `<div class="perde-req"><div class="pr-t">${PERDE_IC} Perde isteği</div><div><b>${esc(u.n)}</b> seninle perdeyi açmak istiyor</div><small>Kabul edersen birbirinizin gerçek fotoğrafını görürsünüz.</small><div class="pr-b"><button class="btn line sm" id="prNo">Şimdi değil</button><button class="btn gold sm" id="prOk">Kabul et</button></div></div>`}
 function perdeBtnHTML(c){if(!REMOTE||c.status!=="open")return "";const st=perdeState(c.u);
   const t={yok:"Perdeyi aç",bende:"İstek gitti",onda:"Perde isteği",acik:"Perde açık"}[st];
-  return `<button class="pd-pill ${st}" id="pdB" aria-label="${t}">🎭<span>${t}</span></button>`}
+  return `<button class="pd-pill ${st}" id="pdB" aria-label="${t}">${PERDE_IC}<span>${t}</span></button>`}
+const PERDE_IC='<svg class="pd-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 3h18"/><path d="M5 3v15c2.5 0 4-2 4-5V3"/><path d="M19 3v15c-2.5 0-4-2-4-5V3"/><path d="M9.5 21h5"/></svg>';
 // Perde animasyonu: kadife perde yavaşça iki yana toplanır, spot ışığında karşı tarafın gerçek fotoğrafı belirir
 function playPerde(uid){
   const u=U[uid]||{n:"",c:"#C79AF2"};$("#perdeOv")&&$("#perdeOv").remove();

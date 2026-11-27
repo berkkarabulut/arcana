@@ -17,6 +17,8 @@ const PB='<svg class="pb" viewBox="0 0 24 24" aria-label="Premium üye" role="im
 const pb=k=>isPrem(k)?PB:"";
 const dgb=k=>k!=="me"&&U[k]&&U[k].dg?`<span class="dg" title="Doğrulanmış profil" aria-label="Doğrulanmış profil">✓</span>`:"";
 function who(k,sub){const u=userOf(k);return `<button class="who" data-prof="${k}">${av(k)}<span><b>${esc(u.n)}${pb(k)}${dgb(k)}</b><small>${Z[u.s].n}${sub?", "+sub:""}</small></span></button>`}
+/* Boş durum kutusu: simge, başlık, açıklama, isteğe bağlı düğme */
+function bosHTML(ic,baslik,metin,btn){return `<div class="bos"><span class="bos-i" aria-hidden="true">${ic||""}</span>${baslik?`<b>${baslik}</b>`:""}<p>${metin}</p>${btn||""}</div>`}
 const IC={
  share:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 15V3"/><path d="M8 7l4-4 4 4"/><path d="M5 12v7a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-7"/></svg>',
  meToo:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M8 11V6.5a1.5 1.5 0 0 1 3 0V11m0-1.5V5a1.5 1.5 0 0 1 3 0v4.5m0 0V6.5a1.5 1.5 0 0 1 3 0V14a6 6 0 0 1-6 6h-.5a6 6 0 0 1-5-2.7L3.8 14a1.5 1.5 0 0 1 2.4-1.8L8 14"/></svg>',

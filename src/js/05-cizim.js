@@ -37,10 +37,11 @@ function vAkis(){
    <div class="feed-head"><div class="seg2" role="group" aria-label="Sıralama"><button data-sort="populer" aria-pressed="${state.sort==="populer"}">Popüler</button><button data-sort="yeni" aria-pressed="${state.sort==="yeni"}">Yeni</button><button data-sort="hafta" aria-pressed="${state.sort==="hafta"}">Haftanın</button></div><span class="feed-count">${list.length+boosted.length+(feat?1:0)} itiraf</span></div>
    ${boosted.map(p=>`<div class="boost-wrap"><div class="boost-tag">${IC.spark}Öne çıkarıldı</div>${postHTML(p)}</div>`).join("")}${feat?`<div class="feat"><div class="it" style="padding-top:12px"><div class="feat-tag">${IC.spark}Bugün en çok sarılan</div>${postHTML(feat).replace('<article class="it">','<article class="it" style="background:none;border:0;padding:0;margin:0">')}</div></div>`:""}
    ${rank&&list.length?`<p class="hint" style="margin:0 0 10px">Son 7 günün en çok sarılan ve konuşulan itirafları. Paylaş düğmesiyle hikâye görseli yapabilirsin.</p>`:""}
-   ${list.length?list.map((p,i)=>rank?`<div class="wk"><span class="wk-n">${i+1}</span>${postHTML(p)}</div>`:postHTML(p)).join(""):(feat?"":`<p class="empty">${rank?"Bu hafta henüz itiraf yok.":"Bu kategoride henüz itiraf yok. Ortadaki “İtiraf et” ile ilkini sen yaz."}</p>`)}`;
+   ${list.length?list.map((p,i)=>rank?`<div class="wk"><span class="wk-n">${i+1}</span>${postHTML(p)}</div>`:postHTML(p)).join(""):(feat?"":bosHTML(IC.spark,rank?"Bu hafta sessiz geçti":"Burası henüz boş",rank?"Bu hafta henüz itiraf yok. İlk sen yaz, haftanın listesine gir.":"Bu kategoride henüz itiraf yok. İlk itirafı sen yaz, akışı sen başlat.",'<button class="btn bos-b" id="bosYaz">İtiraf et</button>'))}`;
   bindInst();
   const dh=$("#dhCard");if(dh)dh.onclick=()=>showDaily();
   const qg=$("#qcGo");if(qg)qg.onclick=()=>showConfess({q:todayQ().t});
+  const by=$("#bosYaz");if(by)by.onclick=()=>showConfess();
 }
 function vMesajlar(){
   const free=!state.premium;
@@ -50,8 +51,9 @@ function vMesajlar(){
    <h3 style="font-size:20px;margin:16px 0 4px">Sohbetler</h3>
    ${REMOTE&&R.ekip?`<button class="row ekip-row" id="ekipRow"><span class="av ekip-av" style="width:46px;height:46px">🛡️</span><span class="t"><b>Kulis Ekibi</b><div>${R.ekip.lastStaff?"":"Sen: "}${esc(R.ekip.last||"")}</div></span><span class="meta">${R.ekip.userUnread?'<span class="dot"></span>':""}</span></button>`:""}
    ${state.chats.length?state.chats.map((c,i)=>{const last=c.msgs[c.msgs.length-1];const locked=last&&!last.me&&isLockedIdx(c,c.msgs.length-1);
-     return `<button class="row" data-chat="${i}">${av(c.u,46)}<span class="t"><b>${esc(U[c.u].n)}${pb(c.u)}${c.match?'<span class="mtag">Eşleşme</span>':""}</b><div class="${locked?"blur":""}">${last?(last.me?"Sen: ":"")+(last.mod?"Mesaj moderatör tarafından silindi":last.kind==="img"?"Fotoğraf":last.kind==="vid"?"Video":last.kind==="voice"?"Ses kaydı":last.kind==="call"?(last.type==="video"?"Görüntülü arama":"Sesli arama"):esc(last.t)):"Sohbet başladı. İlk mesajı yaz."}</div></span><span class="meta">${c.unread?'<span class="dot"></span>':""}</span></button>`}).join(""):`<p class="empty">Henüz sohbet yok. Akışta seni etkileyen bir itirafın altındaki “Özelden yaz” ile başla.</p>`}`;
+     return `<button class="row" data-chat="${i}">${av(c.u,46)}<span class="t"><b>${esc(U[c.u].n)}${pb(c.u)}${c.match?'<span class="mtag">Eşleşme</span>':""}</b><div class="${locked?"blur":""}">${last?(last.me?"Sen: ":"")+(last.mod?"Mesaj moderatör tarafından silindi":last.kind==="img"?"Fotoğraf":last.kind==="vid"?"Video":last.kind==="voice"?"Ses kaydı":last.kind==="call"?(last.type==="video"?"Görüntülü arama":"Sesli arama"):esc(last.t)):"Sohbet başladı. İlk mesajı yaz."}</div></span><span class="meta">${c.unread?'<span class="dot"></span>':""}</span></button>`}).join(""):bosHTML(IC.dm,"Henüz sohbetin yok","Akışta seni etkileyen bir itirafın altındaki “Özelden yaz”a dokun. Karşı taraf kabul edince sohbet burada açılır.",'<button class="btn bos-b" id="bosAkis">Akışa göz at</button>')}`;
   const er=$("#ekipRow");if(er)er.onclick=openEkip;
+  const ba=$("#bosAkis");if(ba)ba.onclick=()=>{state.tab="akis";render();window.scrollTo(0,0)};
 }
 function vBen(){
   const me=state.me;
@@ -66,7 +68,7 @@ function vBen(){
    <div class="pro-btns"><button class="btn line sm" id="editPro">${IC.edit.replace('<svg','<svg width="16" height="16"')}Profili düzenle</button>${state.premium?"":`<button class="btn gold sm" id="goPrem">Premium'a geç</button>`}</div>
    ${me.ad?`<details class="private"><summary>${IC.lock} Gizli bilgilerin<span class="chev">${IC.chev}</span></summary><div class="val" style="margin-top:10px">${esc(me.ad)} ${esc(me.soyad)}<br>${esc(me.email||"")}</div><p>${{google:"Google ile giriş yaptın.",apple:"Apple ile giriş yaptın.",email:"E-posta ile giriş yaptın."}[me.provider]||""} Bunları sadece sen görüyorsun, diğer kullanıcılar seni ${esc(me.n)} olarak görür.</p></details>`:""}
    <div class="tabs"><button aria-pressed="true">İtiraflarım</button></div>
-   ${mine.length?mine.map(p=>`<div class="mini"><q data-open="${p.id}" style="cursor:pointer">“${esc(p.t)}”</q><div class="on">${CATN[p.cat]}, ${p.cm.length} yorum, ${reactTotal(p)} tepki${isBoosted(p)?", öne çıkarıldı":""}<button class="mini-sh" data-share="${p.id}">${IC.share}Hikâyede paylaş</button></div></div>`).join(""):`<p class="empty">Henüz itirafın yok. Ortadaki “İtiraf et” ile ilkini yaz.</p>`}
+   ${mine.length?mine.map(p=>`<div class="mini"><q data-open="${p.id}" style="cursor:pointer">“${esc(p.t)}”</q><div class="on">${CATN[p.cat]}, ${p.cm.length} yorum, ${reactTotal(p)} tepki${isBoosted(p)?", öne çıkarıldı":""}<button class="mini-sh" data-share="${p.id}">${IC.share}Hikâyede paylaş</button></div></div>`).join(""):bosHTML(IC.edit,"","Henüz itirafın yok. İlk itirafını yazınca burada durur, kimlerin tepki verdiğini de buradan görürsün.",'<button class="btn bos-b" id="bosItiraf">İlk itirafını yaz</button>')}
    ${isStandalone()?"":`<button class="btn line wide" id="instPro" style="margin-top:22px">${PHONE_DL}Ana ekrana ekle</button>`}
    ${themePicker()}
    <div class="lg-links"><a href="kurallar.html" data-legal="kurallar">Topluluk kuralları</a><a href="kosullar.html" data-legal="kosullar">Kullanım koşulları</a><a href="gizlilik.html" data-legal="kvkk">KVKK ve gizlilik</a>${GA_ID?'<a href="#" id="ckPref">Çerez tercihleri</a>':""}</div>
@@ -82,6 +84,7 @@ function vBen(){
   const ip=$("#instPro");if(ip)ip.onclick=installApp;
   const ck=$("#ckPref");if(ck)ck.onclick=e=>{e.preventDefault();showConsent(true)};
   const gp=$("#goPrem");if(gp)gp.onclick=()=>showPremium("profil");
+  const bi=$("#bosItiraf");if(bi)bi.onclick=()=>showConfess();
 }
 
 const LOGOUT='<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><path d="M16 17l5-5-5-5"/><path d="M21 12H9"/></svg>';

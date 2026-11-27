@@ -29,6 +29,6 @@ async function showZiyaretciler(){
   const l=son.filter(z=>U[z.uid]);
   openSheet(`<div class="sheet-head"><h2>Profiline bakanlar</h2></div>
     ${l.length?`<p class="muted" style="margin:-4px 0 10px">Son 7 gün, ${l.length} kişi.</p><ul class="bg-liste">${l.map(z=>{const u=U[z.uid];return `<li class="bg-s"><button class="bg-av" data-zp="${z.uid}" aria-label="${esc(u.n)} profiline bak">${av(z.uid,48,true)}</button><div class="bg-m"><b>${esc(u.n)}</b><small>${Z[u.s]?Z[u.s].n:""}${u.age?", "+esc(u.age):""}, ${agoOf(z.ts)}</small></div><button class="btn line sm" data-zp="${z.uid}">Profil</button></li>`}).join("")}</ul>`
-      :`<p class="empty">Son 7 günde profiline bakan olmadı.</p>`}`,true);
+      :bosHTML(PK_IC.ziyaret,"","Son 7 günde profiline bakan olmadı. İtiraf yazdıkça ve yorum yaptıkça profilin daha çok görünür.")}`,true);
   $("#sheet").querySelectorAll("[data-zp]").forEach(b=>b.onclick=()=>showProfile(b.dataset.zp));
 }

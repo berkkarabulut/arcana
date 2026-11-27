@@ -17,7 +17,7 @@ function showNotifs(){
   const list=state.notifs,fresh=list.filter(n=>!n.read),old=list.filter(n=>n.read);
   openSheet(`<div class="sheet-head"><h2>Bildirimler</h2>${fresh.length?`<button class="lnk nf-all" id="nfAll">Tümünü okundu işaretle</button>`:""}</div>${typeof pushCard==="function"?pushCard("nf"):""}
     ${list.length?`${fresh.length?`<h3 class="nf-h">Yeni</h3>${fresh.map(notifRow).join("")}`:""}${old.length?`<h3 class="nf-h">Önceki</h3>${old.map(notifRow).join("")}`:""}`
-    :`<div class="empty" style="text-align:center;padding:30px 10px">${IC.spark}<p style="margin-top:8px">Henüz bildirimin yok. İtirafına tepki geldiğinde, biri sana yazdığında ya da eşleştiğinde burada görürsün.</p></div>`}`);
+    :bosHTML(AY_IC.zil,"Her şey sakin","İtirafına tepki geldiğinde, biri sana yazdığında ya da eşleştiğinde burada görürsün.")}`);
   $("#sheet").querySelectorAll("[data-nf]").forEach(b=>b.onclick=()=>{
     const n=state.notifs.find(x=>x.id===b.dataset.nf);if(!n)return;n.read=true;closeSheet();const g=n.go||{};
     if(g.chat){const i=state.chats.findIndex(c=>c.u===g.chat);if(i>=0){render();openChat(i);return}}

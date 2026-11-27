@@ -70,7 +70,7 @@ function showEditProfile(focus){
     openSheet(`<div class="sheet-head"><h2>Profili düzenle</h2><button class="x" id="ex" aria-label="Kapat">${IC.close}</button></div>
     <div class="ed-prev pro-wrap" style="--acc:${draft.c}"><div class="ed-cover" style="${coverCSS(draft)}"></div><div class="ed-av">${prevAv}</div></div>
 
-    ${REMOTE?`<div class="ed-sec perde-sec" id="secPerde"><div class="ed-h"><b>🎭 Perde arkası</b><span class="muted" style="font-size:12px">ücretsiz</span></div>
+    ${REMOTE?`<div class="ed-sec perde-sec" id="secPerde"><div class="ed-h"><b>Perde arkası</b><span class="muted" style="font-size:12px">ücretsiz</span></div>
     <p class="hint" style="margin:0 0 10px">Gerçek fotoğrafını ve kapağını buraya koy. Herkes aşağıda seçtiğin hazır görünümü görür. Bunları sadece perdeyi birlikte açtığın kişiler görür.</p>
     <div class="perde-up"><button class="pk up round" id="rAvUp" aria-label="Gerçek fotoğrafını yükle">${draft.rAv?`<img src="${draft.rAv}" alt="">`:`${IC.camera}<span>Fotoğraf</span>`}</button>
     <button class="pk up wide-pk" id="rBnUp" aria-label="Gerçek kapağını yükle">${draft.rBn?`<img src="${draft.rBn}" alt="">`:`${IC.camera}<span>Kapak</span>`}</button></div>

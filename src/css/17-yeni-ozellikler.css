@@ -26,12 +26,24 @@
 .ks:active .ks-i{transform:scale(.94)}
 
 /* Günlük seri */
-.seri-b{display:flex;align-items:center;gap:14px;padding:16px;border-radius:16px;background:var(--yuzey2)}
-.seri-b b{font-size:34px;font-weight:800;line-height:1}
-.seri-b span{font-size:15px;line-height:1.4}
-.seri-r{display:flex;flex-wrap:wrap;gap:6px}
-.seri-r span{padding:6px 10px;border-radius:999px;border:1px solid var(--cizgi);font-size:13px;color:var(--soluk)}
-.seri-r span.on{background:var(--nar);border-color:var(--nar);color:var(--on-nar);font-weight:700}
+.seri-b{--alev:#ff9a3c;display:flex;align-items:center;gap:16px;padding:18px;border-radius:18px;background:linear-gradient(135deg,color-mix(in srgb,var(--alev) 16%,var(--yuzey2)),var(--yuzey2));border:1px solid color-mix(in srgb,var(--alev) 25%,transparent)}
+.seri-b.sifir{--alev:var(--soluk)}
+.seri-alev{display:grid;place-items:center;width:58px;height:58px;flex:0 0 auto;border-radius:18px;color:var(--alev);background:color-mix(in srgb,var(--alev) 18%,transparent)}
+.seri-alev svg{width:32px;height:32px}
+.seri-b b{display:block;font-size:34px;font-weight:800;line-height:1;font-variant-numeric:tabular-nums}
+.seri-b b small{font-size:15px;font-weight:600;color:var(--soluk)}
+.seri-b span{display:block;margin-top:4px;font-size:14px;line-height:1.4;color:var(--soluk)}
+.seri-hedef{margin:4px 0 16px;padding:14px;border-radius:14px;border:1px solid var(--cizgi)}
+.seri-hedef>div:first-child{display:flex;justify-content:space-between;align-items:baseline;gap:10px;margin-bottom:10px}
+.seri-hedef b{font-size:14px}.seri-hedef span{font-size:13px;color:var(--soluk)}
+.seri-bar{height:8px;border-radius:99px;background:var(--yuzey2);overflow:hidden}
+.seri-bar i{display:block;height:100%;border-radius:inherit;background:linear-gradient(90deg,#ff9a3c,var(--nar))}
+.seri-r{display:flex;justify-content:space-between;list-style:none;margin:0;padding:0;position:relative}
+.seri-r::before{content:"";position:absolute;left:18px;right:18px;top:18px;height:2px;background:var(--cizgi)}
+.seri-r li{position:relative;display:flex;flex-direction:column;align-items:center;gap:4px}
+.seri-r li span{display:grid;place-items:center;width:36px;height:36px;border-radius:50%;font-size:13px;font-weight:800;background:var(--yuzey);border:2px solid var(--cizgi);color:var(--soluk)}
+.seri-r li small{font-size:11px;color:var(--soluk)}
+.seri-r li.on span{background:#ff9a3c;border-color:#ff9a3c;color:#1b1206}
 
 /* Buz kırıcı */
 .buz{display:flex;gap:8px;overflow-x:auto;padding:0 2px 8px;scrollbar-width:none;-webkit-overflow-scrolling:touch}
@@ -128,3 +140,32 @@
 .gif-i:focus-visible{outline:2px solid var(--nar);outline-offset:2px}
 .gif-d{column-span:all;text-align:center;padding:24px 8px;font-size:14px}
 .gif-a{margin:0;text-align:right;font-size:11px;color:var(--soluk)}
+/* ---- Boş durumlar ---- */
+.bos{display:flex;flex-direction:column;align-items:center;text-align:center;gap:6px;margin:14px 0;padding:28px 20px 24px;border:1px dashed var(--cizgi);border-radius:18px;background:color-mix(in srgb,var(--yuzey) 55%,transparent)}
+.bos-i{display:grid;place-items:center;width:52px;height:52px;border-radius:16px;margin-bottom:6px;color:var(--nar);background:color-mix(in srgb,var(--nar) 13%,transparent)}
+.bos-i svg{width:24px;height:24px}
+.bos b{font-family:var(--display,inherit);font-size:19px;font-weight:500;color:var(--kagit)}
+.bos p{margin:0;max-width:300px;color:var(--soluk);font-size:14px;line-height:1.5}
+.bos-b{margin-top:10px;width:auto;padding:10px 20px;font-size:14px}
+/* ---- Perde arkası kartı: emoji yerine perde simgesi, temaya uyan altın vurgu ---- */
+.perde-card{--altin:#C9A24E;border:1px solid color-mix(in srgb,var(--altin) 35%,var(--cizgi));background:linear-gradient(135deg,color-mix(in srgb,var(--altin) 10%,var(--yuzey)),var(--yuzey));padding:14px;gap:14px}
+.perde-card .pc-ic{display:grid;place-items:center;width:42px;height:42px;flex:0 0 auto;border-radius:13px;color:var(--altin);background:color-mix(in srgb,var(--altin) 16%,transparent);font-size:0}
+.perde-card .pc-ic svg{width:22px;height:22px}
+.perde-card b{font-size:15px}
+.perde-card .pc-add{flex:0 0 auto;padding:7px 14px;border-radius:999px;font-size:13px;font-weight:700;color:var(--altin);border:1px solid color-mix(in srgb,var(--altin) 45%,transparent)}
+.perde-card:hover .pc-add{background:color-mix(in srgb,var(--altin) 14%,transparent)}
+/* Yatay kaydırmada kenar solması okun altındaki çipi tam örtsün */
+.hs-wrap::before,.hs-wrap::after{width:44px}
+.hs-wrap::before{left:0;background:linear-gradient(90deg,var(--edge,var(--murekkep)) 30%,transparent)}
+.hs-wrap::after{right:0;background:linear-gradient(270deg,var(--edge,var(--murekkep)) 30%,transparent)}
+.soru-l li>div{display:flex;gap:8px;align-items:center}
+.soru-sil{color:var(--soluk)}
+/* Sohbet başlığı: isim ve durum tek satır, taşarsa üç nokta */
+.chat-h{gap:6px}
+.chat-h .who{min-width:0}
+.chat-h .who>span{min-width:0;display:flex;flex-direction:column}
+.chat-h .who b,.chat-h .who small{display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.pd-pill{display:inline-flex;align-items:center;gap:6px;flex:0 0 auto;white-space:nowrap}
+.pd-ic{width:16px;height:16px;flex:0 0 auto}
+.perde-req .pr-t{display:flex;align-items:center;gap:6px}
+@media (max-width:380px){.pd-pill span{display:none}.pd-pill{padding:8px}}

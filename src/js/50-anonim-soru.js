@@ -76,8 +76,8 @@ function showSorular(){
   openSheet(`<div class="sheet-head"><h2>Anonim sorular</h2></div>
     <div class="soru-link"><div><b>Senin linkin</b><small>${esc(soruLink().replace("https://",""))}</small></div><button class="btn sm" id="sqP">${kapali?"Kapalı":"Paylaş"}</button></div>
     ${kapali?`<p class="hint" style="margin:8px 0">Linkin kapalı. Ayarlar > Gizlilik'ten açabilirsin.</p>`:""}
-    ${bek.length?`<ul class="soru-l">${bek.map(s=>`<li><q>${esc(s.t)}</q><small>${agoOf(s.ts)}</small><div><button class="btn sm" data-sqc="${s.id}">Cevapla</button><button class="dice" data-sqs="${s.id}" aria-label="Soruyu sil">Sil</button></div></li>`).join("")}</ul>`
-      :`<p class="empty">${SORULAR.length?"Bütün soruları cevapladın.":"Henüz soru yok. Linkini hikâyende paylaş, arkadaşların sana anonim sorsun."}</p>`}`);
+    ${bek.length?`<ul class="soru-l">${bek.map(s=>`<li><q>${esc(s.t)}</q><small>${agoOf(s.ts)}</small><div><button class="btn sm" data-sqc="${s.id}">Cevapla</button><button class="btn line sm soru-sil" data-sqs="${s.id}" aria-label="Soruyu sil">Sil</button></div></li>`).join("")}</ul>`
+      :bosHTML(PK_IC.soru,SORULAR.length?"Hepsini cevapladın":"",SORULAR.length?"Yeni soru gelince burada görünecek.":"Henüz soru yok. Linkini hikâyende paylaş, arkadaşların sana anonim sorsun.")}`);
   $("#sqP").onclick=()=>{if(kapali){closeSheet();showSettings();return}soruPaylas()};
   $("#sheet").querySelectorAll("[data-sqc]").forEach(b=>b.onclick=()=>{const s=SORULAR.find(x=>x.id===b.dataset.sqc);if(!s)return;
     let q=s.t.slice(0,200);if(q.length<5)q="Soru: "+q;SORU_CVP={id:s.id,q};closeSheet();track("soru_cevapla");showConfess({q})});

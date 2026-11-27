@@ -41,7 +41,7 @@ async function showBegenenler(){
   const ciz=()=>{const l=begenenler();
     openSheet(`<div class="sheet-head"><h2>Seni beğenenler</h2></div>
       ${l.length?`<p class="muted" style="margin:-4px 0 10px">${l.length} kişi. Geri beğenirsen eşleşirsiniz ve sohbet açılır.</p><ul class="bg-liste">${l.map(begenenSatir).join("")}</ul>`
-        :`<p class="empty">Şu an bekleyen beğeni yok. Yeni biri seni beğenince burada görünecek.</p>`}`,true);
+        :bosHTML(PK_IC.begenen,"","Şu an bekleyen beğeni yok. Yeni biri seni beğenince burada görünecek.")}`,true);
     $("#sheet").querySelectorAll("[data-bgp]").forEach(b=>b.onclick=()=>showProfile(b.dataset.bgp));
     $("#sheet").querySelectorAll("[data-bgy]").forEach(b=>b.onclick=async()=>{
       const k=b.dataset.bgy;b.disabled=true;b.textContent="…";track("begenen_geri");
