@@ -338,3 +338,11 @@ button,a,input,textarea,select,label{touch-action:manipulation}
 .ayar-ust .gor-satir{margin-top:0}
 /* üst çubuk 4 düğmeyle dar ekranlara sığsın */
 @media (max-width:400px){.top-r{gap:5px}.top-r .icon-btn{width:34px;height:34px;border-radius:10px}.top-r .icon-btn svg{width:18px;height:18px}.top-r .prem-pill{height:34px;padding:0 9px;font-size:12px;border-radius:10px}}
+
+/* Ayarlar: alt başlıklı küçük kartlar */
+.ag-ic2 .ak{background:rgba(var(--kagit-rgb),.035);border:1px solid rgba(var(--kagit-rgb),.08);border-radius:16px;padding:0 14px 2px;margin:12px 0}
+.ag-ic2 .ak:first-child{margin-top:14px}
+.ak-h{display:flex;align-items:center;gap:8px;font-size:13px;font-weight:700;color:#FF8A65;padding:12px 0 4px}
+.ak-h svg{width:17px;height:17px;flex:none}
+.ak .set-row:last-child,.ak .set-dm:last-child{border-bottom:0}
+.ak .set-dm{padding-top:6px}

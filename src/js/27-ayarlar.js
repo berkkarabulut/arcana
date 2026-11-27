@@ -3,6 +3,7 @@ const NOTIF_KINDS=[["dm","Mesajlar"],["req","Mesaj istekleri"],["call","Aramalar
 const DM_ACIK={herkes:"Herkes sana mesaj isteği gönderebilir. İsteği sen kabul edince sohbet açılır.",eslesme:"Sadece Eşleş'te karşılıklı beğendiğin kişiler sana yazabilir.",kimse:"Kimse yeni sohbet başlatamaz. Açık sohbetlerin aynen devam eder."};
 const AY_IC={zil:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9a6 6 0 0 1 12 0c0 6 2.5 7.5 2.5 7.5h-17S6 15 6 9z"/><path d="M10 20a2 2 0 0 0 4 0"/></svg>',tac:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M3 8l4.5 4L12 5l4.5 7L21 8l-2 11H5z"/></svg>'};
 const ABONE_URL="https://play.google.com/store/account/subscriptions?package=com.kulistr.app";
+const AK_IC={mesaj:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a8 8 0 0 1-11.6 7.1L4 20l1-4.6A8 8 0 1 1 21 12z"/></svg>',goz:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/></svg>',soru:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M9.5 9a2.5 2.5 0 0 1 5 .5c0 1.5-2.5 2-2.5 3.5"/><path d="M12 17h.01"/></svg>',kalkan:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l8 3v6c0 5-3.5 8-8 9-4.5-1-8-4-8-9V6z"/></svg>'};
 function swHTML(id,on,label,sub){return `<button class="set-row" data-set="${id}" role="switch" aria-checked="${on}"><span><b>${label}</b>${sub?`<small>${sub}</small>`:""}</span><i class="tgl"><i></i></i></button>`}
 function showSettings(){
   const S=R.settings||{},n=S.n||{};const qf=Number.isInteger(S.qFrom)?S.qFrom:0,qt=Number.isInteger(S.qTo)?S.qTo:8;
@@ -12,16 +13,20 @@ function showSettings(){
   const acikGrup=R.ayarGrup||"gizlilik";
   openSheet(`<div class="sheet-head"><h2>Ayarlar</h2></div>
     ${grup("gizlilik",IC.lock,"Gizlilik ve mesajlar",`${{herkes:"Herkes yazabilir",eslesme:"Sadece eşleştiklerin yazabilir",kimse:"Kimse yeni sohbet açamaz"}[dm]}, son görülme ${S.songor===false?"gizli":"açık"}`,`
+      <div class="ak"><div class="ak-h">${AK_IC.mesaj}Mesajlar</div>
       <div class="set-dm"><b>Kimler bana yazabilir?</b>
         <div class="seg3" role="radiogroup" aria-label="Kimler bana yazabilir">${[["herkes","Herkes"],["eslesme","Eşleştiklerim"],["kimse","Kimse"]].map(([k,l])=>`<button role="radio" aria-checked="${dm===k}" data-dm-set="${k}">${l}</button>`).join("")}</div>
         <small id="dmAc">${DM_ACIK[dm]}</small></div>
-      ${swHTML("songor",S.songor!==false,"Son görülmemi göster","Kapatırsan kimse ne zaman çevrimiçi olduğunu göremez; sen de başkalarınınkini göremezsin")}
       ${swHTML("yaziyor",S.yaziyor!==false,"Yazarken karşı taraf görsün","Kapatırsan \"yazıyor…\" göstergesi karşıya gitmez")}
-      ${swHTML("iz",S.iz!==false,"Profillere iz bırak","Kapatırsan baktığın profillere iz bırakmazsın; sen de kimin baktığını göremezsin")}
-      ${swHTML("soru",S.soru!==false,"Anonim soru linkim açık","Kapatırsan linkinden sana soru gönderilemez")}
-      ${swHTML("okundu",S.okundu!==false,"Okundu bilgisi gönder","Kapatırsan mesajını okuduğunu karşı taraf göremez")}
+      ${swHTML("okundu",S.okundu!==false,"Okundu bilgisi gönder","Kapatırsan mesajını okuduğunu karşı taraf göremez")}</div>
+      <div class="ak"><div class="ak-h">${AK_IC.goz}Görünürlük</div>
+      ${swHTML("songor",S.songor!==false,"Son görülmemi göster","Kapatırsan kimse ne zaman çevrimiçi olduğunu göremez; sen de başkalarınınkini göremezsin")}
+      ${swHTML("iz",S.iz!==false,"Profillere iz bırak","Kapatırsan baktığın profillere iz bırakmazsın; sen de kimin baktığını göremezsin")}</div>
+      <div class="ak"><div class="ak-h">${AK_IC.soru}Anonim soru</div>
+      ${swHTML("soru",S.soru!==false,"Anonim soru linkim açık","Kapatırsan linkinden sana soru gönderilemez")}</div>
+      <div class="ak"><div class="ak-h">${AK_IC.kalkan}Güvenlik</div>
       <button class="set-row" id="engList"><span><b>Engellediklerim</b><small>${nb?nb+" kişi":"Kimseyi engellemedin"}</small></span></button>
-      <button class="set-row" id="dgIste"><span><b>Doğrulanmış profil rozeti <span class="dg">✓</span></b><small>${(U[R.uid]||{}).dg?"Profilin doğrulanmış.":"Gerçek kişi olduğunu gösteren mavi rozet. Selfie ile doğrulamak için dokun."}</small></span></button>`,acikGrup==="gizlilik")}
+      <button class="set-row" id="dgIste"><span><b>Doğrulanmış profil rozeti <span class="dg">✓</span></b><small>${(U[R.uid]||{}).dg?"Profilin doğrulanmış.":"Gerçek kişi olduğunu gösteren mavi rozet. Selfie ile doğrulamak için dokun."}</small></span></button></div>`,acikGrup==="gizlilik")}
     ${grup("arama",IC.phone,"Aramalar",S.callVoice===false&&S.callVideo===false?"Kimse arayamaz":S.callVideo===false?"Sadece sesli arama açık":S.callVoice===false?"Sadece görüntülü arama açık":"Sesli ve görüntülü arama açık",`
       ${swHTML("callVoice",S.callVoice!==false,"Beni sesli arayabilirler","Sadece sohbetin açık olduğu kişiler arayabilir")}
       ${swHTML("callVideo",S.callVideo!==false,"Beni görüntülü arayabilirler","")}`,acikGrup==="arama")}
