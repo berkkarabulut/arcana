@@ -135,7 +135,7 @@ const KDB = {
     }
     await b.commit();
   },
-  async getPrivate() { const s = await getDoc(doc(db, "users", KDB.uid, "private", "info")); return s.exists() ? s.data() : null; },
+  async getPrivate() { const s = await Promise.race([getDoc(doc(db, "users", KDB.uid, "private", "info")), new Promise((_, rej) => setTimeout(() => rej(Object.assign(new Error("zaman aşımı"), { code: "timeout" })), 8000))]); return s.exists() ? s.data() : null; },
   listenUsers(cb) {
     stop("users");
     unsubs.users = onSnapshot(query(collection(db, "users"), orderBy("createdAt", "desc"), limit(200)),
@@ -270,7 +270,7 @@ const KDB = {
   async ban(uid, reason) { const r = await callFn("banla", { uid, reason }); return r.data; },
   async unban(uid) { const r = await callFn("banKaldir", { uid }); return r.data; },
   listenBans(cb) { stop("bans"); unsubs.bans = onSnapshot(collection(db, "bans"), s => cb(s.docs.map(d => ({ id: d.id, ...d.data() }))), e => cb([])); },
-  async myBan() { try { const s = await getDoc(doc(db, "bans", KDB.uid)); return s.exists() ? s.data() : null; } catch (e) { return null; } },
+  async myBan() { try { const s = await Promise.race([getDoc(doc(db, "bans", KDB.uid)), new Promise((_, rej) => setTimeout(() => rej(new Error("zaman aşımı")), 6000))]); return s.exists() ? s.data() : null; } catch (e) { return null; } },
   async isAdmin() { try { const s = await getDoc(doc(db, "config", "admins")); return s.exists() && (s.data().uids || []).includes(KDB.uid); } catch (e) { return false; } },
   block(uid) { return setDoc(doc(db, "users", KDB.uid, "blocks", uid), { ts: serverTimestamp() }); },
   listenBlocks(cb) { stop("blocks"); unsubs.blocks = onSnapshot(collection(db, "users", KDB.uid, "blocks"), s => cb(s.docs.map(d => d.id)), e => console.warn("blocks", e)); },

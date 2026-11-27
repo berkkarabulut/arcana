@@ -5,7 +5,7 @@ function render(){
   const unread=state.chats.filter(c=>c.unread).length+state.requests.length+(REMOTE&&R.ekip&&R.ekip.userUnread?1:0);
   $("#pip").hidden=!unread;$("#pip").textContent=unread;
   const nu=state.notifs.filter(n=>!n.read).length;$("#bellPip").hidden=!nu;$("#bellPip").textContent=nu>9?"9+":nu;$("#topBell").setAttribute("aria-label",nu?`Bildirimler, ${nu} yeni`:"Bildirimler");
-  ({akis:vAkis,kesfet:vKesfet,mesajlar:vMesajlar,ben:vBen})[state.tab]();
+  {const V={akis:vAkis,kesfet:vKesfet,mesajlar:vMesajlar,ben:vBen};if(typeof V[state.tab]!=="function")state.tab="akis";V[state.tab]()}// eski sürümden kalma ya da bozuk sekme adı siteyi çökertmesin
 }
 function allPosts(){return DEMO?[...state.myPosts,...POSTS]:[...state.myPosts]}
 const isBoosted=p=>REMOTE?(!!p.feat&&Date.now()<p.feat):(!!p.boost&&Date.now()-p.boost<864e5);
