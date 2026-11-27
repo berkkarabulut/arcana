@@ -82,7 +82,8 @@
   "61-acilis-bekcisi.js",
   "62-kulis-hesabi.js",
   "63-geri-tusu.js",
-  "64-kenar-susu.js"
+  "64-kenar-susu.js",
+  "65-yakinlastirma-yok.js"
  ],
  "gec": {
   "admin": [
