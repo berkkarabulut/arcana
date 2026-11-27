@@ -278,7 +278,7 @@ const KDB = {
   async duyuru(metin, hedef, uid) { return (await callFn("duyuruGonder", { metin, hedef, uid })).data; },
   async duyuruGecmis() { const s = await getDocs(query(collection(db, "duyurular"), orderBy("ts", "desc"), limit(20))); return s.docs.map(d => ({ id: d.id, ...d.data(), ts: ms(d.data().ts) })); },
   // yönetici: son N günün huni sayaçları (istatistik/YYYY-AA-GG)
-  async istatistik(n = 60) { const s = await getDocs(query(collection(db, "istatistik"), orderBy(documentId(), "desc"), limit(n))); return s.docs.map(d => ({ gun: d.id, ...d.data() })); },
+  async istatistik(n = 60) { const s = await getDocs(collection(db, "istatistik")); return s.docs.map(d => ({ gun: d.id, ...d.data() })).sort((a, b) => b.gun.localeCompare(a.gun)).slice(0, n); }, // günde 1 belge: dizin gerektirmesin diye sıralama burada
   unblock(uid) { return deleteDoc(doc(db, "users", KDB.uid, "blocks", uid)); },
   async userPub(uid) { try { const s = await getDoc(doc(db, "users", uid)); return s.exists() ? { id: s.id, ...s.data() } : null; } catch (e) { return null; } },
   // doğrulanmış profil rozeti: sadece moderatör/yönetici
