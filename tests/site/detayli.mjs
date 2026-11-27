@@ -182,7 +182,13 @@ for (const cihaz of CIHAZLAR) {
     await adim(page, cihaz, "Ayarlar: gruplar açılıp kapanıyor (tek grup açık)", async () => { await page.click('[data-grup="arama"] > summary'); await page.waitForTimeout(200) },
       () => (document.querySelector('[data-grup="arama"]').open && !document.querySelector('[data-grup="gizlilik"]').open) || "gruplar düzgün açılmadı");
     await page.evaluate(() => { const d = document.querySelector('[data-grup="premium"]'); d.open = true });
-    await adim(page, cihaz, "Ayarlar: abonelik iptal bağlantısı", () => page.waitForTimeout(10), () => [...document.querySelectorAll("#sheet a")].some(a => a.href.includes("play.google.com/store/account/subscriptions")) || "bağlantı yok");
+    // Aboneliği olan ya da uygulamadaki kişi iptal bağlantısını görür; aboneliği olmayan web kullanıcısı "uygulamalarla geliyor" ya da "açılış dönemi" bilgisini görür
+    await adim(page, cihaz, "Ayarlar: Premium bölümü (iptal bağlantısı ya da bilgi)", () => page.waitForTimeout(10), () => {
+      const g = document.querySelector('[data-grup="premium"]'), link = [...document.querySelectorAll("#sheet a")].some(a => a.href.includes("play.google.com/store/account/subscriptions"));
+      const abone = !!state.premUntil || (typeof IN_APP !== "undefined" && IN_APP && !R.acilis);
+      if (abone) return link || "abone ama iptal bağlantısı yok";
+      return (!link && /uygulamalarla geliyor|Açılış dönemi/.test(g.innerText)) || "aboneliği olmayana yanlış içerik";
+    });
     await adim(page, cihaz, "Engellediklerim: liste ve engeli kaldırma", async () => { await page.evaluate(() => { document.querySelector('[data-grup="gizlilik"]').open = true }); await page.click("#engList"); await page.waitForSelector(".eng-row"); await page.click("[data-unb]"); await page.waitForTimeout(300) },
       () => (!document.querySelector(".eng-row") && /kalmadı/.test(document.querySelector("#engIc").innerText)) || "engel kaldırılamadı");
     await page.evaluate(() => { delete window.KDB; closeSheet() });
