@@ -41,7 +41,8 @@ for (const cihaz of CIHAZLAR) {
   // ---------- 1) Gerçek sunucu modu: üye olmayan yeni ziyaretçi (misafir) ----------
   {
     const { ctx, page } = await yeniSayfa(cihaz, false);
-    if (YEREL) await ctx.route(/misafirAkis/, rt => rt.fulfill({ contentType: "application/json", body: JSON.stringify({ result: { list: Array.from({ length: 7 }, (_, i) => ({ id: "p" + i, k: "m" + i, anon: i === 2, t: "Yerel test itirafı numara " + i + ", sadece deneme amaçlı yazıldı.", cat: "ask", cm: i, r: { bende: i, saril: 2 * i, yok: 0 }, ts: Date.now() - i * 36e5, a: i === 2 ? { g: null } : { n: "kisi" + i, c: "#7CC4FF", s: "koc", g: "Kadın", age: "25-34", av: null } })) } }) }));
+    // misafir listesi her zaman test verisinden: canlı sitenin o anki itiraf sayısı testi etkilemesin
+    await ctx.route(/misafirAkis/, rt => rt.fulfill({ contentType: "application/json", body: JSON.stringify({ result: { list: Array.from({ length: 7 }, (_, i) => ({ id: "p" + i, k: "m" + i, anon: i === 2, t: "Yerel test itirafı numara " + i + ", sadece deneme amaçlı yazıldı.", cat: "ask", cm: i, r: { bende: i, saril: 2 * i, yok: 0 }, ts: Date.now() - i * 36e5, a: i === 2 ? { g: null } : { n: "kisi" + i, c: "#7CC4FF", s: "koc", g: "Kadın", age: "25-34", av: null } })) } }) }));
     const t0 = Date.now();
     await page.goto(URL + "?_=" + Date.now(), { waitUntil: "domcontentloaded" });
     await page.waitForSelector("#msfSon", { timeout: 15000 }).catch(() => {});
