@@ -322,7 +322,7 @@ const sayTekil = async (alan, cid) => {
   try { await db.doc(`istatistik/${g}/tekil/${alan}_${cid}`).create({ ts: Date.now() }); await db.doc(`istatistik/${g}`).set({ [alan + "_t"]: FV.increment(1) }, { merge: true }); } catch (e) { /* zaten sayılmış */ }
 };
 exports.misafirAkis = onCall({ enforceAppCheck: false, maxInstances: 5 }, async (req) => {
-  say("misafir"); sayTekil("misafir", req.data && req.data.cid);
+  say("misafir"); await sayTekil("misafir", req.data && req.data.cid);
   if (Date.now() - VITRIN.at < 5 * 60e3 && VITRIN.list.length) return { list: VITRIN.list };
   const s = await db.collection("posts").orderBy("ts", "desc").limit(150).get();
   const sum = r => Object.values(r || {}).reduce((a, b) => a + (+b || 0), 0);
