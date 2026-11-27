@@ -1,5 +1,5 @@
 name: App Check
-# durum: zorunluluk ayarını ve son 48 saatin doğrulama sayılarını gösterir.
+# durum: zorunluluk ayarını ve son 7 günin doğrulama sayılarını gösterir.
 # zorla: Firestore, Realtime Database ve Storage için App Check'i zorunlu yapar.
 # gevset: zorunluluğu kaldırır (sorun çıkarsa geri dönüş).
 on:
@@ -39,12 +39,12 @@ jobs:
           curl -s "${H[@]}" "https://firebaseappcheck.googleapis.com/v1/projects/$P/services"; echo
           echo "== App Check metrik türleri"
           curl -s -G "${H[@]}" "https://monitoring.googleapis.com/v3/projects/$P/metricDescriptors" --data-urlencode 'filter=metric.type = starts_with("firebaseappcheck.googleapis.com")' | grep -o '"type": "[^"]*"' | sort -u
-          BAS=$(date -u -d '-48 hours' +%Y-%m-%dT%H:%M:%SZ); SON=$(date -u +%Y-%m-%dT%H:%M:%SZ)
+          BAS=$(date -u -d '-7 days' +%Y-%m-%dT%H:%M:%SZ); SON=$(date -u +%Y-%m-%dT%H:%M:%SZ)
           for m in $(curl -s -G "${H[@]}" "https://monitoring.googleapis.com/v3/projects/$P/metricDescriptors" --data-urlencode 'filter=metric.type = starts_with("firebaseappcheck.googleapis.com")' | grep -o '"type": "firebaseappcheck[^"]*"' | cut -d'"' -f4 | sort -u); do
-            echo "== $m (son 48 saat, etikete göre toplam)"
+            echo "== $m (son 7 gün, etikete göre toplam)"
             curl -s -G "${H[@]}" "https://monitoring.googleapis.com/v3/projects/$P/timeSeries" \
               --data-urlencode "filter=metric.type=\"$m\"" \
               --data-urlencode "interval.startTime=$BAS" --data-urlencode "interval.endTime=$SON" \
-              --data-urlencode "aggregation.alignmentPeriod=172800s" --data-urlencode "aggregation.perSeriesAligner=ALIGN_SUM" \
-              | python3 -c 'import json,sys;d=json.load(sys.stdin);[print(s.get("metric",{}).get("labels"),s.get("resource",{}).get("labels",{}).get("service",""),[p["value"] for p in s.get("points",[])]) for s in d.get("timeSeries",[])] or print(d if "error" in d else "veri yok")'
+              --data-urlencode "aggregation.alignmentPeriod=86400s" --data-urlencode "aggregation.perSeriesAligner=ALIGN_SUM" \
+              | python3 -c 'import json,sys;d=json.load(sys.stdin);[print(s.get("metric",{}).get("labels"),s.get("resource",{}).get("labels",{}),[(p["interval"]["endTime"][5:10],p["value"]["int64Value"]) for p in s.get("points",[])]) for s in d.get("timeSeries",[])] or print(d if "error" in d else "veri yok")'
           done
