@@ -333,3 +333,6 @@ html.sohbet-acik,html.sohbet-acik body{overflow-x:hidden}
 /* yakınlaştırma kapalı: çift dokunma ve iki parmakla büyütme olmasın */
 html,body{touch-action:pan-x pan-y;-webkit-text-size-adjust:100%;text-size-adjust:100%}
 button,a,input,textarea,select,label{touch-action:manipulation}
+
+.ayar-ust{display:flex;flex-direction:column;gap:10px;margin:14px 0 4px}
+.ayar-ust .gor-satir{margin-top:0}
