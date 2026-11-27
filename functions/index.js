@@ -209,7 +209,7 @@ exports.sikayetSonucu = onDocumentUpdated("reports/{rid}", async (event) => {
 // Misafirin huni adımları: üyelik penceresini gördü (duvar), kayıt ekranını açtı (kayitAc). Sadece bu iki sayı artırılabilir.
 exports.misafirOlay = onCall({ enforceAppCheck: false, maxInstances: 5 }, async (req) => {
   const o = req.data && req.data.olay;
-  if (["duvar", "kayitAc", "ilkTepki", "ilkItiraf", "ilkBegeni", "ilkBitti"].includes(o)) await say(o);
+  if (["duvar", "kayitAc", "ilkTepki", "ilkItiraf", "ilkBegeni", "ilkBitti"].includes(o)) await Promise.all([say(o), sayTekil(o, req.data.cid)]);
   return { ok: true };
 });
 
@@ -315,8 +315,14 @@ let VITRIN = { at: 0, list: [] };
 // günlük sayaç (kişisel bilgi yok, sadece sayı): istatistik/YYYY-AA-GG
 const gunId = () => new Date(Date.now() + 3 * 36e5).toISOString().slice(0, 10); // Türkiye günü
 const say = (alan) => db.doc(`istatistik/${gunId()}`).set({ [alan]: FV.increment(1) }, { merge: true }).catch(() => {});
-exports.misafirAkis = onCall({ enforceAppCheck: false, maxInstances: 5 }, async () => {
-  say("misafir");
+// tekil kişi: cihazın rastgele kimliği (kişisel bilgi değil) o gün o adımda ilk kez görülüyorsa "<alan>_t" bir artar
+const sayTekil = async (alan, cid) => {
+  if (typeof cid !== "string" || !/^[a-z0-9]{8,32}$/.test(cid)) return;
+  const g = gunId();
+  try { await db.doc(`istatistik/${g}/tekil/${alan}_${cid}`).create({ ts: Date.now() }); await db.doc(`istatistik/${g}`).set({ [alan + "_t"]: FV.increment(1) }, { merge: true }); } catch (e) { /* zaten sayılmış */ }
+};
+exports.misafirAkis = onCall({ enforceAppCheck: false, maxInstances: 5 }, async (req) => {
+  say("misafir"); sayTekil("misafir", req.data && req.data.cid);
   if (Date.now() - VITRIN.at < 5 * 60e3 && VITRIN.list.length) return { list: VITRIN.list };
   const s = await db.collection("posts").orderBy("ts", "desc").limit(150).get();
   const sum = r => Object.values(r || {}).reduce((a, b) => a + (+b || 0), 0);

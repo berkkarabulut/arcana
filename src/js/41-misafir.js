@@ -5,7 +5,9 @@
 const MSF_URL="https://europe-west1-kulis-1647d.cloudfunctions.net/misafirAkis";
 const MSF={on:false,hazir:false,gozuktu:false,sayildi:{}};
 // huni sayacı: sadece "kaç kez" bilgisi gider (kişisel bilgi yok); her olay sayfa başına bir kez sayılır
-function msfSay(olay){if(MSF.sayildi[olay])return;MSF.sayildi[olay]=1;try{fetch(MSF_URL.replace("misafirAkis","misafirOlay"),{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({data:{olay}}),keepalive:true}).catch(()=>{})}catch(e){}}
+/* tekil sayım için cihaza özel rastgele kimlik (kim olduğunu söylemez, sadece "aynı kişi mi" ayırır) */
+function cihazId(){try{let c=localStorage.getItem("kulis_cid");if(!c||!/^[a-z0-9]{8,32}$/.test(c)){c=(Math.random().toString(36).slice(2)+Date.now().toString(36)).slice(0,20);localStorage.setItem("kulis_cid",c)}return c}catch(e){return ""}}
+function msfSay(olay){if(MSF.sayildi[olay])return;MSF.sayildi[olay]=1;try{fetch(MSF_URL.replace("misafirAkis","misafirOlay"),{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({data:{olay,cid:cihazId()}}),keepalive:true}).catch(()=>{})}catch(e){}}
 function misafirBasla(){
   if(MSF.on||state.me||R.started)return;
   MSF.on=true;MSF.hazir=false;
@@ -13,7 +15,7 @@ function misafirBasla(){
   state.tab="akis";state.cat="hepsi";state.sort="populer";
   document.body.classList.add("misafir");
   render();track("misafir_giris");
-  fetch(MSF_URL,{method:"POST",headers:{"Content-Type":"application/json"},body:'{"data":{}}'})
+  fetch(MSF_URL,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({data:{cid:cihazId()}})})
     .then(r=>r.ok?r.json():Promise.reject(new Error("durum "+r.status)))
     .then(j=>{
       const list=(j&&j.result&&j.result.list)||[];

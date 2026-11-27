@@ -14,7 +14,7 @@ function ilkOku(){try{return JSON.parse(localStorage.getItem(ilkAnahtar())||"nul
 function ilkYaz(v){try{localStorage.setItem(ilkAnahtar(),JSON.stringify(v))}catch(e){}}
 // kayıt tamamlanınca çağrılır (38-perde.js)
 function ilkBasla(){ilkYaz({t:Date.now(),d:{}})}
-function ilkSay(olay){try{if(typeof MSF_URL==="string")fetch(MSF_URL.replace("misafirAkis","misafirOlay"),{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({data:{olay}}),keepalive:true}).catch(()=>{})}catch(e){}}
+function ilkSay(olay){try{if(typeof MSF_URL==="string")fetch(MSF_URL.replace("misafirAkis","misafirOlay"),{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({data:{olay,cid:typeof cihazId==="function"?cihazId():""}}),keepalive:true}).catch(()=>{})}catch(e){}}
 function ilkYapildi(k){
   if(k==="tepki")return Object.values(state.react||{}).some(Boolean);
   if(k==="itiraf")return (state.myPosts||[]).length>0;

@@ -225,7 +225,7 @@ function huniHTML(all){
   if(!R.ist&&!R.istYuk){R.istYuk=true;KDB.istatistik(90).then(l=>{R.ist=l;R.istYuk=false;if($("#adm.open")&&ADM.tab==="huni")openAdminRemote()}).catch(e=>{R.istYuk=false;R.ist=[];toast("İstatistik okunamadı: "+(e.code||e.message))})}
   const gun=ADM.hg||7,now=Date.now(),bas=new Date(now-(gun-1)*864e5);bas.setHours(0,0,0,0);
   const gunKey=t=>new Date(t+3*36e5).toISOString().slice(0,10),basKey=gunKey(bas.getTime());
-  const ist=(R.ist||[]).filter(x=>x.gun>=basKey),top=k=>ist.reduce((a,x)=>a+(x[k]||0),0);
+  const ist=(R.ist||[]).filter(x=>x.gun>=basKey),top=k=>ist.reduce((a,x)=>a+(x[k+"_t"]!=null?x[k+"_t"]:(x[k]||0)),0);// tekil kişi varsa onu say
   const yeni=all.filter(u=>u.created>=bas.getTime());
   const itiraf=yeni.filter(u=>u.posts>0);
   const uygun=yeni.filter(u=>now-u.created>=24*36e5),dondu=uygun.filter(u=>u.seen-u.created>=20*36e5);
@@ -235,7 +235,7 @@ function huniHTML(all){
   const yuz=(a,b)=>b?Math.round(a*100/b)+"%":"—";
   const satir=adim.map((a,i)=>`<div class="hn-s"><div class="hn-t"><b>${a[0]}</b><small>${a[2]}</small></div><div class="hn-bar"><i style="width:${Math.max(2,a[1]*100/enCok)}%"></i></div><div class="hn-n"><b>${a[1]}</b>${i?`<small>${yuz(a[1],adim[i-1][1])} önceki adımdan</small>`:""}</div></div>`).join("");
   const gunler=[];for(let i=gun-1;i>=0;i--){const t=now-i*864e5,k=gunKey(t),x=(R.ist||[]).find(z=>z.gun===k)||{},d0=new Date(t);d0.setHours(0,0,0,0);
-    gunler.push({k,m:x.misafir||0,d:x.duvar||0,ka:x.kayitAc||0,u:all.filter(u=>u.created>=d0.getTime()&&u.created<d0.getTime()+864e5).length})}
+    const tk=a=>x[a+"_t"]!=null?x[a+"_t"]:(x[a]||0);gunler.push({k,m:tk("misafir"),d:tk("duvar"),ka:tk("kayitAc"),u:all.filter(u=>u.created>=d0.getTime()&&u.created<d0.getTime()+864e5).length})}
 const ilkA=[["Üye oldu",yeni.length,"Bu dönemde açılan hesap"],["İlk tepkisini verdi",top("ilkTepki"),"Bir itirafa tepki bıraktı"],["İlk itirafını yazdı",top("ilkItiraf"),"İlk adımlar listesinden"],["Keşfet'te ilk beğeni",top("ilkBegeni"),"Birini sağa kaydırdı"],["Üç adımı bitirdi",top("ilkBitti"),"Listenin tamamı"]];
   const ilkEn=Math.max(1,...ilkA.map(a=>a[1]));
   const ilkSatir=ilkA.map((a,i)=>`<div class="hn-s"><div class="hn-t"><b>${a[0]}</b><small>${a[2]}</small></div><div class="hn-bar"><i style="width:${Math.max(2,a[1]*100/ilkEn)}%"></i></div><div class="hn-n"><b>${a[1]}</b>${i?`<small>${yuz(a[1],ilkA[0][1])} üyelerin</small>`:""}</div></div>`).join("");
@@ -244,7 +244,7 @@ const ilkA=[["Üye oldu",yeni.length,"Bu dönemde açılan hesap"],["İlk tepkis
     <div class="hn">${satir}
       <div class="hn-s hn-don"><div class="hn-t"><b>Ertesi gün geri döndü</b><small>Üye olduktan 20+ saat sonra tekrar girdi (24 saati dolanlar arasından)</small></div><div class="hn-bar"><i style="width:${uygun.length?dondu.length*100/uygun.length:0}%"></i></div><div class="hn-n"><b>${dondu.length}/${uygun.length}</b><small>${yuz(dondu.length,uygun.length)}</small></div></div></div>
     <h3 class="hn-h" style="font-size:17px;margin:18px 2px 6px">Yeni üyenin ilk adımları</h3><div class="hn">${ilkSatir}</div><p class="hint" style="margin:6px 2px 10px">İlk adım sayaçları 25 Kasım 2026'dan sonra üye olanlar için tutuluyor.</p>
-    <p class="hint" style="margin:10px 2px">Misafir sayaçları 24 Kasım 2026'dan itibaren tutuluyor. Son görülmesini gizleyenler "geri döndü" hesabında eksik kalabilir. Üye sayısı son 200 üyeden hesaplanır.</p>
+    <p class="hint" style="margin:10px 2px">Sayılar artık tekil kişi: aynı kişi sayfayı kaç kez açarsa açsın günde bir kez sayılır (27 Kasım akşamından itibaren; önceki günlerde tekrar girişler de sayılıyordu). Misafir sayaçları 24 Kasım 2026'dan itibaren tutuluyor. Son görülmesini gizleyenler "geri döndü" hesabında eksik kalabilir. Üye sayısı son 200 üyeden hesaplanır.</p>
     <table class="hn-tab"><thead><tr><th>Gün</th><th>Misafir</th><th>Pencere</th><th>Kayıt ekranı</th><th>Üye</th></tr></thead><tbody>${gunler.reverse().slice(0,30).map(g=>`<tr><td>${new Date(g.k+"T12:00:00").toLocaleDateString("tr-TR",{day:"numeric",month:"short"})}</td><td>${g.m}</td><td>${g.d}</td><td>${g.ka}</td><td>${g.u}</td></tr>`).join("")}</tbody></table>`;
 }
 
