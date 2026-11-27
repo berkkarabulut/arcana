@@ -168,4 +168,4 @@
 .pd-pill{display:inline-flex;align-items:center;gap:6px;flex:0 0 auto;white-space:nowrap}
 .pd-ic{width:16px;height:16px;flex:0 0 auto}
 .perde-req .pr-t{display:flex;align-items:center;gap:6px}
-@media (max-width:380px){.pd-pill span{display:none}.pd-pill{padding:8px}}
+@media (max-width:440px){.pd-pill span{display:none}.pd-pill{padding:0;width:32px;height:32px;justify-content:center}}

@@ -31,7 +31,7 @@ function showSeri(){
     <div class="seri-b${n?"":" sifir"}"><i class="seri-alev" aria-hidden="true">${PK_IC.seri}</i><div><b>${n}<small> gün</small></b><span>${n?`${n} gündür her gün buradasın.`:"Henüz bir serin yok. Bugün başla."}</span></div></div>
     <p class="muted" style="margin:10px 0">${bugun?"Bugünü tamamladın. Yarın bir itirafa tepki bırakman ya da bir mesaj yazman seriyi sürdürür.":"Bugün bir itirafa tepki bırak, yorum yap ya da bir mesaj yaz: serin büyüsün."}</p>
     ${(()=>{const sonraki=SERI_ROZET.find(r=>r>n),onceki=[...SERI_ROZET].reverse().find(r=>r<=n)||0;
-      const yuzde=sonraki?Math.round((n-onceki)/(sonraki-onceki)*100):100;
+      const yuzde=sonraki?Math.max(4,Math.round(n/sonraki*100)):100;
       return `${sonraki?`<div class="seri-hedef"><div><b>Sıradaki rozet: ${sonraki} gün</b><span>${sonraki-n} gün kaldı</span></div><div class="seri-bar" role="progressbar" aria-valuenow="${n}" aria-valuemax="${sonraki}"><i style="width:${yuzde}%"></i></div></div>`:`<div class="seri-hedef"><b>Bütün rozetleri topladın</b></div>`}
       <ol class="seri-r" aria-label="Seri rozetleri">${SERI_ROZET.map(r=>`<li class="${en>=r?"on":""}"><span>${r}</span><small>gün</small></li>`).join("")}</ol>`})()}
     <p class="hint" style="margin-top:10px">En uzun serin: ${en} gün</p>`);
