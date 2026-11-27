@@ -153,7 +153,7 @@ function openAdminRemote(){
       <h3 style="margin:0 0 2px">${esc(admName(uid))}</h3><p class="hint" style="margin:0 0 10px">Kullanıcı seni "Kulis Ekibi · ${R.admin?"Yönetici":"Moderatör"}" olarak görür.</p>
       <div class="ek-box" id="admEkBox">${ekipMsgsHTML(ADM.dmMsgs||[],true,uid)}</div>
       <div class="box ek-in"><textarea id="admEkIn" rows="2" maxlength="1000" placeholder="Kulis Ekibi olarak yaz" aria-label="Mesaj">${esc(ADM.dmDraft||"")}</textarea><button class="go" id="admEkGo">Gönder</button></div></div>`}
-  const admY=el.dataset.tab===ADM.tab&&el.classList.contains("open")?el.scrollTop:0;el.dataset.tab=ADM.tab;
+  const admY=el._admSekme===ADM.tab&&el.classList.contains("open")?el.scrollTop:0;el._admSekme=ADM.tab;// data-tab DEĞİL: o ad alt menü sekmeleri için ayrılmış
   el.innerHTML=`<div class="adm-in"><div class="adm-top"><h2>Yönetici paneli</h2><button class="icon-btn" id="admX" aria-label="Kapat">${IC.close}</button></div>
     ${R.admin?`<div class="ac-adm"><span><b>Açılış dönemi: herkese ücretsiz Premium</b><small>${R.acilis?"Açık: herkes her şeyi ücretsiz kullanıyor":"Kapalı: ücretsiz sınırlar ve Premium satışı geçerli"}</small></span><button class="btn ${R.acilis?"line":""} sm" id="acAnahtar">${R.acilis?"Kapat":"Aç"}</button></div>`:""}
     <div class="adm-tabs" role="tablist">${tabs.map(([k,n,c])=>`<button role="tab" data-admt="${k}" aria-selected="${ADM.tab===k}">${n}${c?` <span>${c}</span>`:""}</button>`).join("")}</div>${body}</div>`;
