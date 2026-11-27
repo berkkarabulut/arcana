@@ -36,14 +36,14 @@ function vUyumlu(){
   if(!people.length){$("#ksBody").innerHTML=`<p class="empty">Henüz başka üye yok. Arkadaşlarını davet et, burcuna en uyumlu kişiler burada sıralansın.</p><button class="btn wide" id="invK" style="margin-top:12px">${IC.share}Arkadaşını davet et</button>`;$("#invK").onclick=()=>showInvite();return}
   const sameSign=Object.keys(U).filter(k=>U[k].s===me.s&&(DEMO||genderOk(k)));
   $("#ksBody").innerHTML=`<p class="muted" style="font-size:14px;margin-bottom:14px">Burcuna göre en uyumlu itirafçılar. Profiline girip itiraflarını okuyabilir, özelden yazabilirsin.</p>
-   ${people.map(({k,p})=>{const u=U[k];return `<button class="row" data-prof="${k}">${av(k,46)}<span class="t"><b>${esc(u.n)}${pb(k)}${dgb(k)}</b><div>${Z[u.s].n}, ${u.age}, ${u.bio}</div></span><span class="meta"><b style="color:var(--kagit);font-size:15px">%${p}</b><br>uyum</span></button>`}).join("")}
+   ${people.map(({k,p})=>{const u=U[k];return `<button class="row" data-prof="${k}">${av(k,46)}<span class="t"><b>${esc(u.n)}${pb(k)}${dgb(k)}</b><div>${Z[u.s].n}${u.bio?", "+esc(u.bio):""}</div></span><span class="meta"><b style="color:var(--kagit);font-size:15px">%${p}</b><br>uyum</span></button>`}).join("")}
    <p class="hint" style="margin-top:14px">${sameSign.length?`${Z[me.s].n} burcundan ${sameSign.length} kişi aktif.`:`Şu an ${Z[me.s].n} burcundan aktif kimse yok.`}</p>`;
 }
 function swCard(c,back){
   const u=U[c.u],p=uyum(state.me.s,u.s);
   return `<div class="swc${back?" under":""}" ${back?'aria-hidden="true"':`id="swTop" tabindex="0" aria-label="${esc(u.n)} adlı kişinin itirafı. Sağ ok: bana dokundu, sol ok: geç."`} style="--acc:${u.c}">
     <span class="stamp yes">Dokundu</span><span class="stamp no">Geç</span>
-    <div class="swc-top"><span class="swz" style="background:${u.c}">${Z[u.s].g}</span><span class="swn"><b>${esc(u.n)}${pb(c.u)}</b><small>${Z[u.s].n}, ${u.age}, ${u.g}</small></span><span class="it-cat">${CATN[c.cat]}</span></div>
+    <div class="swc-top"><span class="swz" style="background:${u.c}">${Z[u.s].g}</span><span class="swn"><b>${esc(u.n)}${pb(c.u)}</b><small>${Z[u.s].n}${u.g?", "+u.g:""}</small></span><span class="it-cat">${CATN[c.cat]}</span></div>
     <blockquote class="swq">${esc(c.t)}</blockquote>
     <div class="swc-foot">${ringSVG(p)}<span><b>Burç uyumunuz</b><small>${Z[state.me.s].n} ve ${Z[u.s].n}</small></span></div>
   </div>`;

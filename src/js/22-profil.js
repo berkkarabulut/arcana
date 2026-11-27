@@ -7,7 +7,7 @@ function showProfile(k){
   let tab="itiraf";
   const chatIdx=state.chats.findIndex(c=>c.u===k);
   const draw=()=>{openSheet(`<div class="pro-wrap" style="--acc:${u.c}"><div class="cover" style="height:96px;${coverCSS(u)}"></div><div class="pro2" style="margin-top:-46px"><span class="ring2" style="display:inline-block">${av(k,84,true)}</span><h2>${esc(u.n)}${pb(k)}${dgb(k)}</h2>
-    <div class="badges"><span class="bd"><span class="glyph">${Z[u.s].g}</span>${Z[u.s].n}</span><span class="bd">${u.age}</span><span class="bd">${u.g}</span><span class="bd">${u.since}'den beri</span></div>
+    <div class="badges"><span class="bd"><span class="glyph">${Z[u.s].g}</span>${Z[u.s].n}</span><span class="bd">${u.g}</span><span class="bd">${u.since}'den beri</span></div>
     <p class="bio">${esc(u.bio)}</p></div>
     <div class="stats"><div><b>${u.stat[0]}</b><span>itiraf</span></div><div><b>${u.stat[1]}</b><span>yorum</span></div><div><b>${u.stat[2]}</b><span>tepki aldı</span></div></div>
     <div class="uyum">${ringSVG(p)}<div><b>Seninle burç uyumu</b><p>${Z[me.s].n} ve ${Z[u.s].n}. ${uyumText(me.s,u.s,p)}</p></div></div>

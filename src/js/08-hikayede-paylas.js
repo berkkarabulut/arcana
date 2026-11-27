@@ -49,7 +49,7 @@ async function storyCanvas(p){
   x.fillStyle="#fff";x.font=`400 40px ${SANS}`;x.textAlign="center";x.textBaseline="middle";x.fillText(Z[u.s].g+"︎",cx+pad+38,hy+2);
   x.textAlign="left";x.textBaseline="alphabetic";x.fillStyle="#EEF3FF";x.font=`800 36px ${SANS}`;
   x.fillText(mine?u.n:`Bir ${Z[u.s].n} itiraf etti`,cx+pad+96,hy-4);
-  x.fillStyle="rgba(238,243,255,.6)";x.font=`600 28px ${SANS}`;x.fillText(mine?`${Z[u.s].n}${u.age?", "+u.age:""}`:"Takma adı gizli",cx+pad+96,hy+36);
+  x.fillStyle="rgba(238,243,255,.6)";x.font=`600 28px ${SANS}`;x.fillText(mine?`${Z[u.s].n}`:"Takma adı gizli",cx+pad+96,hy+36);
   const cat=CATN[p.cat]||"";x.font=`800 26px ${SANS}`;const tw=x.measureText(cat).width+40;rr(x,cx+cw-pad-tw,hy-26,tw,52,26);x.fillStyle="rgba(238,243,255,.08)";x.fill();
   x.fillStyle="rgba(238,243,255,.8)";x.textAlign="center";x.fillText(cat,cx+cw-pad-tw/2,hy+9);
   // itiraf

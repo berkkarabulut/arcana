@@ -48,7 +48,7 @@ function drawOnb(){
     body=`<h1>Doğum tarihin</h1><p class="lead">Burcun profilinde görünür, doğum tarihin görünmez. Yaşın sadece aralık olarak görünür.</p>
     <div class="wheels" style="grid-template-columns:1fr 2fr 1.3fr">${wheel("gun",range(1,days),ob.d)}${wheel("ay",range(1,12,i=>AYLAR[i-1]),ob.m)}${wheel("yil",range(1950,new Date().getFullYear()-18),ob.y)}</div>
     <div class="wlab" style="grid-template-columns:1fr 2fr 1.3fr"><span>Gün</span><span>Ay</span><span>Yıl</span></div>
-    <div class="sign-big" id="sb"><div class="g glyph">${sign.g}</div><div><b style="font-size:17px">${sign.n}</b><div class="muted" style="font-size:13px">${EL[sign.e]} grubu, ${ageBand(ageOf(ob.y,ob.m,ob.d))} yaş aralığı</div></div></div>
+    <div class="sign-big" id="sb"><div class="g glyph">${sign.g}</div><div><b style="font-size:17px">${sign.n}</b><div class="muted" style="font-size:13px">${EL[sign.e]} grubu</div></div></div>
     <p class="warn" id="ageWarn" ${ageOf(ob.y,ob.m,ob.d)>=18?"hidden":""} style="margin-top:12px">Kulis'i kullanmak için 18 yaşını doldurmuş olman gerekiyor.</p>`;ok=ageOf(ob.y,ob.m,ob.d)>=18;}
   if(s===3){body=`<h1>Biraz daha</h1><p class="lead">Profilinde görünür, sohbet önerilerinde kullanılır.</p>
     <label class="lbl">Cinsiyet</label><div class="choice">${["Kadın","Erkek"].map(g=>`<button data-g="${g}" aria-pressed="${ob.g===g}">${g}</button>`).join("")}</div>`;ok=!!ob.g;}
@@ -76,7 +76,7 @@ function drawOnb(){
       if(!ob.ad)setTimeout(()=>{const a=$("#ad");a&&a.focus()},120)}}
   if(s===1){const n=$("#nk");n.oninput=()=>{ob.n=n.value.replace(/\s/g,"").toLocaleLowerCase("tr");if(n.value!==ob.n)n.value=ob.n;$("#obN").disabled=ob.n.length<3};
     document.querySelectorAll("[data-c]").forEach(b=>b.onclick=()=>{ob.c=b.dataset.c;drawOnb()});if(!ob.n)setTimeout(()=>n.focus(),120)}
-  if(s===2){const upd=()=>{if(!$("#sb"))return;const ad=ageOf(ob.y,ob.m,ob.d)>=18;const w=$("#ageWarn");if(w)w.hidden=ad;const nb=$("#obN");if(nb)nb.disabled=!ad;const sign=Z[signOf(ob.m,ob.d)];$("#sb").innerHTML=`<div class="g glyph">${sign.g}</div><div><b style="font-size:17px">${sign.n}</b><div class="muted" style="font-size:13px">${EL[sign.e]} grubu, ${ageBand(ageOf(ob.y,ob.m,ob.d))} yaş aralığı</div></div>`};
+  if(s===2){const upd=()=>{if(!$("#sb"))return;const ad=ageOf(ob.y,ob.m,ob.d)>=18;const w=$("#ageWarn");if(w)w.hidden=ad;const nb=$("#obN");if(nb)nb.disabled=!ad;const sign=Z[signOf(ob.m,ob.d)];$("#sb").innerHTML=`<div class="g glyph">${sign.g}</div><div><b style="font-size:17px">${sign.n}</b><div class="muted" style="font-size:13px">${EL[sign.e]} grubu</div></div>`};
     bindWheel("gun",v=>{ob.d=v;upd()});bindWheel("ay",v=>{ob.m=v;fixDays();upd()});bindWheel("yil",v=>{ob.y=v;fixDays();upd()})}
   if(s===3)document.querySelectorAll("[data-g]").forEach(b=>b.onclick=()=>{ob.g=b.dataset.g;drawOnb()});
   if(s===4){$("#ck").onclick=()=>{ob.ok=!ob.ok;drawOnb()};const ci=$("#ckI");if(ci)ci.onclick=()=>{ob.inst=!ob.inst;drawOnb()}}

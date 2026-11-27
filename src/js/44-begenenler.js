@@ -20,7 +20,7 @@ function begenenSatir(l){
   const u=U[l.from];if(!u)return "";
   const p=l.pid&&(state.myPosts||[]).find(x=>x.id===l.pid);
   return `<li class="bg-s"><button class="bg-av" data-bgp="${l.from}" aria-label="${esc(u.n)} profiline bak">${av(l.from,52,true)}</button>
-    <div class="bg-m"><b>${esc(u.n)}</b><small>${Z[u.s]?Z[u.s].n:""}${u.age?", "+esc(u.age):""}${l.ts?", "+agoOf(l.ts):""}</small>
+    <div class="bg-m"><b>${esc(u.n)}</b><small>${Z[u.s]?Z[u.s].n:""}${l.ts?", "+agoOf(l.ts):""}</small>
     ${p?`<q>${esc(p.t.slice(0,80))}${p.t.length>80?"…":""}</q>`:""}</div>
     <button class="btn sm" data-bgy="${l.from}">Geri beğen</button></li>`;
 }

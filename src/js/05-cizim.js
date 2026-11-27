@@ -61,7 +61,7 @@ function vBen(){
   view.innerHTML=`<div class="pro-wrap" style="--acc:${me.c}"><div class="cover" style="${coverCSS(me)}"><button class="cover-edit" id="covBtn">${IC.camera}Kapak</button><button class="cover-edit" id="outTop" style="right:auto;left:10px">${LOGOUT}Çıkış</button></div>
    <div class="pro2"><div style="position:relative"><span class="ring2" style="display:inline-block">${av("me",96,true)}</span><button class="cam" id="camBtn" aria-label="Profil fotoğrafını değiştir">${IC.camera}</button></div>
    <h2>${esc(me.n)}${pb("me")}</h2>
-   <div class="badges"><span class="bd"><span class="glyph">${Z[me.s].g}</span>${Z[me.s].n}</span><span class="bd">${me.age}</span><span class="bd">${me.g}</span></div>
+   <div class="badges"><span class="bd"><span class="glyph">${Z[me.s].g}</span>${Z[me.s].n}</span><span class="bd">${me.g}</span></div>
    ${REMOTE?perdeCard():(isUpload(me.photo)||isUpload(me.banner))&&!state.premium?`<button class="pnote" id="pNote">${IC.lock}<span>Yüklediğin ${isUpload(me.photo)&&isUpload(me.banner)?"fotoğraf ve kapak":isUpload(me.photo)?"fotoğraf":"kapak"} şu an sadece sana görünüyor. Diğer kullanıcılar hazır görünümü görür. Göstermek için Premium'a geç.</span></button>`:""}
    <p class="bio">${me.bio?esc(me.bio):'<span class="muted" style="font-family:var(--body);font-size:13.5px">Profiline kendini anlatan tek bir cümle ekle.</span>'}</p></div>
    <div class="stats"><div><b>${mine.length}</b><span>itiraf</span></div><div><b>${state.myComments.length}</b><span>yorum</span></div><div><b>${mine.reduce((a,p)=>a+reactTotal(p),0)}</b><span>tepki</span></div></div>
