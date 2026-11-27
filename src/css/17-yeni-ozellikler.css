@@ -274,3 +274,14 @@
 .gk-l li{display:flex;align-items:center;gap:10px;font-size:14px}
 .gk-l i{width:18px;height:18px;flex:0 0 auto;border-radius:50%;border:2px solid var(--cizgi)}
 .gk-l li.ok i{background:#22B07D;border-color:#22B07D}.gk-l li.ok{color:var(--soluk);text-decoration:line-through}
+/* ---- Her pencerede sağ üstte kapat düğmesi (kaydırınca da yerinde durur) ---- */
+.sh-kb{position:sticky;top:0;height:0;z-index:20;display:flex;justify-content:flex-end;pointer-events:none}
+.sh-kapat{pointer-events:auto;display:grid;place-items:center;width:38px;height:38px;margin:2px -4px 0 0;border-radius:50%;color:var(--kagit);background:color-mix(in srgb,var(--yuzey2) 88%,transparent);border:1px solid var(--cizgi);box-shadow:0 4px 14px rgba(0,0,0,.18);-webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px);transition:transform .15s,background-color .15s}
+.sh-kapat svg{width:17px;height:17px}
+.sh-kapat:hover{background:var(--yuzey2);transform:rotate(90deg)}
+.sh-kapat:active{transform:scale(.92)}
+.sh-kapat:focus-visible{outline:2px solid var(--nar);outline-offset:2px}
+@media (prefers-reduced-motion:reduce){.sh-kapat:hover{transform:none}}
+/* eski, pencereye özel kapat düğmeleri artık gereksiz; başlıklar düğmenin altına girmesin */
+#sheet .sheet-head .x{display:none}
+#sheet .sheet-head,#sheet>h2,#sheet>.ac-p>h2:first-child{padding-right:46px}

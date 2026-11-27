@@ -2,7 +2,7 @@
 const $=s=>document.querySelector(s), view=$("#view");
 const esc=s=>String(s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
 function toast(t){const e=$("#toast");e.textContent=t;e.classList.add("show");clearTimeout(e._t);e._t=setTimeout(()=>e.classList.remove("show"),2800)}
-function openSheet(h,keepGuard){if(!keepGuard)sheetGuard=null;const sh=$("#sheet"),y=keepGuard&&$("#scrim").classList.contains("open")?sh.scrollTop:0;sh.innerHTML='<div class="grab"></div>'+h;$("#scrim").classList.add("open");sh.scrollTop=y}
+function openSheet(h,keepGuard){if(!keepGuard)sheetGuard=null;const sh=$("#sheet"),y=keepGuard&&$("#scrim").classList.contains("open")?sh.scrollTop:0;sh.innerHTML='<div class="sh-kb"><button type="button" class="sh-kapat" aria-label="Kapat" title="Kapat" onclick="tryCloseSheet()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg></button></div><div class="grab"></div>'+h;$("#scrim").classList.add("open");sh.scrollTop=y}
 let sheetGuard=null;
 function closeSheet(){sheetGuard=null;$("#scrim").classList.remove("open")}
 function tryCloseSheet(){if(sheetGuard&&sheetGuard())return;closeSheet()}
