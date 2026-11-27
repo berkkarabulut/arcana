@@ -22,3 +22,6 @@ async function kulisOnbellekTemizle(){
   // başarıyla açılınca sayaç sıfırlansın
   {const t=setInterval(()=>{if(state.me&&!$("#remLoad")){clearInterval(t);try{sessionStorage.removeItem("kulis_bekci")}catch(e){}}},2000);setTimeout(()=>clearInterval(t),60000)}
 }
+// Yönetici panelindeki "Yenile": sayfa yenilenince panel aynı sekmede kendiliğinden açılsın
+{let ac=null;try{ac=sessionStorage.getItem("kulis_adm_ac")}catch(e){}
+  if(ac){const t=setInterval(()=>{if(!state.me||!(R.admin||R.isMod))return;clearInterval(t);if(typeof openAdminRemote==="function")openAdminRemote()},500);setTimeout(()=>clearInterval(t),20000)}}

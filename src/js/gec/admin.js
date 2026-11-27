@@ -61,6 +61,7 @@ function admUsers(){
   return (R.usersRaw||[]).map(u=>({uid:u.id,n:u.n,c:u.c,s:u.s,g:u.g,age:u.age,av:u.av,prem:!!u.prem,dg:!!u.dg,created:u.createdAt||0,seen:Math.max(u.lastSeen||0,u.createdAt||0),posts:posts[u.id]||0,me:u.id===R.uid}));
 }
 function openAdminRemote(){
+  try{const t=sessionStorage.getItem("kulis_adm_ac");if(t){sessionStorage.removeItem("kulis_adm_ac");ADM.tab=t;ADM.dm=null}}catch(e){}
   if(!R.admin&&!R.isMod){toast("Bu panel sadece yöneticiler için");return}
   if(!R.admin&&!["sikayet","destek"].includes(ADM.tab))ADM.tab="sikayet";
   let el=$("#adm");if(!el){el=document.createElement("div");el.id="adm";el.setAttribute("role","dialog");el.setAttribute("aria-label","Yönetici paneli");document.body.appendChild(el)}
@@ -154,11 +155,12 @@ function openAdminRemote(){
       <div class="ek-box" id="admEkBox">${ekipMsgsHTML(ADM.dmMsgs||[],true,uid)}</div>
       <div class="box ek-in"><textarea id="admEkIn" rows="2" maxlength="1000" placeholder="Kulis Ekibi olarak yaz" aria-label="Mesaj">${esc(ADM.dmDraft||"")}</textarea><button class="go" id="admEkGo">Gönder</button></div></div>`}
   const admY=el._admSekme===ADM.tab&&el.classList.contains("open")?el.scrollTop:0;el._admSekme=ADM.tab;// data-tab DEĞİL: o ad alt menü sekmeleri için ayrılmış
-  el.innerHTML=`<div class="adm-in"><div class="adm-top"><h2>Yönetici paneli</h2><button class="icon-btn" id="admX" aria-label="Kapat">${IC.close}</button></div>
+  el.innerHTML=`<div class="adm-in"><div class="adm-top"><h2>Yönetici paneli</h2><div class="adm-tus"><button class="icon-btn" id="admYenile" aria-label="Yenile" title="Yenile"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 11a8 8 0 1 0-2.3 5.7"/><path d="M20 4v7h-7"/></svg></button><button class="icon-btn" id="admX" aria-label="Kapat">${IC.close}</button></div></div>
     ${R.admin?`<div class="ac-adm"><span><b>Açılış dönemi: herkese ücretsiz Premium</b><small>${R.acilis?"Açık: herkes her şeyi ücretsiz kullanıyor":"Kapalı: ücretsiz sınırlar ve Premium satışı geçerli"}</small></span><button class="btn ${R.acilis?"line":""} sm" id="acAnahtar">${R.acilis?"Kapat":"Aç"}</button></div><div class="ac-adm"><span><b>Akışta herkesin itiraflarını gör</b><small>${LS("kulis_adm_hepsi",true)?"Açık: kadın ve erkek, bütün itirafları görüyorsun":"Kapalı: sıradan bir üye gibi sadece karşı cinsin itiraflarını görüyorsun"}</small></span><button class="btn ${LS("kulis_adm_hepsi",true)?"line":""} sm" id="admHepsi">${LS("kulis_adm_hepsi",true)?"Kapat":"Aç"}</button></div>`:""}
     <div class="adm-tabs" role="tablist">${tabs.map(([k,n,c])=>`<button role="tab" data-admt="${k}" aria-selected="${ADM.tab===k}">${n}${c?` <span>${c}</span>`:""}</button>`).join("")}</div>${body}</div>`;
   el.classList.add("open");document.body.style.overflow="hidden";if(admY)el.scrollTop=admY;
   $("#admX").onclick=closeAdmin;
+  {const y=$("#admYenile");if(y)y.onclick=()=>{y.classList.add("donuyor");try{sessionStorage.setItem("kulis_adm_ac",ADM.tab||"uye")}catch(e){}location.reload()}}
   {const h=$("#admHepsi");if(h)h.onclick=()=>{LSset("kulis_adm_hepsi",!LS("kulis_adm_hepsi",true));openAdminRemote();rerender();toast(LS("kulis_adm_hepsi",true)?"Artık bütün itirafları görüyorsun":"Sıradan üye görünümüne geçtin")}}
   setTimeout(()=>{const a=$("#acAnahtar");if(a&&!a.dataset.b){a.dataset.b=1;a.onclick=async()=>{const yeni=!R.acilis;
     if(!confirm(yeni?"Açılış dönemi açılsın mı?\n\nHerkes Kulis Tam gibi kullanır: sınırsız mesaj, arama, Eşleş. Premium satış ekranları gizlenir.":"Açılış dönemi kapansın mı?\n\nÜcretsiz sınırlar geri gelir, Premium satışı yeniden görünür."))return;

@@ -291,3 +291,9 @@ html.sohbet-acik,html.sohbet-acik body{overflow:hidden;overscroll-behavior:none}
 .msgs{overscroll-behavior:contain;-webkit-overflow-scrolling:touch;overflow-anchor:none}
 .composer{flex:0 0 auto}
 .chat-h{flex:0 0 auto}
+.adm-tus{display:flex;gap:8px}
+#admYenile svg{width:20px;height:20px;transition:transform .5s}
+#admYenile:hover svg{transform:rotate(-120deg)}
+#admYenile.donuyor svg{animation:admDon .8s linear infinite}
+@keyframes admDon{to{transform:rotate(-360deg)}}
+@media (prefers-reduced-motion:reduce){#admYenile svg,#admYenile:hover svg{transition:none;transform:none}#admYenile.donuyor svg{animation:none}}
