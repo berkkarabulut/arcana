@@ -501,6 +501,7 @@ const KDB = {
   // ---------- 5651 erişim kaydı (IP sunucuda tutulur) ----------
   logAccess(act) { if (IS_TEST || !auth.currentUser) return Promise.resolve(); return callFn("erisimKaydi", { act }).catch(() => {}); },
 
+  gorevDurum(bildir) { return callFn("gorevDurum", bildir ? { bildir } : {}).then(r => r.data); },
   // ---------- Açılış dönemi (config/genel.acilis): açıkken herkes Kulis Tam ----------
   listenGenel(cb) {
     stop("genel");

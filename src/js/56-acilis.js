@@ -8,9 +8,10 @@ function acilisPenceresi(){
     <span class="ac-i" aria-hidden="true">${IC.spark}</span>
     <h2>Açılış dönemi: Kulis tamamen ücretsiz</h2>
     <p class="muted">Mesajlaşma, sesli ve görüntülü arama, Eşleş ve seni beğenenler; hepsi şu an herkese açık, sınır yok.</p>
-    <div class="ac-hediye"><b>Erken gelene teşekkür</b><span>Uygulamalar çıkıp Premium başladığında, açılış döneminde katılan herkese <b>Kurucu üye</b> rozeti ve <b>1 ay Premium</b> hediye.</span></div>
+    <div class="ac-hediye"><b>Erken gelene teşekkür</b><span>Açılış döneminde katılan herkese <b>Kurucu üye</b> rozeti. Kurucu görevlerini bitirene de uygulamalar çıkınca <b>1 ay Premium</b> hediye.</span><button class="btn sm ac-gv" id="acGv">Görevlere bak</button></div>
     ${uygHTML()}
     <button class="btn line wide" onclick="closeSheet()" style="margin-top:6px">Tamam</button></div>`);
+  const ag=$("#acGv");if(ag)ag.onclick=()=>{closeSheet();if(typeof showGorevler==="function")showGorevler()};
   track("acilis_pencere");
 }
 {const sp0=showPremium;showPremium=function(){if(R.acilis){acilisPenceresi();return}return sp0.apply(this,arguments)}}

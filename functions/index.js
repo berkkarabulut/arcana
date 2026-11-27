@@ -676,3 +676,59 @@ exports.gifAra = onCall({ enforceAppCheck: false, maxInstances: 5 }, async (req)
   await ref.set({ r, ts: Date.now(), q }).catch(() => {});
   return { r };
 });
+
+// ---------------- Kurucu görevleri ----------------
+// Açılış döneminde 6 görevi bitirene, uygulamalar çıkınca 1 ay Premium. İlerlemeyi sunucu hesaplar, kullanıcı yazamaz.
+// users/{uid}/private/gorev: { gunler: ["2026-11-27", …], anaEkran, paylas, tamam, tamamTs }
+const trGun = (ms) => new Date(ms + 3 * 36e5).toISOString().slice(0, 10);
+const GOREV_GUN = 15, GOREV_ITIRAF_SERI = 3, GOREV_ITIRAF_MIN = 20;
+exports.gorevDurum = onCall({ enforceAppCheck: false, maxInstances: 10 }, async (req) => {
+  const uid = req.auth && req.auth.uid;
+  if (!uid) throw new HttpsError("unauthenticated", "giris");
+  const bildir = req.data && req.data.bildir;
+  const ref = db.doc(`users/${uid}/private/gorev`), bugun = trGun(Date.now());
+  // bugünü say, cihazın bildirdiği görevleri işaretle
+  const g = await db.runTransaction(async tx => {
+    const s = await tx.get(ref), d = s.exists ? s.data() : {};
+    const gunler = Array.isArray(d.gunler) ? d.gunler : [];
+    const yeni = {};
+    if (!gunler.includes(bugun)) yeni.gunler = [...gunler, bugun].slice(-60);
+    if (bildir === "anaEkran" && !d.anaEkran) yeni.anaEkran = true;
+    if (bildir === "paylas" && !d.paylas) yeni.paylas = true;
+    if (Object.keys(yeni).length) tx.set(ref, yeni, { merge: true });
+    return { ...d, ...yeni, gunler: yeni.gunler || gunler };
+  });
+  const [u, push, posts, anon, davet] = await Promise.all([
+    db.doc(`users/${uid}`).get(),
+    db.collection(`users/${uid}/push`).limit(1).get(),
+    db.collection("posts").where("uid", "==", uid).limit(300).get(),
+    db.collection(`users/${uid}/anon`).limit(100).get(),
+    db.doc(`users/${uid}/private/ref`).get()
+  ]);
+  const ud = u.exists ? u.data() : {};
+  // itiraf günleri: kendi adıyla ve anonim yazdıkları, en az 20 karakter
+  const gunSet = new Set();
+  posts.docs.forEach(p => { const v = p.data(); if (v.ts && String(v.t || "").trim().length >= GOREV_ITIRAF_MIN) gunSet.add(trGun(v.ts.toMillis())) });
+  if (!anon.empty) {
+    const aps = await db.getAll(...anon.docs.map(a => db.doc(`posts/${a.id}`)));
+    aps.forEach(p => { if (!p.exists) return; const v = p.data(); if (v.ts && String(v.t || "").trim().length >= GOREV_ITIRAF_MIN) gunSet.add(trGun(v.ts.toMillis())) });
+  }
+  const gunlerSirali = [...gunSet].sort();
+  let enUzun = 0, seri = 0, onceki = null;
+  for (const gun of gunlerSirali) {
+    const t = Date.parse(gun + "T00:00:00Z");
+    seri = onceki !== null && t - onceki === 864e5 ? seri + 1 : 1; onceki = t; enUzun = Math.max(enUzun, seri);
+  }
+  const davetSay = davet.exists ? (davet.data().uids || []).length : 0;
+  const gorevler = {
+    profil: !!(ud.av && ud.banner && String(ud.bio || "").trim().length >= 10),
+    anaEkran: !!g.anaEkran,
+    bildirim: !push.empty,
+    itiraf: enUzun >= GOREV_ITIRAF_SERI,
+    gun: (g.gunler || []).length >= GOREV_GUN,
+    paylas: !!g.paylas || davetSay > 0
+  };
+  const tamam = Object.values(gorevler).every(Boolean);
+  if (tamam && !g.tamam) await ref.set({ tamam: true, tamamTs: FV.serverTimestamp() }, { merge: true });
+  return { gorevler, gunSay: (g.gunler || []).length, itirafSeri: enUzun, tamam: tamam || !!g.tamam };
+});
