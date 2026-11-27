@@ -285,3 +285,9 @@
 /* eski, pencereye özel kapat düğmeleri artık gereksiz; başlıklar düğmenin altına girmesin */
 #sheet .sheet-head .x{display:none}
 #sheet .sheet-head,#sheet>h2,#sheet>.ac-p>h2:first-child{padding-right:46px}
+/* ---- Akıcı sohbet ---- */
+html.sohbet-acik,html.sohbet-acik body{overflow:hidden;overscroll-behavior:none}
+.chat{top:0;bottom:auto;height:100%;height:100dvh;will-change:transform}
+.msgs{overscroll-behavior:contain;-webkit-overflow-scrolling:touch;overflow-anchor:none}
+.composer{flex:0 0 auto}
+.chat-h{flex:0 0 auto}

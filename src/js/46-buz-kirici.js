@@ -15,8 +15,9 @@ function buzOneriler(c){
 }
 function buzKirici(){
   const c=state.chats[openIdx];if(!c||c.status!=="open")return;
-  const kutu=$("#chatIn .composer .box"),t=$("#mIn");if(!kutu||!t||$("#buzK"))return;
-  if(c.msgs.some(m=>m.me)||t.value.trim())return;
+  const kutu=$("#chatIn .composer .box"),t=$("#mIn");if(!kutu||!t)return;
+  if($("#buzK")){if(c.msgs.some(m=>m.me))$("#buzK").remove();return}
+  if(c.msgs.some(m=>m.me)||t.value.trim()){const b=$("#buzK");if(b&&c.msgs.some(m=>m.me))b.remove();return}
   const el=document.createElement("div");el.className="buz";el.id="buzK";el.setAttribute("aria-label","İlk mesaj önerileri");
   el.innerHTML=buzOneriler(c).map(o=>`<button class="buz-c" type="button">${esc(o)}</button>`).join("");
   kutu.before(el);

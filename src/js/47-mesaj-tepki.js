@@ -45,4 +45,4 @@ function mesajDokunmaBagla(){
   box.addEventListener("scroll",()=>clearTimeout(zam),{passive:true});
   box.addEventListener("dblclick",e=>{const el=hedef(e);if(el)mesajMenu(el)});
 }
-{const dcTp=drawChat;drawChat=function(){dcTp();try{mesajDokunmaBagla();if(CEVAP)cevapCubuk()}catch(e){}}}
+{const dcTp=drawChat;drawChat=function(){dcTp();try{mesajDokunmaBagla();if(CEVAP)cevapCubuk();else{const b=$("#cvBar");if(b)b.remove()}}catch(e){}}}

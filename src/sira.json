@@ -77,7 +77,8 @@
   "56-acilis.js",
   "57-kurucu-gorev.js",
   "58-gorev-tesvik.js",
-  "59-bildirim-git.js"
+  "59-bildirim-git.js",
+  "60-sohbet-akici.js"
  ],
  "gec": {
   "admin": [
