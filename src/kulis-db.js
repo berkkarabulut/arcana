@@ -275,7 +275,7 @@ const KDB = {
   block(uid) { return setDoc(doc(db, "users", KDB.uid, "blocks", uid), { ts: serverTimestamp() }); },
   listenBlocks(cb) { stop("blocks"); unsubs.blocks = onSnapshot(collection(db, "users", KDB.uid, "blocks"), s => cb(s.docs.map(d => d.id)), e => console.warn("blocks", e)); },
   // yönetici: toplu bildirim (duyuru) gönder, geçmişini oku
-  async duyuru(metin, hedef) { return (await callFn("duyuruGonder", { metin, hedef })).data; },
+  async duyuru(metin, hedef, uid) { return (await callFn("duyuruGonder", { metin, hedef, uid })).data; },
   async duyuruGecmis() { const s = await getDocs(query(collection(db, "duyurular"), orderBy("ts", "desc"), limit(20))); return s.docs.map(d => ({ id: d.id, ...d.data(), ts: ms(d.data().ts) })); },
   // yönetici: son N günün huni sayaçları (istatistik/YYYY-AA-GG)
   async istatistik(n = 60) { const s = await getDocs(query(collection(db, "istatistik"), orderBy(documentId(), "desc"), limit(n))); return s.docs.map(d => ({ gun: d.id, ...d.data() })); },

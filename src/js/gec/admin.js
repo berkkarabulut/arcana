@@ -85,6 +85,7 @@ function openAdminRemote(){
           ${pv===undefined?`<div><dt>Gizli bilgiler</dt><dd class="muted">Yükleniyor…</dd></div>`:pv===null?`<div><dt>Gizli bilgiler</dt><dd class="muted">Görülemedi</dd></div>`:
           `<div><dt>Ad soyad</dt><dd>${esc((pv.ad||"")+" "+(pv.soyad||""))||"—"}</dd></div><div><dt>E-posta</dt><dd>${esc(pv.email||"—")}</dd></div><div><dt>Doğum tarihi</dt><dd>${pv.b?`${pv.b.d} ${AYLAR[pv.b.m-1]} ${pv.b.y}`:"—"}</dd></div><div><dt>Giriş</dt><dd>${{google:"Google",email:"E-posta bağlantısı",apple:"Apple"}[pv.provider]||esc(pv.provider||"—")}</dd></div>`}
           <div><dt>Kullanıcı kimliği</dt><dd class="au-id">${u.uid}</dd></div></dl>
+          ${u.me?"":`<button class="btn line sm" data-audu="${u.uid}" style="margin:8px 0">Bildirim gönder</button>`}
           ${u.me?"":ADM.confirm===u.uid?`<div class="au-del"><p>Silmek için takma adı yaz: <b>${esc(u.n)}</b></p><div class="adm-add"><input class="city-search" id="auDelIn" autocomplete="off" maxlength="20"><button class="btn au-danger-fill" id="auDelGo" disabled>Kalıcı sil</button></div><button class="dice" id="auDelX" style="margin-top:8px">Vazgeç</button></div>`
             :`<button class="btn line" data-admdm="${u.uid}" style="height:40px;margin-top:12px;margin-right:8px">Mesaj gönder</button><button class="btn line" data-audg="${u.uid}" style="height:40px;margin-top:12px;margin-right:8px">${((R.usersRaw||[]).find(x=>x.id===u.uid)||{}).dg?"Doğrulama rozetini kaldır":"✓ Doğrulanmış rozeti ver"}</button>${R.bans&&R.bans.has(u.uid)?`<button class="btn line" data-auunban="${u.uid}" style="height:40px;margin-top:12px;margin-right:8px">Banı kaldır</button>`:(R.mods||[]).includes(u.uid)?"":`<button class="btn line" data-auban="${u.uid}" style="height:40px;margin-top:12px;margin-right:8px;color:var(--nar)">Banla</button>`}<button class="btn line" data-aureal="${u.uid}" style="height:40px;margin-top:12px;margin-right:8px">Perde fotoğrafını sil</button><button class="btn line au-danger" data-audel="${u.uid}" style="height:40px;margin-top:12px">Hesabı sil</button>`}
         </div>`:""}</div>`};
@@ -165,6 +166,7 @@ function openAdminRemote(){
   el.querySelectorAll("[data-admt]").forEach(b=>b.onclick=()=>{if(ADM.dm){ADM.dm=null;KDB.stopEkipMsgs()}ADM.tab=b.dataset.admt;ADM.open=null;ADM.confirm=null;openAdminRemote();el.scrollTop=0});
   const q=$("#auQ");if(q)q.oninput=()=>{ADM.q=q.value;const p=q.selectionStart;openAdminRemote();const n=$("#auQ");n.focus();n.setSelectionRange(p,p)};
   el.querySelectorAll("[data-auf]").forEach(b=>b.onclick=()=>{ADM.f=b.dataset.auf;openAdminRemote()});
+  el.querySelectorAll("[data-audu]").forEach(b=>b.onclick=()=>{ADM.tab="duyuru";ADM.kime="kisi";ADM.duyUid=b.dataset.audu;openAdminRemote();setTimeout(()=>{const t=$("#duyMetin");if(t)t.focus()},50)});
   el.querySelectorAll("[data-au]").forEach(b=>b.onclick=()=>{const id=b.dataset.au;ADM.confirm=null;ADM.open=ADM.open===id?null:id;
     if(ADM.open&&!(id in ADM.priv))KDB.adminPrivate(id).then(p=>{ADM.priv[id]=p;if(ADM.open===id)openAdminRemote()}).catch(()=>{ADM.priv[id]=null;if(ADM.open===id)openAdminRemote()});
     openAdminRemote()});
@@ -241,19 +243,46 @@ function duyuruHTML(all){
   return `<p class="hint" style="margin:0 0 10px">Yazdığın metin üyelerin bildirimlerine düşer ve bildirime izin verenlerin telefonuna gider. "Kulis duyurularını" kapatanlara ve sessiz saatindeki kişilere telefon bildirimi gitmez. Kısa ve net yaz.</p>
     <textarea id="duyMetin" class="city-search" rows="3" maxlength="180" placeholder="Örnek: Bu akşamın sorusu geldi: En son ne zaman ağladın? Gel cevapla 👀" style="width:100%;resize:vertical;padding:12px;font:inherit"></textarea>
     <div style="display:flex;justify-content:space-between;font-size:12px;opacity:.65;margin:4px 2px 12px"><span>Başlık: "Kulis"</span><span id="duySay">0/180</span></div>
-    <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px"><button class="btn line" id="duyDene">Önce bana gönder</button><button class="btn" id="duyHerkes">Herkese gönder</button></div>
+    <div class="seg duy-kime" role="tablist" aria-label="Kime gidecek"><button role="tab" data-kime="herkes" class="${ADM.kime!=="kisi"?"on":""}">Herkese</button><button role="tab" data-kime="kisi" class="${ADM.kime==="kisi"?"on":""}">Bir kişiye</button></div>
+    <div id="duyKisiAlan" ${ADM.kime==="kisi"?"":"hidden"}>
+      <div id="duySecili"></div>
+      <input id="duyAra" class="city-search" type="search" placeholder="Takma adla ara" autocomplete="off" style="width:100%;padding:11px 12px;margin-top:8px">
+      <div id="duyListe" class="duy-liste"></div>
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:12px"><button class="btn line" id="duyDene">Önce bana gönder</button><button class="btn" id="duyHerkes">${ADM.kime==="kisi"?"Ona gönder":"Herkese gönder"}</button></div>
     <h3 class="ayar-h" style="margin-top:18px">Son gönderilenler</h3><div id="duyGecmis"><p class="hint">Yükleniyor…</p></div>`;
 }
 function duyuruGecmisCiz(){const b=$("#duyGecmis");if(!b)return;const l=R.duyG||[];
-  b.innerHTML=l.length?l.map(d=>`<div class="adm-rep"><div class="adm-rh"><b>${d.kisi} kişi</b><small>${relTime(d.ts)}</small></div><p style="margin:4px 0 0">${esc(d.metin)}</p></div>`).join(""):`<p class="hint">Henüz duyuru gönderilmedi.</p>`}
+  b.innerHTML=l.length?l.map(d=>`<div class="adm-rep"><div class="adm-rh"><b>${d.hedef?"Sadece "+esc(d.hedefN||"bir kişi"):d.kisi+" kişi"}</b><small>${relTime(d.ts)}</small></div><p style="margin:4px 0 0">${esc(d.metin)}</p></div>`).join(""):`<p class="hint">Henüz duyuru gönderilmedi.</p>`}
 function duyuruBagla(){
   const t=$("#duyMetin");if(!t||t.dataset.bagli)return;t.dataset.bagli=1;duyuruGecmisCiz();
   t.oninput=()=>{$("#duySay").textContent=t.value.length+"/180"};
   const gonder=async(hedef,btn)=>{const m=t.value.trim();if(m.length<3){toast("Önce metni yaz");return}
+    const kisi=hedef==="kisi"?admUsers().find(u=>u.uid===ADM.duyUid):null;
+    if(hedef==="kisi"&&!kisi){toast("Önce kişiyi seç");return}
     if(hedef==="herkes"&&!confirm(`Bu bildirim bütün üyelere gidecek:\n\n"${m}"\n\nGönderilsin mi?`))return;
-    btn.disabled=true;try{const r=await KDB.duyuru(m,hedef);toast(hedef==="deneme"?"Sana gönderildi, telefonuna bak":`${r.gitti} kişiye gönderildi`);if(hedef==="herkes"){t.value="";R.duyG=null;openAdminRemote()}}
+    if(hedef==="kisi"&&!confirm(`Bu bildirim sadece ${kisi.n} adlı üyeye gidecek:\n\n"${m}"\n\nGönderilsin mi?`))return;
+    btn.disabled=true;try{const r=await KDB.duyuru(m,hedef,kisi&&kisi.uid);
+      toast(hedef==="deneme"?"Sana gönderildi, telefonuna bak":hedef==="kisi"?(r.telefon?`${kisi.n} kişisine gönderildi, telefonuna da gitti`:`${kisi.n} kişisine gönderildi. Telefonu bildirime kayıtlı değil, uygulamayı açınca görecek`):`${r.gitti} kişiye gönderildi`);
+      if(hedef!=="deneme"){t.value="";R.duyG=null;openAdminRemote()}}
     catch(e){toast("Gönderilemedi: "+(e.code||e.message))}finally{btn.disabled=false}};
-  $("#duyDene").onclick=e=>gonder("deneme",e.currentTarget);$("#duyHerkes").onclick=e=>gonder("herkes",e.currentTarget);
+  $("#duyDene").onclick=e=>gonder("deneme",e.currentTarget);$("#duyHerkes").onclick=e=>gonder(ADM.kime==="kisi"?"kisi":"herkes",e.currentTarget);
+  document.querySelectorAll("[data-kime]").forEach(b=>b.onclick=()=>{ADM.kime=b.dataset.kime;const m=t.value;openAdminRemote();const t2=$("#duyMetin");if(t2){t2.value=m;t2.oninput&&t2.oninput()}});
+  duyuruKisiCiz();
+}
+function duyuruKisiCiz(){
+  const ara=$("#duyAra"),liste=$("#duyListe"),sec=$("#duySecili");if(!ara||!liste)return;
+  const tum=admUsers().filter(u=>!u.me).sort((a,b)=>b.seen-a.seen);
+  const s=tum.find(u=>u.uid===ADM.duyUid);
+  sec.innerHTML=s?`<div class="duy-sec"><span class="au-av" style="background:${esc(s.c||"#7CC4FF")};width:34px;height:34px">${esc((s.n||"?").charAt(0).toLocaleUpperCase("tr"))}</span><span><b>${esc(s.n||"İsimsiz")}</b><small>${s.seen?"Son görülme "+relTime(s.seen):""}</small></span><button class="ib" id="duySecX" aria-label="Seçimi kaldır">${IC.close}</button></div>`:"";
+  const sx=$("#duySecX");if(sx)sx.onclick=()=>{ADM.duyUid=null;duyuruKisiCiz()};
+  ara.style.display=s?"none":"";
+  const ciz=()=>{if(s){liste.innerHTML="";return}
+    const q=ara.value.trim().toLocaleLowerCase("tr");
+    const l=tum.filter(u=>!q||(u.n||"").toLocaleLowerCase("tr").includes(q)).slice(0,30);
+    liste.innerHTML=l.length?l.map(u=>`<button class="duy-k" data-duyu="${u.uid}"><span class="au-av" style="background:${esc(u.c||"#7CC4FF")};width:30px;height:30px">${esc((u.n||"?").charAt(0).toLocaleUpperCase("tr"))}</span><span><b>${esc(u.n||"İsimsiz")}</b><small>${u.seen?relTime(u.seen):""}</small></span></button>`).join(""):`<p class="hint">Bu adla üye yok.</p>`;
+    liste.querySelectorAll("[data-duyu]").forEach(b=>b.onclick=()=>{ADM.duyUid=b.dataset.duyu;duyuruKisiCiz()})};
+  ara.oninput=ciz;ciz();
 }
 
 // ---- Selfie doğrulama: bekleyen başvurular, selfie ve perde arkasındaki profil fotoğrafı yan yana ----

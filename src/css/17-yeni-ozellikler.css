@@ -180,3 +180,14 @@
 .bs-l li::before{content:"";position:absolute;left:4px;top:3px;width:14px;height:14px;border-radius:50%;background:color-mix(in srgb,var(--nar) 22%,transparent);box-shadow:inset 0 0 0 4px var(--nar)}
 .bs-b{display:grid;gap:8px;width:100%;margin-top:6px}
 .bs-p .hint{margin:4px 0 0}
+/* ---- Admin: tek kişiye bildirim ---- */
+.duy-kime{display:grid;grid-template-columns:1fr 1fr;gap:4px;padding:4px;border-radius:12px;background:var(--yuzey2)}
+.duy-kime button{padding:9px;border-radius:9px;font-weight:700;font-size:14px;color:var(--soluk)}
+.duy-kime button.on{background:var(--yuzey);color:var(--kagit);box-shadow:0 1px 3px rgba(0,0,0,.15)}
+.duy-liste{display:grid;gap:2px;max-height:240px;overflow-y:auto;margin-top:6px}
+.duy-k,.duy-sec{display:flex;align-items:center;gap:10px;padding:8px;border-radius:10px;text-align:left;width:100%}
+.duy-k:hover{background:var(--yuzey2)}
+.duy-k span,.duy-sec span{display:flex;flex-direction:column;min-width:0;flex:1}
+.duy-k small,.duy-sec small{font-size:12px;color:var(--soluk)}
+.duy-sec{margin-top:10px;border:1px solid var(--nar);background:color-mix(in srgb,var(--nar) 8%,transparent)}
+.duy-k .au-av,.duy-sec .au-av{flex:0 0 auto;border-radius:50%;display:grid;place-items:center;font-weight:800;color:#14101A;font-size:13px}

@@ -453,6 +453,17 @@ exports.duyuruGonder = onCall({ enforceAppCheck: false, timeoutSeconds: 300 }, a
   if (metin.length < 3) throw new HttpsError("invalid-argument", "metin");
   const kayit = { type: "duyuru", text: metin, go: null, ts: FV.serverTimestamp(), read: false };
   if (hedef === "deneme") { await db.collection(`users/${me}/notifs`).add(kayit); return { gitti: 1 }; }
+  if (hedef === "kisi") {
+    const uid = String((req.data && req.data.uid) || "");
+    if (!/^[A-Za-z0-9]{10,64}$/.test(uid)) throw new HttpsError("invalid-argument", "kisi");
+    const u = await db.doc(`users/${uid}`).get();
+    if (!u.exists) throw new HttpsError("not-found", "kisi");
+    await db.collection(`users/${uid}/notifs`).add(kayit);
+    const tel = !(await db.collection(`users/${uid}/push`).limit(1).get()).empty;
+    await db.collection("duyurular").add({ metin, by: me, kisi: 1, hedef: uid, hedefN: u.data().n || "", ts: FV.serverTimestamp() });
+    logger.info("duyuru-kisi", { telefon: tel });
+    return { gitti: 1, telefon: tel };
+  }
   if (hedef !== "herkes") throw new HttpsError("invalid-argument", "hedef");
   const us = await db.collection("users").select().get();
   let b = db.batch(), n = 0, top = 0;
