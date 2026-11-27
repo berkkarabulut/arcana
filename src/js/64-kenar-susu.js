@@ -62,10 +62,22 @@ function kenarCiz(){
   const imza=k+(kenarAcikMi()?"-a":"-k");if(el._imza===imza)return;el._imza=imza;el.innerHTML=kenarSVG(k,kenarAcikMi());
 }
 function setKenar(k){try{localStorage.setItem("kulis_kenar",k)}catch(e){}kenarCiz();if(typeof track==="function")track("kenar_"+k);if(state.me&&state.tab==="ben")render()}
-/* Ayarlar > Görünüm: tema seçicinin altına kenar süsü seçici (sadece bilgisayarda görünür) */
-{const tp0=themePicker;themePicker=function(){const k=kenarPref(),ac=kenarAcikMi();
-  return tp0.apply(this,arguments)+`<div class="kenar-pick"><div class="kp-b">Arka plan süsü <small>Sohbetlerin arka planında, bilgisayarda sitenin iki yanında da görünür</small></div><div class="kp-l" role="group" aria-label="Arka plan süsü">${KENAR_LISTE.map(([id,ad])=>`<button data-kenar="${id}" aria-pressed="${k===id}" title="${ad}"><span class="kp-o">${id==="yok"?"":kenarSVG(id,ac).replace('preserveAspectRatio="xMidYMid slice"','preserveAspectRatio="xMinYMid slice"')}</span><span class="kp-a">${ad}</span></button>`).join("")}</div></div>`}}
-document.addEventListener("click",e=>{const b=e.target.closest("[data-kenar]");if(b)setKenar(b.dataset.kenar)});
+/* Görünüm penceresi: üst çubuktaki palet simgesinden ya da Profilim > Görünüm satırından açılır */
+const PALET='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3a9 9 0 1 0 0 18c1.1 0 1.8-.8 1.8-1.7 0-.5-.2-.9-.5-1.2-.3-.3-.5-.7-.5-1.2 0-.9.8-1.7 1.7-1.7H16a5 5 0 0 0 5-5c0-3.9-4-7.2-9-7.2z"/><circle cx="7.5" cy="11.5" r="1.2" fill="currentColor"/><circle cx="10.5" cy="7.5" r="1.2" fill="currentColor"/><circle cx="15" cy="7.8" r="1.2" fill="currentColor"/></svg>';
+const tp0=themePicker;
+function gorunumHTML(){const k=kenarPref(),ac=kenarAcikMi();
+  return `<div class="sheet-head" id="gorSheet"><h2>Görünüm</h2></div>${tp0().replace('<div class="ayar-h">Görünüm</div>','')}
+  <div class="kenar-pick"><div class="kp-b">Arka plan süsü <small>Sohbetlerin arka planında, bilgisayarda sitenin iki yanında da görünür</small></div><div class="kp-l" role="group" aria-label="Arka plan süsü">${KENAR_LISTE.map(([id,ad])=>`<button data-kenar="${id}" aria-pressed="${k===id}" title="${ad}"><span class="kp-o">${id==="yok"?"":kenarSVG(id,ac,true).replace(/width="640" height="930" /,'width="100%" height="100%" ').replace(/<g opacity="[.0-9]+">/,'<g>')}</span><span class="kp-a">${ad}</span></button>`).join("")}</div></div>`}
+function openGorunum(){openSheet(gorunumHTML())}
+const gorAcikMi=()=>!!document.getElementById("gorSheet")&&$("#scrim").classList.contains("open");
+/* Profilim'de uzun bölüm yerine tek satır */
+themePicker=function(){const t=temaPref(),k=kenarPref();const ta={sistem:"Sistem",acik:"Açık",koyu:"Koyu"}[t]||"Sistem",ka=(KENAR_LISTE.find(x=>x[0]===k)||["","Yok"])[1];
+  return `<button class="gor-satir" id="gorAc">${PALET}<span><b>Görünüm</b><small>${ta} tema, ${ka}</small></span><i aria-hidden="true">›</i></button>`};
+document.addEventListener("click",e=>{
+  if(e.target.closest("#topGor,#gorAc")){openGorunum();return}
+  const b=e.target.closest("[data-kenar]");if(b)setKenar(b.dataset.kenar);
+  if((b||e.target.closest("[data-tema]"))&&gorAcikMi())setTimeout(()=>openSheet(gorunumHTML(),true),0);
+});
 {const at0=applyTheme;applyTheme=function(){const s=at0.apply(this,arguments);kenarCiz();return s}}
 lightMQ.addEventListener?lightMQ.addEventListener("change",()=>setTimeout(kenarCiz,0)):0;
 addEventListener("resize",()=>{clearTimeout(kenarCiz._t);kenarCiz._t=setTimeout(kenarCiz,200)});
