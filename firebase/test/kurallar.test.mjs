@@ -238,6 +238,24 @@ await env.withSecurityRulesDisabled(async c => { await setDoc(doc(c.firestore(),
 await t("Süresi dolmuş premium arama başlatamaz", () => callAs(F, "uf", "ue"), false);
 await t("Kullanıcı kendine premium yazamaz", () => setDoc(doc(F, "users/uf/private/premium"), { active: true, until: Date.now() + 864e5, tier: "tam" }), false);
 
+// ---- Açılış dönemi: config/genel.acilis açıkken herkes Kulis Tam ----
+const M = ctx("um"), N = ctx("un"), YON = ctx("uadmin");
+await env.withSecurityRulesDisabled(async c => { const d = c.firestore();
+  await setDoc(doc(d, "users/um"), { n: "testm", g: "Erkek" }); await setDoc(doc(d, "users/un"), { n: "testn", g: "Kadın" });
+  await setDoc(doc(d, "chats/um_un"), { members: ["um", "un"], status: "open", reqBy: "um", n: 30 });
+});
+await t("Açılış kapalıyken ücretsiz üye 31. mesajı gönderemez", () => msgAs(M, "um", "um_un", { t: "kapalı" }), false);
+await t("Üye açılış anahtarını değiştiremez", () => setDoc(doc(M, "config/genel"), { acilis: true }), false);
+await t("Yönetici açılış anahtarını açar", () => setDoc(doc(YON, "config/genel"), { acilis: true, updatedAt: Date.now() }), true);
+await t("Açılış anahtarına başka alan yazılamaz", () => setDoc(doc(YON, "config/genel"), { acilis: true, hile: 1 }), false);
+await wait(1200);
+await t("Açılışta ücretsiz üye 31. mesajı gönderir", () => msgAs(M, "um", "um_un", { t: "açılış" }), true);
+await t("Açılışta ücretsiz üye görüntülü arama başlatır", () => callAs(M, "um", "un", "video"), true);
+await t("Açılışta da kendine premium yazılamaz", () => setDoc(doc(M, "users/um/private/premium"), { active: true, until: Date.now() + 864e5, tier: "tam" }), false);
+await t("Yönetici açılışı kapatır", () => setDoc(doc(YON, "config/genel"), { acilis: false, updatedAt: Date.now() }), true);
+await wait(1200);
+await t("Açılış kapanınca sınır geri gelir", () => msgAs(M, "um", "um_un", { t: "tekrar kapalı" }), false);
+
 // ---- Yeni: kimler yazabilir, yazıyor/görüldü, yoruma cevap, kaydetme, doğrulama rozeti ----
 const G = ctx("ug"), H = ctx("uh"), I = ctx("ui");
 await env.withSecurityRulesDisabled(async c => { const d = c.firestore();

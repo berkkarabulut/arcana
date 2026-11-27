@@ -12,7 +12,7 @@ const krediSay=t=>Math.max(0,KREDI[t]||0);
 function premiumHakVar(son){if(!state.premium)return false;const s=KREDI[son];const ms=s&&s.toMillis?s.toMillis():0;return Date.now()-ms>864e5}
 // tek seferlik ürün satın al (sadece Play'den indirilen uygulamada)
 async function urunAl(sku,btn){
-  if(!IN_APP){openSheet(`<div class="sheet-head"><h2>Uygulamadan satın alınır</h2></div><p class="muted">Tek seferlik paketler şimdilik Google Play'den indirilen Kulis uygulamasında satılıyor. Web'den kartla ödeme yakında.</p>`);return}
+  if(!IN_APP){openSheet(`<div class="sheet-head"><h2>Uygulamalarla geliyor</h2></div>${uygHTML("Paketler uygulamalarla birlikte açılıyor","Öne çıkarma ve süper beğeni paketleri, çok yakında mağazalara çıkacak Kulis uygulamalarından alınabilecek.")}`);return}
   const svc=await playService();if(!svc){toast("Google Play ödemesi açılamadı. Uygulamayı güncelleyip tekrar dene.");return}
   if(btn)btn.disabled=true;
   try{

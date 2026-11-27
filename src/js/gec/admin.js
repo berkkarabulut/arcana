@@ -240,7 +240,11 @@ const ilkA=[["Üye oldu",yeni.length,"Bu dönemde açılan hesap"],["İlk tepkis
 function duyuruHTML(all){
   if(!R.duyG&&!R.duyY){R.duyY=true;KDB.duyuruGecmis().then(l=>{R.duyG=l;R.duyY=false;if($("#adm.open")&&ADM.tab==="duyuru")duyuruGecmisCiz()}).catch(()=>{R.duyG=[];R.duyY=false})}
   setTimeout(duyuruBagla,0);
-  return `<p class="hint" style="margin:0 0 10px">Yazdığın metin üyelerin bildirimlerine düşer ve bildirime izin verenlerin telefonuna gider. "Kulis duyurularını" kapatanlara ve sessiz saatindeki kişilere telefon bildirimi gitmez. Kısa ve net yaz.</p>
+  setTimeout(()=>{const a=$("#acAnahtar");if(a&&!a.dataset.b){a.dataset.b=1;a.onclick=async()=>{const yeni=!R.acilis;
+    if(!confirm(yeni?"Açılış dönemi açılsın mı?\n\nHerkes Kulis Tam gibi kullanır: sınırsız mesaj, arama, Eşleş. Premium satış ekranları gizlenir.":"Açılış dönemi kapansın mı?\n\nÜcretsiz sınırlar geri gelir, Premium satışı yeniden görünür."))return;
+    a.disabled=true;try{await KDB.setAcilis(yeni);toast(yeni?"Açılış dönemi açık":"Açılış dönemi kapandı")}catch(e){toast("Değiştirilemedi: "+(e.code||e.message))}finally{a.disabled=false}}}},0);
+  return `<div class="ac-adm"><span><b>Açılış dönemi</b><small>${R.acilis?"Açık: herkes her şeyi ücretsiz kullanıyor":"Kapalı: ücretsiz sınırlar ve Premium satışı geçerli"}</small></span><button class="btn ${R.acilis?"line":""} sm" id="acAnahtar">${R.acilis?"Kapat":"Aç"}</button></div>
+  <p class="hint" style="margin:0 0 10px">Yazdığın metin üyelerin bildirimlerine düşer ve bildirime izin verenlerin telefonuna gider. "Kulis duyurularını" kapatanlara ve sessiz saatindeki kişilere telefon bildirimi gitmez. Kısa ve net yaz.</p>
     <textarea id="duyMetin" class="city-search" rows="3" maxlength="180" placeholder="Örnek: Bu akşamın sorusu geldi: En son ne zaman ağladın? Gel cevapla 👀" style="width:100%;resize:vertical;padding:12px;font:inherit"></textarea>
     <div style="display:flex;justify-content:space-between;font-size:12px;opacity:.65;margin:4px 2px 12px"><span>Başlık: "Kulis"</span><span id="duySay">0/180</span></div>
     <div class="seg duy-kime" role="tablist" aria-label="Kime gidecek"><button role="tab" data-kime="herkes" class="${ADM.kime!=="kisi"?"on":""}">Herkese</button><button role="tab" data-kime="kisi" class="${ADM.kime==="kisi"?"on":""}">Bir kişiye</button></div>

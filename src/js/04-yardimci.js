@@ -12,11 +12,19 @@ function grow(t){t.style.height="auto";t.style.height=Math.min(t.scrollHeight,15
 function save(){try{localStorage.setItem("itiraf_me",JSON.stringify(state.me))}catch(e){}}
 const userOf=k=>k==="me"?state.me:U[k];
 function av(k,size=36,noZ){const u=userOf(k),ph=(k!=="me"&&u.realAv)||u.photo;return `<span class="av" style="width:${size}px;height:${size}px;background:${ph?"var(--yuzey2)":u.c};font-size:${size*.42}px">${ph?`<img src="${presetURI(ph)}" alt="">`:esc(u.n.charAt(0).toLocaleUpperCase("tr"))}${noZ?"":`<span class="z glyph">${Z[u.s].g}</span>`}</span>`}
-const isPrem=k=>k==="me"?state.premium:!!(U[k]&&U[k].prem);
+const isPrem=k=>k==="me"?(state.premium&&!(R.acilis&&!state.premUntil)):!!(U[k]&&U[k].prem);// açılışta herkese açık olduğu için tacı sadece gerçek abonelik gösterir
 const PB='<svg class="pb" viewBox="0 0 24 24" aria-label="Premium üye" role="img"><title>Premium üye</title><path fill="#E9B96E" d="M4 8l4.5 4L12 5l3.5 7L20 8l-1.6 10H5.6z"/><rect x="5.5" y="19" width="13" height="2" rx="1" fill="#E9B96E"/></svg>';
 const pb=k=>isPrem(k)?PB:"";
 const dgb=k=>k!=="me"&&U[k]&&U[k].dg?`<span class="dg" title="Doğrulanmış profil" aria-label="Doğrulanmış profil">✓</span>`:"";
 function who(k,sub){const u=userOf(k);return `<button class="who" data-prof="${k}">${av(k)}<span><b>${esc(u.n)}${pb(k)}${dgb(k)}</b><small>${Z[u.s].n}${sub?", "+sub:""}</small></span></button>`}
+/* Uygulamalar: mağazalara çıkınca sadece burayı değiştir ("yakinda" -> mağaza adresi) */
+const UYGULAMA={android:"yakinda",ios:"yakinda"};
+const UYG_IC='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="6" y="2.5" width="12" height="19" rx="2.5"/><path d="M10.5 18.5h3"/></svg>';
+function uygHTML(baslik,metin){
+  const k=(ad,d)=>d==="yakinda"?`<div class="uyg-k"><span class="uyg-ki" aria-hidden="true">${UYG_IC}</span><span><b>${ad}</b><small>Çok yakında</small></span></div>`:`<a class="uyg-k" href="${d}" target="_blank" rel="noopener"><span class="uyg-ki" aria-hidden="true">${UYG_IC}</span><span><b>${ad}</b><small>Hemen indir</small></span></a>`;
+  return `<div class="uyg"><b class="uyg-b">${baslik||"Kulis uygulamaları yolda"}</b><p>${metin||"Android ve iPhone uygulamaları çok yakında mağazalarda. O zamana kadar Kulis'i tarayıcından kullanabilir ya da ana ekranına ekleyip uygulama gibi açabilirsin."}</p>
+  <div class="uyg-l">${k("Android",UYGULAMA.android)}${k("iPhone",UYGULAMA.ios)}</div>${isStandalone()?"":`<button class="btn line wide uyg-ekle" data-uygekle>Ana ekrana ekle</button>`}</div>`}
+document.addEventListener("click",e=>{if(e.target.closest("[data-uygekle]"))installApp()});
 /* Boş durum kutusu: simge, başlık, açıklama, isteğe bağlı düğme */
 function bosHTML(ic,baslik,metin,btn){return `<div class="bos"><span class="bos-i" aria-hidden="true">${ic||""}</span>${baslik?`<b>${baslik}</b>`:""}<p>${metin}</p>${btn||""}</div>`}
 const IC={

@@ -25,7 +25,7 @@ function setPremiumFrom(p){
   const on=!!(p&&p.active&&(p.until||0)>Date.now());
   // Premium sadece satın alanlarda. Yönetici ve moderatörlerde her şey açık.
   // Google Play inceleme hesabı: satın alma yapamadıkları için tüm özellikler açık
-  const web=REMOTE&&((WEB_FREE_PREMIUM&&!IN_APP)||R.admin===true||R.isMod===true||["kulistrinfo@gmail.com"].includes(String(KDB.email||"").toLowerCase()));
+  const web=REMOTE&&((WEB_FREE_PREMIUM&&!IN_APP)||R.acilis===true||R.admin===true||R.isMod===true||["kulistrinfo@gmail.com"].includes(String(KDB.email||"").toLowerCase()));
   const was=state.premium,wasT=state.tier;state.premium=web||on;state.premUntil=on?p.until:0;
   state.tier=web?"tam":on?(p.tier||(String(p.productId||"").split("_")[1])||"tam"):null;
   if(wasT!==state.tier&&state.me&&was===state.premium){render();if(openIdx>=0)drawChat()}
@@ -64,9 +64,9 @@ function showPremiumRemote(src){
    <div class="pr-kart" role="radiogroup" aria-label="Paket">${TIERS.map(x=>`<button class="pr-k" role="radio" aria-checked="${tier===x.k}" data-tier="${x.k}">
       <span class="pr-k-u"><b>${x.n}</b>${x.k==="ses"?`<i>Önerilen</i>`:""}<span class="pr-f">${fiyat(x.k)}</span></span>
       <span class="pr-k-l">${FARK[x.k].map(t=>`<span>${IC.chk}${t}</span>`).join("")}</span></button>`).join("")}</div>
-   ${web?`<p class="prem-free" style="margin-top:12px">${IC.spark}<span>Premium, Google Play'deki <b>Kulis uygulamasından</b> alınır. Aldığın üyelik aynı hesapla web'de de geçerli olur.</span></p>
-     <a class="btn gold wide" href="https://play.google.com/store/apps/details?id=com.kulistr.app" target="_blank" rel="noopener" style="display:flex;justify-content:center;align-items:center;text-decoration:none">Uygulamayı Google Play'den aç</a><button class="btn line wide" id="buyX" style="margin-top:8px">Kapat</button>
-     <p class="hint" style="text-align:center;margin-top:10px">Aboneliğin varsa <a href="${ABONE_URL}" target="_blank" rel="noopener">Google Play > Abonelikler</a>'den istediğin zaman iptal edebilirsin.</p>`
+   ${web?`${uygHTML("Premium, uygulamalarla birlikte açılıyor","Kulis'in Android ve iPhone uygulamaları çok yakında mağazalarda. Premium'u oradan alabileceksin, aldığın üyelik aynı hesapla web'de de geçerli olacak. O zamana kadar itiraf, sohbet ve eşleşme ücretsiz.")}
+     <button class="btn line wide" id="buyX" style="margin-top:8px">Kapat</button>
+     ${state.premUntil?`<p class="hint" style="text-align:center;margin-top:10px">Aboneliğini <a href="${ABONE_URL}" target="_blank" rel="noopener">Google Play > Abonelikler</a>'den istediğin zaman iptal edebilirsin.</p>`:""}`
     :`<button class="btn gold wide" id="buy" style="margin-top:12px">${T.n}, ${PER[1].toLocaleLowerCase("tr")} ${fiyat(tier)} ile abone ol</button>
      <p class="hint" style="text-align:center">Her dönem sonunda otomatik yenilenir. İstediğin zaman <a href="${ABONE_URL}" target="_blank" rel="noopener">Google Play > Abonelikler</a>'den iptal edersin; dönem sonuna kadar premium kalırsın.</p>`}`);
    const x=$("#buyX");if(x)x.onclick=closeSheet;

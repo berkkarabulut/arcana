@@ -32,8 +32,10 @@ function showSettings(){
       <h3 class="ayar-h">Sessiz saatler</h3>
       ${swHTML("quiet",!!S.quiet,"Sessiz saatleri aç","Bu saatlerde telefonuna bildirim gelmez, uygulama içinde yine görünür")}
       <div class="set-q" ${S.quiet?"":"hidden"}><label>Başlangıç<select id="qF">${hrs(qf)}</select></label><label>Bitiş<select id="qT">${hrs(qt)}</select></label></div>`,acikGrup==="bildirim")}
-    ${grup("premium",AY_IC.tac,"Premium",state.premUntil?`${new Date(state.premUntil).toLocaleDateString("tr-TR")} tarihine kadar açık`:"Abonelik ve iptal",`
-      <a class="set-row" href="${ABONE_URL}" target="_blank" rel="noopener"><span><b>Aboneliğimi yönet / iptal et</b><small>Google Play'den, istediğin zaman. İptal edersen dönem sonuna kadar premium kalır.</small></span></a>`,acikGrup==="premium")}
+    ${grup("premium",AY_IC.tac,"Premium",state.premUntil?`${new Date(state.premUntil).toLocaleDateString("tr-TR")} tarihine kadar açık`:R.acilis?"Açılış dönemi, ücretsiz":"Abonelik ve iptal",`
+      ${R.acilis&&!state.premUntil?`<div class="set-row"><span><b>Açılış dönemi: her şey ücretsiz</b><small>Mesaj, arama ve eşleşmede sınır yok. Android ve iPhone uygulamaları çıkınca Premium başlayacak; açılışta katılanlara Kurucu üye rozeti ve 1 ay Premium hediye.</small></span></div>`:""}
+      ${!R.acilis&&!state.premUntil&&!IN_APP?`<div class="set-row"><span><b>Premium uygulamalarla geliyor</b><small>Android ve iPhone uygulamaları çok yakında mağazalarda. Premium'u oradan alabileceksin.</small></span></div>`:""}
+      ${state.premUntil||(IN_APP&&!R.acilis)?`<a class="set-row" href="${ABONE_URL}" target="_blank" rel="noopener"><span><b>Aboneliğimi yönet / iptal et</b><small>Google Play'den, istediğin zaman. İptal edersen dönem sonuna kadar premium kalır.</small></span></a>`:""}`,acikGrup==="premium")}
     <button class="btn wide" style="margin-top:18px" onclick="closeSheet()">Tamam</button>`);
   // aynı anda tek grup açık kalsın, hangisinin açık olduğu hatırlansın
   $("#sheet").querySelectorAll(".ayar-grup").forEach(d=>d.addEventListener("toggle",()=>{if(!d.open)return;R.ayarGrup=d.dataset.grup;$("#sheet").querySelectorAll(".ayar-grup").forEach(x=>{if(x!==d)x.open=false})}));

@@ -191,3 +191,27 @@
 .duy-k small,.duy-sec small{font-size:12px;color:var(--soluk)}
 .duy-sec{margin-top:10px;border:1px solid var(--nar);background:color-mix(in srgb,var(--nar) 8%,transparent)}
 .duy-k .au-av,.duy-sec .au-av{flex:0 0 auto;border-radius:50%;display:grid;place-items:center;font-weight:800;color:#14101A;font-size:13px}
+/* ---- Uygulamalar yakında kartı ---- */
+.uyg{display:flex;flex-direction:column;gap:10px;margin:12px 0;padding:16px;border-radius:18px;border:1px solid var(--cizgi);background:var(--yuzey)}
+.uyg-b{font-size:16px}
+.uyg p{margin:0;font-size:14px;line-height:1.5;color:var(--soluk)}
+.uyg-l{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.uyg-k{display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:14px;background:var(--yuzey2);color:var(--kagit);text-decoration:none}
+.uyg-ki{display:grid;place-items:center;width:34px;height:34px;flex:0 0 auto;border-radius:10px;color:var(--nar);background:color-mix(in srgb,var(--nar) 14%,transparent)}
+.uyg-ki svg{width:19px;height:19px}
+.uyg-k span:last-child{display:flex;flex-direction:column;min-width:0}
+.uyg-k b{font-size:14px}.uyg-k small{font-size:12px;color:var(--soluk)}
+.uyg-ekle{margin-top:2px}
+/* ---- Açılış dönemi ---- */
+.prem-pill.ac-pill{display:inline-flex;align-items:center;gap:5px}
+.prem-pill.ac-pill svg{width:14px;height:14px}
+.ac-p{display:flex;flex-direction:column;gap:10px;text-align:center;align-items:stretch}
+.ac-i{align-self:center;display:grid;place-items:center;width:58px;height:58px;border-radius:18px;color:var(--nar);background:color-mix(in srgb,var(--nar) 14%,transparent)}
+.ac-i svg{width:28px;height:28px}
+.ac-p h2{margin:2px 0 0;font-size:22px;line-height:1.25}
+.ac-p .muted{margin:0;font-size:14px;line-height:1.5}
+.ac-hediye{display:flex;flex-direction:column;gap:4px;padding:14px;border-radius:16px;text-align:left;border:1px solid color-mix(in srgb,#C9A24E 40%,var(--cizgi));background:linear-gradient(135deg,color-mix(in srgb,#C9A24E 12%,var(--yuzey)),var(--yuzey))}
+.ac-hediye>b{color:#C9A24E;font-size:14px}.ac-hediye span{font-size:14px;line-height:1.45}
+.ac-p .uyg{text-align:left;margin:0}
+.ac-adm{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:12px 14px;margin:0 0 14px;border-radius:14px;border:1px solid var(--cizgi);background:var(--yuzey)}
+.ac-adm span{display:flex;flex-direction:column;gap:2px}.ac-adm small{font-size:12.5px;color:var(--soluk)}

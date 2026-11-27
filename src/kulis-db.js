@@ -501,6 +501,12 @@ const KDB = {
   // ---------- 5651 erişim kaydı (IP sunucuda tutulur) ----------
   logAccess(act) { if (IS_TEST || !auth.currentUser) return Promise.resolve(); return callFn("erisimKaydi", { act }).catch(() => {}); },
 
+  // ---------- Açılış dönemi (config/genel.acilis): açıkken herkes Kulis Tam ----------
+  listenGenel(cb) {
+    stop("genel");
+    unsubs.genel = onSnapshot(doc(db, "config", "genel"), s => cb(s.exists() ? s.data() : null), e => cb(null));
+  },
+  async setAcilis(acik) { await setDoc(doc(db, "config", "genel"), { acilis: !!acik, updatedAt: Date.now(), ...(acik ? { acilisBas: Date.now() } : {}) }, { merge: true }); },
   // ---------- Premium (Google Play) ----------
   listenPremium(cb) {
     stop("prem");

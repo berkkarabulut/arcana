@@ -517,7 +517,12 @@ exports.anonimSoru = onCall({ enforceAppCheck: false, maxInstances: 5 }, async (
 // ---------------- Krediler: öne çıkarma ve süper beğeni ----------------
 // users/{uid}/private/kredi: { oneCikar, superBegeni, sonBoost, sonSuper } — sadece sunucu yazar.
 // Premium üyeye her 24 saatte 1 öne çıkarma ve 1 süper beğeni ücretsiz; fazlası satın alınan krediden düşer.
+async function acilisAcik() {
+  const g = await db.doc("config/genel").get().catch(() => null);
+  return !!(g && g.exists && g.data().acilis === true);
+}
 async function premiumMu(uid) {
+  if (await acilisAcik()) return true; // açılış döneminde herkes Kulis Tam
   const p = await db.doc(`users/${uid}/private/premium`).get();
   return p.exists && p.data().active === true && (p.data().until || 0) > Date.now();
 }

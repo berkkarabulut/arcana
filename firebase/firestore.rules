@@ -24,14 +24,19 @@ service cloud.firestore {
     // Yönetici/moderatör ve Google Play inceleme hesabında her şey açık.
     function premPath() { return /databases/$(database)/documents/users/$(request.auth.uid)/private/premium; }
     function staffOrReviewer() { return request.auth.token.get('email', '') == 'kulistrinfo@gmail.com' || isMod(); }
+    // Açılış dönemi: config/genel.acilis true iken herkes Kulis Tam gibi (yönetici panelinden açılıp kapanır)
+    function acilisAcik() {
+      return exists(/databases/$(database)/documents/config/genel)
+        && get(/databases/$(database)/documents/config/genel).data.get('acilis', false) == true;
+    }
     function premOk() {
-      return (exists(premPath()) && get(premPath()).data.get('active', false) == true
+      return acilisAcik() || (exists(premPath()) && get(premPath()).data.get('active', false) == true
               && get(premPath()).data.get('until', 0) > request.time.toMillis())
         || staffOrReviewer();
     }
     // paket: sohbet < ses (sesli arama) < tam (görüntülü arama dahil)
     function tierOk(need) {
-      return (exists(premPath()) && get(premPath()).data.get('active', false) == true
+      return acilisAcik() || (exists(premPath()) && get(premPath()).data.get('active', false) == true
               && get(premPath()).data.get('until', 0) > request.time.toMillis()
               && (need == 'sohbet' || get(premPath()).data.get('tier', 'tam') in (need == 'ses' ? ['ses','tam'] : ['tam'])))
         || staffOrReviewer();
@@ -61,7 +66,10 @@ service cloud.firestore {
     // Ayarlar: yönetici listesi sadece Firebase panelinden; yasaklı kelimeler yönetici panelinden
     match /config/{doc} {
       allow read: if signedIn();
-      allow write: if (doc == 'moderation' && isAdmin()
+      allow write: if (doc == 'genel' && isAdmin()
+          && request.resource.data.keys().hasOnly(['acilis','acilisBas','updatedAt'])
+          && request.resource.data.acilis is bool)
+        || (doc == 'moderation' && isAdmin()
         && request.resource.data.keys().hasOnly(['re','words','updatedAt'])
         && request.resource.data.re is string && request.resource.data.re.size() < 20000)
         || (doc == 'mods' && isAdmin() && request.resource.data.keys().hasOnly(['uids','updatedAt'])
