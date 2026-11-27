@@ -8,12 +8,13 @@ function bildirimSorUygun(){
   if(!REMOTE||!state.me||!R.uid||!R.pushOk||typeof Notification==="undefined")return false;
   if(Notification.permission!=="default")return false;
   if(LS("kulis_push_sor",0)>Date.now())return false;
+  if(!popupHakki())return false;
   if($("#scrim")&&$("#scrim").classList.contains("open"))return false;
   if(openIdx>=0)return false;// sohbetin ortasında bölme
   return true;
 }
 function bildirimSorPenceresi(){
-  LSset("kulis_push_sor",Date.now()+BILDIRIM_SOR_ARA);track("bildirim_sor");
+  LSset("kulis_push_sor",Date.now()+BILDIRIM_SOR_ARA);popupKullan();track("bildirim_sor");
   openSheet(`<div class="bs-p">
     <span class="bs-i" aria-hidden="true">${AY_IC.zil}</span>
     <h2>Kimse sana yazdığında haberin olsun</h2>

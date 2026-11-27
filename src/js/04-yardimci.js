@@ -17,6 +17,10 @@ const PB='<svg class="pb" viewBox="0 0 24 24" aria-label="Premium üye" role="im
 const pb=k=>isPrem(k)?PB:"";
 const dgb=k=>k!=="me"&&U[k]&&U[k].dg?`<span class="dg" title="Doğrulanmış profil" aria-label="Doğrulanmış profil">✓</span>`:"";
 function who(k,sub){const u=userOf(k);return `<button class="who" data-prof="${k}">${av(k)}<span><b>${esc(u.n)}${pb(k)}${dgb(k)}</b><small>${Z[u.s].n}${sub?", "+sub:""}</small></span></button>`}
+/* Kendiliğinden açılan pencereler: günde en fazla bir tane (kişiyi bunaltmamak için) */
+const yerelGun=()=>{const d=new Date();return d.getFullYear()+"-"+(d.getMonth()+1)+"-"+d.getDate()};
+function popupHakki(){return LS("kulis_popup_gun","")!==yerelGun()}
+function popupKullan(){LSset("kulis_popup_gun",yerelGun())}
 /* Uygulamalar: mağazalara çıkınca sadece burayı değiştir ("yakinda" -> mağaza adresi) */
 const UYGULAMA={android:"yakinda",ios:"yakinda"};
 const UYG_IC='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="6" y="2.5" width="12" height="19" rx="2.5"/><path d="M10.5 18.5h3"/></svg>';

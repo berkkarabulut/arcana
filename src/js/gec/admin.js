@@ -70,20 +70,23 @@ function openAdminRemote(){
   const errs=R.errors||[];
   const tabs=R.admin?[["uye","Kullanıcılar",all.length],["sikayet","Şikâyetler",openReps.length],["mod","Moderatörler",(R.mods||[]).length||null],["destek","Destek",(R.ekipList||[]).filter(x=>x.staffUnread).length||null],["dogru","Doğrulama",(R.dgBek||[]).length||null],["huni","Huni",null],["duyuru","Bildirim gönder",null],["kelime","Kelimeler",null],["hata","Hatalar",errs.length]]:[["sikayet","Şikâyetler",openReps.length],["destek","Destek",(R.ekipList||[]).filter(x=>x.staffUnread).length||null],["dogru","Doğrulama",(R.dgBek||[]).length||null]];
   let body="";
+  if(ADM.tab==="uye"&&!R.bdDurum&&!R.bdYuk){R.bdYuk=true;KDB.adminBildirimDurum().then(d=>{R.bdDurum=d||{};R.bdYuk=false;if($("#adm.open")&&ADM.tab==="uye")openAdminRemote()}).catch(()=>{R.bdDurum={};R.bdYuk=false})}
+  const bd=R.bdDurum||{},bdAcik=all.filter(u=>bd[u.uid]&&bd[u.uid].acik),bdKapali=all.filter(u=>R.bdDurum&&!(bd[u.uid]&&bd[u.uid].acik));
   if(ADM.tab==="uye"){
     const q=lowTR(ADM.q.trim());
-    let list=ADM.f==="online"?online:ADM.f==="bugun"?activeToday:ADM.f==="yeni"?newWeek:ADM.f==="prem"?all.filter(u=>u.prem):ADM.f==="dg"?all.filter(u=>u.dg):ADM.f==="dgist"?all.filter(u=>(R.ekipList||[]).some(x=>x.id===u.uid&&/rozet/i.test(x.last||""))):all;
+    let list=ADM.f==="online"?online:ADM.f==="bugun"?activeToday:ADM.f==="yeni"?newWeek:ADM.f==="prem"?all.filter(u=>u.prem):ADM.f==="bdacik"?bdAcik:ADM.f==="bdkapali"?bdKapali:ADM.f==="dg"?all.filter(u=>u.dg):ADM.f==="dgist"?all.filter(u=>(R.ekipList||[]).some(x=>x.id===u.uid&&/rozet/i.test(x.last||""))):all;
     if(q)list=list.filter(u=>lowTR(u.n||"").includes(q));
     list=[...list].sort((a,b)=>b.seen-a.seen);
     const row=u=>{const on=now-u.seen<ONLINE_MS,z=Z[u.s]||{g:"",n:""},op=ADM.open===u.uid,pv=ADM.priv[u.uid];
       return `<div class="au ${op?"op":""}"><button class="au-row" data-au="${u.uid}" aria-expanded="${op}">
         <span class="au-av" style="background:${esc(u.c||"#7CC4FF")}">${esc((u.n||"?").charAt(0).toLocaleUpperCase("tr"))}<i class="${on?"on":""}"></i></span>
-        <span class="au-main"><b>${esc(u.n||"?")}${u.me?" <em>sen</em>":""}${u.prem?` <em class="pr">Premium</em>`:""}${u.dg?` <span class="dg" title="Doğrulanmış">✓</span>`:""}${R.bans&&R.bans.has(u.uid)?`<span class="adm-ban">Banlı</span>`:""}</b><small>${z.g} ${z.n} · ${esc(u.g||"—")} · ${esc(u.age||"—")}</small></span>
+        <span class="au-main"><b>${esc(u.n||"?")}${u.me?" <em>sen</em>":""}${u.prem?` <em class="pr">Premium</em>`:""}${u.dg?` <span class="dg" title="Doğrulanmış">✓</span>`:""}${R.bans&&R.bans.has(u.uid)?`<span class="adm-ban">Banlı</span>`:""}${R.bdDurum?(bd[u.uid]&&bd[u.uid].acik?` <span class="au-bd on" title="Bildirim açık: ${esc(bd[u.uid].cihaz.join(", "))}">🔔</span>`:` <span class="au-bd" title="Bildirim kapalı">🔕</span>`):""}</b><small>${z.g} ${z.n} · ${esc(u.g||"—")} · ${esc(u.age||"—")}</small></span>
         <span class="au-side"><span class="${on?"au-on":""}">${on?"Şu an sitede":relTime(u.seen)}</span><small>${u.posts} itiraf</small></span></button>
         ${op?`<div class="au-det">
           <dl><div><dt>Kayıt</dt><dd>${fmtDate(u.created)}</dd></div><div><dt>Son görülme</dt><dd>${on?"Şu an sitede":fmtDate(u.seen)}</dd></div>
           ${pv===undefined?`<div><dt>Gizli bilgiler</dt><dd class="muted">Yükleniyor…</dd></div>`:pv===null?`<div><dt>Gizli bilgiler</dt><dd class="muted">Görülemedi</dd></div>`:
           `<div><dt>Ad soyad</dt><dd>${esc((pv.ad||"")+" "+(pv.soyad||""))||"—"}</dd></div><div><dt>E-posta</dt><dd>${esc(pv.email||"—")}</dd></div><div><dt>Doğum tarihi</dt><dd>${pv.b?`${pv.b.d} ${AYLAR[pv.b.m-1]} ${pv.b.y}`:"—"}</dd></div><div><dt>Giriş</dt><dd>${{google:"Google",email:"E-posta bağlantısı",apple:"Apple"}[pv.provider]||esc(pv.provider||"—")}</dd></div>`}
+          <div><dt>Telefon bildirimi</dt><dd>${!R.bdDurum?"Yükleniyor…":bd[u.uid]&&bd[u.uid].acik?"Açık ("+esc(bd[u.uid].cihaz.join(", "))+")":"Kapalı"}</dd></div>
           <div><dt>Kullanıcı kimliği</dt><dd class="au-id">${u.uid}</dd></div></dl>
           ${u.me?"":`<button class="btn line sm" data-audu="${u.uid}" style="margin:8px 0">Bildirim gönder</button>`}
           ${u.me?"":ADM.confirm===u.uid?`<div class="au-del"><p>Silmek için takma adı yaz: <b>${esc(u.n)}</b></p><div class="adm-add"><input class="city-search" id="auDelIn" autocomplete="off" maxlength="20"><button class="btn au-danger-fill" id="auDelGo" disabled>Kalıcı sil</button></div><button class="dice" id="auDelX" style="margin-top:8px">Vazgeç</button></div>`
@@ -93,9 +96,10 @@ function openAdminRemote(){
       <div><b>${all.length}</b><small>Toplam üye</small><i>son 200 kayıt</i></div>
       <div><b class="g">${online.length}</b><small>Şu an sitede</small><i>son 5 dakika</i></div>
       <div><b>${activeToday.length}</b><small>Bugün giren</small><i>gece yarısından beri</i></div>
-      <div><b>${newToday.length}</b><small>Bugün kayıt</small><i>bu hafta ${newWeek.length}</i></div></div>
+      <div><b>${newToday.length}</b><small>Bugün kayıt</small><i>bu hafta ${newWeek.length}</i></div>
+      <div><b class="g">${R.bdDurum?bdAcik.length:"…"}</b><small>Bildirimi açık</small><i>${R.bdDurum?`kapalı ${bdKapali.length}`:"yükleniyor"}</i></div></div>
       <input class="city-search" id="auQ" placeholder="Takma adla ara" value="${esc(ADM.q)}" autocomplete="off" style="margin:14px 0 8px">
-      <div class="au-chips">${[["hepsi","Hepsi",all.length],["online","Şu an sitede",online.length],["bugun","Bugün giren",activeToday.length],["yeni","Son 7 gün kayıt",newWeek.length],["prem","Premium",all.filter(u=>u.prem).length],["dg","✓ Doğrulanmış",all.filter(u=>u.dg).length],["dgist","Rozet isteyen",all.filter(u=>(R.ekipList||[]).some(x=>x.id===u.uid&&/rozet/i.test(x.last||""))).length]].map(([k,n,c])=>`<button class="c" data-auf="${k}" aria-pressed="${ADM.f===k}">${n} <span>${c}</span></button>`).join("")}</div>
+      <div class="au-chips">${[["hepsi","Hepsi",all.length],["online","Şu an sitede",online.length],["bugun","Bugün giren",activeToday.length],["yeni","Son 7 gün kayıt",newWeek.length],["prem","Premium",all.filter(u=>u.prem).length],["bdacik","🔔 Bildirim açık",R.bdDurum?bdAcik.length:"…"],["bdkapali","🔕 Bildirim kapalı",R.bdDurum?bdKapali.length:"…"],["dg","✓ Doğrulanmış",all.filter(u=>u.dg).length],["dgist","Rozet isteyen",all.filter(u=>(R.ekipList||[]).some(x=>x.id===u.uid&&/rozet/i.test(x.last||""))).length]].map(([k,n,c])=>`<button class="c" data-auf="${k}" aria-pressed="${ADM.f===k}">${n} <span>${c}</span></button>`).join("")}</div>
       <div class="au-list">${list.length?list.map(row).join(""):`<p class="muted" style="font-size:14px;padding:18px 4px">Bu filtrede kullanıcı yok.</p>`}</div>`;
   } else if(ADM.tab==="sikayet"){
     const done=reps.filter(r=>r.status!=="bekliyor").slice(0,30);

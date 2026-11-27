@@ -18,6 +18,7 @@ function gorevGetir(bildir,zorla){
   if(!bildir&&!zorla&&R.gorev&&Date.now()-gorevSon<60e3)return Promise.resolve(R.gorev);
   gorevYukleniyor=KDB.gorevDurum(bildir).then(g=>{const once=R.gorev;R.gorev=g;gorevSon=Date.now();gorevYukleniyor=null;
     if(once&&!once.tamam&&g.tamam)gorevKutla();
+    else if(once&&once.gorevler){const yeni=GOREV_LISTE.filter(x=>!once.gorevler[x.k]&&g.gorevler[x.k]);if(yeni.length&&typeof gorevYesil==="function")gorevYesil(yeni[0])}
     if(state.tab==="ben")render();if($("#gvIc"))gorevCiz();return g}).catch(()=>{gorevYukleniyor=null;return R.gorev});
   return gorevYukleniyor;
 }
@@ -58,7 +59,7 @@ function gorevYap(k,btn){
 function showGorevler(){
   openSheet(`<div class="sheet-head"><h2>Kurucu görevleri</h2></div><div id="gvIc"></div>`);gorevCiz();gorevGetir(null,true);track("gorev_ac");
 }
-function gorevKutla(){toast("Bütün kurucu görevlerini bitirdin! 1 ay Premium hakkın hazır 🎉");track("gorev_tamam")}
+function gorevKutla(){if(typeof gorevYesil==="function")gorevYesil(null,"Bütün kurucu görevlerini bitirdin! 1 ay Premium hakkın hazır 🎉");else toast("Bütün kurucu görevlerini bitirdin!");track("gorev_tamam")}
 // Profilim'e kart: kısayol kutucuklarının hemen altına
 {const r0=render;render=function(){r0.apply(this,arguments);
   if(!REMOTE||!R.acilis||state.tab!=="ben"||!state.me)return;

@@ -272,7 +272,39 @@ exports.senYokken = onSchedule({ schedule: "40 19 * * *", timeZone: "Europe/Ista
       seriGitti++;
     }
   } catch (e) { logger.warn("seri", String(e && e.message)); }
-  logger.info("senYokken", { aday: us.size, gitti, seriGitti });
+  // Kurucu görevi: dün itiraf yazmış, bugün yazmamış, 3 günlük itiraf serisini henüz tamamlamamış olana hatırlatma (günde en fazla bir)
+  let gorevGitti = 0;
+  try {
+    if (await acilisAcik()) {
+      const bugun = trGun(simdi), dun = trGun(simdi - G), evvel = trGun(simdi - 2 * G);
+      const ps = await db.collection("posts").where("ts", ">=", admin.firestore.Timestamp.fromMillis(simdi - 3 * G)).limit(1000).get();
+      const gunler = {};
+      for (const p of ps.docs) {
+        const v = p.data(); if (!v.ts || String(v.t || "").trim().length < GOREV_ITIRAF_MIN) continue;
+        let uid = v.uid;
+        if (!uid) { const o = await db.doc(`anonOwners/${p.id}`).get().catch(() => null); uid = o && o.exists ? o.data().uid : null; }
+        if (!uid) continue;
+        (gunler[uid] = gunler[uid] || new Set()).add(trGun(v.ts.toMillis()));
+      }
+      for (const [uid, set] of Object.entries(gunler)) {
+        if (!set.has(dun) || set.has(bugun)) continue;
+        const g = await db.doc(`users/${uid}/private/gorev`).get();
+        if (g.exists && g.data().tamam) continue;
+        const seri = set.has(evvel) ? 2 : 1;
+        const st = await settingsOf(uid);
+        if (st.n && st.n.hatirla === false) continue;
+        if (inQuiet(st)) continue;
+        const m = await db.doc(`users/${uid}/meta/gorevHatirla`).get();
+        if (m.exists && m.data().gun === bugun) continue;
+        const toks = await db.collection(`users/${uid}/push`).limit(1).get();
+        if (toks.empty) continue;
+        await sendPush(uid, { title: "Kurucu görevi", body: seri === 2 ? "İtiraf serin 2/3. Bugün bir itiraf daha yaz, görev tamam ✅" : "Dün itiraf yazdın, harika. Bugün de yaz, serin 2/3 olsun.", link: SITE, tag: "gorev" }, 5 * 3600);
+        await db.doc(`users/${uid}/meta/gorevHatirla`).set({ gun: bugun });
+        gorevGitti++;
+      }
+    }
+  } catch (e) { logger.warn("gorevHatirla", String(e && e.message)); }
+  logger.info("senYokken", { aday: us.size, gitti, seriGitti, gorevGitti });
 });
 
 // ---------------- Misafir vitrini ----------------
@@ -731,4 +763,20 @@ exports.gorevDurum = onCall({ enforceAppCheck: false, maxInstances: 10 }, async 
   const tamam = Object.values(gorevler).every(Boolean);
   if (tamam && !g.tamam) await ref.set({ tamam: true, tamamTs: FV.serverTimestamp() }, { merge: true });
   return { gorevler, gunSay: (g.gunler || []).length, itirafSeri: enUzun, tamam: tamam || !!g.tamam };
+});
+
+// ---------------- Yönetici: kimin telefon bildirimi açık ----------------
+// Sadece yönetici. Her üye için: bildirim kaydı var mı, hangi cihaz türleri. Token'ların kendisi gönderilmez.
+exports.adminBildirimDurum = onCall({ enforceAppCheck: false, timeoutSeconds: 120 }, async (req) => {
+  const me = req.auth && req.auth.uid;
+  if (!me) throw new HttpsError("unauthenticated", "giris");
+  if (!(await rolesOf(me)).admin) throw new HttpsError("permission-denied", "yetki");
+  const us = await db.collection("users").select().get();
+  const durum = {};
+  await Promise.all(us.docs.map(async u => {
+    const p = await db.collection(`users/${u.id}/push`).get();
+    const cihaz = [...new Set(p.docs.map(d => { const ua = String(d.data().ua || ""); return /Android/.test(ua) ? "Android" : /iPhone|iPad/.test(ua) ? "iPhone" : ua ? "Bilgisayar" : "?"; }))];
+    durum[u.id] = { acik: !p.empty, cihaz };
+  }));
+  return { durum };
 });
