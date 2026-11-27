@@ -318,7 +318,7 @@ try{const rf=new URLSearchParams(location.search).get("ref");rf&&/^[A-Za-z0-9]{1
     <p class="hint">\u0130stedi\u011Fin zaman Ayarlar'dan kapatabilirsin.</p></div>`),$("#bsNo").onclick=()=>{track("bildirim_sor_hayir"),closeSheet()},$("#bsAc").onclick=async()=>{closeSheet(),await turnPushOn(null)}}async function bildirimSessizKaydet(){if(!(!REMOTE||!R.uid||!R.pushOk||typeof Notification>"u"||Notification.permission!=="granted")&&!(LS("kulis_push_on",!1)&&localStorage.getItem("kulis_push")))try{await KDB.enablePush(),LSset("kulis_push_on",!0),track("bildirim_sessiz_kayit")}catch{}}{let ilk=0,bitti=!1;const t=setInterval(()=>{if(!bitti){if(REMOTE&&R.uid&&R.pushOk&&typeof Notification<"u"&&Notification.permission==="granted"){bitti=!0,clearInterval(t),bildirimSessizKaydet();return}if(!bildirimSorUygun()){ilk=0;return}if(!ilk){ilk=Date.now();return}Date.now()-ilk>=(IN_APP?6e3:2e4)&&(bitti=!0,clearInterval(t),bildirimSorPenceresi())}},3e3)}
 
 
-var __GEC={"admin":"assets/gec-admin.a3dad2997c.js","yasal":"assets/gec-yasal.d64032b355.js"},__gecP={},__ilk={};
+var __GEC={"admin":"assets/gec-admin.5eaa26c1e4.js","yasal":"assets/gec-yasal.d64032b355.js"},__gecP={},__ilk={};
 function __yukle(k){return __gecP[k]||(__gecP[k]=new Promise(function(ok,no){var s=document.createElement("script");s.src=__GEC[k];s.async=true;s.onload=ok;s.onerror=function(){delete __gecP[k];no(new Error("parça yüklenemedi"))};document.head.appendChild(s)}))}
 function openAdmin(){var a=arguments,t=this;return __yukle("admin").then(function(){if(window.openAdmin===__ilk.openAdmin)throw new Error("openAdmin yüklenmedi");return window.openAdmin.apply(t,a)}).catch(function(e){console.error(e);try{toast("Bağlantı sorunu, tekrar dene.")}catch(x){}})}
 __ilk.openAdmin=openAdmin;
