@@ -36,7 +36,7 @@ self.addEventListener("push", e => {
     const wins = await self.clients.matchAll({ type: "window", includeUncontrolled: true });
     if (wins.some(w => w.visibilityState === "visible")) return;
     await self.registration.showNotification(d.title || "Kulis", {
-      body: d.body || "", icon: "icons/icon-192.png", badge: "icons/icon-192.png",
+      body: d.body || "", icon: "icons/icon-192.png", badge: "icons/bildirim-rozet.png",
       tag: d.tag || "kulis", renotify: true, data: { link: d.link || "./" },
       ...(d.tag === "call" ? { requireInteraction: true, vibrate: [500, 300, 500, 300, 500, 300, 500] } : {})
     });
