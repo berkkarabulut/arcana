@@ -25,10 +25,13 @@ function showMore(id){
     <button id="m1">${IC.link}Bağlantıyı kopyala</button>
     ${REMOTE&&(R.admin||R.isMod)?`<button id="mF">${IC.spark}${isBoosted(p)?"Öne çıkarmayı kaldır ("+boostLeft(p)+" kaldı)":"Moderatör: 24 saat öne çıkar"}</button>`:""}
     ${mine?`${REMOTE?"":`<button id="mB">${IC.spark}${isBoosted(p)?"Öne çıkarıldı, "+boostLeft(p)+" kaldı":"24 saat öne çıkar"}${state.premium?"":`<span class="lk-mini">${IC.lock}</span>`}</button>`}<button id="mD" class="danger">${IC.close}İtirafı sil</button>`:""}
+    ${!mine&&REMOTE&&(R.admin||R.isMod)?`<button id="mDm" class="danger">${IC.close}Yönetici: itirafı sil</button>`:""}
     ${mine?"":`<button id="m2">${IC.flag}İtirafı şikâyet et</button>${p.anon?"":`<button id="m3" class="danger">${IC.block}${esc(U[p.u].n)} kullanıcısını engelle</button>`}`}
     <button id="m4">${IC.close}Vazgeç</button></div>`);
   $("#m1").onclick=async()=>{closeSheet();try{await navigator.clipboard.writeText(location.href.split("#")[0]+"#"+p.id);toast("Bağlantı kopyalandı")}catch(e){toast("Kopyalanamadı")}};
   const mf=$("#mF");if(mf)mf.onclick=()=>{const on=isBoosted(p);closeSheet();KDB.setFeature(p.id,on?null:Date.now()+864e5).then(()=>toast(on?"Öne çıkarma kaldırıldı":"İtiraf 24 saat akışın en üstünde")).catch(e=>toast("Olmadı: "+(e.code||e.message)))};
+  const mdm=$("#mDm");if(mdm)mdm.onclick=()=>{openSheet(`<h2>Bu itiraf silinsin mi?</h2><p class="muted" style="margin:8px 0 16px">Başka bir üyenin itirafını yönetici olarak siliyorsun. Altındaki yorumlar ve tepkiler de gider, geri alınamaz.</p><div style="display:grid;gap:8px"><button class="btn wide" id="mDmY" style="background:var(--nar)">Sil</button><button class="btn line wide" id="mDmN">Vazgeç</button></div>`);
+    $("#mDmN").onclick=closeSheet;$("#mDmY").onclick=()=>{closeSheet();KDB.deletePost(p.id).then(()=>toast("İtiraf silindi")).catch(e=>toast("Silinemedi: "+(e.code||e.message)))}};
   if(mine){
     if($("#mB"))$("#mB").onclick=()=>{if(isBoosted(p)){closeSheet();return}
       if(REMOTE){oneCikarAkisi(p);return}
