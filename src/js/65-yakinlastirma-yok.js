@@ -7,3 +7,5 @@
   document.addEventListener("touchmove",e=>{if(e.touches&&e.touches.length>1)dur(e)},{passive:false});
   // çift dokunarak büyütme CSS'teki touch-action ile kapalı (hızlı art arda dokunuşları bozmasın diye burada engellenmiyor)
 }
+/* üst çubuktaki ayarlar simgesi: Ayarlar penceresini açar (demo modda Görünüm'ü) */
+document.addEventListener("click",e=>{if(!e.target.closest("#topAyar"))return;if(REMOTE&&typeof showSettings==="function")showSettings();else if(typeof openGorunum==="function")openGorunum()});

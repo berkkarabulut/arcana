@@ -336,3 +336,5 @@ button,a,input,textarea,select,label{touch-action:manipulation}
 
 .ayar-ust{display:flex;flex-direction:column;gap:10px;margin:14px 0 4px}
 .ayar-ust .gor-satir{margin-top:0}
+/* üst çubuk 4 düğmeyle dar ekranlara sığsın */
+@media (max-width:400px){.top-r{gap:5px}.top-r .icon-btn{width:34px;height:34px;border-radius:10px}.top-r .icon-btn svg{width:18px;height:18px}.top-r .prem-pill{height:34px;padding:0 9px;font-size:12px;border-radius:10px}}
