@@ -502,7 +502,7 @@ const KDB = {
   logAccess(act) { if (IS_TEST || !auth.currentUser) return Promise.resolve(); return callFn("erisimKaydi", { act }).catch(() => {}); },
 
   adminBildirimDurum() { return callFn("adminBildirimDurum", {}).then(r => r.data && r.data.durum); },
-  gorevDurum(bildir) { return callFn("gorevDurum", bildir ? { bildir } : {}).then(r => r.data); },
+  gorevDurum(bildir) { if (IS_TEST || EMU0) return Promise.reject(new Error("test")); return callFn("gorevDurum", bildir ? { bildir } : {}).then(r => r.data); },
   // ---------- Açılış dönemi (config/genel.acilis): açıkken herkes Kulis Tam ----------
   listenGenel(cb) {
     stop("genel");
