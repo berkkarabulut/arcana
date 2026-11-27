@@ -80,7 +80,8 @@
   "59-bildirim-git.js",
   "60-sohbet-akici.js",
   "61-acilis-bekcisi.js",
-  "62-kulis-hesabi.js"
+  "62-kulis-hesabi.js",
+  "63-geri-tusu.js"
  ],
  "gec": {
   "admin": [
