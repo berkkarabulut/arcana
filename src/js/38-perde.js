@@ -26,7 +26,7 @@ function onPerde(list){
 }
 function perdeAction(c){
   const st=perdeState(c.u),u=U[c.u]||{n:"Bu kişi"};
-  if(st==="yok"){KDB.perdeIste(c.u).then(()=>{KDB.notify(c.u,"perde","seninle perdeyi açmak istiyor",{chat:c.u});toast("Perde isteğin gönderildi")}).catch(e=>toast(writeErr(e,"perde")));return}
+  if(st==="yok"){KDB.perdeIste(c.u).then(()=>{KDB.notify(c.u,"perde","seninle perdeyi açmak istiyor",{chat:R.uid});toast("Perde isteğin gönderildi")}).catch(e=>toast(writeErr(e,"perde")));return}
   if(st==="bende"){openSheet(`<h2>Perde isteğin bekliyor</h2><p class="muted" style="font-size:14px;margin:8px 0 16px">${esc(u.n)} kabul edince birbirinizin gerçek fotoğrafını göreceksiniz.</p><div style="display:grid;gap:8px"><button class="btn line wide" id="pdC">İsteği geri çek</button><button class="btn wide" id="pdK">Tamam</button></div>`);
     $("#pdK").onclick=closeSheet;$("#pdC").onclick=()=>{closeSheet();KDB.perdeKapat(c.u).then(()=>toast("Perde isteğin geri çekildi")).catch(e=>toast(writeErr(e,"perde")))};return}
   if(st==="acik"){openSheet(`<h2>Perdeyi kapat?</h2><p class="muted" style="font-size:14px;margin:8px 0 16px">Kapatırsan ikiniz de yeniden sadece hazır avatarlarınızı görürsünüz. İstediğiniz zaman tekrar açabilirsiniz.</p><div style="display:grid;gap:8px"><button class="btn wide" id="pdX" style="background:var(--nar)">Perdeyi kapat</button><button class="btn line wide" id="pdN">Vazgeç</button></div>`);

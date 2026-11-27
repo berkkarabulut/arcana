@@ -60,13 +60,15 @@ exports.bildirimTelefona = onDocumentCreated("users/{uid}/notifs/{nid}", async (
   if (st.n && st.n[TUR_AYAR[n.type] || n.type] === false) return; // bu türü kapatmış
   if (inQuiet(st)) return;                     // sessiz saatler
   // sistem bildirimleri (kimden geldiği olmayan): metin olduğu gibi gider
-  if (!n.from) { await sendPush(uid, { title: TITLES[n.type] || "Kulis", body: String(n.text || "").slice(0, 180), link: SITE, tag: n.type || "kulis" }); return; }
+  // dokununca bu bildirimin gösterdiği yere gitsin: site ?nf=<bildirim> ile açılır, bildirimin "go" bilgisine göre yönlenir
+  const link = SITE + "?nf=" + encodeURIComponent(event.params.nid);
+  if (!n.from) { await sendPush(uid, { title: TITLES[n.type] || "Kulis", body: String(n.text || "").slice(0, 180), link, tag: n.type || "kulis" }); return; }
   let who = "Biri";
   if (n.from) {
     const f = await db.doc(`users/${n.from}`).get().catch(() => null);
     if (f && f.exists && f.data().n) who = f.data().n;
   }
-  await sendPush(uid, { title: TITLES[n.type] || "Kulis", body: `${who} ${n.text || ""}`.slice(0, 180), link: SITE, tag: n.type || "kulis" });
+  await sendPush(uid, { title: TITLES[n.type] || "Kulis", body: `${who} ${n.text || ""}`.slice(0, 180), link, tag: n.type || "kulis" });
 });
 
 // ---------------- Gelen arama bildirimi ----------------
@@ -268,7 +270,7 @@ exports.senYokken = onSchedule({ schedule: "40 19 * * *", timeZone: "Europe/Ista
       if (inQuiet(st)) continue;
       const toks = await db.collection(`users/${d.id}/push`).limit(1).get();
       if (toks.empty) continue;
-      await sendPush(d.id, { title: TITLES.seri, body: `${n} günlük serin bu gece bitiyor 🔥 Bir itirafa tepki bırakman yeter.`, link: SITE, tag: "seri" }, 5 * 3600);
+      await sendPush(d.id, { title: TITLES.seri, body: `${n} günlük serin bu gece bitiyor 🔥 Bir itirafa tepki bırakman yeter.`, link: SITE + "?git=akis", tag: "seri" }, 5 * 3600);
       seriGitti++;
     }
   } catch (e) { logger.warn("seri", String(e && e.message)); }
@@ -298,7 +300,7 @@ exports.senYokken = onSchedule({ schedule: "40 19 * * *", timeZone: "Europe/Ista
         if (m.exists && m.data().gun === bugun) continue;
         const toks = await db.collection(`users/${uid}/push`).limit(1).get();
         if (toks.empty) continue;
-        await sendPush(uid, { title: "Kurucu görevi", body: seri === 2 ? "İtiraf serin 2/3. Bugün bir itiraf daha yaz, görev tamam ✅" : "Dün itiraf yazdın, harika. Bugün de yaz, serin 2/3 olsun.", link: SITE, tag: "gorev" }, 5 * 3600);
+        await sendPush(uid, { title: "Kurucu görevi", body: seri === 2 ? "İtiraf serin 2/3. Bugün bir itiraf daha yaz, görev tamam ✅" : "Dün itiraf yazdın, harika. Bugün de yaz, serin 2/3 olsun.", link: SITE + "?git=itiraf", tag: "gorev" }, 5 * 3600);
         await db.doc(`users/${uid}/meta/gorevHatirla`).set({ gun: bugun });
         gorevGitti++;
       }

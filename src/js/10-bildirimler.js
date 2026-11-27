@@ -19,13 +19,7 @@ function showNotifs(){
     ${list.length?`${fresh.length?`<h3 class="nf-h">Yeni</h3>${fresh.map(notifRow).join("")}`:""}${old.length?`<h3 class="nf-h">Önceki</h3>${old.map(notifRow).join("")}`:""}`
     :bosHTML(AY_IC.zil,"Her şey sakin","İtirafına tepki geldiğinde, biri sana yazdığında ya da eşleştiğinde burada görürsün.")}`);
   $("#sheet").querySelectorAll("[data-nf]").forEach(b=>b.onclick=()=>{
-    const n=state.notifs.find(x=>x.id===b.dataset.nf);if(!n)return;n.read=true;closeSheet();const g=n.go||{};
-    if(g.chat){const i=state.chats.findIndex(c=>c.u===g.chat);if(i>=0){render();openChat(i);return}}
-    if(g.post){render();showPost(g.post);return}
-    if(g.confess){render();showConfess();return}
-    if(g.kesfet){sw.mode="eslesme"}
-    if(g.tab){closeChat();state.tab=g.tab;if(g.tab==="kesfet")sw.mode="eslesme";render();scrollTo(0,0);return}
-    render();
+    const n=state.notifs.find(x=>x.id===b.dataset.nf);if(!n)return;bildirimeGit(n);
   });
   if(fresh.length){state.notifs.forEach(n=>n.read=true);const nu=$("#bellPip");nu.hidden=true;saveData()}
   const all=$("#nfAll");if(all)all.onclick=()=>{state.notifs.forEach(n=>n.read=true);toast("Hepsi okundu işaretlendi");showNotifs()};

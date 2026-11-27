@@ -39,7 +39,7 @@ function shrinkImg(file,max=1600){return new Promise((ok,no)=>{const u=URL.creat
   im.onload=()=>{const k=Math.min(1,max/Math.max(im.width,im.height)),cv=document.createElement("canvas");cv.width=Math.round(im.width*k);cv.height=Math.round(im.height*k);
     cv.getContext("2d").drawImage(im,0,0,cv.width,cv.height);URL.revokeObjectURL(u);cv.toBlob(b=>b?ok(b):no(new Error("görsel işlenemedi")),"image/jpeg",.82)};
   im.onerror=()=>{URL.revokeObjectURL(u);no(new Error("Bu fotoğraf açılamadı"))};im.src=u})}
-function mediaSent(c){const wasMine=c.lastBy===R.uid;askPushOnce("mesaj");if(!wasMine)KDB.notify(c.u,"dm","sana yeni mesaj gönderdi",{chat:c.u})}
+function mediaSent(c){const wasMine=c.lastBy===R.uid;askPushOnce("mesaj");if(!wasMine)KDB.notify(c.u,"dm","sana yeni mesaj gönderdi",{chat:R.uid})}
 function sendPhotoRemote(c){
   if(!picker){picker=document.createElement("input");picker.type="file";picker.hidden=true;document.body.appendChild(picker)}
   picker.accept="image/*";

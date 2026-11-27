@@ -36,7 +36,7 @@ function gifGonder(c,id){
   if(!/^[A-Za-z0-9]{4,40}$/.test(id))return;
   const wasMine=c.lastBy===R.uid,re=cevapAl(),om={me:true,kind:"gif",g:id,t:"",re};
   c.msgs.push(om);drawChat();track("gif_gonder");
-  KDB.sendMsg(c.id,"",re,id).then(()=>{if(!wasMine)KDB.notify(c.u,"dm","sana bir GIF gönderdi",{chat:c.u})}).catch(e=>{
+  KDB.sendMsg(c.id,"",re,id).then(()=>{if(!wasMine)KDB.notify(c.u,"dm","sana bir GIF gönderdi",{chat:R.uid})}).catch(e=>{
     c.msgs=c.msgs.filter(x=>x!==om);drawChat();
     if(e&&e.code==="permission-denied"&&!state.premium&&(c.srvN||0)>=FREE_LIMIT){showPremium("sohbet");return}
     toast(writeErr(e,"mesaj"))});
