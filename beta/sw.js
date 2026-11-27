@@ -1,6 +1,6 @@
 // Kulis service worker: sayfa her zaman ağdan taze gelir, internet yoksa son kopya açılır.
 // Ayrıca telefona/tarayıcıya gelen anlık bildirimleri (Firebase Cloud Messaging) gösterir.
-const CACHE = "kulis-e8c5aa129d";
+const CACHE = "kulis-25bed9d2a7";
 const CORE = ["./", "./index.html", "./manifest.webmanifest", "./icons/icon-192.png", "./icons/icon-512.png", "./icons/apple-touch-icon.png"];
 self.addEventListener("install", e => {
   e.waitUntil(caches.open(CACHE).then(c => c.addAll(CORE)).then(() => self.skipWaiting()));
@@ -47,7 +47,9 @@ self.addEventListener("notificationclick", e => {
   const link = (e.notification.data && e.notification.data.link) || "./";
   e.waitUntil((async () => {
     const wins = await self.clients.matchAll({ type: "window", includeUncontrolled: true });
-    for (const w of wins) { if ("focus" in w) { await w.focus(); return; } }
+    for (const w of wins) {
+      if ("focus" in w) { try { w.postMessage({ tip: "bildirim-git", link }); } catch (err) {} await w.focus(); return; }
+    }
     await self.clients.openWindow(link);
   })());
 });
