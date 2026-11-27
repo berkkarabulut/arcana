@@ -17,6 +17,8 @@ const PB='<svg class="pb" viewBox="0 0 24 24" aria-label="Premium üye" role="im
 const pb=k=>isPrem(k)?PB:"";
 const dgb=k=>k!=="me"&&U[k]&&U[k].dg?`<span class="dg" title="Doğrulanmış profil" aria-label="Doğrulanmış profil">✓</span>`:"";
 function who(k,sub){const u=userOf(k);return `<button class="who" data-prof="${k}">${av(k)}<span><b>${esc(u.n)}${pb(k)}${dgb(k)}</b><small>${Z[u.s].n}${sub?", "+sub:""}</small></span></button>`}
+/* Kulis'in resmi hesabı (Kulis Moderatörü): paylaşımları herkese görünür, eşleşmede çıkmaz, "Özelden yaz" Kulis Ekibi sohbetini açar */
+const KULIS_HESAP="kulismoderator";
 /* Kendiliğinden açılan pencereler: günde en fazla bir tane (kişiyi bunaltmamak için) */
 const yerelGun=()=>{const d=new Date();return d.getFullYear()+"-"+(d.getMonth()+1)+"-"+d.getDate()};
 function popupHakki(){return LS("kulis_popup_gun","")!==yerelGun()}

@@ -8,7 +8,7 @@ if(REMOTE){
   U.anon={n:"Anonim",s:"koc",c:"#8A93A6",g:null,age:"",bio:"",stat:[0,0,0],since:""};
   POSTS.length=0;
   allPosts=function(){if(R.admin&&LS("kulis_adm_hepsi",true))return (R.mapped||[]).slice();// yönetici: cinsiyet ayrımı olmadan hepsi
-    return (R.mapped||[]).filter(p=>p.u==="me"||(p.anon?(()=>{const t=swTarget();return !t||p.ag===t})():genderOk(p.uid)))};
+    return (R.mapped||[]).filter(p=>p.u==="me"||p.uid===KULIS_HESAP||(p.anon?(()=>{const t=swTarget();return !t||p.ag===t})():genderOk(p.uid)))};
   seedDemo=function(){seeded=true};
   // yerel kayıt: sadece bu cihaza ait küçük tercihler (tepkilerim, kaydırdıklarım)
   const LKEY="kulis_beta_local";
